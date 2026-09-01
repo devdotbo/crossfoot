@@ -1,0 +1,1206 @@
+{
+  "actus_cross_check": {
+    "agree": true,
+    "divergences": [],
+    "horizon_compared": true,
+    "note": "the engine carries exact decimals, not integers, so agreement is by margin below one wei, not by construction",
+    "recognition_points_compared": 80,
+    "smallest_distance_to_the_flooring_boundary_wei": "0.0214960000"
+  },
+  "check_class": "full recomputation",
+  "comparison": {
+    "check_class": "full recomputation",
+    "fields": [
+      {
+        "equal": true,
+        "field": "account.saved",
+        "modeled": "81761995488279584010351",
+        "observed": "81761995488279584010351",
+        "residual": "0"
+      },
+      {
+        "equal": true,
+        "field": "account.ticks",
+        "modeled": "1346800022157",
+        "observed": "1346800022157",
+        "residual": "0"
+      },
+      {
+        "equal": true,
+        "field": "vault.totalAssets()",
+        "modeled": "81769497488003849675143",
+        "observed": "81769497488003849675143",
+        "residual": "0"
+      },
+      {
+        "equal": true,
+        "field": "vault.price()",
+        "modeled": "1021764268673581424",
+        "observed": "1021764268673581424",
+        "residual": "0"
+      },
+      {
+        "equal": true,
+        "field": "vault.convertToAssets(1e18)",
+        "modeled": "1021764268673581424",
+        "observed": "1021764268673581424",
+        "residual": "0"
+      }
+    ],
+    "tolerance": "zero, to the wei"
+  },
+  "first_divergence": null,
+  "format": "crossfoot-result-v1",
+  "initial_state": {
+    "saved": "186839662683663639740",
+    "ticks": 794139532057
+  },
+  "input_gaps": [],
+  "inputs": {
+    "flow_events_total": 127,
+    "rate_segments": [
+      {
+        "rate_ppm": 30000,
+        "start": 1747891715
+      },
+      {
+        "rate_ppm": 40000,
+        "start": 1765387379
+      },
+      {
+        "rate_ppm": 37500,
+        "start": 1770732311
+      },
+      {
+        "rate_ppm": 35000,
+        "start": 1774638431
+      }
+    ],
+    "recognition_events_in_window": 80,
+    "uint40_segment_bound_violations": 0
+  },
+  "interest_series_mismatches": [],
+  "modeled": {
+    "account.saved": "81761995488279584010351",
+    "account.ticks": 1346800022157,
+    "accrued_interest": "7501999724265664792",
+    "tick_clock_origin_unix": 1747891715,
+    "vault.price()": "1021764268673581424",
+    "vault.totalAssets()": "81769497488003849675143",
+    "virtual_accrual_start_unix": null
+  },
+  "replay_steps": [
+    {
+      "action": "withdraw",
+      "amount": "99990805532811873",
+      "block": 24619988,
+      "index": 0,
+      "modeled_interest": "188533033055906746",
+      "observed_interest": "188533033055906746",
+      "state_after": {
+        "saved": "186928204911186734613",
+        "ticks": 825961350000
+      },
+      "ticks_at_event": 825961350000,
+      "timestamp": 1773060155
+    },
+    {
+      "action": "withdraw",
+      "amount": "61580860206597161517",
+      "block": 24628242,
+      "index": 1,
+      "modeled_interest": "22171050787982079",
+      "observed_interest": "22171050787982079",
+      "state_after": {
+        "saved": "125369515755377555175",
+        "ticks": 829701750000
+      },
+      "ticks_at_event": 829701750000,
+      "timestamp": 1773159899
+    },
+    {
+      "action": "save",
+      "amount": "62104014651295760908",
+      "block": 24629916,
+      "index": 2,
+      "modeled_interest": "3010800442584195",
+      "observed_interest": "3010800442584195",
+      "state_after": {
+        "saved": "187476541207115900278",
+        "ticks": 833678974969
+      },
+      "ticks_at_event": 830459100000,
+      "timestamp": 1773180095
+    },
+    {
+      "action": "withdraw",
+      "amount": "20347882932480324266",
+      "block": 24685311,
+      "index": 3,
+      "modeled_interest": "129809640719636709",
+      "observed_interest": "129809640719636709",
+      "state_after": {
+        "saved": "167258467915355212721",
+        "ticks": 855514650000
+      },
+      "ticks_at_event": 855514650000,
+      "timestamp": 1773848243
+    },
+    {
+      "action": "save",
+      "amount": "20347703666272526564",
+      "block": 24685354,
+      "index": 4,
+      "modeled_interest": "105013878257357",
+      "observed_interest": "105013878257357",
+      "state_after": {
+        "saved": "187606276595505996642",
+        "ticks": 856588677412
+      },
+      "ticks_at_event": 855534450000,
+      "timestamp": 1773848771
+    },
+    {
+      "action": "save",
+      "amount": "30813959324554059442",
+      "block": 24748875,
+      "index": 5,
+      "modeled_interest": "164485496006601630",
+      "observed_interest": "164485496006601630",
+      "state_after": {
+        "saved": "218584721416066657714",
+        "ticks": 885608381563
+      },
+      "ticks_at_event": 884238150000,
+      "timestamp": 1774614203
+    },
+    {
+      "action": "save",
+      "amount": "58722532613634804934",
+      "block": 24749060,
+      "index": 6,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "277307254029701462648",
+        "ticks": 887394441856
+      },
+      "ticks_at_event": 884322750000,
+      "timestamp": 1774616459
+    },
+    {
+      "action": "save",
+      "amount": "61814163016360181978",
+      "block": 24777503,
+      "index": 7,
+      "modeled_interest": "78917358123031996",
+      "observed_interest": "78917358123031996",
+      "state_after": {
+        "saved": "339200334404184676622",
+        "ticks": 898022335654
+      },
+      "ticks_at_event": 896369100000,
+      "timestamp": 1774959071
+    },
+    {
+      "action": "save",
+      "amount": "109706830057719665635",
+      "block": 24777710,
+      "index": 8,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "448907164461904342257",
+        "ticks": 899856628123
+      },
+      "ticks_at_event": 896456040000,
+      "timestamp": 1774961555
+    },
+    {
+      "action": "save",
+      "amount": "20842847340461577071",
+      "block": 24777743,
+      "index": 9,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "469750011802365919328",
+        "ticks": 900108884112
+      },
+      "ticks_at_event": 896469900000,
+      "timestamp": 1774961951
+    },
+    {
+      "action": "save",
+      "amount": "3806289674445538258",
+      "block": 24780088,
+      "index": 10,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "473556301476811457586",
+        "ticks": 900160519844
+      },
+      "ticks_at_event": 897461100000,
+      "timestamp": 1774990271
+    },
+    {
+      "action": "save",
+      "amount": "320089041579798091521",
+      "block": 24785579,
+      "index": 11,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "793645343056609549107",
+        "ticks": 903665891569
+      },
+      "ticks_at_event": 899779920000,
+      "timestamp": 1775056523
+    },
+    {
+      "action": "save",
+      "amount": "257716244733879799608",
+      "block": 24785582,
+      "index": 12,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "1051361587790489348715",
+        "ticks": 904937431741
+      },
+      "ticks_at_event": 899781180000,
+      "timestamp": 1775056559
+    },
+    {
+      "action": "save",
+      "amount": "269920701773504955216",
+      "block": 24785592,
+      "index": 13,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "1321282289563994303931",
+        "ticks": 905738225934
+      },
+      "ticks_at_event": 899785380000,
+      "timestamp": 1775056679
+    },
+    {
+      "action": "withdraw",
+      "amount": "2000000000000000000",
+      "block": 24785670,
+      "index": 14,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "1319282289563994303931",
+        "ticks": 905738225934
+      },
+      "ticks_at_event": 899818560000,
+      "timestamp": 1775057627
+    },
+    {
+      "action": "withdraw",
+      "amount": "2000000000000000000",
+      "block": 24785674,
+      "index": 15,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "1317282289563994303931",
+        "ticks": 905738225934
+      },
+      "ticks_at_event": 899820240000,
+      "timestamp": 1775057675
+    },
+    {
+      "action": "save",
+      "amount": "126039031142094261493",
+      "block": 24785690,
+      "index": 16,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "1443321320706088565424",
+        "ticks": 906014239219
+      },
+      "ticks_at_event": 899826960000,
+      "timestamp": 1775057867
+    },
+    {
+      "action": "save",
+      "amount": "6831198981128441610",
+      "block": 24787591,
+      "index": 17,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "1450152519687217007034",
+        "ticks": 906031601173
+      },
+      "ticks_at_event": 900627900000,
+      "timestamp": 1775080751
+    },
+    {
+      "action": "save",
+      "amount": "7913494043379370200",
+      "block": 24787788,
+      "index": 18,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "1458066013730596377234",
+        "ticks": 906051959526
+      },
+      "ticks_at_event": 900710640000,
+      "timestamp": 1775083115
+    },
+    {
+      "action": "withdraw",
+      "amount": "8088702890328190502",
+      "block": 24788679,
+      "index": 19,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "1449977310840268186732",
+        "ticks": 906051959526
+      },
+      "ticks_at_event": 901086960000,
+      "timestamp": 1775093867
+    },
+    {
+      "action": "withdraw",
+      "amount": "7246165618690554782",
+      "block": 24789347,
+      "index": 20,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "1442731145221577631950",
+        "ticks": 906051959526
+      },
+      "ticks_at_event": 901367520000,
+      "timestamp": 1775101883
+    },
+    {
+      "action": "save",
+      "amount": "5285307611900845979",
+      "block": 24818647,
+      "index": 21,
+      "modeled_interest": "350463462378294167",
+      "observed_interest": "350463462378294167",
+      "state_after": {
+        "saved": "1448366916295856772096",
+        "ticks": 913745685085
+      },
+      "ticks_at_event": 913712580000,
+      "timestamp": 1775454599
+    },
+    {
+      "action": "save",
+      "amount": "800000000000000000",
+      "block": 24821894,
+      "index": 22,
+      "modeled_interest": "61344094298968816",
+      "observed_interest": "61344094298968816",
+      "state_after": {
+        "saved": "1449228260390155740912",
+        "ticks": 915086367906
+      },
+      "ticks_at_event": 915081360000,
+      "timestamp": 1775493707
+    },
+    {
+      "action": "save",
+      "amount": "5000000000000000000",
+      "block": 24821926,
+      "index": 23,
+      "modeled_interest": "387494575059179",
+      "observed_interest": "387494575059179",
+      "state_after": {
+        "saved": "1454228647884730800091",
+        "ticks": 915125991793
+      },
+      "ticks_at_event": 915094800000,
+      "timestamp": 1775494091
+    },
+    {
+      "action": "save",
+      "amount": "436868646952000000000",
+      "block": 24821977,
+      "index": 24,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "1891097294836730800091",
+        "ticks": 917219487133
+      },
+      "ticks_at_event": 915116220000,
+      "timestamp": 1775494703
+    },
+    {
+      "action": "save",
+      "amount": "10890107107053616972",
+      "block": 24822354,
+      "index": 25,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "1901987401943784417063",
+        "ticks": 917260296636
+      },
+      "ticks_at_event": 915274980000,
+      "timestamp": 1775499239
+    },
+    {
+      "action": "withdraw",
+      "amount": "8165002836213314067",
+      "block": 24823675,
+      "index": 26,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "1893822399107571102996",
+        "ticks": 917260296636
+      },
+      "ticks_at_event": 915832320000,
+      "timestamp": 1775515163
+    },
+    {
+      "action": "withdraw",
+      "amount": "3822927243936634919",
+      "block": 24824933,
+      "index": 27,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "1889999471863634468077",
+        "ticks": 917260296636
+      },
+      "ticks_at_event": 916361100000,
+      "timestamp": 1775530271
+    },
+    {
+      "action": "save",
+      "amount": "1175267015548000000000",
+      "block": 24827508,
+      "index": 28,
+      "modeled_interest": "11127082061911013",
+      "observed_interest": "11127082061911013",
+      "state_after": {
+        "saved": "3065277614493696379090",
+        "ticks": 920924281935
+      },
+      "ticks_at_event": 917445960000,
+      "timestamp": 1775561267
+    },
+    {
+      "action": "save",
+      "amount": "5303625451739704601",
+      "block": 24852301,
+      "index": 29,
+      "modeled_interest": "678093340824216130",
+      "observed_interest": "678093340824216130",
+      "state_after": {
+        "saved": "3071259333286260299821",
+        "ticks": 927916266046
+      },
+      "ticks_at_event": 927900600000,
+      "timestamp": 1775859971
+    },
+    {
+      "action": "withdraw",
+      "amount": "7198132054788031624",
+      "block": 24861750,
+      "index": 30,
+      "modeled_interest": "386361030510506177",
+      "observed_interest": "386361030510506177",
+      "state_after": {
+        "saved": "3064447562261982774374",
+        "ticks": 931883460000
+      },
+      "ticks_at_event": 931883460000,
+      "timestamp": 1775973767
+    },
+    {
+      "action": "withdraw",
+      "amount": "5181165699622260286",
+      "block": 24867927,
+      "index": 31,
+      "modeled_interest": "252834415025667585",
+      "observed_interest": "252834415025667585",
+      "state_after": {
+        "saved": "3059519230977386181673",
+        "ticks": 934485360000
+      },
+      "ticks_at_event": 934485360000,
+      "timestamp": 1776048107
+    },
+    {
+      "action": "save",
+      "amount": "8988791890380714309",
+      "block": 24874214,
+      "index": 32,
+      "modeled_interest": "256909971954313050",
+      "observed_interest": "256909971954313050",
+      "state_after": {
+        "saved": "3068764932839721209032",
+        "ticks": 937160033009
+      },
+      "ticks_at_event": 937133460000,
+      "timestamp": 1776123767
+    },
+    {
+      "action": "save",
+      "amount": "8988078271345112319",
+      "block": 24874241,
+      "index": 33,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "3077753011111066321351",
+        "ticks": 937186481827
+      },
+      "ticks_at_event": 937144800000,
+      "timestamp": 1776124091
+    },
+    {
+      "action": "withdraw",
+      "amount": "5341541172038197781",
+      "block": 24876061,
+      "index": 34,
+      "modeled_interest": "70656583013997922",
+      "observed_interest": "70656583013997922",
+      "state_after": {
+        "saved": "3072482126522042121492",
+        "ticks": 937910460000
+      },
+      "ticks_at_event": 937910460000,
+      "timestamp": 1776145967
+    },
+    {
+      "action": "save",
+      "amount": "8932275877793973996",
+      "block": 24886287,
+      "index": 35,
+      "modeled_interest": "419508385326727227",
+      "observed_interest": "419508385326727227",
+      "state_after": {
+        "saved": "3081833910785162822715",
+        "ticks": 942242593956
+      },
+      "ticks_at_event": 942216300000,
+      "timestamp": 1776268991
+    },
+    {
+      "action": "withdraw",
+      "amount": "9115726658600940991",
+      "block": 24887855,
+      "index": 36,
+      "modeled_interest": "62075073780279433",
+      "observed_interest": "62075073780279433",
+      "state_after": {
+        "saved": "3072780259200342161157",
+        "ticks": 942877800000
+      },
+      "ticks_at_event": 942877800000,
+      "timestamp": 1776287891
+    },
+    {
+      "action": "save",
+      "amount": "4290524124555343111",
+      "block": 24889202,
+      "index": 37,
+      "modeled_interest": "55369676245978768",
+      "observed_interest": "55369676245978768",
+      "state_after": {
+        "saved": "3077126153001143483036",
+        "ticks": 943458709346
+      },
+      "ticks_at_event": 943446060000,
+      "timestamp": 1776304127
+    },
+    {
+      "action": "save",
+      "amount": "5102298806892797168",
+      "block": 24889938,
+      "index": 38,
+      "modeled_interest": "28969114535927624",
+      "observed_interest": "28969114535927624",
+      "state_after": {
+        "saved": "3082257420922572207828",
+        "ticks": 943770617582
+      },
+      "ticks_at_event": 943755600000,
+      "timestamp": 1776312971
+    },
+    {
+      "action": "save",
+      "amount": "10137149559209782507",
+      "block": 24893247,
+      "index": 39,
+      "modeled_interest": "134981921823876565",
+      "observed_interest": "134981921823876565",
+      "state_after": {
+        "saved": "3092529552403605866900",
+        "ticks": 945181417539
+      },
+      "ticks_at_event": 945151680000,
+      "timestamp": 1776352859
+    },
+    {
+      "action": "save",
+      "amount": "3514511735869653628",
+      "block": 24893977,
+      "index": 40,
+      "modeled_interest": "27150093309033827",
+      "observed_interest": "27150093309033827",
+      "state_after": {
+        "saved": "3096071214232784554355",
+        "ticks": 945468578099
+      },
+      "ticks_at_event": 945458280000,
+      "timestamp": 1776361619
+    },
+    {
+      "action": "withdraw",
+      "amount": "1474893701726251407723",
+      "block": 24949666,
+      "index": 41,
+      "modeled_interest": "2301774409394129710",
+      "observed_interest": "2301774409394129710",
+      "state_after": {
+        "saved": "1623479286915927276342",
+        "ticks": 968914020000
+      },
+      "ticks_at_event": 968914020000,
+      "timestamp": 1777031783
+    },
+    {
+      "action": "withdraw",
+      "amount": "1620962877783261732711",
+      "block": 24991486,
+      "index": 42,
+      "modeled_interest": "906359203952818280",
+      "observed_interest": "906359203952818280",
+      "state_after": {
+        "saved": "3422768336618361911",
+        "ticks": 986520000000
+      },
+      "ticks_at_event": 986520000000,
+      "timestamp": 1777534811
+    },
+    {
+      "action": "save",
+      "amount": "162411465985295049870",
+      "block": 25752380,
+      "index": 43,
+      "modeled_interest": "34815128354976749",
+      "observed_interest": "34815128354976749",
+      "state_after": {
+        "saved": "165869049450268388530",
+        "ticks": 1316175371801
+      },
+      "ticks_at_event": 1307292480000,
+      "timestamp": 1786699739
+    },
+    {
+      "action": "save",
+      "amount": "1605612703076004621921",
+      "block": 25752389,
+      "index": 44,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "1771481752526273010451",
+        "ticks": 1316350199310
+      },
+      "ticks_at_event": 1307296260000,
+      "timestamp": 1786699847
+    },
+    {
+      "action": "save",
+      "amount": "13772119199610768261103",
+      "block": 25769767,
+      "index": 45,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "15543600952137041271554",
+        "ticks": 1322855088372
+      },
+      "ticks_at_event": 1314619800000,
+      "timestamp": 1786909091
+    },
+    {
+      "action": "save",
+      "amount": "100000000000000000000",
+      "block": 25770541,
+      "index": 46,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "15643600952137041271554",
+        "ticks": 1322862514997
+      },
+      "ticks_at_event": 1314944880000,
+      "timestamp": 1786918379
+    },
+    {
+      "action": "withdraw",
+      "amount": "99999999999999999999",
+      "block": 25772894,
+      "index": 47,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "15543600952137041271555",
+        "ticks": 1322862514997
+      },
+      "ticks_at_event": 1315938180000,
+      "timestamp": 1786946759
+    },
+    {
+      "action": "save",
+      "amount": "999999999999999999",
+      "block": 25772987,
+      "index": 48,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "15544600952137041271554",
+        "ticks": 1322862655671
+      },
+      "ticks_at_event": 1315977240000,
+      "timestamp": 1786947875
+    },
+    {
+      "action": "save",
+      "amount": "18146556991426868134",
+      "block": 25773161,
+      "index": 49,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "15562747509128468139688",
+        "ticks": 1322865290496
+      },
+      "ticks_at_event": 1316050320000,
+      "timestamp": 1786949963
+    },
+    {
+      "action": "save",
+      "amount": "999999999999999999",
+      "block": 25775450,
+      "index": 50,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "15563747509128468139687",
+        "ticks": 1322865497419
+      },
+      "ticks_at_event": 1317013800000,
+      "timestamp": 1786977491
+    },
+    {
+      "action": "withdraw",
+      "amount": "999999999999999998",
+      "block": 25775451,
+      "index": 51,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "15562747509128468139689",
+        "ticks": 1322865497419
+      },
+      "ticks_at_event": 1317014220000,
+      "timestamp": 1786977503
+    },
+    {
+      "action": "save",
+      "amount": "999999999999999998",
+      "block": 25775471,
+      "index": 52,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "15563747509128468139687",
+        "ticks": 1322865704896
+      },
+      "ticks_at_event": 1317022620000,
+      "timestamp": 1786977743
+    },
+    {
+      "action": "withdraw",
+      "amount": "999999999999999997",
+      "block": 25775473,
+      "index": 53,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "15562747509128468139690",
+        "ticks": 1322865704896
+      },
+      "ticks_at_event": 1317023460000,
+      "timestamp": 1786977767
+    },
+    {
+      "action": "save",
+      "amount": "3964929536971634534054",
+      "block": 25780243,
+      "index": 54,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "19527677046100102673744",
+        "ticks": 1323929702461
+      },
+      "ticks_at_event": 1319034000000,
+      "timestamp": 1787035211
+    },
+    {
+      "action": "save",
+      "amount": "1915550486454116474032",
+      "block": 25780260,
+      "index": 55,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "21443227532554219147776",
+        "ticks": 1324303414198
+      },
+      "ticks_at_event": 1319041140000,
+      "timestamp": 1787035415
+    },
+    {
+      "action": "save",
+      "amount": "5708335970181061637",
+      "block": 25780650,
+      "index": 56,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "21448935868524400209413",
+        "ticks": 1324304472143
+      },
+      "ticks_at_event": 1319206620000,
+      "timestamp": 1787040143
+    },
+    {
+      "action": "save",
+      "amount": "2641773587789788187253",
+      "block": 25781555,
+      "index": 57,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "24090709456314188396666",
+        "ticks": 1324782094673
+      },
+      "ticks_at_event": 1319587980000,
+      "timestamp": 1787051039
+    },
+    {
+      "action": "save",
+      "amount": "1000000000000000000000",
+      "block": 25783482,
+      "index": 58,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "25090709456314188396666",
+        "ticks": 1324969039778
+      },
+      "ticks_at_event": 1320400680000,
+      "timestamp": 1787074259
+    },
+    {
+      "action": "withdraw",
+      "amount": "999999999999999999999",
+      "block": 25783751,
+      "index": 59,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "24090709456314188396667",
+        "ticks": 1324969039778
+      },
+      "ticks_at_event": 1320514080000,
+      "timestamp": 1787077499
+    },
+    {
+      "action": "save",
+      "amount": "1873231517623512120724",
+      "block": 25787214,
+      "index": 60,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "25963940973937700517391",
+        "ticks": 1325407264704
+      },
+      "ticks_at_event": 1321971060000,
+      "timestamp": 1787119127
+    },
+    {
+      "action": "save",
+      "amount": "1620982609847812945440",
+      "block": 25787309,
+      "index": 61,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "27584923583785513462831",
+        "ticks": 1325740787591
+      },
+      "ticks_at_event": 1322010960000,
+      "timestamp": 1787120267
+    },
+    {
+      "action": "save",
+      "amount": "6638450034067859211",
+      "block": 25787909,
+      "index": 62,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "27591562033819581322042",
+        "ticks": 1325742133734
+      },
+      "ticks_at_event": 1322263800000,
+      "timestamp": 1787127491
+    },
+    {
+      "action": "withdraw",
+      "amount": "180345759713571525842",
+      "block": 25790880,
+      "index": 63,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "27411216274106009796200",
+        "ticks": 1325742133734
+      },
+      "ticks_at_event": 1323516660000,
+      "timestamp": 1787163287
+    },
+    {
+      "action": "save",
+      "amount": "2057713045576181554962",
+      "block": 25794949,
+      "index": 64,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "29468929319682191351162",
+        "ticks": 1326339886965
+      },
+      "ticks_at_event": 1325230680000,
+      "timestamp": 1787212259
+    },
+    {
+      "action": "save",
+      "amount": "7173981343478357494",
+      "block": 25796738,
+      "index": 65,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "29476103301025669708656",
+        "ticks": 1326342008664
+      },
+      "ticks_at_event": 1325985420000,
+      "timestamp": 1787233823
+    },
+    {
+      "action": "save",
+      "amount": "1598971047425351606844",
+      "block": 25798166,
+      "index": 66,
+      "modeled_interest": "228072784961862120",
+      "observed_interest": "228072784961862120",
+      "state_after": {
+        "saved": "31075302421235983177620",
+        "ticks": 1327052817238
+      },
+      "ticks_at_event": 1326586020000,
+      "timestamp": 1787250983
+    },
+    {
+      "action": "save",
+      "amount": "5885155468403537227",
+      "block": 25804497,
+      "index": 67,
+      "modeled_interest": "2168060826268033283",
+      "observed_interest": "2168060826268033283",
+      "state_after": {
+        "saved": "31083355637530654748130",
+        "ticks": 1329254737643
+      },
+      "ticks_at_event": 1329253020000,
+      "timestamp": 1787327183
+    },
+    {
+      "action": "save",
+      "amount": "5565362316840000000000",
+      "block": 25817001,
+      "index": 68,
+      "modeled_interest": "5194064956448646911",
+      "observed_interest": "5194064956448646911",
+      "state_after": {
+        "saved": "36653912019327103395041",
+        "ticks": 1335901890977
+      },
+      "ticks_at_event": 1334524440000,
+      "timestamp": 1787477795
+    },
+    {
+      "action": "save",
+      "amount": "27189916619777694389486",
+      "block": 25817075,
+      "index": 69,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "63843828639104797784527",
+        "ticks": 1339192094798
+      },
+      "ticks_at_event": 1334555520000,
+      "timestamp": 1787478683
+    },
+    {
+      "action": "save",
+      "amount": "31185465685707283596",
+      "block": 25819864,
+      "index": 70,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "63875014104790505068123",
+        "ticks": 1339194833828
+      },
+      "ticks_at_event": 1335730260000,
+      "timestamp": 1787512247
+    },
+    {
+      "action": "save",
+      "amount": "12094224560176500000000",
+      "block": 25819910,
+      "index": 71,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "75969238664967005068123",
+        "ticks": 1340090606023
+      },
+      "ticks_at_event": 1335749580000,
+      "timestamp": 1787512799
+    },
+    {
+      "action": "save",
+      "amount": "20000000000000000000",
+      "block": 25832146,
+      "index": 72,
+      "modeled_interest": "1961030595664591611",
+      "observed_interest": "1961030595664591611",
+      "state_after": {
+        "saved": "75991199695562669659734",
+        "ticks": 1340907047644
+      },
+      "ticks_at_event": 1340904660000,
+      "timestamp": 1787660087
+    },
+    {
+      "action": "save",
+      "amount": "80333923850065978831",
+      "block": 25832245,
+      "index": 73,
+      "modeled_interest": "94440453809474371",
+      "observed_interest": "94440453809474371",
+      "state_after": {
+        "saved": "76071628059866545112936",
+        "ticks": 1340955820304
+      },
+      "ticks_at_event": 1340946240000,
+      "timestamp": 1787661275
+    },
+    {
+      "action": "save",
+      "amount": "20000000000000000000",
+      "block": 25834811,
+      "index": 74,
+      "modeled_interest": "2588740698741522345",
+      "observed_interest": "2588740698741522345",
+      "state_after": {
+        "saved": "76094216800565286635281",
+        "ticks": 1342031384412
+      },
+      "ticks_at_event": 1342029000000,
+      "timestamp": 1787692211
+    },
+    {
+      "action": "save",
+      "amount": "1599861149302869137",
+      "block": 25834879,
+      "index": 75,
+      "modeled_interest": "63159908300173614",
+      "observed_interest": "63159908300173614",
+      "state_after": {
+        "saved": "76095879821622889678032",
+        "ticks": 1342057750732
+      },
+      "ticks_at_event": 1342057560000,
+      "timestamp": 1787693027
+    },
+    {
+      "action": "save",
+      "amount": "20990056931792604206",
+      "block": 25841502,
+      "index": 76,
+      "modeled_interest": "6734951716905830372",
+      "observed_interest": "6734951716905830372",
+      "state_after": {
+        "saved": "76123604830271588112610",
+        "ticks": 1344851381481
+      },
+      "ticks_at_event": 1344848880000,
+      "timestamp": 1787772779
+    },
+    {
+      "action": "save",
+      "amount": "465475072154862673941",
+      "block": 25843614,
+      "index": 77,
+      "modeled_interest": "2145293626896144646",
+      "observed_interest": "2145293626896144646",
+      "state_after": {
+        "saved": "76591225196053346931197",
+        "ticks": 1345795254120
+      },
+      "ticks_at_event": 1345740120000,
+      "timestamp": 1787798243
+    },
+    {
+      "action": "save",
+      "amount": "1154232949935219007757",
+      "block": 25844765,
+      "index": 78,
+      "modeled_interest": "1043234564533133797",
+      "observed_interest": "1043234564533133797",
+      "state_after": {
+        "saved": "77746501380553099072751",
+        "ticks": 1346359483891
+      },
+      "ticks_at_event": 1346224800000,
+      "timestamp": 1787812091
+    },
+    {
+      "action": "save",
+      "amount": "4015494107726484937600",
+      "block": 25844843,
+      "index": 79,
+      "modeled_interest": "0",
+      "state_after": {
+        "saved": "81761995488279584010351",
+        "ticks": 1346800022157
+      },
+      "ticks_at_event": 1346257560000,
+      "timestamp": 1787813027
+    }
+  ],
+  "stale_reads": [],
+  "summary": {
+    "check_class": "full recomputation",
+    "consumer_action": "ALLOW",
+    "family": "recomputable-accrual",
+    "fields_compared": 5,
+    "fields_exact": 5,
+    "findings_count": 0,
+    "headline": "5 of 5 fields exact, residual 0",
+    "largest_residual": null,
+    "nav_recomputation": "FULL",
+    "posted": {
+      "decimals": 18,
+      "field": "vault.price()",
+      "value": "1021764268673581424"
+    },
+    "recomputed": {
+      "decimals": 18,
+      "field": "vault.price()",
+      "value": "1021764268673581424"
+    },
+    "target": "svzchf",
+    "verdict": "MODEL_MATCH",
+    "window": {
+      "baseline_block": 24570000,
+      "block": 25853000
+    }
+  },
+  "target": "svzchf",
+  "tolerance": "zero, to the wei",
+  "verdict": "MODEL_MATCH",
+  "window": {
+    "baseline_block": 24570000,
+    "baseline_timestamp_unix": 1772457383,
+    "block": 25853000,
+    "block_timestamp_unix": 1787911199
+  }
+}

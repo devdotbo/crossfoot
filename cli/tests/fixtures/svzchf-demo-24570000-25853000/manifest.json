@@ -1,0 +1,1461 @@
+{
+  "bundle": "svzchf-run-24570000-25853000-20260901T223813Z",
+  "cache_hits": 32,
+  "cache_misses": 0,
+  "cache_preimage_version": "crossfoot-cache-v1",
+  "chain_id": 1,
+  "code": {
+    "git_commit": "8929c8206cab44a34c58c24782bef34cf1a6ea09",
+    "git_dirty": true,
+    "packages_sha256": "7e16e0df30409e5a7fc2fce663f9a97544d6f1824518e99bc8fcfb8c5564d2f2",
+    "tool_version": "0.1.0"
+  },
+  "entries": [
+    {
+      "block": "n/a",
+      "byte_len": 39,
+      "cache": "hit",
+      "cache_key": "f850f3b048c9bd6a1d50075e4c7e5ee5f560f7831e396be9ebdce06fb0e5eca5",
+      "calldata": "",
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/001-eth-chainid.json",
+      "first_stored_utc": "2026-09-01T13:20:58.737Z",
+      "index": 1,
+      "label": "eth_chainId",
+      "method": "eth_chainId",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_chainId\nblock=n/a\nto=\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_chainId",
+        "params": []
+      },
+      "sha256": "79226432df73e05966f20e4d291fb5048bfef1138d7078f8feab534126df1aa5",
+      "to": "",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18a7c48",
+      "byte_len": 23887,
+      "cache": "hit",
+      "cache_key": "4ea8de4cab04e8e547774f0360a2a89c6d345e22fdc8328ca10135b6f967e782",
+      "calldata": "full_transactions=false",
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/002-block-header-25853000.json",
+      "first_stored_utc": "2026-09-01T13:20:58.860Z",
+      "index": 2,
+      "label": "block header @ 25853000",
+      "method": "eth_getBlockByNumber",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getBlockByNumber\nblock=0x18a7c48\nto=\ncalldata=full_transactions=false\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getBlockByNumber",
+        "params": [
+          "0x18a7c48",
+          false
+        ]
+      },
+      "sha256": "5fa6eb2745ecc924f2e41924827f357e53fd22a68240ed7719ba8ff88ed0f274",
+      "to": "",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18a7c48",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "48f81322709f233eb99b442d7dbf03614b9eb085744bd6c09580ffc76ecfa17a",
+      "calldata": "0x38d52e0f",
+      "decoded": {
+        "address": "0xb58e61c3098d85632df34eecfb899a1ed80921cb",
+        "decimal": "1036502551596801103936626207020812947050644185547",
+        "hex": "0x000000000000000000000000b58e61c3098d85632df34eecfb899a1ed80921cb",
+        "shape": "word"
+      },
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/003-vault-asset.json",
+      "first_stored_utc": "2026-09-01T13:20:59.042Z",
+      "index": 3,
+      "label": "vault.asset()",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18a7c48\nto=0xe5f130253ff137f9917c0107659a4c5262abf6b0\ncalldata=0x38d52e0f\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x38d52e0f",
+            "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0"
+          },
+          "0x18a7c48"
+        ]
+      },
+      "sha256": "eabef5c55f007a556cbf1f5d02d6ad543073c4f214ce07c9c41c1157545a80ba",
+      "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18a7c48",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "ffea206a9c15c42047af1e5f2bcb55e1e107e6104e29d47645ce9aeba7c8dba8",
+      "calldata": "0xc86d6ae4",
+      "decoded": {
+        "address": "0x27d9ad987bde08a0d083ef7e0e4043c857a17b38",
+        "decimal": "227505024083244761556576772359314993738468653880",
+        "hex": "0x00000000000000000000000027d9ad987bde08a0d083ef7e0e4043c857a17b38",
+        "shape": "word"
+      },
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/004-vault-savings.json",
+      "first_stored_utc": "2026-09-01T13:20:59.306Z",
+      "index": 4,
+      "label": "vault.savings()",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18a7c48\nto=0xe5f130253ff137f9917c0107659a4c5262abf6b0\ncalldata=0xc86d6ae4\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0xc86d6ae4",
+            "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0"
+          },
+          "0x18a7c48"
+        ]
+      },
+      "sha256": "dddb0595fdd762f6620984ec9f243816cb3a9298f53760d74592574bc8169905",
+      "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18a7c48",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "f154d02d1b20aea6c98055892c0bce02bb2c2cf8a9d5a9dedbd97328d8e90186",
+      "calldata": "0x18160ddd",
+      "decoded": {
+        "decimal": "80027751992300676663517",
+        "hex": "0x0000000000000000000000000000000000000000000010f250292fcb9d3548dd",
+        "shape": "word"
+      },
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/005-vault-totalsupply.json",
+      "first_stored_utc": "2026-09-01T13:20:59.567Z",
+      "index": 5,
+      "label": "vault.totalSupply()",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18a7c48\nto=0xe5f130253ff137f9917c0107659a4c5262abf6b0\ncalldata=0x18160ddd\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x18160ddd",
+            "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0"
+          },
+          "0x18a7c48"
+        ]
+      },
+      "sha256": "4b0e456a2d27863d7cebe16dc561afa585349e5a01908b4207e48bf22399d1f4",
+      "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18a7c48",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "46a51915dfd0f0dc39b6673fce51551cc7e415c38fc5ccc6e2986ee2f42511ac",
+      "calldata": "0x01e1d114",
+      "decoded": {
+        "decimal": "81769497488003849675143",
+        "hex": "0x000000000000000000000000000000000000000000001150bbbc3bf9697e6187",
+        "shape": "word"
+      },
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/006-vault-totalassets.json",
+      "first_stored_utc": "2026-09-01T13:20:59.666Z",
+      "index": 6,
+      "label": "vault.totalAssets()",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18a7c48\nto=0xe5f130253ff137f9917c0107659a4c5262abf6b0\ncalldata=0x01e1d114\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x01e1d114",
+            "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0"
+          },
+          "0x18a7c48"
+        ]
+      },
+      "sha256": "91b0eeeb96d7e1736d50e9c070e5630b14e263c41d04f07f51be7f603caf6957",
+      "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18a7c48",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "8530a030f93217a726338c7e2b904711b3adf702f21f275a3a065cbd66ade06f",
+      "calldata": "0x07a2d13a0000000000000000000000000000000000000000000000000de0b6b3a7640000",
+      "decoded": {
+        "decimal": "1021764268673581424",
+        "hex": "0x0000000000000000000000000000000000000000000000000e2e09305679c170",
+        "shape": "word"
+      },
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/007-vault-converttoassets-1e18.json",
+      "first_stored_utc": "2026-09-01T13:20:59.759Z",
+      "index": 7,
+      "label": "vault.convertToAssets(1e18)",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18a7c48\nto=0xe5f130253ff137f9917c0107659a4c5262abf6b0\ncalldata=0x07a2d13a0000000000000000000000000000000000000000000000000de0b6b3a7640000\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x07a2d13a0000000000000000000000000000000000000000000000000de0b6b3a7640000",
+            "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0"
+          },
+          "0x18a7c48"
+        ]
+      },
+      "sha256": "6703250672188f0a4f26c5fc8684efe636277773e7dfff7c630e465cea1a6ae4",
+      "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18a7c48",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "cd3ae5fa125bb058b4e0aea159e9a0010956cbdb72debcb61bce1e3761c6f421",
+      "calldata": "0x06a7b376",
+      "decoded": {
+        "decimal": "35000",
+        "hex": "0x00000000000000000000000000000000000000000000000000000000000088b8",
+        "shape": "word"
+      },
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/008-module-currentrateppm.json",
+      "first_stored_utc": "2026-09-01T13:20:59.906Z",
+      "index": 8,
+      "label": "module.currentRatePPM()",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18a7c48\nto=0x27d9ad987bde08a0d083ef7e0e4043c857a17b38\ncalldata=0x06a7b376\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x06a7b376",
+            "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38"
+          },
+          "0x18a7c48"
+        ]
+      },
+      "sha256": "2b6b90399d01d7b689397fe24ed09a3de05162dad6fc89b0506456c1cfae3ed5",
+      "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18a7c48",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "30cc51daf8cfa0c8af1be8e7c509eae05fbac5d666505315fb0d738301dec945",
+      "calldata": "0xb079f163",
+      "decoded": {
+        "decimal": "1349693580000",
+        "hex": "0x0000000000000000000000000000000000000000000000000000013a4001a2e0",
+        "shape": "word"
+      },
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/009-module-currentticks.json",
+      "first_stored_utc": "2026-09-01T13:21:00.091Z",
+      "index": 9,
+      "label": "module.currentTicks()",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18a7c48\nto=0x27d9ad987bde08a0d083ef7e0e4043c857a17b38\ncalldata=0xb079f163\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0xb079f163",
+            "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38"
+          },
+          "0x18a7c48"
+        ]
+      },
+      "sha256": "c2e9b329b4adccb532f1d09b3d1e9b61999c0187bf2ab9b98c2987b74814b5e6",
+      "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18a7c48",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "147291b8ccf86ad73d2353b95715e6eb348389deefa89724e95c4b34e3886ba8",
+      "calldata": "0x4df61d82",
+      "decoded": {
+        "decimal": "259200",
+        "hex": "0x000000000000000000000000000000000000000000000000000000000003f480",
+        "shape": "word"
+      },
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/010-module-interest-delay.json",
+      "first_stored_utc": "2026-09-01T13:21:00.224Z",
+      "index": 10,
+      "label": "module.INTEREST_DELAY()",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18a7c48\nto=0x27d9ad987bde08a0d083ef7e0e4043c857a17b38\ncalldata=0x4df61d82\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x4df61d82",
+            "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38"
+          },
+          "0x18a7c48"
+        ]
+      },
+      "sha256": "17f057b3cec5027e035a2194b36a18d005c0c3c69c01edd0cb5a5a904f464873",
+      "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18a7c48",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "b0385aaa2a64cdfb4619aa26091ec3d49844185d9156160ff38d7a451f79aef4",
+      "calldata": "0xa035b1fe",
+      "decoded": {
+        "decimal": "1021764268673581424",
+        "hex": "0x0000000000000000000000000000000000000000000000000e2e09305679c170",
+        "shape": "word"
+      },
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/011-vault-price.json",
+      "first_stored_utc": "2026-09-01T13:21:00.299Z",
+      "index": 11,
+      "label": "vault.price()",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18a7c48\nto=0xe5f130253ff137f9917c0107659a4c5262abf6b0\ncalldata=0xa035b1fe\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0xa035b1fe",
+            "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0"
+          },
+          "0x18a7c48"
+        ]
+      },
+      "sha256": "6703250672188f0a4f26c5fc8684efe636277773e7dfff7c630e465cea1a6ae4",
+      "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18a7c48",
+      "byte_len": 294,
+      "cache": "hit",
+      "cache_key": "2dd921f8a72659e0005e9d79b11f5c46d50b7a0b1e36416ec8ff732b215a45fd",
+      "calldata": "0x1f7cdd5f000000000000000000000000e5f130253ff137f9917c0107659a4c5262abf6b0",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "81761995488279584010351",
+            "hex": "0x000000000000000000000000000000000000000000001150539fc6f8eb8f706f",
+            "name": "saved"
+          },
+          {
+            "decimal": "1346800022157",
+            "hex": "0x000000000000000000000000000000000000000000000000000001399389728d",
+            "name": "ticks"
+          },
+          {
+            "address": "0x0000000000000000000000000000000000000000",
+            "decimal": "0",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "name": "referrer"
+          },
+          {
+            "decimal": "0",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "name": "referralFeePPM"
+          }
+        ],
+        "hex": "0x000000000000000000000000000000000000000000001150539fc6f8eb8f706f000000000000000000000000000000000000000000000000000001399389728d00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        "shape": "fields"
+      },
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/012-module-savings-vault.json",
+      "first_stored_utc": "2026-09-01T13:21:00.681Z",
+      "index": 12,
+      "label": "module.savings(vault)",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18a7c48\nto=0x27d9ad987bde08a0d083ef7e0e4043c857a17b38\ncalldata=0x1f7cdd5f000000000000000000000000e5f130253ff137f9917c0107659a4c5262abf6b0\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x1f7cdd5f000000000000000000000000e5f130253ff137f9917c0107659a4c5262abf6b0",
+            "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38"
+          },
+          "0x18a7c48"
+        ]
+      },
+      "sha256": "12ef7bbe5186e5076a141ed61dd9d4565395165b6c7ee56290e4377102ceede6",
+      "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18a7c48",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "26f86531cb029da31b9093942882c573969216b4911321e95226cce283625e68",
+      "calldata": "0x534cb30d000000000000000000000000000000000000000000000000000000006a915c1f",
+      "decoded": {
+        "decimal": "1349693580000",
+        "hex": "0x0000000000000000000000000000000000000000000000000000013a4001a2e0",
+        "shape": "word"
+      },
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/013-module-ticks-1787911199.json",
+      "first_stored_utc": "2026-09-01T13:21:00.876Z",
+      "index": 13,
+      "label": "module.ticks(1787911199)",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18a7c48\nto=0x27d9ad987bde08a0d083ef7e0e4043c857a17b38\ncalldata=0x534cb30d000000000000000000000000000000000000000000000000000000006a915c1f\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x534cb30d000000000000000000000000000000000000000000000000000000006a915c1f",
+            "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38"
+          },
+          "0x18a7c48"
+        ]
+      },
+      "sha256": "c2e9b329b4adccb532f1d09b3d1e9b61999c0187bf2ab9b98c2987b74814b5e6",
+      "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x0..0x18a7c48",
+      "byte_len": 1859,
+      "cache": "hit",
+      "cache_key": "facb83ed86c1724b29dc0f675f7231e6dbd16d3ed1bfffea4cc822d0831e0d3f",
+      "calldata": "topic0=0xd76dfbd4c35cffe2a846b6488bc677c511aa4337e1551f3a360427ac7a78de7b,topic1=none,topic2=none",
+      "decoded": {
+        "byte_len": 4,
+        "hex": "rate_changed_logs=4",
+        "shape": "other"
+      },
+      "endpoint": "https://eth.blockscout.com/api",
+      "file": "raw/014-rate-change-history-blockscout.json",
+      "first_stored_utc": "2026-09-01T13:21:01.025Z",
+      "index": 14,
+      "label": "rate change history, blockscout",
+      "method": "blockscout_getLogs",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=blockscout_getLogs\nblock=0x0..0x18a7c48\nto=0x27d9ad987bde08a0d083ef7e0e4043c857a17b38\ncalldata=topic0=0xd76dfbd4c35cffe2a846b6488bc677c511aa4337e1551f3a360427ac7a78de7b,topic1=none,topic2=none\n",
+      "request": {
+        "api": "blockscout_getLogs",
+        "http_method": "GET",
+        "query": [
+          [
+            "module",
+            "logs"
+          ],
+          [
+            "action",
+            "getLogs"
+          ],
+          [
+            "address",
+            "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38"
+          ],
+          [
+            "fromBlock",
+            "0"
+          ],
+          [
+            "toBlock",
+            "25853000"
+          ],
+          [
+            "topic0",
+            "0xd76dfbd4c35cffe2a846b6488bc677c511aa4337e1551f3a360427ac7a78de7b"
+          ]
+        ]
+      },
+      "sha256": "20f208fa56f13a11eb657912eba53364e98403d2cb32027467d4edea9958bb50",
+      "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38",
+      "wire": "http_get"
+    },
+    {
+      "block": "0x0..0x18a7c48",
+      "byte_len": 68458,
+      "cache": "hit",
+      "cache_key": "6a80a3a59cc1a0ae8bf66977d8e67b3ff9e2d456a732ca1fad41022d00da15cd",
+      "calldata": "topic0=none,topic1=0x000000000000000000000000e5f130253ff137f9917c0107659a4c5262abf6b0,topic2=none",
+      "decoded": {
+        "byte_len": 127,
+        "hex": "flow_logs=127",
+        "shape": "other"
+      },
+      "endpoint": "https://eth.blockscout.com/api",
+      "file": "raw/015-vault-flow-series-blockscout.json",
+      "first_stored_utc": "2026-09-01T13:21:01.180Z",
+      "index": 15,
+      "label": "vault flow series, blockscout",
+      "method": "blockscout_getLogs",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=blockscout_getLogs\nblock=0x0..0x18a7c48\nto=0x27d9ad987bde08a0d083ef7e0e4043c857a17b38\ncalldata=topic0=none,topic1=0x000000000000000000000000e5f130253ff137f9917c0107659a4c5262abf6b0,topic2=none\n",
+      "request": {
+        "api": "blockscout_getLogs",
+        "http_method": "GET",
+        "query": [
+          [
+            "module",
+            "logs"
+          ],
+          [
+            "action",
+            "getLogs"
+          ],
+          [
+            "address",
+            "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38"
+          ],
+          [
+            "fromBlock",
+            "0"
+          ],
+          [
+            "toBlock",
+            "25853000"
+          ],
+          [
+            "topic1",
+            "0x000000000000000000000000e5f130253ff137f9917c0107659a4c5262abf6b0"
+          ]
+        ]
+      },
+      "sha256": "bd45f73b7397e153b4090f3949b435634c06fbb15ed59004a07ecea323ca6a46",
+      "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38",
+      "wire": "http_get"
+    },
+    {
+      "block": "0x0..0x18a7c48",
+      "byte_len": 23346,
+      "cache": "hit",
+      "cache_key": "b54b8e4d0f54c77c6134309ce6b5314bc407cce897818ab8177d5bd28ad2338d",
+      "calldata": "topic0=0x3c3606ed6d5dfe840e9ac3e4e9ff72ed55b257bdee70eb24a2ade297d439976e,topic1=none,topic2=none",
+      "decoded": {
+        "byte_len": 40,
+        "hex": "interest_claimed_logs=40",
+        "shape": "other"
+      },
+      "endpoint": "https://eth.blockscout.com/api",
+      "file": "raw/016-vault-interestclaimed-blockscout.json",
+      "first_stored_utc": "2026-09-01T13:21:01.266Z",
+      "index": 16,
+      "label": "vault InterestClaimed, blockscout",
+      "method": "blockscout_getLogs",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=blockscout_getLogs\nblock=0x0..0x18a7c48\nto=0xe5f130253ff137f9917c0107659a4c5262abf6b0\ncalldata=topic0=0x3c3606ed6d5dfe840e9ac3e4e9ff72ed55b257bdee70eb24a2ade297d439976e,topic1=none,topic2=none\n",
+      "request": {
+        "api": "blockscout_getLogs",
+        "http_method": "GET",
+        "query": [
+          [
+            "module",
+            "logs"
+          ],
+          [
+            "action",
+            "getLogs"
+          ],
+          [
+            "address",
+            "0xE5F130253fF137f9917C0107659A4c5262abf6b0"
+          ],
+          [
+            "fromBlock",
+            "0"
+          ],
+          [
+            "toBlock",
+            "25853000"
+          ],
+          [
+            "topic0",
+            "0x3c3606ed6d5dfe840e9ac3e4e9ff72ed55b257bdee70eb24a2ade297d439976e"
+          ]
+        ]
+      },
+      "sha256": "b00735e21a1e657b12aa763b14f5265fa459b244dab9c39bf3c5d2e11b80d872",
+      "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
+      "wire": "http_get"
+    },
+    {
+      "block": "n/a",
+      "byte_len": 39,
+      "cache": "hit",
+      "cache_key": "f850f3b048c9bd6a1d50075e4c7e5ee5f560f7831e396be9ebdce06fb0e5eca5",
+      "calldata": "",
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/017-eth-chainid.json",
+      "first_stored_utc": "2026-09-01T13:20:58.737Z",
+      "index": 17,
+      "label": "eth_chainId",
+      "method": "eth_chainId",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_chainId\nblock=n/a\nto=\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_chainId",
+        "params": []
+      },
+      "sha256": "79226432df73e05966f20e4d291fb5048bfef1138d7078f8feab534126df1aa5",
+      "to": "",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x176e890",
+      "byte_len": 29879,
+      "cache": "hit",
+      "cache_key": "c3201026e1dc07605ca4e888eda7a83579504c706e3c70d229bc8203e084b3ac",
+      "calldata": "full_transactions=false",
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/018-block-header-24570000.json",
+      "first_stored_utc": "2026-09-01T13:21:08.642Z",
+      "index": 18,
+      "label": "block header @ 24570000",
+      "method": "eth_getBlockByNumber",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getBlockByNumber\nblock=0x176e890\nto=\ncalldata=full_transactions=false\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getBlockByNumber",
+        "params": [
+          "0x176e890",
+          false
+        ]
+      },
+      "sha256": "dd327fa78b3d9b3d5f79ca971e1932f64b58f17f1d3243d193d566aba7fa680f",
+      "to": "",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x176e890",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "141d941224bdb155240e3309a00c23894bf20d384f1d0cd69f81142a75adc76b",
+      "calldata": "0x38d52e0f",
+      "decoded": {
+        "address": "0xb58e61c3098d85632df34eecfb899a1ed80921cb",
+        "decimal": "1036502551596801103936626207020812947050644185547",
+        "hex": "0x000000000000000000000000b58e61c3098d85632df34eecfb899a1ed80921cb",
+        "shape": "word"
+      },
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/019-vault-asset.json",
+      "first_stored_utc": "2026-09-01T13:21:08.717Z",
+      "index": 19,
+      "label": "vault.asset()",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x176e890\nto=0xe5f130253ff137f9917c0107659a4c5262abf6b0\ncalldata=0x38d52e0f\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x38d52e0f",
+            "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0"
+          },
+          "0x176e890"
+        ]
+      },
+      "sha256": "eabef5c55f007a556cbf1f5d02d6ad543073c4f214ce07c9c41c1157545a80ba",
+      "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x176e890",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "245ecc02203372f35d792ee379f855a57e9bc9cba5d65287e70118fbed20c2dd",
+      "calldata": "0xc86d6ae4",
+      "decoded": {
+        "address": "0x27d9ad987bde08a0d083ef7e0e4043c857a17b38",
+        "decimal": "227505024083244761556576772359314993738468653880",
+        "hex": "0x00000000000000000000000027d9ad987bde08a0d083ef7e0e4043c857a17b38",
+        "shape": "word"
+      },
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/020-vault-savings.json",
+      "first_stored_utc": "2026-09-01T13:21:08.783Z",
+      "index": 20,
+      "label": "vault.savings()",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x176e890\nto=0xe5f130253ff137f9917c0107659a4c5262abf6b0\ncalldata=0xc86d6ae4\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0xc86d6ae4",
+            "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0"
+          },
+          "0x176e890"
+        ]
+      },
+      "sha256": "dddb0595fdd762f6620984ec9f243816cb3a9298f53760d74592574bc8169905",
+      "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x176e890",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "73c619b97b97f401cd3c952e863f75ed8bf63b6f7d75ec70743c371d92315bae",
+      "calldata": "0x18160ddd",
+      "decoded": {
+        "decimal": "185812758161290596611",
+        "hex": "0x00000000000000000000000000000000000000000000000a12ab8711cb4a9103",
+        "shape": "word"
+      },
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/021-vault-totalsupply.json",
+      "first_stored_utc": "2026-09-01T13:21:09.186Z",
+      "index": 21,
+      "label": "vault.totalSupply()",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x176e890\nto=0xe5f130253ff137f9917c0107659a4c5262abf6b0\ncalldata=0x18160ddd\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x18160ddd",
+            "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0"
+          },
+          "0x176e890"
+        ]
+      },
+      "sha256": "2dfc30b854e043e8e57d44fde328853e2e23e5ee25433ba4fe2ee9039c5a19ba",
+      "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x176e890",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "424aba2ad1239812c41b6175e7634772c3939c4c46d9380d8b33aa25321ad594",
+      "calldata": "0x01e1d114",
+      "decoded": {
+        "decimal": "186894275295825381128",
+        "hex": "0x00000000000000000000000000000000000000000000000a21add92c59bc4708",
+        "shape": "word"
+      },
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/022-vault-totalassets.json",
+      "first_stored_utc": "2026-09-01T13:21:09.283Z",
+      "index": 22,
+      "label": "vault.totalAssets()",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x176e890\nto=0xe5f130253ff137f9917c0107659a4c5262abf6b0\ncalldata=0x01e1d114\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x01e1d114",
+            "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0"
+          },
+          "0x176e890"
+        ]
+      },
+      "sha256": "45098429fd3a46305bb26cc4e1d27fc95660fc8d0a1091f25556ac974b334d03",
+      "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x176e890",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "8d2b19ec92d30d13ce0fc4226d0a8ccf49d3e6da5c98ad6323b501e848722a77",
+      "calldata": "0x07a2d13a0000000000000000000000000000000000000000000000000de0b6b3a7640000",
+      "decoded": {
+        "decimal": "1005820467578421056",
+        "hex": "0x0000000000000000000000000000000000000000000000000df56462ddd43f40",
+        "shape": "word"
+      },
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/023-vault-converttoassets-1e18.json",
+      "first_stored_utc": "2026-09-01T13:21:09.345Z",
+      "index": 23,
+      "label": "vault.convertToAssets(1e18)",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x176e890\nto=0xe5f130253ff137f9917c0107659a4c5262abf6b0\ncalldata=0x07a2d13a0000000000000000000000000000000000000000000000000de0b6b3a7640000\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x07a2d13a0000000000000000000000000000000000000000000000000de0b6b3a7640000",
+            "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0"
+          },
+          "0x176e890"
+        ]
+      },
+      "sha256": "facbac83097e3637ea2cb5a29d3da5b48ef0159c86f091ded61054336498811f",
+      "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x176e890",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "748e65a40020abd93c16d1f47e91e48e8689b18b7f39494589f6ba944a78ac43",
+      "calldata": "0x06a7b376",
+      "decoded": {
+        "decimal": "37500",
+        "hex": "0x000000000000000000000000000000000000000000000000000000000000927c",
+        "shape": "word"
+      },
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/024-module-currentrateppm.json",
+      "first_stored_utc": "2026-09-01T13:21:09.406Z",
+      "index": 24,
+      "label": "module.currentRatePPM()",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x176e890\nto=0x27d9ad987bde08a0d083ef7e0e4043c857a17b38\ncalldata=0x06a7b376\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x06a7b376",
+            "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38"
+          },
+          "0x176e890"
+        ]
+      },
+      "sha256": "8809313d493fa29d18d45c40167d66f97911d937d6b12d28eac7b6b8503480d8",
+      "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x176e890",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "a3f2c140585163a3e0ef77f0d67c396b04fbb72555e974a6b90323ddafdfe314",
+      "calldata": "0xb079f163",
+      "decoded": {
+        "decimal": "803357400000",
+        "hex": "0x000000000000000000000000000000000000000000000000000000bb0bd51bc0",
+        "shape": "word"
+      },
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/025-module-currentticks.json",
+      "first_stored_utc": "2026-09-01T13:21:09.529Z",
+      "index": 25,
+      "label": "module.currentTicks()",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x176e890\nto=0x27d9ad987bde08a0d083ef7e0e4043c857a17b38\ncalldata=0xb079f163\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0xb079f163",
+            "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38"
+          },
+          "0x176e890"
+        ]
+      },
+      "sha256": "db87b71f904cdb3dfa1486995d95c2cf687d244b44c9a2a117e48661d557f567",
+      "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x176e890",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "b8ad71e9d9b8a5e78cd724e91eb4c4b29c29ffa3f774b64c1972394ce0adc424",
+      "calldata": "0x4df61d82",
+      "decoded": {
+        "decimal": "259200",
+        "hex": "0x000000000000000000000000000000000000000000000000000000000003f480",
+        "shape": "word"
+      },
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/026-module-interest-delay.json",
+      "first_stored_utc": "2026-09-01T13:21:09.960Z",
+      "index": 26,
+      "label": "module.INTEREST_DELAY()",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x176e890\nto=0x27d9ad987bde08a0d083ef7e0e4043c857a17b38\ncalldata=0x4df61d82\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x4df61d82",
+            "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38"
+          },
+          "0x176e890"
+        ]
+      },
+      "sha256": "17f057b3cec5027e035a2194b36a18d005c0c3c69c01edd0cb5a5a904f464873",
+      "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x176e890",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "6e0e08c78dcbc430b619a190f6ff9e1b135bc9c4687f1054d43aab4209dda0f1",
+      "calldata": "0xa035b1fe",
+      "decoded": {
+        "decimal": "1005820467578421056",
+        "hex": "0x0000000000000000000000000000000000000000000000000df56462ddd43f40",
+        "shape": "word"
+      },
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/027-vault-price.json",
+      "first_stored_utc": "2026-09-01T13:21:10.113Z",
+      "index": 27,
+      "label": "vault.price()",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x176e890\nto=0xe5f130253ff137f9917c0107659a4c5262abf6b0\ncalldata=0xa035b1fe\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0xa035b1fe",
+            "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0"
+          },
+          "0x176e890"
+        ]
+      },
+      "sha256": "facbac83097e3637ea2cb5a29d3da5b48ef0159c86f091ded61054336498811f",
+      "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x176e890",
+      "byte_len": 294,
+      "cache": "hit",
+      "cache_key": "1ca88e5d3c5d3b57122994ecbd4beaffb9501ea4a4d062ee7c8cf75e93ef08c7",
+      "calldata": "0x1f7cdd5f000000000000000000000000e5f130253ff137f9917c0107659a4c5262abf6b0",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "186839662683663639740",
+            "hex": "0x00000000000000000000000000000000000000000000000a20ebd34ab59424bc",
+            "name": "saved"
+          },
+          {
+            "decimal": "794139532057",
+            "hex": "0x000000000000000000000000000000000000000000000000000000b8e6679b19",
+            "name": "ticks"
+          },
+          {
+            "address": "0x0000000000000000000000000000000000000000",
+            "decimal": "0",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "name": "referrer"
+          },
+          {
+            "decimal": "0",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "name": "referralFeePPM"
+          }
+        ],
+        "hex": "0x00000000000000000000000000000000000000000000000a20ebd34ab59424bc000000000000000000000000000000000000000000000000000000b8e6679b1900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        "shape": "fields"
+      },
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/028-module-savings-vault.json",
+      "first_stored_utc": "2026-09-01T13:21:10.166Z",
+      "index": 28,
+      "label": "module.savings(vault)",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x176e890\nto=0x27d9ad987bde08a0d083ef7e0e4043c857a17b38\ncalldata=0x1f7cdd5f000000000000000000000000e5f130253ff137f9917c0107659a4c5262abf6b0\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x1f7cdd5f000000000000000000000000e5f130253ff137f9917c0107659a4c5262abf6b0",
+            "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38"
+          },
+          "0x176e890"
+        ]
+      },
+      "sha256": "6efcade488238d0e3a2f6a6b73d3da8fd14ae17a28c3f27b24a669dae170a6ae",
+      "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x176e890",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "b85cb6fcc129f0534996c6b85900a863e9694c316fe535eccae36ffddcf59917",
+      "calldata": "0x534cb30d0000000000000000000000000000000000000000000000000000000069a58da7",
+      "decoded": {
+        "decimal": "803357400000",
+        "hex": "0x000000000000000000000000000000000000000000000000000000bb0bd51bc0",
+        "shape": "word"
+      },
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/029-module-ticks-1772457383.json",
+      "first_stored_utc": "2026-09-01T13:21:10.219Z",
+      "index": 29,
+      "label": "module.ticks(1772457383)",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x176e890\nto=0x27d9ad987bde08a0d083ef7e0e4043c857a17b38\ncalldata=0x534cb30d0000000000000000000000000000000000000000000000000000000069a58da7\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x534cb30d0000000000000000000000000000000000000000000000000000000069a58da7",
+            "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38"
+          },
+          "0x176e890"
+        ]
+      },
+      "sha256": "db87b71f904cdb3dfa1486995d95c2cf687d244b44c9a2a117e48661d557f567",
+      "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x0..0x176e890",
+      "byte_len": 1405,
+      "cache": "hit",
+      "cache_key": "06c3a4e53cb44a5eb48fd534638efa386586915c0686ca6380399d19510a2278",
+      "calldata": "topic0=0xd76dfbd4c35cffe2a846b6488bc677c511aa4337e1551f3a360427ac7a78de7b,topic1=none,topic2=none",
+      "decoded": {
+        "byte_len": 3,
+        "hex": "rate_changed_logs=3",
+        "shape": "other"
+      },
+      "endpoint": "https://eth.blockscout.com/api",
+      "file": "raw/030-rate-change-history-blockscout.json",
+      "first_stored_utc": "2026-09-01T13:21:10.368Z",
+      "index": 30,
+      "label": "rate change history, blockscout",
+      "method": "blockscout_getLogs",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=blockscout_getLogs\nblock=0x0..0x176e890\nto=0x27d9ad987bde08a0d083ef7e0e4043c857a17b38\ncalldata=topic0=0xd76dfbd4c35cffe2a846b6488bc677c511aa4337e1551f3a360427ac7a78de7b,topic1=none,topic2=none\n",
+      "request": {
+        "api": "blockscout_getLogs",
+        "http_method": "GET",
+        "query": [
+          [
+            "module",
+            "logs"
+          ],
+          [
+            "action",
+            "getLogs"
+          ],
+          [
+            "address",
+            "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38"
+          ],
+          [
+            "fromBlock",
+            "0"
+          ],
+          [
+            "toBlock",
+            "24570000"
+          ],
+          [
+            "topic0",
+            "0xd76dfbd4c35cffe2a846b6488bc677c511aa4337e1551f3a360427ac7a78de7b"
+          ]
+        ]
+      },
+      "sha256": "fe37150e85c1a3ca1442b116da8729ee25eb99a6e0868db0f1e9f64299f3dcfc",
+      "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38",
+      "wire": "http_get"
+    },
+    {
+      "block": "0x0..0x176e890",
+      "byte_len": 6583,
+      "cache": "hit",
+      "cache_key": "0d3b73bb1bc1c7523ff24ca0cc2e58becb5e5b317cb8f8cc4ad8c279b9449991",
+      "calldata": "topic0=none,topic1=0x000000000000000000000000e5f130253ff137f9917c0107659a4c5262abf6b0,topic2=none",
+      "decoded": {
+        "byte_len": 12,
+        "hex": "flow_logs=12",
+        "shape": "other"
+      },
+      "endpoint": "https://eth.blockscout.com/api",
+      "file": "raw/031-vault-flow-series-blockscout.json",
+      "first_stored_utc": "2026-09-01T13:21:10.443Z",
+      "index": 31,
+      "label": "vault flow series, blockscout",
+      "method": "blockscout_getLogs",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=blockscout_getLogs\nblock=0x0..0x176e890\nto=0x27d9ad987bde08a0d083ef7e0e4043c857a17b38\ncalldata=topic0=none,topic1=0x000000000000000000000000e5f130253ff137f9917c0107659a4c5262abf6b0,topic2=none\n",
+      "request": {
+        "api": "blockscout_getLogs",
+        "http_method": "GET",
+        "query": [
+          [
+            "module",
+            "logs"
+          ],
+          [
+            "action",
+            "getLogs"
+          ],
+          [
+            "address",
+            "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38"
+          ],
+          [
+            "fromBlock",
+            "0"
+          ],
+          [
+            "toBlock",
+            "24570000"
+          ],
+          [
+            "topic1",
+            "0x000000000000000000000000e5f130253ff137f9917c0107659a4c5262abf6b0"
+          ]
+        ]
+      },
+      "sha256": "13c1c45f6b42c9dc33dbc115895a6f07dbb521947b268c0a01873a7fe62561af",
+      "to": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38",
+      "wire": "http_get"
+    },
+    {
+      "block": "0x0..0x176e890",
+      "byte_len": 2953,
+      "cache": "hit",
+      "cache_key": "a35121b565b1e10e516f780f16b87c98673c4d2cc37bc31922aa612693037d94",
+      "calldata": "topic0=0x3c3606ed6d5dfe840e9ac3e4e9ff72ed55b257bdee70eb24a2ade297d439976e,topic1=none,topic2=none",
+      "decoded": {
+        "byte_len": 5,
+        "hex": "interest_claimed_logs=5",
+        "shape": "other"
+      },
+      "endpoint": "https://eth.blockscout.com/api",
+      "file": "raw/032-vault-interestclaimed-blockscout.json",
+      "first_stored_utc": "2026-09-01T13:21:10.576Z",
+      "index": 32,
+      "label": "vault InterestClaimed, blockscout",
+      "method": "blockscout_getLogs",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=blockscout_getLogs\nblock=0x0..0x176e890\nto=0xe5f130253ff137f9917c0107659a4c5262abf6b0\ncalldata=topic0=0x3c3606ed6d5dfe840e9ac3e4e9ff72ed55b257bdee70eb24a2ade297d439976e,topic1=none,topic2=none\n",
+      "request": {
+        "api": "blockscout_getLogs",
+        "http_method": "GET",
+        "query": [
+          [
+            "module",
+            "logs"
+          ],
+          [
+            "action",
+            "getLogs"
+          ],
+          [
+            "address",
+            "0xE5F130253fF137f9917C0107659A4c5262abf6b0"
+          ],
+          [
+            "fromBlock",
+            "0"
+          ],
+          [
+            "toBlock",
+            "24570000"
+          ],
+          [
+            "topic0",
+            "0x3c3606ed6d5dfe840e9ac3e4e9ff72ed55b257bdee70eb24a2ade297d439976e"
+          ]
+        ]
+      },
+      "sha256": "cd43236b26e5eb52571da2ea37299b6a9a60cf180246e417055e85ea93df9a46",
+      "to": "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
+      "wire": "http_get"
+    }
+  ],
+  "entry_count": 32,
+  "findings": [],
+  "format": "crossfoot-manifest-v2",
+  "summary": {
+    "fetches": {
+      "b0": {
+        "baseline": null,
+        "block": 24570000,
+        "block_hash": "0x6d42f8126dbac4a92f67fcd72a47078eae48307eafe2c0a088fc541b5314cf10",
+        "block_hex": "0x176e890",
+        "block_timestamp_unix": 1772457383,
+        "block_timestamp_utc": "2026-03-02T13:16:23Z",
+        "logs": null,
+        "module": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38",
+        "module_deployment_block": null,
+        "rate_history": {
+          "cross_check": {
+            "matches_reference": true,
+            "reference_source": "reference series recorded independently at development time, not verified against a primary source here",
+            "reference_within_range": [
+              {
+                "block": 22536327,
+                "rate_ppm": 30000
+              },
+              {
+                "block": 23983764,
+                "rate_ppm": 40000
+              },
+              {
+                "block": 24426856,
+                "rate_ppm": 37500
+              }
+            ]
+          },
+          "from_block": 0,
+          "result_cap": 1000,
+          "series": [
+            {
+              "block": 22536327,
+              "rate_ppm": 30000,
+              "timestamp_unix": 1747891715,
+              "timestamp_utc": "2025-05-22T05:28:35Z",
+              "transaction_hash": "0xb227f904a26ff3b3e7259b2fa1ec8b95f1738885417dc731b3eac6f1d26cbfd8"
+            },
+            {
+              "block": 23983764,
+              "rate_ppm": 40000,
+              "timestamp_unix": 1765387379,
+              "timestamp_utc": "2025-12-10T17:22:59Z",
+              "transaction_hash": "0xf3ad06cab1adffd5b0a3d84f60797f9ee7740fe7576245cfd46f543132bc318f"
+            },
+            {
+              "block": 24426856,
+              "rate_ppm": 37500,
+              "timestamp_unix": 1770732311,
+              "timestamp_utc": "2026-02-10T14:05:11Z",
+              "transaction_hash": "0x8fc3c89d05ebe804b47cedda945b43e023b637ab6f04209c159c37705c1c9513"
+            }
+          ],
+          "signature": "RateChanged(uint24)",
+          "source": "blockscout",
+          "to_block": 24570000,
+          "topic0": "0xd76dfbd4c35cffe2a846b6488bc677c511aa4337e1551f3a360427ac7a78de7b",
+          "truncated_by_cap": false
+        },
+        "reads": {
+          "module.INTEREST_DELAY()": "259200",
+          "module.currentRatePPM()": "37500",
+          "module.currentTicks()": "803357400000",
+          "module.savings(vault)": {
+            "referralFeePPM": {
+              "decimal": "0"
+            },
+            "referrer": {
+              "address": "0x0000000000000000000000000000000000000000",
+              "decimal": "0"
+            },
+            "saved": {
+              "decimal": "186839662683663639740"
+            },
+            "ticks": {
+              "decimal": "794139532057"
+            }
+          },
+          "module.ticks(block timestamp)": "803357400000",
+          "vault.asset()": "0xb58e61c3098d85632df34eecfb899a1ed80921cb",
+          "vault.convertToAssets(1e18)": "1005820467578421056",
+          "vault.price()": "1005820467578421056",
+          "vault.savings()": "0x27d9ad987bde08a0d083ef7e0e4043c857a17b38",
+          "vault.totalAssets()": "186894275295825381128",
+          "vault.totalSupply()": "185812758161290596611"
+        },
+        "vault": "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
+        "vault_flows": {
+          "account": "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
+          "first_block": 24118273,
+          "from_block": 0,
+          "interest_collected": 5,
+          "last_block": 24549442,
+          "module": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38",
+          "result_cap": 1000,
+          "saved": 6,
+          "source": "blockscout",
+          "to_block": 24570000,
+          "total": 12,
+          "truncated_by_cap": false,
+          "withdrawn": 1
+        },
+        "vault_interest_claimed": {
+          "count": 5,
+          "source": "blockscout",
+          "to_block": 24570000,
+          "vault": "0xE5F130253fF137f9917C0107659A4c5262abf6b0"
+        }
+      },
+      "b1": {
+        "baseline": null,
+        "block": 25853000,
+        "block_hash": "0xf6722a6c686b40d517a1016f936f1d0373c8aeee5fe193b499b3c387e4a7c358",
+        "block_hex": "0x18a7c48",
+        "block_timestamp_unix": 1787911199,
+        "block_timestamp_utc": "2026-08-28T09:59:59Z",
+        "logs": null,
+        "module": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38",
+        "module_deployment_block": null,
+        "rate_history": {
+          "cross_check": {
+            "matches_reference": true,
+            "reference_source": "reference series recorded independently at development time, not verified against a primary source here",
+            "reference_within_range": [
+              {
+                "block": 22536327,
+                "rate_ppm": 30000
+              },
+              {
+                "block": 23983764,
+                "rate_ppm": 40000
+              },
+              {
+                "block": 24426856,
+                "rate_ppm": 37500
+              },
+              {
+                "block": 24750879,
+                "rate_ppm": 35000
+              }
+            ]
+          },
+          "from_block": 0,
+          "result_cap": 1000,
+          "series": [
+            {
+              "block": 22536327,
+              "rate_ppm": 30000,
+              "timestamp_unix": 1747891715,
+              "timestamp_utc": "2025-05-22T05:28:35Z",
+              "transaction_hash": "0xb227f904a26ff3b3e7259b2fa1ec8b95f1738885417dc731b3eac6f1d26cbfd8"
+            },
+            {
+              "block": 23983764,
+              "rate_ppm": 40000,
+              "timestamp_unix": 1765387379,
+              "timestamp_utc": "2025-12-10T17:22:59Z",
+              "transaction_hash": "0xf3ad06cab1adffd5b0a3d84f60797f9ee7740fe7576245cfd46f543132bc318f"
+            },
+            {
+              "block": 24426856,
+              "rate_ppm": 37500,
+              "timestamp_unix": 1770732311,
+              "timestamp_utc": "2026-02-10T14:05:11Z",
+              "transaction_hash": "0x8fc3c89d05ebe804b47cedda945b43e023b637ab6f04209c159c37705c1c9513"
+            },
+            {
+              "block": 24750879,
+              "rate_ppm": 35000,
+              "timestamp_unix": 1774638431,
+              "timestamp_utc": "2026-03-27T19:07:11Z",
+              "transaction_hash": "0x21fd3545ee08be786fde2650b1abd428909874dfe2cf1238602232147320750f"
+            }
+          ],
+          "signature": "RateChanged(uint24)",
+          "source": "blockscout",
+          "to_block": 25853000,
+          "topic0": "0xd76dfbd4c35cffe2a846b6488bc677c511aa4337e1551f3a360427ac7a78de7b",
+          "truncated_by_cap": false
+        },
+        "reads": {
+          "module.INTEREST_DELAY()": "259200",
+          "module.currentRatePPM()": "35000",
+          "module.currentTicks()": "1349693580000",
+          "module.savings(vault)": {
+            "referralFeePPM": {
+              "decimal": "0"
+            },
+            "referrer": {
+              "address": "0x0000000000000000000000000000000000000000",
+              "decimal": "0"
+            },
+            "saved": {
+              "decimal": "81761995488279584010351"
+            },
+            "ticks": {
+              "decimal": "1346800022157"
+            }
+          },
+          "module.ticks(block timestamp)": "1349693580000",
+          "vault.asset()": "0xb58e61c3098d85632df34eecfb899a1ed80921cb",
+          "vault.convertToAssets(1e18)": "1021764268673581424",
+          "vault.price()": "1021764268673581424",
+          "vault.savings()": "0x27d9ad987bde08a0d083ef7e0e4043c857a17b38",
+          "vault.totalAssets()": "81769497488003849675143",
+          "vault.totalSupply()": "80027751992300676663517"
+        },
+        "vault": "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
+        "vault_flows": {
+          "account": "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
+          "first_block": 24118273,
+          "from_block": 0,
+          "interest_collected": 40,
+          "last_block": 25844843,
+          "module": "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38",
+          "result_cap": 1000,
+          "saved": 66,
+          "source": "blockscout",
+          "to_block": 25853000,
+          "total": 127,
+          "truncated_by_cap": false,
+          "withdrawn": 21
+        },
+        "vault_interest_claimed": {
+          "count": 40,
+          "source": "blockscout",
+          "to_block": 25853000,
+          "vault": "0xE5F130253fF137f9917C0107659A4c5262abf6b0"
+        }
+      }
+    },
+    "verdict": "MODEL_MATCH"
+  },
+  "target": "svzchf-run"
+}
