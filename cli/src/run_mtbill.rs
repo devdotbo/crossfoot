@@ -11,9 +11,7 @@ use std::path::Path;
 use serde_json::{json, Value};
 
 use crate::bundle::BundleWriter;
-use crate::model::mtbill::{
-    self as checks, CheckResult, CheckVerdict,
-};
+use crate::model::mtbill::{self as checks, CheckResult, CheckVerdict};
 use crate::mtbill;
 use crate::rpc::Client;
 use crate::util::now_utc;
@@ -72,8 +70,10 @@ fn c2_parameters_and_roles(
     // events emitted when each round was posted. These are two independent
     // sources; a disagreement would mean stored history was rewritten, which
     // only a proxy upgrade could do.
-    let logged: std::collections::BTreeMap<u64, &checks::Round> =
-        rounds_logged.iter().map(|round| (round.round_id, round)).collect();
+    let logged: std::collections::BTreeMap<u64, &checks::Round> = rounds_logged
+        .iter()
+        .map(|round| (round.round_id, round))
+        .collect();
     let mut compared = 0usize;
     for stored in rounds_stored {
         if let Some(from_log) = logged.get(&stored.round_id) {

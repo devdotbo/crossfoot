@@ -12,8 +12,8 @@
 //! two agreeing models and the chain is a finding.
 
 pub mod actus;
-pub mod mtbill;
 pub mod clock;
+pub mod mtbill;
 pub mod replay;
 pub mod verdict;
 pub mod wide;

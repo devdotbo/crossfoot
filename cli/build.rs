@@ -30,5 +30,8 @@ fn main() {
         }
     }
     entries.sort();
-    println!("cargo:rustc-env=CROSSFOOT_LOCK_PACKAGES={}", entries.join(";"));
+    println!(
+        "cargo:rustc-env=CROSSFOOT_LOCK_PACKAGES={}",
+        entries.join(";")
+    );
 }

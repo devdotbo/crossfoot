@@ -156,10 +156,22 @@ mod tests {
     /// The four observed rate changes on module 0x27d9AD98.
     fn observed() -> TickClock {
         TickClock::new(vec![
-            RateSegment { start: 1_747_891_715, rate_ppm: 30_000 },
-            RateSegment { start: 1_765_387_379, rate_ppm: 40_000 },
-            RateSegment { start: 1_770_732_311, rate_ppm: 37_500 },
-            RateSegment { start: 1_774_638_431, rate_ppm: 35_000 },
+            RateSegment {
+                start: 1_747_891_715,
+                rate_ppm: 30_000,
+            },
+            RateSegment {
+                start: 1_765_387_379,
+                rate_ppm: 40_000,
+            },
+            RateSegment {
+                start: 1_770_732_311,
+                rate_ppm: 37_500,
+            },
+            RateSegment {
+                start: 1_774_638_431,
+                rate_ppm: 35_000,
+            },
         ])
         .unwrap()
     }
@@ -197,8 +209,14 @@ mod tests {
     fn a_segment_past_the_uint40_bound_is_reported() {
         // 2^40 - 1 ppm-seconds is about 424 days at 30000 ppm.
         let clock = TickClock::new(vec![
-            RateSegment { start: 0, rate_ppm: 30_000 },
-            RateSegment { start: 40_000_000, rate_ppm: 35_000 },
+            RateSegment {
+                start: 0,
+                rate_ppm: 30_000,
+            },
+            RateSegment {
+                start: 40_000_000,
+                rate_ppm: 35_000,
+            },
         ])
         .unwrap();
         let violations = clock.uint40_violations();
@@ -214,7 +232,10 @@ mod tests {
             let recovered = clock.virtual_accrual_start(anchor, u64::MAX).unwrap();
             // Rounded up to the next whole second, so it lands on t or just
             // after when the crossing is not exactly on a second.
-            assert!(recovered >= t.saturating_sub(1) && recovered <= t + 1, "t={t} recovered={recovered}");
+            assert!(
+                recovered >= t.saturating_sub(1) && recovered <= t + 1,
+                "t={t} recovered={recovered}"
+            );
             assert!(clock.ticks(recovered).unwrap() >= anchor);
         }
     }
@@ -227,8 +248,14 @@ mod tests {
     #[test]
     fn a_non_ascending_series_is_rejected() {
         assert!(TickClock::new(vec![
-            RateSegment { start: 100, rate_ppm: 1 },
-            RateSegment { start: 100, rate_ppm: 2 },
+            RateSegment {
+                start: 100,
+                rate_ppm: 1
+            },
+            RateSegment {
+                start: 100,
+                rate_ppm: 2
+            },
         ])
         .is_err());
     }

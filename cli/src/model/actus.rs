@@ -26,10 +26,10 @@
 //! is the contract's formula. See `docs` on `segment_accrual` for why this is
 //! used in place of a virtual start date.
 
+use actus_pam::compute_schedule_with_rr_dates;
 use actus_pam::types::{
     ContractRole, ContractTerms, ContractType, DayCountConvention, EventType, RiskFactors,
 };
-use actus_pam::compute_schedule_with_rr_dates;
 use chrono::DateTime;
 use rust_decimal::Decimal;
 use std::collections::HashMap;
@@ -60,9 +60,12 @@ fn risk_factors(clock: &TickClock) -> RiskFactors {
             .segments()
             .iter()
             .filter_map(|segment| {
-                to_datetime(segment.start)
-                    .ok()
-                    .map(|dt| (dt, Decimal::from_i128_with_scale(segment.rate_ppm as i128, 6)))
+                to_datetime(segment.start).ok().map(|dt| {
+                    (
+                        dt,
+                        Decimal::from_i128_with_scale(segment.rate_ppm as i128, 6),
+                    )
+                })
             })
             .collect(),
     );
@@ -139,8 +142,7 @@ pub fn segment_accrual(
     // Adding the segment's own accrual then yields exactly
     // (ticks(end) - anchor) * S / 1e6 / Y, which is the contract's formula.
     let offset_ticks = ticks_start as i128 - state.ticks as i128;
-    let initial_accrued = Decimal::from_i128_with_scale(offset_ticks, 0)
-        * wei_to_zchf(state.saved)
+    let initial_accrued = Decimal::from_i128_with_scale(offset_ticks, 0) * wei_to_zchf(state.saved)
         / Decimal::from_i128_with_scale(PPM as i128, 0)
         / Decimal::from_i128_with_scale(YEAR_SECONDS as i128, 0);
 

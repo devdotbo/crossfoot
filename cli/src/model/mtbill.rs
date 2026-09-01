@@ -378,7 +378,10 @@ pub fn c3_cadence(rounds: &[Round], stale_after_seconds: u64) -> CheckResult {
             "C3",
             "cadence",
             CheckVerdict::InsufficientWindow,
-            format!("{} round(s) in the window, at least 2 are needed", rounds.len()),
+            format!(
+                "{} round(s) in the window, at least 2 are needed",
+                rounds.len()
+            ),
         );
     }
     let gaps: Vec<u64> = rounds
@@ -459,8 +462,7 @@ pub fn c4_monotonicity(rounds: &[Round], launch_rebase_round: Option<u64>) -> Ch
             }));
         }
         if previous.answer > 0 {
-            let bps =
-                (current.answer - previous.answer) as f64 / previous.answer as f64 * 10_000.0;
+            let bps = (current.answer - previous.answer) as f64 / previous.answer as f64 * 10_000.0;
             if bps > largest_increase_bps {
                 largest_increase_bps = bps;
                 largest_increase_at = Some(current.round_id);
@@ -830,7 +832,10 @@ mod tests {
 
         let mut checks = all_consistent();
         checks[2] = check("C3", CheckVerdict::ObservedDeviation);
-        assert_eq!(overall_verdict(&checks, false).overall, "OBSERVED_DEVIATION");
+        assert_eq!(
+            overall_verdict(&checks, false).overall,
+            "OBSERVED_DEVIATION"
+        );
     }
 
     #[test]
@@ -862,7 +867,10 @@ mod tests {
         assert_eq!(overall_verdict(&checks, false).overall, "SOURCE_STALE");
         checks[3] = check("C4", CheckVerdict::InputGap);
         assert_eq!(overall_verdict(&checks, false).overall, "INPUT_GAP");
-        assert_eq!(overall_verdict(&all_consistent(), true).overall, "INPUT_GAP");
+        assert_eq!(
+            overall_verdict(&all_consistent(), true).overall,
+            "INPUT_GAP"
+        );
     }
 
     #[test]
@@ -962,7 +970,12 @@ mod tests {
             round(2, 100_050_000, 1_000_000 + 3601),
         ];
         let result = c1_posting_rules(&rounds, params(), &strict_era(), &blocks(&[1, 2, 3]), None);
-        assert_eq!(result.verdict, CheckVerdict::Consistent, "{:?}", result.violations);
+        assert_eq!(
+            result.verdict,
+            CheckVerdict::Consistent,
+            "{:?}",
+            result.violations
+        );
     }
 
     #[test]
@@ -974,7 +987,10 @@ mod tests {
         let result = c1_posting_rules(&rounds, params(), &strict_era(), &blocks(&[1, 2, 3]), None);
         assert_eq!(result.verdict, CheckVerdict::ObservedDeviation);
         assert_eq!(result.violations.len(), 1);
-        assert_eq!(result.violations[0]["rule"], "deviation from the previous answer within maxAnswerDeviation");
+        assert_eq!(
+            result.violations[0]["rule"],
+            "deviation from the previous answer within maxAnswerDeviation"
+        );
     }
 
     /// The contract's spacing comparison is strict: exactly 3600 seconds
@@ -986,7 +1002,14 @@ mod tests {
             round(2, 100_000_001, 1_000_000 + 3600),
         ];
         assert_eq!(
-            c1_posting_rules(&exactly_an_hour, params(), &strict_era(), &blocks(&[1, 2, 3]), None).verdict,
+            c1_posting_rules(
+                &exactly_an_hour,
+                params(),
+                &strict_era(),
+                &blocks(&[1, 2, 3]),
+                None
+            )
+            .verdict,
             CheckVerdict::ObservedDeviation
         );
         let one_second_more = [
@@ -994,7 +1017,14 @@ mod tests {
             round(2, 100_000_001, 1_000_000 + 3601),
         ];
         assert_eq!(
-            c1_posting_rules(&one_second_more, params(), &strict_era(), &blocks(&[1, 2, 3]), None).verdict,
+            c1_posting_rules(
+                &one_second_more,
+                params(),
+                &strict_era(),
+                &blocks(&[1, 2, 3]),
+                None
+            )
+            .verdict,
             CheckVerdict::Consistent
         );
     }
@@ -1004,7 +1034,10 @@ mod tests {
         let rounds = [round(1, 10_000_000_000_001, 1_000_000)];
         let result = c1_posting_rules(&rounds, params(), &strict_era(), &blocks(&[1, 2, 3]), None);
         assert_eq!(result.verdict, CheckVerdict::ObservedDeviation);
-        assert_eq!(result.violations[0]["rule"], "answer within [minAnswer, maxAnswer]");
+        assert_eq!(
+            result.violations[0]["rule"],
+            "answer within [minAnswer, maxAnswer]"
+        );
     }
 
     /// A rule that did not exist yet must not be applied retroactively: a
@@ -1025,7 +1058,12 @@ mod tests {
         // Under the implementation that has no spacing rule, it is not.
         let lenient =
             c1_posting_rules(&rounds, params(), &no_spacing_era(), &blocks(&[1, 2]), None);
-        assert_eq!(lenient.verdict, CheckVerdict::Consistent, "{:?}", lenient.violations);
+        assert_eq!(
+            lenient.verdict,
+            CheckVerdict::Consistent,
+            "{:?}",
+            lenient.violations
+        );
     }
 
     /// A round whose era cannot be resolved is checked against every rule and
@@ -1057,8 +1095,7 @@ mod tests {
             round(1, 50_000_000_000, 1_000_000),
             round(2, 100_000_000, 1_000_000 + 3601),
         ];
-        let result =
-            c1_posting_rules(&rounds, params(), &strict_era(), &blocks(&[1, 2]), Some(2));
+        let result = c1_posting_rules(&rounds, params(), &strict_era(), &blocks(&[1, 2]), Some(2));
         assert_eq!(result.violations.len(), 1);
         assert!(result.violations[0]["classification"]
             .as_str()
@@ -1075,10 +1112,7 @@ mod tests {
 
     #[test]
     fn c4_flags_a_decrease() {
-        let rounds = [
-            round(1, 100_000_000, 0),
-            round(2, 99_000_000, 86_400),
-        ];
+        let rounds = [round(1, 100_000_000, 0), round(2, 99_000_000, 86_400)];
         let result = c4_monotonicity(&rounds, None);
         assert_eq!(result.verdict, CheckVerdict::ObservedDeviation);
         assert_eq!(result.violations[0]["kind"], "decrease");
@@ -1087,15 +1121,15 @@ mod tests {
     #[test]
     fn c4_accepts_a_flat_series() {
         let rounds = [round(1, 100_000_000, 0), round(2, 100_000_000, 86_400)];
-        assert_eq!(c4_monotonicity(&rounds, None).verdict, CheckVerdict::Consistent);
+        assert_eq!(
+            c4_monotonicity(&rounds, None).verdict,
+            CheckVerdict::Consistent
+        );
     }
 
     #[test]
     fn c3_flags_a_stale_interval() {
-        let rounds = [
-            round(1, 100_000_000, 0),
-            round(2, 100_000_001, 6 * 86_400),
-        ];
+        let rounds = [round(1, 100_000_000, 0), round(2, 100_000_001, 6 * 86_400)];
         let result = c3_cadence(&rounds, 5 * 86_400);
         assert_eq!(result.verdict, CheckVerdict::SourceStale);
         assert_eq!(result.violations.len(), 1);
@@ -1103,7 +1137,12 @@ mod tests {
 
     #[test]
     fn c6_identity_is_exact() {
-        let flow = SupplyFlow { mints: 500, burns: 200, mint_count: 2, burn_count: 1 };
+        let flow = SupplyFlow {
+            mints: 500,
+            burns: 200,
+            mint_count: 2,
+            burn_count: 1,
+        };
         let ok = c6_supply_identity(1_000, 1_300, &flow, vec![]);
         assert_eq!(ok.verdict, CheckVerdict::Consistent);
         assert_eq!(ok.detail["residual"], "0");
@@ -1115,14 +1154,22 @@ mod tests {
 
     #[test]
     fn c6_flags_unclassified_counterparties() {
-        let flow = SupplyFlow { mints: 500, burns: 200, mint_count: 2, burn_count: 1 };
+        let flow = SupplyFlow {
+            mints: 500,
+            burns: 200,
+            mint_count: 2,
+            burn_count: 1,
+        };
         let result = c6_supply_identity(1_000, 1_300, &flow, vec![json!({"kind": "unclassified"})]);
         assert_eq!(result.verdict, CheckVerdict::ObservedDeviation);
     }
 
     #[test]
     fn c7_scaling_is_a_multiplication_by_1e10() {
-        assert_eq!(expected_base18(107_000_001, 8), Some(1_070_000_010_000_000_000));
+        assert_eq!(
+            expected_base18(107_000_001, 8),
+            Some(1_070_000_010_000_000_000)
+        );
         assert_eq!(expected_base18(0, 8), Some(0));
         assert_eq!(expected_base18(-1, 8), None);
     }
@@ -1164,20 +1211,39 @@ mod tests {
         let first = round(1, 100_000_000, 0);
         let last = round(2, 100_062_329, 7 * 86_400);
         let days = (last.updated_at - first.updated_at) as f64 / 86_400.0;
-        assert!((days - 7.0).abs() < 0.01, "the window should be 7.0 days, got {days}");
+        assert!(
+            (days - 7.0).abs() < 0.01,
+            "the window should be 7.0 days, got {days}"
+        );
 
         let growth = annualized_growth(&first, &last).unwrap();
-        assert!((growth - 3.25).abs() < 0.001, "expected 3.25 percent, got {growth}");
+        assert!(
+            (growth - 3.25).abs() < 0.001,
+            "expected 3.25 percent, got {growth}"
+        );
         let compound = annualized_growth_compound(&first, &last).unwrap();
-        assert!(compound > growth, "compound {compound} should exceed simple {growth}");
-        assert!((compound - 3.30).abs() < 0.01, "compound should be near 3.30, got {compound}");
+        assert!(
+            compound > growth,
+            "compound {compound} should exceed simple {growth}"
+        );
+        assert!(
+            (compound - 3.30).abs() < 0.01,
+            "compound should be near 3.30, got {compound}"
+        );
 
         // A benchmark of 3.75 minus the 50 bps tracking error is 3.25, so the
         // residual against reference (a) is within a fraction of a basis point.
         let result = c5_drift(&[first, last], Some(3.75), 50.0, 0.10, 25.0, 5.0);
         assert_eq!(result.verdict, CheckVerdict::Consistent);
-        let residual: f64 = result.detail["residual_a_bps"].as_str().unwrap().parse().unwrap();
-        assert!(residual.abs() < 1.0, "residual against the reference was {residual} bps");
+        let residual: f64 = result.detail["residual_a_bps"]
+            .as_str()
+            .unwrap()
+            .parse()
+            .unwrap();
+        assert!(
+            residual.abs() < 1.0,
+            "residual against the reference was {residual} bps"
+        );
     }
 
     #[test]

@@ -75,7 +75,6 @@ pub fn generate_schedule_with_rr_dates(
     terms: &ContractTerms,
     rr_dates: &[NaiveDateTime],
 ) -> Vec<ScheduledEvent> {
-
     use crate::types::EventType;
 
     let mut schedule = Vec::new();

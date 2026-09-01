@@ -145,7 +145,9 @@ fn apply_save(
         .checked_add(amount)
         .ok_or_else(|| "balance overflowed".to_string())?;
     if denominator == 0 {
-        return Err("a save of zero into an empty account has no defined weighted average".to_string());
+        return Err(
+            "a save of zero into an empty account has no defined weighted average".to_string(),
+        );
     }
     let weighted = numerator / denominator;
     // The contract casts to uint64. A value that does not fit would wrap on
@@ -242,7 +244,12 @@ pub fn replay(
 
         let (label, amount) = match event.action {
             Action::Save { amount } => {
-                apply_save(&mut state, ticks_now, clock.rate_at(event.timestamp), amount)?;
+                apply_save(
+                    &mut state,
+                    ticks_now,
+                    clock.rate_at(event.timestamp),
+                    amount,
+                )?;
                 ("save", amount)
             }
             Action::Withdraw { amount } => {
@@ -250,7 +257,6 @@ pub fn replay(
                 ("withdraw", amount)
             }
         };
-
 
         steps.push(ReplayStep {
             index,
@@ -281,7 +287,11 @@ pub fn accrued_at(clock: &TickClock, state: AccountState, timestamp: u64) -> Res
 }
 
 /// totalAssets() = saved + accruedInterest.
-pub fn total_assets(clock: &TickClock, state: AccountState, timestamp: u64) -> Result<u128, String> {
+pub fn total_assets(
+    clock: &TickClock,
+    state: AccountState,
+    timestamp: u64,
+) -> Result<u128, String> {
     Ok(state.saved + accrued_at(clock, state, timestamp)?)
 }
 
@@ -304,10 +314,22 @@ mod tests {
 
     fn observed_clock() -> TickClock {
         TickClock::new(vec![
-            RateSegment { start: 1_747_891_715, rate_ppm: 30_000 },
-            RateSegment { start: 1_765_387_379, rate_ppm: 40_000 },
-            RateSegment { start: 1_770_732_311, rate_ppm: 37_500 },
-            RateSegment { start: 1_774_638_431, rate_ppm: 35_000 },
+            RateSegment {
+                start: 1_747_891_715,
+                rate_ppm: 30_000,
+            },
+            RateSegment {
+                start: 1_765_387_379,
+                rate_ppm: 40_000,
+            },
+            RateSegment {
+                start: 1_770_732_311,
+                rate_ppm: 37_500,
+            },
+            RateSegment {
+                start: 1_774_638_431,
+                rate_ppm: 35_000,
+            },
         ])
         .unwrap()
     }
@@ -336,13 +358,19 @@ mod tests {
 
     #[test]
     fn a_zero_anchor_account_earns_nothing() {
-        let state = AccountState { saved: 1_000_000, ticks: 0 };
+        let state = AccountState {
+            saved: 1_000_000,
+            ticks: 0,
+        };
         assert_eq!(calculate_interest(state, 999_999).unwrap(), 0);
     }
 
     #[test]
     fn an_anchor_ahead_of_the_clock_earns_nothing() {
-        let state = AccountState { saved: 1_000_000, ticks: 500 };
+        let state = AccountState {
+            saved: 1_000_000,
+            ticks: 500,
+        };
         assert_eq!(calculate_interest(state, 500).unwrap(), 0);
         assert_eq!(calculate_interest(state, 499).unwrap(), 0);
     }
@@ -356,8 +384,15 @@ mod tests {
         let mut state = AccountState::empty();
         // refresh runs first on chain, and on an empty account it sets the
         // anchor to the current clock before save reads it.
-        apply_recognition(&clock, &mut state, t, Action::Save { amount: 1_000_000_000_000_000_000 })
-            .unwrap();
+        apply_recognition(
+            &clock,
+            &mut state,
+            t,
+            Action::Save {
+                amount: 1_000_000_000_000_000_000,
+            },
+        )
+        .unwrap();
         assert_eq!(state.saved, 1_000_000_000_000_000_000);
         assert_eq!(state.ticks, ticks_now + 30_000 * 259_200);
         // Interest is zero for every tick value at or below the anchor, and
@@ -376,8 +411,15 @@ mod tests {
         let t = 1_774_638_431u64 - 86_400; // one day before the drop to 35000
         let ticks_now = clock.ticks(t).unwrap();
         let mut state = AccountState::empty();
-        apply_recognition(&clock, &mut state, t, Action::Save { amount: 1_000_000_000_000_000_000 })
-            .unwrap();
+        apply_recognition(
+            &clock,
+            &mut state,
+            t,
+            Action::Save {
+                amount: 1_000_000_000_000_000_000,
+            },
+        )
+        .unwrap();
         let bought = state.ticks - ticks_now;
         assert_eq!(bought, 37_500 * 259_200);
         let start = clock.virtual_accrual_start(state.ticks, u64::MAX).unwrap();
@@ -390,19 +432,34 @@ mod tests {
 
     #[test]
     fn a_full_withdrawal_deletes_the_account() {
-        let mut state = AccountState { saved: 500, ticks: 12_345 };
+        let mut state = AccountState {
+            saved: 500,
+            ticks: 12_345,
+        };
         apply_withdraw(&mut state, 500);
         assert_eq!(state, AccountState::empty());
-        let mut state = AccountState { saved: 500, ticks: 12_345 };
+        let mut state = AccountState {
+            saved: 500,
+            ticks: 12_345,
+        };
         apply_withdraw(&mut state, 900);
         assert_eq!(state, AccountState::empty());
     }
 
     #[test]
     fn a_partial_withdrawal_keeps_the_anchor() {
-        let mut state = AccountState { saved: 500, ticks: 12_345 };
+        let mut state = AccountState {
+            saved: 500,
+            ticks: 12_345,
+        };
         apply_withdraw(&mut state, 200);
-        assert_eq!(state, AccountState { saved: 300, ticks: 12_345 });
+        assert_eq!(
+            state,
+            AccountState {
+                saved: 300,
+                ticks: 12_345
+            }
+        );
     }
 
     #[test]

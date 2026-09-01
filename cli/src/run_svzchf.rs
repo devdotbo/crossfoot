@@ -13,9 +13,7 @@ use serde_json::{json, Value};
 use crate::bundle::BundleWriter;
 use crate::model::actus;
 use crate::model::clock::{RateSegment, TickClock};
-use crate::model::replay::{
-    self, AccountState, Action, RecognitionEvent,
-};
+use crate::model::replay::{self, AccountState, Action, RecognitionEvent};
 use crate::model::verdict::{ComparisonSet, FieldComparison, Verdict};
 use crate::rpc::Client;
 use crate::svzchf::{self, FlowKind};
@@ -63,9 +61,7 @@ pub fn load_inputs(
         .ok_or("the manifest has no summary")?
         .clone();
     Ok(ModelInputs {
-        clock: clock_from_rate_history(
-            summary.get("rate_history").ok_or("no rate history")?,
-        )?,
+        clock: clock_from_rate_history(summary.get("rate_history").ok_or("no rate history")?)?,
         flows: fetched.flow_events,
         reads: summary.get("reads").ok_or("no reads")?.clone(),
         block_timestamp: summary
@@ -277,11 +273,7 @@ fn cross_check_actus(
 }
 
 #[allow(clippy::too_many_arguments)]
-pub fn run(
-    client: &mut Client,
-    args: &RunArgs,
-    verify_root: &Path,
-) -> Result<RunOutcome, String> {
+pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<RunOutcome, String> {
     if args.baseline_block >= args.block {
         return Err(format!(
             "--baseline-block {} must be below --block {}",
@@ -353,7 +345,8 @@ pub fn run(
         .ok_or("the B0 manifest has no block timestamp")?;
 
     let clock = clock_from_rate_history(
-        s1.get("rate_history").ok_or("the B1 manifest has no rate history")?,
+        s1.get("rate_history")
+            .ok_or("the B1 manifest has no rate history")?,
     )?;
 
     // The deployed uint40 evaluation bound.
@@ -457,9 +450,7 @@ pub fn run(
         .findings
         .iter()
         .chain(fetch_b0.findings.iter())
-        .filter(|finding| {
-            matches!(finding.kind.as_str(), "call_reverted" | "empty_return_data")
-        })
+        .filter(|finding| matches!(finding.kind.as_str(), "call_reverted" | "empty_return_data"))
         .collect();
 
     // The ACTUS cross-check is part of the verdict, not a side note. A

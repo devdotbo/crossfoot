@@ -9,7 +9,9 @@
 use serde::Serialize;
 use serde_json::{json, Value};
 
-use crate::abi::{encode_no_args, encode_uint256, hex_decode, word_to_decimal, word_to_signed_decimal, Decoded};
+use crate::abi::{
+    encode_no_args, encode_uint256, hex_decode, word_to_decimal, word_to_signed_decimal, Decoded,
+};
 use crate::bundle::BundleWriter;
 use crate::model::mtbill::{FeedParams, Round, SupplyFlow};
 use crate::rpc::{
@@ -96,8 +98,7 @@ pub const KNOWN_IMPLEMENTATIONS: [(&str, bool, bool, &str); 2] = [
     ),
 ];
 
-pub const ZERO_TOPIC: &str =
-    "0x0000000000000000000000000000000000000000000000000000000000000000";
+pub const ZERO_TOPIC: &str = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
 /// From the instrument's published terms (ISIN CH1371002986): the reference
 /// source is the accumulated return of 8 week US T-Bills minus a 50 bps
@@ -129,11 +130,26 @@ fn u128_word(data: &str, index: usize) -> Option<u128> {
 /// latestRoundData / getRoundData return shape. The answer is an int256, so
 /// it is decoded as two's complement rather than as an unsigned word.
 pub const ROUND_FIELDS: [crate::abi::Field; 5] = [
-    crate::abi::Field { name: "roundId", kind: crate::abi::FieldKind::Uint },
-    crate::abi::Field { name: "answer", kind: crate::abi::FieldKind::Int },
-    crate::abi::Field { name: "startedAt", kind: crate::abi::FieldKind::Uint },
-    crate::abi::Field { name: "updatedAt", kind: crate::abi::FieldKind::Uint },
-    crate::abi::Field { name: "answeredInRound", kind: crate::abi::FieldKind::Uint },
+    crate::abi::Field {
+        name: "roundId",
+        kind: crate::abi::FieldKind::Uint,
+    },
+    crate::abi::Field {
+        name: "answer",
+        kind: crate::abi::FieldKind::Int,
+    },
+    crate::abi::Field {
+        name: "startedAt",
+        kind: crate::abi::FieldKind::Uint,
+    },
+    crate::abi::Field {
+        name: "updatedAt",
+        kind: crate::abi::FieldKind::Uint,
+    },
+    crate::abi::Field {
+        name: "answeredInRound",
+        kind: crate::abi::FieldKind::Uint,
+    },
 ];
 
 /// A mint or burn, taken from a Transfer to or from the zero address.
@@ -393,7 +409,10 @@ fn fetch_treasury_csv(
             bundle.add_finding(
                 "benchmark_unavailable",
                 "Treasury daily bill rates",
-                format!("the benchmark CSV for {year} could not be fetched: {}", err.message),
+                format!(
+                    "the benchmark CSV for {year} could not be fetched: {}",
+                    err.message
+                ),
             );
             Ok(None)
         }
@@ -523,7 +542,10 @@ pub fn fetch(
 
     // Block headers, for timestamps.
     let header_b1 = client
-        .fetch(get_block_descriptor(&format!("block header @ {block}"), &b1))
+        .fetch(get_block_descriptor(
+            &format!("block header @ {block}"),
+            &b1,
+        ))
         .map_err(|err| err.message)?;
     let ts_b1 = header_b1
         .result()?
@@ -531,7 +553,9 @@ pub fn fetch(
         .and_then(Value::as_str)
         .and_then(parse_hex_u64)
         .ok_or("the pinned block has no timestamp")?;
-    bundle.record(&header_b1, None, None).map_err(|e| e.to_string())?;
+    bundle
+        .record(&header_b1, None, None)
+        .map_err(|e| e.to_string())?;
 
     let header_b0 = client
         .fetch(get_block_descriptor(
@@ -545,33 +569,84 @@ pub fn fetch(
         .and_then(Value::as_str)
         .and_then(parse_hex_u64)
         .ok_or("the baseline block has no timestamp")?;
-    bundle.record(&header_b0, None, None).map_err(|e| e.to_string())?;
+    bundle
+        .record(&header_b0, None, None)
+        .map_err(|e| e.to_string())?;
 
     // Oracle parameters at B1.
-    let latest_round = call(client, bundle, "oracle.latestRound()", ORACLE, &encode_no_args("latestRound()"), &b1)?
-        .and_then(|data| u64_word(&data, 0))
-        .ok_or("oracle.latestRound() was not readable at the pinned block")?;
-    let max_answer_deviation = call(client, bundle, "oracle.maxAnswerDeviation()", ORACLE, &encode_no_args("maxAnswerDeviation()"), &b1)?
-        .and_then(|data| i128_word(&data, 0))
-        .ok_or("oracle.maxAnswerDeviation() was not readable")?;
-    let min_answer = call(client, bundle, "oracle.minAnswer()", ORACLE, &encode_no_args("minAnswer()"), &b1)?
-        .and_then(|data| i128_word(&data, 0))
-        .ok_or("oracle.minAnswer() was not readable")?;
-    let max_answer = call(client, bundle, "oracle.maxAnswer()", ORACLE, &encode_no_args("maxAnswer()"), &b1)?
-        .and_then(|data| i128_word(&data, 0))
-        .ok_or("oracle.maxAnswer() was not readable")?;
-    let feed_decimals = call(client, bundle, "oracle.decimals()", ORACLE, &encode_no_args("decimals()"), &b1)?
-        .and_then(|data| u64_word(&data, 0))
-        .unwrap_or(8) as u32;
-    let description_raw = call(client, bundle, "oracle.description()", ORACLE, &encode_no_args("description()"), &b1)?;
+    let latest_round = call(
+        client,
+        bundle,
+        "oracle.latestRound()",
+        ORACLE,
+        &encode_no_args("latestRound()"),
+        &b1,
+    )?
+    .and_then(|data| u64_word(&data, 0))
+    .ok_or("oracle.latestRound() was not readable at the pinned block")?;
+    let max_answer_deviation = call(
+        client,
+        bundle,
+        "oracle.maxAnswerDeviation()",
+        ORACLE,
+        &encode_no_args("maxAnswerDeviation()"),
+        &b1,
+    )?
+    .and_then(|data| i128_word(&data, 0))
+    .ok_or("oracle.maxAnswerDeviation() was not readable")?;
+    let min_answer = call(
+        client,
+        bundle,
+        "oracle.minAnswer()",
+        ORACLE,
+        &encode_no_args("minAnswer()"),
+        &b1,
+    )?
+    .and_then(|data| i128_word(&data, 0))
+    .ok_or("oracle.minAnswer() was not readable")?;
+    let max_answer = call(
+        client,
+        bundle,
+        "oracle.maxAnswer()",
+        ORACLE,
+        &encode_no_args("maxAnswer()"),
+        &b1,
+    )?
+    .and_then(|data| i128_word(&data, 0))
+    .ok_or("oracle.maxAnswer() was not readable")?;
+    let feed_decimals = call(
+        client,
+        bundle,
+        "oracle.decimals()",
+        ORACLE,
+        &encode_no_args("decimals()"),
+        &b1,
+    )?
+    .and_then(|data| u64_word(&data, 0))
+    .unwrap_or(8) as u32;
+    let description_raw = call(
+        client,
+        bundle,
+        "oracle.description()",
+        ORACLE,
+        &encode_no_args("description()"),
+        &b1,
+    )?;
     let description = description_raw
         .as_deref()
         .and_then(decode_string)
         .unwrap_or_default();
-    let feed_admin_role = call(client, bundle, "oracle.feedAdminRole()", ORACLE, &encode_no_args("feedAdminRole()"), &b1)?
-        .map(|data| data.trim_start_matches("0x").to_string())
-        .map(|hex| format!("0x{hex}"))
-        .unwrap_or_default();
+    let feed_admin_role = call(
+        client,
+        bundle,
+        "oracle.feedAdminRole()",
+        ORACLE,
+        &encode_no_args("feedAdminRole()"),
+        &b1,
+    )?
+    .map(|data| data.trim_start_matches("0x").to_string())
+    .map(|hex| format!("0x{hex}"))
+    .unwrap_or_default();
 
     // The wrapper. getDataInBase18 reverts when the feed is stale by its own
     // healthyDiff, so a revert here is a staleness statement, not an error.
@@ -588,23 +663,61 @@ pub fn fetch(
         Err(description) => (None, Some(description)),
     };
     bundle
-        .record(&wrapper_raw, None, wrapper_revert.as_ref().map(|_| "call_reverted".to_string()))
+        .record(
+            &wrapper_raw,
+            None,
+            wrapper_revert.as_ref().map(|_| "call_reverted".to_string()),
+        )
         .map_err(|e| e.to_string())?;
     if let Some(reason) = &wrapper_revert {
-        bundle.add_finding("wrapper_reverted", "dataFeed.getDataInBase18()", reason.clone());
+        bundle.add_finding(
+            "wrapper_reverted",
+            "dataFeed.getDataInBase18()",
+            reason.clone(),
+        );
     }
-    let wrapper_aggregator = call(client, bundle, "dataFeed.aggregator()", DATA_FEED, &encode_no_args("aggregator()"), &b1)?
-        .and_then(|data| word_at(&data, 0).map(|word| format!("0x{}", crate::abi::hex_encode(&word[12..32]))));
-    let wrapper_healthy_diff = call(client, bundle, "dataFeed.healthyDiff()", DATA_FEED, &encode_no_args("healthyDiff()"), &b1)?
-        .and_then(|data| u64_word(&data, 0));
+    let wrapper_aggregator = call(
+        client,
+        bundle,
+        "dataFeed.aggregator()",
+        DATA_FEED,
+        &encode_no_args("aggregator()"),
+        &b1,
+    )?
+    .and_then(|data| {
+        word_at(&data, 0).map(|word| format!("0x{}", crate::abi::hex_encode(&word[12..32])))
+    });
+    let wrapper_healthy_diff = call(
+        client,
+        bundle,
+        "dataFeed.healthyDiff()",
+        DATA_FEED,
+        &encode_no_args("healthyDiff()"),
+        &b1,
+    )?
+    .and_then(|data| u64_word(&data, 0));
 
     // Token supply at both blocks.
-    let total_supply_b1 = call(client, bundle, "token.totalSupply() @ B1", TOKEN, &encode_no_args("totalSupply()"), &b1)?
-        .and_then(|data| u128_word(&data, 0))
-        .ok_or("token.totalSupply() was not readable at the pinned block")?;
-    let total_supply_b0 = call(client, bundle, "token.totalSupply() @ B0", TOKEN, &encode_no_args("totalSupply()"), &b0)?
-        .and_then(|data| u128_word(&data, 0))
-        .ok_or("token.totalSupply() was not readable at the baseline block")?;
+    let total_supply_b1 = call(
+        client,
+        bundle,
+        "token.totalSupply() @ B1",
+        TOKEN,
+        &encode_no_args("totalSupply()"),
+        &b1,
+    )?
+    .and_then(|data| u128_word(&data, 0))
+    .ok_or("token.totalSupply() was not readable at the pinned block")?;
+    let total_supply_b0 = call(
+        client,
+        bundle,
+        "token.totalSupply() @ B0",
+        TOKEN,
+        &encode_no_args("totalSupply()"),
+        &b0,
+    )?
+    .and_then(|data| u128_word(&data, 0))
+    .ok_or("token.totalSupply() was not readable at the baseline block")?;
 
     // latestRoundData, decoded with the typed tuple shape so the manifest
     // carries a readable answer rather than a raw word.
@@ -662,11 +775,18 @@ pub fn fetch(
     for row in &answer_rows {
         let topics = row.get("topics").and_then(Value::as_array);
         if let Some(topics) = topics {
-            let answer = topics.get(1).and_then(Value::as_str).and_then(|t| {
-                word_at(t, 0).map(|w| word_to_signed_decimal(&w))
-            });
-            let round_id = topics.get(2).and_then(Value::as_str).and_then(parse_hex_u64);
-            let timestamp = topics.get(3).and_then(Value::as_str).and_then(parse_hex_u64);
+            let answer = topics
+                .get(1)
+                .and_then(Value::as_str)
+                .and_then(|t| word_at(t, 0).map(|w| word_to_signed_decimal(&w)));
+            let round_id = topics
+                .get(2)
+                .and_then(Value::as_str)
+                .and_then(parse_hex_u64);
+            let timestamp = topics
+                .get(3)
+                .and_then(Value::as_str)
+                .and_then(parse_hex_u64);
             if let (Some(answer), Some(round_id), Some(timestamp)) = (answer, round_id, timestamp) {
                 if let Ok(answer) = answer.parse::<i128>() {
                     rounds_from_logs.push(Round {
@@ -709,8 +829,14 @@ pub fn fetch(
     // Role grants and revocations for the feed admin role.
     let mut role_events = Vec::new();
     for (label, topic0) in [
-        ("access control RoleGranted, feed admin", ROLE_GRANTED_TOPIC0),
-        ("access control RoleRevoked, feed admin", ROLE_REVOKED_TOPIC0),
+        (
+            "access control RoleGranted, feed admin",
+            ROLE_GRANTED_TOPIC0,
+        ),
+        (
+            "access control RoleRevoked, feed admin",
+            ROLE_REVOKED_TOPIC0,
+        ),
     ] {
         let rows = blockscout_logs(
             client,
@@ -737,8 +863,15 @@ pub fn fetch(
 
     // Proxy upgrades on the oracle, over its whole history.
     let upgrade_rows = blockscout_logs(
-        client, bundle, "oracle proxy upgrades", ORACLE,
-        Some(UPGRADED_TOPIC0), None, None, 0, block,
+        client,
+        bundle,
+        "oracle proxy upgrades",
+        ORACLE,
+        Some(UPGRADED_TOPIC0),
+        None,
+        None,
+        0,
+        block,
     )?;
     let oracle_upgrades: Vec<Value> = upgrade_rows
         .iter()
@@ -771,12 +904,33 @@ pub fn fetch(
     let mut bounds_history = Vec::new();
     for at in &sample_blocks {
         let at_hex = crate::util::block_hex(*at);
-        let deviation = call(client, bundle, &format!("oracle.maxAnswerDeviation() @ {at}"), ORACLE, &encode_no_args("maxAnswerDeviation()"), &at_hex)?
-            .and_then(|data| i128_word(&data, 0));
-        let minimum = call(client, bundle, &format!("oracle.minAnswer() @ {at}"), ORACLE, &encode_no_args("minAnswer()"), &at_hex)?
-            .and_then(|data| i128_word(&data, 0));
-        let maximum = call(client, bundle, &format!("oracle.maxAnswer() @ {at}"), ORACLE, &encode_no_args("maxAnswer()"), &at_hex)?
-            .and_then(|data| i128_word(&data, 0));
+        let deviation = call(
+            client,
+            bundle,
+            &format!("oracle.maxAnswerDeviation() @ {at}"),
+            ORACLE,
+            &encode_no_args("maxAnswerDeviation()"),
+            &at_hex,
+        )?
+        .and_then(|data| i128_word(&data, 0));
+        let minimum = call(
+            client,
+            bundle,
+            &format!("oracle.minAnswer() @ {at}"),
+            ORACLE,
+            &encode_no_args("minAnswer()"),
+            &at_hex,
+        )?
+        .and_then(|data| i128_word(&data, 0));
+        let maximum = call(
+            client,
+            bundle,
+            &format!("oracle.maxAnswer() @ {at}"),
+            ORACLE,
+            &encode_no_args("maxAnswer()"),
+            &at_hex,
+        )?
+        .and_then(|data| i128_word(&data, 0));
         bounds_history.push(json!({
             "block": at,
             "max_answer_deviation": deviation.map(|v| v.to_string()),
@@ -798,14 +952,26 @@ pub fn fetch(
 
     // Mints and burns over the window.
     let mint_rows = blockscout_logs(
-        client, bundle, "token mints", TOKEN,
-        Some(TRANSFER_TOPIC0), Some(ZERO_TOPIC), None,
-        baseline_block + 1, block,
+        client,
+        bundle,
+        "token mints",
+        TOKEN,
+        Some(TRANSFER_TOPIC0),
+        Some(ZERO_TOPIC),
+        None,
+        baseline_block + 1,
+        block,
     )?;
     let burn_rows = blockscout_logs(
-        client, bundle, "token burns", TOKEN,
-        Some(TRANSFER_TOPIC0), None, Some(ZERO_TOPIC),
-        baseline_block + 1, block,
+        client,
+        bundle,
+        "token burns",
+        TOKEN,
+        Some(TRANSFER_TOPIC0),
+        None,
+        Some(ZERO_TOPIC),
+        baseline_block + 1,
+        block,
     )?;
     let mints = supply_events(&mint_rows, 2)?;
     let burns = supply_events(&burn_rows, 1)?;
@@ -820,12 +986,24 @@ pub fn fetch(
         ("redemptionVaultUstb", REDEMPTION_VAULT_USTB),
     ] {
         let rows = blockscout_logs(
-            client, bundle, &format!("{name} events"), address, None, None, None,
-            baseline_block + 1, block,
+            client,
+            bundle,
+            &format!("{name} events"),
+            address,
+            None,
+            None,
+            None,
+            baseline_block + 1,
+            block,
         )?;
         let mut by_topic: std::collections::BTreeMap<String, usize> = Default::default();
         for row in &rows {
-            if let Some(topic0) = row.get("topics").and_then(Value::as_array).and_then(|t| t.first()).and_then(Value::as_str) {
+            if let Some(topic0) = row
+                .get("topics")
+                .and_then(Value::as_array)
+                .and_then(|t| t.first())
+                .and_then(Value::as_str)
+            {
                 *by_topic.entry(topic0.to_string()).or_insert(0) += 1;
             }
             if let Some(hash) = row.get("transactionHash").and_then(Value::as_str) {
@@ -899,7 +1077,9 @@ pub fn fetch(
             ))
             .map_err(|err| err.message)?;
         let transaction = fetched.result().unwrap_or(Value::Null);
-        bundle.record(&fetched, None, None).map_err(|e| e.to_string())?;
+        bundle
+            .record(&fetched, None, None)
+            .map_err(|e| e.to_string())?;
         let input = transaction
             .get("input")
             .and_then(Value::as_str)
@@ -936,7 +1116,8 @@ pub fn fetch(
         let mut inner: Option<(String, String, Option<String>)> = None;
         let mut current = input.clone();
         let mut depth = 0usize;
-        while current.get(..10).map(|s| s.to_lowercase()) == Some(EXEC_TRANSACTION_SELECTOR.to_string())
+        while current.get(..10).map(|s| s.to_lowercase())
+            == Some(EXEC_TRANSACTION_SELECTOR.to_string())
             && depth < 6
         {
             match decode_safe_inner_call(&current) {
@@ -1051,9 +1232,7 @@ pub fn fetch(
 ///
 /// Returns (target, inner selector, inner first argument as decimal, the
 /// inner calldata so a nested Safe can be unwrapped in turn).
-fn decode_safe_inner_call(
-    input: &str,
-) -> Option<(String, String, Option<String>, String)> {
+fn decode_safe_inner_call(input: &str) -> Option<(String, String, Option<String>, String)> {
     let body = input.strip_prefix("0x").unwrap_or(input);
     let args = body.get(8..)?;
     let word = |index: usize| -> Option<&str> { args.get(index * 64..(index + 1) * 64) };

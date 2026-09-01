@@ -147,7 +147,6 @@ mod tests {
     }
 }
 
-
 #[cfg(test)]
 mod a365s_tests {
     use super::*;

@@ -580,11 +580,8 @@ fn mtbill_rounds(run: &Run) -> Vec<(u64, i128, u64, u64)> {
         .iter()
         .filter_map(|row| {
             let topics = row.get("topics")?.as_array()?;
-            let answer = i128::from_str_radix(
-                topics.get(1)?.as_str()?.trim_start_matches("0x"),
-                16,
-            )
-            .ok()?;
+            let answer =
+                i128::from_str_radix(topics.get(1)?.as_str()?.trim_start_matches("0x"), 16).ok()?;
             let round_id =
                 u64::from_str_radix(topics.get(2)?.as_str()?.trim_start_matches("0x"), 16).ok()?;
             let timestamp =
@@ -635,7 +632,11 @@ fn headline(result: &Value) -> String {
                         .filter(|f| f.get("equal").and_then(Value::as_bool) == Some(false))
                         .count();
                     if nonzero == 0 {
-                        format!("{} of {} fields exact, residual 0", fields.len(), fields.len())
+                        format!(
+                            "{} of {} fields exact, residual 0",
+                            fields.len(),
+                            fields.len()
+                        )
                     } else {
                         format!("{nonzero} of {} fields deviate", fields.len())
                     }
@@ -674,10 +675,14 @@ fn headline(result: &Value) -> String {
 fn reproduce_command(result: &Value) -> String {
     let baseline = u64_at(result, &["window", "baseline_block"]);
     let block = u64_at(result, &["window", "block"]);
-    match (result.get("target").and_then(Value::as_str), baseline, block) {
-        (Some(target), Some(baseline), Some(block)) => format!(
-            "crossfoot run {target} --baseline-block {baseline} --block {block}"
-        ),
+    match (
+        result.get("target").and_then(Value::as_str),
+        baseline,
+        block,
+    ) {
+        (Some(target), Some(baseline), Some(block)) => {
+            format!("crossfoot run {target} --baseline-block {baseline} --block {block}")
+        }
         _ => "unknown".to_string(),
     }
 }
@@ -822,12 +827,16 @@ fn provenance(run: &Run) -> String {
 
 fn window_block(result: &Value) -> String {
     let w = result.get("window");
-    let b0 = w.and_then(|w| w.get("baseline_block")).and_then(Value::as_u64);
+    let b0 = w
+        .and_then(|w| w.get("baseline_block"))
+        .and_then(Value::as_u64);
     let b1 = w.and_then(|w| w.get("block")).and_then(Value::as_u64);
     let t0 = w
         .and_then(|w| w.get("baseline_timestamp_unix"))
         .and_then(Value::as_u64);
-    let t1 = w.and_then(|w| w.get("block_timestamp_unix")).and_then(Value::as_u64);
+    let t1 = w
+        .and_then(|w| w.get("block_timestamp_unix"))
+        .and_then(Value::as_u64);
     format!(
         "block {} to {}<br><span class=\"note\">{} to {}</span>",
         b0.map(|v| v.to_string()).unwrap_or("?".into()),
@@ -843,7 +852,9 @@ fn svzchf_body(run: &Run) -> String {
 
     html.push_str("<h2>Comparison</h2>\n");
     html.push_str("<p class=\"note\">Modeled is recomputed from the log-derived rate path and the account's own flow history. Observed is read from the chain at the pinned block. Tolerance is zero.</p>\n");
-    html.push_str("<table>\n<tr><th>field</th><th>modeled</th><th>observed</th><th>residual</th></tr>\n");
+    html.push_str(
+        "<table>\n<tr><th>field</th><th>modeled</th><th>observed</th><th>residual</th></tr>\n",
+    );
     if let Some(fields) = result
         .get("comparison")
         .and_then(|c| c.get("fields"))
@@ -861,7 +872,10 @@ fn svzchf_body(run: &Run) -> String {
                 if name.contains("ticks") {
                     String::new()
                 } else {
-                    format!("<br><span class=\"note\">{}</span>", escape(&wei(value, 18)))
+                    format!(
+                        "<br><span class=\"note\">{}</span>",
+                        escape(&wei(value, 18))
+                    )
                 }
             };
             html.push_str(&format!(
@@ -924,7 +938,10 @@ fn mtbill_body(run: &Run) -> String {
     let mut html = String::new();
 
     html.push_str("<div class=\"panel\">\n<p><strong>nav_recomputation: INPUT_GAP</strong> (underlying portfolio not observable)</p>\n");
-    if let Some(reason) = result.get("nav_recomputation_reason").and_then(Value::as_str) {
+    if let Some(reason) = result
+        .get("nav_recomputation_reason")
+        .and_then(Value::as_str)
+    {
         html.push_str(&format!("<p class=\"note\">{}</p>\n", escape(reason)));
     }
     html.push_str("</div>\n");
@@ -1094,7 +1111,10 @@ fn run_page(run: &Run) -> String {
         addresses.push(("oracle", crate::mtbill::ORACLE.to_string()));
         addresses.push(("dataFeed wrapper", crate::mtbill::DATA_FEED.to_string()));
         addresses.push(("deposit vault", crate::mtbill::DEPOSIT_VAULT.to_string()));
-        addresses.push(("redemption vault", crate::mtbill::REDEMPTION_VAULT.to_string()));
+        addresses.push((
+            "redemption vault",
+            crate::mtbill::REDEMPTION_VAULT.to_string(),
+        ));
         addresses.push((
             "redemption vault USTB",
             crate::mtbill::REDEMPTION_VAULT_USTB.to_string(),
@@ -1130,9 +1150,7 @@ fn run_page(run: &Run) -> String {
     }
     html.push_str("<h2>Unverified</h2>\n");
     if unverified.is_empty() {
-        html.push_str(
-            "<p class=\"note\">This result carries no input gaps or stale reads.</p>\n",
-        );
+        html.push_str("<p class=\"note\">This result carries no input gaps or stale reads.</p>\n");
     } else {
         html.push_str("<ul>\n");
         for item in unverified {
@@ -1305,9 +1323,7 @@ mod tests {
             if closing {
                 match stack.pop() {
                     Some(open) if open == name => {}
-                    Some(open) => {
-                        return Err(format!("closing <{name}> while <{open}> is open"))
-                    }
+                    Some(open) => return Err(format!("closing <{name}> while <{open}> is open")),
                     None => return Err(format!("closing <{name}> with nothing open")),
                 }
             } else {
@@ -1405,7 +1421,9 @@ mod tests {
             (3, 100_010_000, 1_700_700_000, 180),
         ];
         write_json_file(
-            &mtbill.join("raw").join("001-oracle-answerupdated-history.json"),
+            &mtbill
+                .join("raw")
+                .join("001-oracle-answerupdated-history.json"),
             &json!({
                 "status": "1",
                 "message": "OK",
@@ -1512,16 +1530,21 @@ mod tests {
         let outcome = render(&input, &out).unwrap();
         assert_eq!(outcome.rendered, 2, "both run bundles should render");
         assert_eq!(outcome.pages.len(), 3, "index plus one page per run");
-        assert_eq!(outcome.skipped, vec!["svzchf-200-20260101T000000Z".to_string()]);
+        assert_eq!(
+            outcome.skipped,
+            vec!["svzchf-200-20260101T000000Z".to_string()]
+        );
 
         let index = fs::read_to_string(out.join("index.html")).unwrap();
-        assert!(index.contains("were skipped"), "the index should say a bundle was skipped");
+        assert!(
+            index.contains("were skipped"),
+            "the index should say a bundle was skipped"
+        );
 
         for page in &outcome.pages {
             let html = fs::read_to_string(page).unwrap();
-            balanced(&html).unwrap_or_else(|err| {
-                panic!("{} is not well formed: {err}", page.display())
-            });
+            balanced(&html)
+                .unwrap_or_else(|err| panic!("{} is not well formed: {err}", page.display()));
             // No asset is fetched at view time. A URL in prose or an SVG
             // xmlns is not a fetch, so the check is for the constructs that
             // actually load something.
@@ -1591,13 +1614,19 @@ mod tests {
             mtbill.contains("launch rebase, not a manipulation signal"),
             "a round the result labels as the launch rebase must be labelled on the page"
         );
-        assert!(mtbill.contains("Check class"), "the check class must sit next to the verdict");
+        assert!(
+            mtbill.contains("Check class"),
+            "the check class must sit next to the verdict"
+        );
         assert!(mtbill.contains("All 3 posted rounds are counted"));
         // The placeholder round is drawn off scale, in the plain colour
         // because it is not itself a violation; the re-base round is circled.
         assert_eq!(mtbill.matches("l4,7 l-8,0 z").count(), 1);
         assert!(mtbill.contains("pre-issue placeholder"));
-        assert!(!mtbill.contains(">500.0000<"), "the placeholder must not set the axis");
+        assert!(
+            !mtbill.contains(">500.0000<"),
+            "the placeholder must not set the axis"
+        );
 
         let svzchf =
             fs::read_to_string(out.join("svzchf-run-100-200-20260101t000000z.html")).unwrap();
@@ -1611,7 +1640,10 @@ mod tests {
     #[test]
     fn wei_renders_the_full_integer_with_a_point() {
         assert_eq!(wei("1005820467578421056", 18), "1.005820467578421056");
-        assert_eq!(wei("81769497488003849675143", 18), "81769.497488003849675143");
+        assert_eq!(
+            wei("81769497488003849675143", 18),
+            "81769.497488003849675143"
+        );
         assert_eq!(wei("0", 18), "0.000000000000000000");
         assert_eq!(wei("-5", 18), "-0.000000000000000005");
     }

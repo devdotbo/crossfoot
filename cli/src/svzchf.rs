@@ -14,14 +14,17 @@ use std::path::Path;
 use serde::Serialize;
 use serde_json::{json, Value};
 
-use crate::abi::{encode_address, encode_no_args, encode_uint256, Decoded, Expect, Field, FieldKind};
+use crate::abi::{
+    encode_address, encode_no_args, encode_uint256, Decoded, Expect, Field, FieldKind,
+};
 use crate::bundle::BundleWriter;
 use crate::rpc::{
     blockscout_logs_descriptor, call_descriptor, chain_id_descriptor, get_block_descriptor,
-    get_code_descriptor, get_logs_descriptor, Client, Fetched, RpcErrorKind,
-    BLOCKSCOUT_RESULT_CAP,
+    get_code_descriptor, get_logs_descriptor, Client, Fetched, RpcErrorKind, BLOCKSCOUT_RESULT_CAP,
 };
-use crate::util::{block_hex, git_provenance, now_stamp, now_utc, parse_hex_u64, workspace_packages};
+use crate::util::{
+    block_hex, git_provenance, now_stamp, now_utc, parse_hex_u64, workspace_packages,
+};
 
 pub const VAULT: &str = "0xE5F130253fF137f9917C0107659A4c5262abf6b0";
 pub const MODULE: &str = "0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38";
@@ -51,8 +54,7 @@ const KNOWN_EVENTS: [&str; 5] = [
 
 pub const RATE_CHANGED_TOPIC0: &str =
     "0xd76dfbd4c35cffe2a846b6488bc677c511aa4337e1551f3a360427ac7a78de7b";
-pub const SAVED_TOPIC0: &str =
-    "0xf195ce54b48d5147da31c1fc525c8828b8836088b505a329e5de2b35da6731e2";
+pub const SAVED_TOPIC0: &str = "0xf195ce54b48d5147da31c1fc525c8828b8836088b505a329e5de2b35da6731e2";
 pub const WITHDRAWN_TOPIC0: &str =
     "0x47cf194f5e559cca0413017d38814a7843cc6f3052bc43c8085938774ae58151";
 pub const INTEREST_COLLECTED_TOPIC0: &str =
@@ -73,10 +75,22 @@ pub fn address_topic(address: &str) -> String {
 
 /// The account tuple returned by the module's savings(address).
 pub const SAVINGS_ACCOUNT: [Field; 4] = [
-    Field { name: "saved", kind: FieldKind::Uint },
-    Field { name: "ticks", kind: FieldKind::Uint },
-    Field { name: "referrer", kind: FieldKind::Address },
-    Field { name: "referralFeePPM", kind: FieldKind::Uint },
+    Field {
+        name: "saved",
+        kind: FieldKind::Uint,
+    },
+    Field {
+        name: "ticks",
+        kind: FieldKind::Uint,
+    },
+    Field {
+        name: "referrer",
+        kind: FieldKind::Address,
+    },
+    Field {
+        name: "referralFeePPM",
+        kind: FieldKind::Uint,
+    },
 ];
 
 /// Cross-check reference for the administered rate path, as (block, ppm).
@@ -98,8 +112,10 @@ const MIN_BLOCKSCOUT_WINDOW: u64 = 10_000;
 
 fn topic0_signature(topic0: &str) -> Option<&'static str> {
     KNOWN_EVENTS.into_iter().find(|signature| {
-        format!("0x{}", crate::abi::hex_encode(&crate::abi::keccak256(signature.as_bytes())))
-            == topic0.to_lowercase()
+        format!(
+            "0x{}",
+            crate::abi::hex_encode(&crate::abi::keccak256(signature.as_bytes()))
+        ) == topic0.to_lowercase()
     })
 }
 
@@ -161,7 +177,9 @@ fn read_call(
             } else {
                 None
             };
-            bundle.record(&fetched, Some(decoded.clone()), finding).map_err(|e| e.to_string())?;
+            bundle
+                .record(&fetched, Some(decoded.clone()), finding)
+                .map_err(|e| e.to_string())?;
             Ok(Some(decoded))
         }
         Err(description) => {
@@ -202,25 +220,26 @@ fn find_deployment_block(
     address: &str,
     upper: u64,
 ) -> Result<Option<u64>, String> {
-    let probe = |client: &mut Client, bundle: &mut BundleWriter, block: u64| -> Result<bool, String> {
-        let hex = block_hex(block);
-        let label = format!("deployment probe eth_getCode @ {block}");
-        let fetched = client
-            .fetch(get_code_descriptor(&label, address, &hex))
-            .map_err(|err| err.message)?;
-        let present = has_code(&fetched)?;
-        bundle
-            .record(
-                &fetched,
-                Some(Decoded::Other {
-                    hex: format!("code_present={present}"),
-                    byte_len: 0,
-                }),
-                None,
-            )
-            .map_err(|e| e.to_string())?;
-        Ok(present)
-    };
+    let probe =
+        |client: &mut Client, bundle: &mut BundleWriter, block: u64| -> Result<bool, String> {
+            let hex = block_hex(block);
+            let label = format!("deployment probe eth_getCode @ {block}");
+            let fetched = client
+                .fetch(get_code_descriptor(&label, address, &hex))
+                .map_err(|err| err.message)?;
+            let present = has_code(&fetched)?;
+            bundle
+                .record(
+                    &fetched,
+                    Some(Decoded::Other {
+                        hex: format!("code_present={present}"),
+                        byte_len: 0,
+                    }),
+                    None,
+                )
+                .map_err(|e| e.to_string())?;
+            Ok(present)
+        };
 
     if !probe(client, bundle, upper)? {
         bundle.add_finding(
@@ -586,7 +605,8 @@ fn sweep_blockscout_all(
     while cursor <= to {
         let window_end = (cursor + window - 1).min(to);
         let label = format!("all module logs, blockscout {cursor}..{window_end}");
-        let descriptor = blockscout_logs_descriptor(&label, address, None, None, cursor, window_end);
+        let descriptor =
+            blockscout_logs_descriptor(&label, address, None, None, cursor, window_end);
         match client.fetch(descriptor) {
             Ok(fetched) => {
                 let rows = fetched
@@ -733,10 +753,42 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
     }
 
     // 3. Vault reads at the pinned block.
-    let asset = read_call(client, &mut bundle, "vault.asset()", VAULT, &encode_no_args("asset()"), &block_hex_value, Expect::Address)?;
-    let savings = read_call(client, &mut bundle, "vault.savings()", VAULT, &encode_no_args("savings()"), &block_hex_value, Expect::Address)?;
-    let total_supply = read_call(client, &mut bundle, "vault.totalSupply()", VAULT, &encode_no_args("totalSupply()"), &block_hex_value, Expect::Uint)?;
-    let total_assets = read_call(client, &mut bundle, "vault.totalAssets()", VAULT, &encode_no_args("totalAssets()"), &block_hex_value, Expect::Uint)?;
+    let asset = read_call(
+        client,
+        &mut bundle,
+        "vault.asset()",
+        VAULT,
+        &encode_no_args("asset()"),
+        &block_hex_value,
+        Expect::Address,
+    )?;
+    let savings = read_call(
+        client,
+        &mut bundle,
+        "vault.savings()",
+        VAULT,
+        &encode_no_args("savings()"),
+        &block_hex_value,
+        Expect::Address,
+    )?;
+    let total_supply = read_call(
+        client,
+        &mut bundle,
+        "vault.totalSupply()",
+        VAULT,
+        &encode_no_args("totalSupply()"),
+        &block_hex_value,
+        Expect::Uint,
+    )?;
+    let total_assets = read_call(
+        client,
+        &mut bundle,
+        "vault.totalAssets()",
+        VAULT,
+        &encode_no_args("totalAssets()"),
+        &block_hex_value,
+        Expect::Uint,
+    )?;
     let convert_to_assets = read_call(
         client,
         &mut bundle,
@@ -760,14 +812,46 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
     }
 
     // 4. Module reads at the pinned block.
-    let current_rate = read_call(client, &mut bundle, "module.currentRatePPM()", MODULE, &encode_no_args("currentRatePPM()"), &block_hex_value, Expect::Uint)?;
-    let current_ticks = read_call(client, &mut bundle, "module.currentTicks()", MODULE, &encode_no_args("currentTicks()"), &block_hex_value, Expect::Uint)?;
-    let interest_delay = read_call(client, &mut bundle, "module.INTEREST_DELAY()", MODULE, &encode_no_args("INTEREST_DELAY()"), &block_hex_value, Expect::Uint)?;
+    let current_rate = read_call(
+        client,
+        &mut bundle,
+        "module.currentRatePPM()",
+        MODULE,
+        &encode_no_args("currentRatePPM()"),
+        &block_hex_value,
+        Expect::Uint,
+    )?;
+    let current_ticks = read_call(
+        client,
+        &mut bundle,
+        "module.currentTicks()",
+        MODULE,
+        &encode_no_args("currentTicks()"),
+        &block_hex_value,
+        Expect::Uint,
+    )?;
+    let interest_delay = read_call(
+        client,
+        &mut bundle,
+        "module.INTEREST_DELAY()",
+        MODULE,
+        &encode_no_args("INTEREST_DELAY()"),
+        &block_hex_value,
+        Expect::Uint,
+    )?;
 
     // The vault's own price, and the vault's account inside the module. These
     // are the comparison targets the recompute step comes back for, so they
     // are captured in the same pinned bundle rather than in a second pass.
-    let price = read_call(client, &mut bundle, "vault.price()", VAULT, &encode_no_args("price()"), &block_hex_value, Expect::Uint)?;
+    let price = read_call(
+        client,
+        &mut bundle,
+        "vault.price()",
+        VAULT,
+        &encode_no_args("price()"),
+        &block_hex_value,
+        Expect::Uint,
+    )?;
     let account = read_call(
         client,
         &mut bundle,
@@ -829,10 +913,12 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
                 &baseline_hex,
             ))
             .map_err(|err| err.message)?;
-        let baseline_ts = baseline_header
-            .result()
-            .ok()
-            .and_then(|value| value.get("timestamp").and_then(Value::as_str).and_then(parse_hex_u64));
+        let baseline_ts = baseline_header.result().ok().and_then(|value| {
+            value
+                .get("timestamp")
+                .and_then(Value::as_str)
+                .and_then(parse_hex_u64)
+        });
         bundle
             .record(&baseline_header, None, None)
             .map_err(|e| e.to_string())?;
@@ -1038,7 +1124,9 @@ pub enum FlowKind {
 }
 
 fn log_u64(log: &Value, field: &str) -> Option<u64> {
-    log.get(field).and_then(Value::as_str).and_then(parse_hex_u64)
+    log.get(field)
+        .and_then(Value::as_str)
+        .and_then(parse_hex_u64)
 }
 
 /// Reads a 32 byte word out of a log data blob, as a decimal string.
@@ -1091,8 +1179,9 @@ fn decode_flow_events(rows: &[Value]) -> Result<Vec<FlowEvent>, String> {
                 .ok_or_else(|| format!("log data is too short for one word: {data}"))?,
             referral_fee: if kind == FlowKind::InterestCollected {
                 Some(
-                    data_word(data, 1)
-                        .ok_or_else(|| format!("InterestCollected data lacks a second word: {data}"))?,
+                    data_word(data, 1).ok_or_else(|| {
+                        format!("InterestCollected data lacks a second word: {data}")
+                    })?,
                 )
             } else {
                 None

@@ -116,7 +116,10 @@ mod tests {
 
     #[test]
     fn slugs_are_filesystem_safe() {
-        assert_eq!(slug("vault.convertToAssets(1e18)"), "vault-converttoassets-1e18");
+        assert_eq!(
+            slug("vault.convertToAssets(1e18)"),
+            "vault-converttoassets-1e18"
+        );
         assert_eq!(slug("module.INTEREST_DELAY()"), "module-interest-delay");
         assert_eq!(slug("eth_getLogs 0x1..0x2"), "eth-getlogs-0x1-0x2");
     }

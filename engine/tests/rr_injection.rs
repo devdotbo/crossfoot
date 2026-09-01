@@ -87,8 +87,14 @@ fn injected_dates_become_rr_events() {
     assert_eq!(rr[0].event_date, first);
     assert_eq!(rr[1].event_date, second);
     // The rate after each reset is the observation at that timestamp.
-    assert_eq!(rr[0].nominal_interest_rate, Decimal::from_str_exact("0.0375").unwrap());
-    assert_eq!(rr[1].nominal_interest_rate, Decimal::from_str_exact("0.035").unwrap());
+    assert_eq!(
+        rr[0].nominal_interest_rate,
+        Decimal::from_str_exact("0.0375").unwrap()
+    );
+    assert_eq!(
+        rr[1].nominal_interest_rate,
+        Decimal::from_str_exact("0.035").unwrap()
+    );
 }
 
 /// No business-day shift: a block timestamp on a Saturday stays on the
@@ -121,7 +127,8 @@ fn an_injected_rr_on_maturity_is_dropped() {
     let status = at(2026, 1, 1, 0, 0, 0);
     let maturity = at(2026, 6, 1, 0, 0, 0);
     let rf = risk_factors(&[(maturity, "0.04")]);
-    let events = compute_schedule_with_rr_dates(&terms(status, maturity), &rf, &[maturity]).unwrap();
+    let events =
+        compute_schedule_with_rr_dates(&terms(status, maturity), &rf, &[maturity]).unwrap();
     assert!(
         !events.iter().any(|e| e.event_type == EventType::RR),
         "an RR landing exactly on maturity must be dropped"

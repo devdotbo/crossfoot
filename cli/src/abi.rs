@@ -54,7 +54,11 @@ pub fn encode_no_args(signature: &str) -> String {
 pub fn encode_uint256(signature: &str, value: u128) -> String {
     let mut word = [0u8; 32];
     word[16..32].copy_from_slice(&value.to_be_bytes());
-    format!("0x{}{}", hex_encode(&selector(signature)), hex_encode(&word))
+    format!(
+        "0x{}{}",
+        hex_encode(&selector(signature)),
+        hex_encode(&word)
+    )
 }
 
 /// Calldata for a function taking a single address.
@@ -99,7 +103,12 @@ pub fn word_to_signed_decimal(word: &[u8; 32]) -> String {
 pub fn word_to_decimal(word: &[u8; 32]) -> String {
     let mut limbs = [0u32; 8];
     for (i, limb) in limbs.iter_mut().enumerate() {
-        *limb = u32::from_be_bytes([word[i * 4], word[i * 4 + 1], word[i * 4 + 2], word[i * 4 + 3]]);
+        *limb = u32::from_be_bytes([
+            word[i * 4],
+            word[i * 4 + 1],
+            word[i * 4 + 2],
+            word[i * 4 + 3],
+        ]);
     }
     let mut digits = Vec::new();
     while limbs.iter().any(|limb| *limb != 0) {
@@ -174,10 +183,7 @@ pub enum Decoded {
         fields: Vec<DecodedField>,
     },
     /// Anything that is not exactly one word: recorded, not interpreted.
-    Other {
-        hex: String,
-        byte_len: usize,
-    },
+    Other { hex: String, byte_len: usize },
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -338,7 +344,11 @@ mod tests {
     #[test]
     fn encodes_an_address_argument() {
         assert_eq!(
-            encode_address("savings(address)", "0xE5F130253fF137f9917C0107659A4c5262abf6b0").unwrap(),
+            encode_address(
+                "savings(address)",
+                "0xE5F130253fF137f9917C0107659A4c5262abf6b0"
+            )
+            .unwrap(),
             "0x1f7cdd5f000000000000000000000000e5f130253ff137f9917c0107659a4c5262abf6b0"
         );
         assert!(encode_address("savings(address)", "0x1234").is_err());
@@ -348,10 +358,22 @@ mod tests {
     #[test]
     fn decodes_the_savings_account_tuple() {
         const ACCOUNT: [Field; 4] = [
-            Field { name: "saved", kind: FieldKind::Uint },
-            Field { name: "ticks", kind: FieldKind::Uint },
-            Field { name: "referrer", kind: FieldKind::Address },
-            Field { name: "referralFeePPM", kind: FieldKind::Uint },
+            Field {
+                name: "saved",
+                kind: FieldKind::Uint,
+            },
+            Field {
+                name: "ticks",
+                kind: FieldKind::Uint,
+            },
+            Field {
+                name: "referrer",
+                kind: FieldKind::Address,
+            },
+            Field {
+                name: "referralFeePPM",
+                kind: FieldKind::Uint,
+            },
         ];
         let data = "0x00000000000000000000000000000000000000000000000a20ebd34ab59424bc000000000000000000000000000000000000000000000000000000b8e6679b1900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
         match decode_return(data, Expect::Fields(&ACCOUNT)) {
@@ -360,7 +382,10 @@ mod tests {
                 assert_eq!(fields[0].name, "saved");
                 assert_eq!(fields[0].decimal, "186839662683663639740");
                 assert_eq!(fields[1].decimal, "794139532057");
-                assert_eq!(fields[2].address.as_deref(), Some("0x0000000000000000000000000000000000000000"));
+                assert_eq!(
+                    fields[2].address.as_deref(),
+                    Some("0x0000000000000000000000000000000000000000")
+                );
                 assert_eq!(fields[3].decimal, "0");
             }
             other => panic!("expected fields, got {other:?}"),
@@ -372,10 +397,22 @@ mod tests {
     #[test]
     fn a_tuple_of_the_wrong_width_stays_raw() {
         const ACCOUNT: [Field; 4] = [
-            Field { name: "saved", kind: FieldKind::Uint },
-            Field { name: "ticks", kind: FieldKind::Uint },
-            Field { name: "referrer", kind: FieldKind::Address },
-            Field { name: "referralFeePPM", kind: FieldKind::Uint },
+            Field {
+                name: "saved",
+                kind: FieldKind::Uint,
+            },
+            Field {
+                name: "ticks",
+                kind: FieldKind::Uint,
+            },
+            Field {
+                name: "referrer",
+                kind: FieldKind::Address,
+            },
+            Field {
+                name: "referralFeePPM",
+                kind: FieldKind::Uint,
+            },
         ];
         let one_word = "0x0000000000000000000000000000000000000000000000000000000000000001";
         assert!(matches!(
@@ -397,7 +434,8 @@ mod tests {
         assert_eq!(word_to_signed_decimal(&[0u8; 32]), "0");
 
         // A large positive answer must not be read as negative.
-        let hex = hex_decode("0000000000000000000000000000000000000000000000000000000006615037").unwrap();
+        let hex =
+            hex_decode("0000000000000000000000000000000000000000000000000000000006615037").unwrap();
         let mut word = [0u8; 32];
         word.copy_from_slice(&hex);
         assert_eq!(word_to_signed_decimal(&word), "107040823");

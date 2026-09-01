@@ -80,7 +80,10 @@ fn svzchf_state_at_block_25853000() {
     const BLOCK: u64 = 25_853_000;
     let mut client = client();
 
-    assert_eq!(uint(&mut client, MODULE, "currentTicks()", BLOCK), "1349693580000");
+    assert_eq!(
+        uint(&mut client, MODULE, "currentTicks()", BLOCK),
+        "1349693580000"
+    );
     assert_eq!(
         uint(&mut client, VAULT, "totalSupply()", BLOCK),
         "80027751992300676663517"
@@ -156,10 +159,22 @@ fn t1_tick_clock_reproduces_chain_ticks() {
     assert_eq!(
         inputs.clock.segments(),
         &[
-            RateSegment { start: 1_747_891_715, rate_ppm: 30_000 },
-            RateSegment { start: 1_765_387_379, rate_ppm: 40_000 },
-            RateSegment { start: 1_770_732_311, rate_ppm: 37_500 },
-            RateSegment { start: 1_774_638_431, rate_ppm: 35_000 },
+            RateSegment {
+                start: 1_747_891_715,
+                rate_ppm: 30_000
+            },
+            RateSegment {
+                start: 1_765_387_379,
+                rate_ppm: 40_000
+            },
+            RateSegment {
+                start: 1_770_732_311,
+                rate_ppm: 37_500
+            },
+            RateSegment {
+                start: 1_774_638_431,
+                rate_ppm: 35_000
+            },
         ]
     );
     assert_eq!(inputs.block_timestamp, 1_787_911_199);
@@ -220,12 +235,10 @@ fn t2_full_pipeline_at_block_25853000() {
 #[ignore = "needs the network on a first run; see the module comment"]
 fn t3_historical_point_at_block_24570000() {
     let mut client = client();
-    let inputs =
-        run_svzchf::load_inputs(&mut client, &verify_root(), HISTORICAL_BLOCK).unwrap();
+    let inputs = run_svzchf::load_inputs(&mut client, &verify_root(), HISTORICAL_BLOCK).unwrap();
 
     let events =
-        run_svzchf::recognition_events(&inputs.flows, B0_FOR_HISTORICAL, HISTORICAL_BLOCK)
-            .unwrap();
+        run_svzchf::recognition_events(&inputs.flows, B0_FOR_HISTORICAL, HISTORICAL_BLOCK).unwrap();
     assert!(
         !events.is_empty(),
         "the window must contain the deposits that build the position"
@@ -242,12 +255,14 @@ fn t3_historical_point_at_block_24570000() {
         saved: replayed.final_state.saved.parse().unwrap(),
         ticks: replayed.final_state.ticks,
     };
-    let assets =
-        replay::total_assets(&inputs.clock, final_state, inputs.block_timestamp).unwrap();
+    let assets = replay::total_assets(&inputs.clock, final_state, inputs.block_timestamp).unwrap();
     let supply = run_svzchf::decimal_read(&inputs.reads, "vault.totalSupply()").unwrap();
     let price = replay::price(assets, supply).unwrap();
 
-    assert_eq!(price, 1_005_820_467_578_421_056, "the pinned historical value");
+    assert_eq!(
+        price, 1_005_820_467_578_421_056,
+        "the pinned historical value"
+    );
     assert_eq!(
         price,
         run_svzchf::decimal_read(&inputs.reads, "vault.convertToAssets(1e18)").unwrap()
@@ -299,16 +314,13 @@ fn t4_reference_replay_equals_actus_path_over_the_full_history() {
     }
 
     // And at the horizon.
-    let reference_final =
-        replay::accrued_at(&inputs.clock, state, inputs.block_timestamp).unwrap();
-    let (actus_final, _) = actus::interest_at(
-        &inputs.clock,
-        state,
-        segment_start,
-        inputs.block_timestamp,
-    )
-    .unwrap();
-    assert_eq!(actus_final, reference_final, "the two paths diverged at the horizon");
+    let reference_final = replay::accrued_at(&inputs.clock, state, inputs.block_timestamp).unwrap();
+    let (actus_final, _) =
+        actus::interest_at(&inputs.clock, state, segment_start, inputs.block_timestamp).unwrap();
+    assert_eq!(
+        actus_final, reference_final,
+        "the two paths diverged at the horizon"
+    );
 
     // The replayed final state must also equal the chain, otherwise the two
     // paths agree with each other and both are wrong.
@@ -343,7 +355,10 @@ fn t4b_rate_segments_stay_inside_the_deployed_uint40_bound() {
 #[test]
 #[ignore = "needs the network on a first run; see the module comment"]
 fn t5_run_command_reports_model_match_at_both_blocks() {
-    for (baseline, block) in [(HISTORICAL_BLOCK, B1), (B0_FOR_HISTORICAL, HISTORICAL_BLOCK)] {
+    for (baseline, block) in [
+        (HISTORICAL_BLOCK, B1),
+        (B0_FOR_HISTORICAL, HISTORICAL_BLOCK),
+    ] {
         let mut client = client();
         let outcome = run_svzchf::run(
             &mut client,
@@ -359,10 +374,8 @@ fn t5_run_command_reports_model_match_at_both_blocks() {
             Verdict::ModelMatch,
             "window {baseline}..{block} should reproduce the chain exactly"
         );
-        let result: serde_json::Value = serde_json::from_str(
-            &std::fs::read_to_string(&outcome.result_path).unwrap(),
-        )
-        .unwrap();
+        let result: serde_json::Value =
+            serde_json::from_str(&std::fs::read_to_string(&outcome.result_path).unwrap()).unwrap();
         assert_eq!(result["verdict"], "MODEL_MATCH");
         assert_eq!(result["check_class"], "full recomputation");
         assert_eq!(result["actus_cross_check"]["agree"], true);
@@ -453,8 +466,15 @@ fn m1_fetch_reads_the_whole_round_history() {
         inputs.latest_round,
         "every round from 1 to latestRound must have been read"
     );
-    assert!(!inputs.rounds_from_logs.is_empty(), "the event series must be present");
-    assert_eq!(inputs.attribution.len(), 1, "one attribution entry per requested round");
+    assert!(
+        !inputs.rounds_from_logs.is_empty(),
+        "the event series must be present"
+    );
+    assert_eq!(
+        inputs.attribution.len(),
+        1,
+        "one attribution entry per requested round"
+    );
     assert_eq!(
         inputs.feed_decimals,
         mchecks::FEED_DECIMALS,

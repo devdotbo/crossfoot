@@ -268,7 +268,10 @@ fn classify(body: &str) -> (Classification, String) {
                 return (Classification::Success, String::new());
             }
             let detail = format!("Blockscout status {status}: {message}");
-            if message.contains("rate limit") || message.contains("throttl") || message.contains("try again") {
+            if message.contains("rate limit")
+                || message.contains("throttl")
+                || message.contains("try again")
+            {
                 return (Classification::Retryable, detail);
             }
             return (Classification::Fatal, detail);
@@ -279,7 +282,10 @@ fn classify(body: &str) -> (Classification, String) {
         return (Classification::Success, String::new());
     }
     let description = describe_rpc_error(&parsed);
-    let code = parsed.get("error").and_then(|e| e.get("code")).and_then(Value::as_i64);
+    let code = parsed
+        .get("error")
+        .and_then(|e| e.get("code"))
+        .and_then(Value::as_i64);
     let message = parsed
         .get("error")
         .and_then(|e| e.get("message"))
@@ -365,18 +371,26 @@ impl Client {
     /// The configured JSON-RPC endpoints, redacted for evidence. The full
     /// URLs stay private to the client.
     pub fn endpoints(&self) -> Vec<String> {
-        self.endpoints.iter().map(|url| redact_endpoint(url)).collect()
+        self.endpoints
+            .iter()
+            .map(|url| redact_endpoint(url))
+            .collect()
     }
 
     /// The configured log history endpoints, redacted for evidence.
     pub fn log_endpoints(&self) -> Vec<String> {
-        self.log_endpoints.iter().map(|url| redact_endpoint(url)).collect()
+        self.log_endpoints
+            .iter()
+            .map(|url| redact_endpoint(url))
+            .collect()
     }
 
     fn endpoints_for(&self, descriptor: &Descriptor) -> Vec<String> {
         match &descriptor.wire {
             Wire::JsonRpc => self.endpoints.clone(),
-            Wire::HttpGet { base: Some(base), .. } => vec![base.clone()],
+            Wire::HttpGet {
+                base: Some(base), ..
+            } => vec![base.clone()],
             Wire::HttpGet { base: None, .. } => self.log_endpoints.clone(),
         }
     }
@@ -385,7 +399,14 @@ impl Client {
         &self.cache
     }
 
-    fn observe(&mut self, endpoint: &str, descriptor: &Descriptor, attempt: u32, kind: &str, detail: String) {
+    fn observe(
+        &mut self,
+        endpoint: &str,
+        descriptor: &Descriptor,
+        attempt: u32,
+        kind: &str,
+        detail: String,
+    ) {
         self.observations.push(Observation {
             utc: now_utc(),
             endpoint: redact_endpoint(endpoint),
@@ -424,7 +445,11 @@ impl Client {
         self.fetch_from_network(descriptor, key)
     }
 
-    fn fetch_from_network(&mut self, descriptor: Descriptor, key: String) -> Result<Fetched, RpcError> {
+    fn fetch_from_network(
+        &mut self,
+        descriptor: Descriptor,
+        key: String,
+    ) -> Result<Fetched, RpcError> {
         let request_body = descriptor.request_body();
         let request_text = request_body.to_string();
         let endpoints = self.endpoints_for(&descriptor);
@@ -460,7 +485,13 @@ impl Client {
                             Err(err) => {
                                 let detail = format!("could not read response body: {err}");
                                 last_detail[endpoint_index] = detail.clone();
-                                self.observe(endpoint, &descriptor, attempt, "body_read_failed", detail);
+                                self.observe(
+                                    endpoint,
+                                    &descriptor,
+                                    attempt,
+                                    "body_read_failed",
+                                    detail,
+                                );
                                 continue;
                             }
                         }
@@ -483,7 +514,11 @@ impl Client {
                 if status == 429 || (500..600).contains(&status) {
                     let detail = format!("HTTP {status}: {}", truncate(&body, 300));
                     last_detail[endpoint_index] = detail.clone();
-                    let kind = if status == 429 { "http_429_rate_limited" } else { "http_5xx" };
+                    let kind = if status == 429 {
+                        "http_429_rate_limited"
+                    } else {
+                        "http_5xx"
+                    };
                     self.observe(endpoint, &descriptor, attempt, kind, detail);
                     if let Some(seconds) = retry_after {
                         sleep(Duration::from_secs(seconds.min(30)));
@@ -511,24 +546,35 @@ impl Client {
                     // as DefiLlama: the JSON-RPC result/error shape does not
                     // apply, so a parseable body without an error field is the
                     // answer.
-                    Wire::HttpGet { json: true, base: Some(_), .. } => {
-                        match serde_json::from_str::<Value>(&body) {
-                            Ok(parsed) => {
-                                if let Some(error) = parsed.get("error") {
-                                    (Classification::Fatal, format!("source returned an error: {error}"))
-                                } else {
-                                    (Classification::Success, String::new())
-                                }
+                    Wire::HttpGet {
+                        json: true,
+                        base: Some(_),
+                        ..
+                    } => match serde_json::from_str::<Value>(&body) {
+                        Ok(parsed) => {
+                            if let Some(error) = parsed.get("error") {
+                                (
+                                    Classification::Fatal,
+                                    format!("source returned an error: {error}"),
+                                )
+                            } else {
+                                (Classification::Success, String::new())
                             }
-                            Err(err) => (Classification::Retryable, format!("unparsable body: {err}")),
                         }
-                    }
+                        Err(err) => (Classification::Retryable, format!("unparsable body: {err}")),
+                    },
                     _ => classify(&body),
                 };
                 match classification {
                     Classification::Success | Classification::DeterministicRevert => {
                         if classification == Classification::DeterministicRevert {
-                            self.observe(endpoint, &descriptor, attempt, "deterministic_revert", detail);
+                            self.observe(
+                                endpoint,
+                                &descriptor,
+                                attempt,
+                                "deterministic_revert",
+                                detail,
+                            );
                         }
                         let meta = CacheMeta {
                             key: key.clone(),
@@ -555,7 +601,13 @@ impl Client {
                         });
                     }
                     Classification::RequestTooBroad => {
-                        self.observe(endpoint, &descriptor, attempt, "request_too_broad", detail.clone());
+                        self.observe(
+                            endpoint,
+                            &descriptor,
+                            attempt,
+                            "request_too_broad",
+                            detail.clone(),
+                        );
                         return Err(RpcError {
                             kind: RpcErrorKind::RequestTooBroad,
                             message: detail,
@@ -582,7 +634,11 @@ impl Client {
             .iter()
             .zip(last_detail.iter())
             .map(|(endpoint, detail)| {
-                let detail = if detail.is_empty() { "no error recorded" } else { detail };
+                let detail = if detail.is_empty() {
+                    "no error recorded"
+                } else {
+                    detail
+                };
                 format!("{} said: {detail}", redact_endpoint(endpoint))
             })
             .collect();
@@ -804,7 +860,9 @@ mod tests {
     fn redaction_drops_keys_wherever_providers_put_them() {
         // Path segment keys (Alchemy, Infura, QuickNode, Ankr shapes).
         assert_eq!(
-            redact_endpoint("https://eth-mainnet.g.alchemy.com/v2/AbCdEf0123456789AbCdEf0123456789"),
+            redact_endpoint(
+                "https://eth-mainnet.g.alchemy.com/v2/AbCdEf0123456789AbCdEf0123456789"
+            ),
             "https://eth-mainnet.g.alchemy.com/v2/<redacted>"
         );
         assert_eq!(
@@ -826,10 +884,22 @@ mod tests {
             "https://rpc.example.org/mainnet"
         );
         // Short route segments survive, so the provider and route stay legible.
-        assert_eq!(redact_endpoint(DEFAULT_ARCHIVE_ENDPOINT), DEFAULT_ARCHIVE_ENDPOINT);
-        assert_eq!(redact_endpoint(DEFAULT_LATEST_ENDPOINT), DEFAULT_LATEST_ENDPOINT);
-        assert_eq!(redact_endpoint(DEFAULT_LOG_HISTORY_ENDPOINT), DEFAULT_LOG_HISTORY_ENDPOINT);
-        assert_eq!(redact_endpoint("https://x.example/api/v1/eth"), "https://x.example/api/v1/eth");
+        assert_eq!(
+            redact_endpoint(DEFAULT_ARCHIVE_ENDPOINT),
+            DEFAULT_ARCHIVE_ENDPOINT
+        );
+        assert_eq!(
+            redact_endpoint(DEFAULT_LATEST_ENDPOINT),
+            DEFAULT_LATEST_ENDPOINT
+        );
+        assert_eq!(
+            redact_endpoint(DEFAULT_LOG_HISTORY_ENDPOINT),
+            DEFAULT_LOG_HISTORY_ENDPOINT
+        );
+        assert_eq!(
+            redact_endpoint("https://x.example/api/v1/eth"),
+            "https://x.example/api/v1/eth"
+        );
     }
 
     #[test]

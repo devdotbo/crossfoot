@@ -8,14 +8,14 @@
 mod abi;
 mod bundle;
 mod cache;
-mod model;
-mod mtbill;
-mod run_mtbill;
-mod run_svzchf;
 #[cfg(test)]
 mod live_tests;
+mod model;
+mod mtbill;
 mod render;
 mod rpc;
+mod run_mtbill;
+mod run_svzchf;
 mod svzchf;
 mod util;
 
@@ -25,7 +25,9 @@ use std::process::ExitCode;
 use clap::{Args, Parser, Subcommand};
 
 use cache::Cache;
-use rpc::{Client, DEFAULT_ARCHIVE_ENDPOINT, DEFAULT_LATEST_ENDPOINT, DEFAULT_LOG_HISTORY_ENDPOINT};
+use rpc::{
+    Client, DEFAULT_ARCHIVE_ENDPOINT, DEFAULT_LATEST_ENDPOINT, DEFAULT_LOG_HISTORY_ENDPOINT,
+};
 use svzchf::LogSource;
 
 #[derive(Parser)]
@@ -266,10 +268,12 @@ fn print_selectors(signatures: &[String]) {
 }
 
 fn run_svzchf(opts: FetchOpts) -> Result<(), String> {
-    let verify_root = opts
-        .verify_root
-        .canonicalize()
-        .map_err(|err| format!("--verify-root {} is not readable: {err}", opts.verify_root.display()))?;
+    let verify_root = opts.verify_root.canonicalize().map_err(|err| {
+        format!(
+            "--verify-root {} is not readable: {err}",
+            opts.verify_root.display()
+        )
+    })?;
 
     let endpoints = if opts.endpoints.is_empty() {
         vec![
@@ -328,7 +332,10 @@ fn run_svzchf(opts: FetchOpts) -> Result<(), String> {
 
 fn recompute_svzchf(opts: RunOpts) -> Result<(), String> {
     let verify_root = opts.verify_root.canonicalize().map_err(|err| {
-        format!("--verify-root {} is not readable: {err}", opts.verify_root.display())
+        format!(
+            "--verify-root {} is not readable: {err}",
+            opts.verify_root.display()
+        )
     })?;
 
     let endpoints = if opts.endpoints.is_empty() {
@@ -374,7 +381,10 @@ fn recompute_svzchf(opts: RunOpts) -> Result<(), String> {
 
 fn check_mtbill(opts: RunOpts) -> Result<(), String> {
     let verify_root = opts.verify_root.canonicalize().map_err(|err| {
-        format!("--verify-root {} is not readable: {err}", opts.verify_root.display())
+        format!(
+            "--verify-root {} is not readable: {err}",
+            opts.verify_root.display()
+        )
     })?;
 
     let endpoints = if opts.endpoints.is_empty() {

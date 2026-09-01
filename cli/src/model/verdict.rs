@@ -160,27 +160,50 @@ mod tests {
         // Fault injection: the chain comparison is perfect, the ACTUS path
         // disagrees with the reference replay. Before this aggregation
         // existed the run reported MODEL_MATCH here.
-        let faulty = VerdictInputs { model_paths_agree: false, ..CLEAN };
+        let faulty = VerdictInputs {
+            model_paths_agree: false,
+            ..CLEAN
+        };
         assert_eq!(aggregate(faulty), Verdict::ModelInconsistent);
         // And a residual on top does not turn it back into a chain finding.
-        let faulty = VerdictInputs { all_equal: false, ..faulty };
+        let faulty = VerdictInputs {
+            all_equal: false,
+            ..faulty
+        };
         assert_eq!(aggregate(faulty), Verdict::ModelInconsistent);
     }
 
     #[test]
     fn residuals_and_series_mismatches_are_deviations() {
-        assert_eq!(aggregate(VerdictInputs { all_equal: false, ..CLEAN }), Verdict::ObservedDeviation);
         assert_eq!(
-            aggregate(VerdictInputs { interest_series_clean: false, ..CLEAN }),
+            aggregate(VerdictInputs {
+                all_equal: false,
+                ..CLEAN
+            }),
+            Verdict::ObservedDeviation
+        );
+        assert_eq!(
+            aggregate(VerdictInputs {
+                interest_series_clean: false,
+                ..CLEAN
+            }),
             Verdict::ObservedDeviation
         );
     }
 
     #[test]
     fn observation_failures_outrank_everything() {
-        let stale = VerdictInputs { stale_read: true, model_paths_agree: false, all_equal: false, ..CLEAN };
+        let stale = VerdictInputs {
+            stale_read: true,
+            model_paths_agree: false,
+            all_equal: false,
+            ..CLEAN
+        };
         assert_eq!(aggregate(stale), Verdict::SourceStale);
-        let gap = VerdictInputs { input_gap: true, ..stale };
+        let gap = VerdictInputs {
+            input_gap: true,
+            ..stale
+        };
         assert_eq!(aggregate(gap), Verdict::InputGap);
     }
     use serde_json::json;
