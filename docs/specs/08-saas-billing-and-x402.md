@@ -34,7 +34,8 @@ switched by environment variables only.
   workspaces and entitlements for the operator.
 - No alert on poster key change or feed-admin role revocation: the
   ingested records do not carry them yet (roadmap).
-- No web3 wallet sign-in; email code only (Q1).
+- No custodial wallet and no transaction signing in the app beyond the
+  SIWE message and the x402 payment authorization.
 - No reuse of the user's x402-rs fork (`Tomu-sh/x402-rs-ws-stream`, v1
   shaped, stale against upstream) without reading it first; the server
   side here is TypeScript and nothing from the fork is assumed to fit.
@@ -50,9 +51,19 @@ switched by environment variables only.
   mutation with the `polarEvents` and `entitlements` tables, the
   `/polar/webhook` route, `entitlementLogic.ts`, `mailer.ts` (Scaleway
   transactional email transport), `product-ci.yml`, `vitest.config.ts`,
-  `eslint.config.js`. Better Auth with `@convex-dev/better-auth` is
-  ported with the `emailOTP` plugin only; passkey, `crossDomain`, the
-  closed allowlist and every product string are left behind.
+  `eslint.config.js`. Better Auth on the Convex component
+  (`@convex-dev/better-auth`) is ported with the `passkey` plugin (the
+  boilerplate's primary method) and the `emailOTP` plugin, and gains the
+  Better Auth `siwe` plugin (EIP-4361); `crossDomain`, the closed
+  allowlist and every product string are left behind.
+- Wallet stack: viem for message verification and ENS lookups on the
+  server, wagmi plus viem with ConnectKit as the connector modal on the
+  client (R1e). Kickoff-day checks, unverified as of 2026-09-01: whether
+  the `siwe` plugin hands `verifyMessage` the raw message, signature,
+  address and chain id so that EIP-1271 verification can be plugged in;
+  whether the Convex component passes the `passkey` and `siwe` plugin
+  routes through unchanged; ConnectKit's maintenance state against the
+  current wagmi major.
 - Polar REST: `POST /v1/checkouts/`, `POST /v1/customer-sessions`, the
   webhook events `order.paid`, `subscription.created`,
   `subscription.active`, `subscription.uncanceled`, `subscription.canceled`,
@@ -84,10 +95,44 @@ limits and table shapes are own synthesis.
 
 Accounts and workspaces:
 
-- R1. Sign-in is an email one-time code through Better Auth `emailOTP`;
-  signup is open; the code mail goes through the ported mailer; a
-  `loginMailThrottle` row limits codes to 3 per email and 10 per IP per
-  15 minutes. Codes expire after 10 minutes and are single use.
+- R1. Sign-in is Better Auth on the Convex component with three methods
+  and open signup: passkey (Better Auth `passkey` plugin, WebAuthn,
+  the boilerplate's primary method), wallet (Better Auth `siwe` plugin,
+  EIP-4361), and email code (`emailOTP` plugin through the ported
+  mailer). A `loginMailThrottle` row limits codes to 3 per email and 10
+  per IP per 15 minutes; codes expire after 10 minutes and are single
+  use. Every method yields the same session and the same `users` row.
+- R1a. SIWE server side: `getNonce` returns a random nonce of at least
+  96 bits stored with a 5 minute expiry; `verifyMessage` consumes the
+  nonce on the first attempt whether it succeeds or fails (single use),
+  rejects an expired or unknown nonce, and rejects a message whose
+  `domain` is not the app host, whose `uri` is not on `SITE_URL`, whose
+  `chainId` is not in `SIWE_CHAIN_IDS` (default `1`), or whose
+  `expirationTime` has passed. Verification uses viem's public-client
+  `verifySiweMessage` (or `verifyMessage` on the parsed fields), which
+  falls back to EIP-1271 `isValidSignature` for a contract account, never
+  plain `recoverAddress` alone, so smart-account wallets pass. The
+  optional `ensLookup` resolves the reverse record through a viem mainnet
+  client and keeps the name only when the forward record matches.
+- R1b. A wallet may create an account with no email (anonymous
+  wallet-only account). An email can be linked later through the
+  `emailOTP` flow and becomes required before `createCheckout` (R11) and
+  for email alert delivery (R8); the billing page says so.
+- R1c. One account may hold several wallets, one passkey and one email.
+  Linking a wallet needs a SIWE message signed by the new wallet from an
+  already signed-in session; a wallet bound to another account is
+  rejected; removing the last remaining method is refused.
+- R1d. Addresses are shown as the ENS name when R1a resolved one, else
+  checksummed and truncated with the full address on copy; the ENS name
+  is display only and never a key.
+- R1e. Client: wagmi plus viem with ConnectKit as the connector modal
+  (injected, WalletConnect, Coinbase Wallet connectors). Reason for
+  ConnectKit over Reown AppKit: it is wagmi-native, themed through CSS
+  variables so the Bauhaus tokens apply without a second design system,
+  ships no SIWE helper of its own (Better Auth's plugin owns the flow),
+  and carries no vendor account features the app does not use. The
+  WalletConnect project id is a public identifier and may sit in the
+  client bundle.
 - R2. First sign-in creates a personal workspace (`workspaces`,
   `memberships` with role `owner`). Roles are `owner` and `member`; an
   owner invites by email (an `invitations` row with a token, 7 day
@@ -97,7 +142,9 @@ Accounts and workspaces:
   membership for the `workspaceId` argument and rejects with
   `FORBIDDEN` when absent; there is one helper for this and every
   function uses it (audit memo `authz.ts` pattern).
-- R4. `/account` shows the email, workspaces, memberships and a sign-out;
+- R4. `/account` shows the linked methods (email, passkey, wallets as
+  R1d), lets the user add or remove one under R1c, and shows workspaces,
+  memberships and a sign-out;
   `/billing` shows the entitlement, the Polar checkout or portal button
   and the API key section (R14).
 
@@ -121,8 +168,8 @@ Watchlists and alerts:
   transaction hash and the feed page URL; the row is created once per
   key (unique index), so re-ingestion never duplicates an alert.
 - R8. Delivery: for every workspace whose watchlist contains the address
-  and whose tier allows email, one `alertDeliveries` row per member is
-  queued and sent by the ported mail job; the row records queued, sent
+  and whose tier allows email, one `alertDeliveries` row per member with
+  a linked email (R1b) is queued and sent by the ported mail job; the row records queued, sent
   or failed with the transport response id. The email subject is
   `Crossfoot: <KIND> on <product>` and the body carries the R7 fields
   as text and the link; no HTML-only content.
@@ -264,7 +311,11 @@ README with the date and what remains.
 
 ## Data and file formats
 
-Tables (Convex): `workspaces` (name, createdBy), `memberships`
+Tables (Convex): the Better Auth component's own tables (users, sessions,
+passkeys, accounts) plus `walletAccounts` (userId, address lowercase,
+chainId, ensName, ensCheckedAt, linkedAt; unique on address) and
+`siweNonces` (nonce, expiresAt, consumedAt) if the plugin does not store
+them itself; `workspaces` (name, createdBy), `memberships`
 (workspaceId, userId, role), `invitations`, `watchlists` (workspaceId,
 addresses[], emailEnabled), `alerts` (kind, address, key, product,
 finding, verdict, decision, reason, bundle_root, transaction_hash, url,
@@ -281,7 +332,8 @@ Environment variables: `POLAR_ENV`, `POLAR_ACCESS_TOKEN`,
 `POLAR_PRODUCT_ID_API`, `CROSSFOOT_INGEST_SECRET`, `X402_NETWORK`,
 `X402_ASSET`, `X402_FACILITATOR_URL`, `X402_FACILITATOR_KEY`,
 `CROSSFOOT_PAY_TO`, `X402_PRICE_FEED`, `X402_PRICE_FAMILY`, mail transport
-keys, `SITE_URL`. The README lists each with sandbox and production
+keys, `SITE_URL`, `SIWE_CHAIN_IDS`, `ENS_RPC_URL` (server, mainnet),
+`VITE_WALLETCONNECT_PROJECT_ID` (client, public). The README lists each with sandbox and production
 values or their source.
 
 402 body example (demo values):
@@ -312,7 +364,12 @@ required or failed, body says which), 403 (key without quota), 404
 
 | Requirement | Test or command |
 |---|---|
-| R1 | `otp_sign_in_creates_a_session`; `login_codes_are_throttled_per_email_and_ip`; `otp_is_single_use_and_expires` |
+| R1 | `otp_sign_in_creates_a_session`; `login_codes_are_throttled_per_email_and_ip`; `otp_is_single_use_and_expires`; `passkey_registration_and_sign_in` (Playwright, WebAuthn virtual authenticator); `three_methods_yield_the_same_session_shape` |
+| R1a | `siwe_sign_in_with_a_viem_test_account` (a viem `privateKeyToAccount` from a fixed test key signs an EIP-4361 message against a fixed nonce; verify succeeds, the nonce is consumed, a second use fails); `siwe_rejects_expired_nonce_wrong_domain_wrong_uri_wrong_chain_and_expired_message` (one case each); `siwe_smart_account_signature_verifies_via_eip1271` (mocked public client whose `isValidSignature` returns the magic value; plain recovery would fail); `ens_lookup_keeps_the_name_only_on_forward_match` (mocked client) |
+| R1b | `wallet_only_account_has_no_email_and_can_link_one`; `checkout_requires_a_linked_email`; `delivery_skips_members_without_email` |
+| R1c | `account_holds_several_wallets_and_one_passkey`; `wallet_bound_elsewhere_is_rejected`; `last_method_cannot_be_removed`; `linking_a_wallet_needs_a_signed_in_session` |
+| R1d | `address_renders_as_ens_name_or_checksummed_truncated` (route test, both branches) |
+| R1e | `connector_modal_lists_injected_walletconnect_and_coinbase` (Playwright); `client_bundle_contains_only_the_public_project_id` (extends R25 scan) |
 | R2, R3 | `first_sign_in_creates_a_personal_workspace`; `member_cannot_edit_watchlist_owner_can`; `every_private_function_rejects_a_non_member` (enumerates the API against the 07 R6 public list) |
 | R4 | `account_and_billing_routes_render_for_a_signed_in_user` (route test) |
 | R5, R13 | `free_tier_watchlist_stops_at_three`; `entitlement_table_is_exhaustive` (three tiers, every field) |
@@ -345,8 +402,10 @@ required or failed, body says which), 403 (key without quota), 404
 
 ## Open questions
 
-- Q1. Wallet sign-in (SIWE) for a crypto audience. Default: email code
-  only; a wallet is not needed to read, pay or subscribe.
+- Q1. Settled by the user on 2026-09-01: three sign-in methods (R1 to
+  R1e), passkey primary, SIWE wallet, email code. What remains to verify
+  on kickoff day is listed under "Inputs and sources" (plugin
+  pass-through, EIP-1271 hook, ConnectKit state).
 - Q2. x402 v2 header names, package names, the Coinbase facilitator URL
   and whether the handshake runs inside a Convex HTTP action (fetch only,
   no Node middleware). Default: the handshake is hand-written against
