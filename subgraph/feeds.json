@@ -1,0 +1,489 @@
+{
+  "family": "midas-customfeed",
+  "chain_id": 1,
+  "network": "mainnet",
+  "callHandlers": true,
+  "source": "raw/midas-customfeed-creators-2026-09-01.md (creation blocks) and raw/midas-customfeed-survey-2026-09-01.md (the 66 addresses minus the six customFeedDv/customFeedRv wrappers, which emit no events)",
+  "feeds": [
+    {
+      "product": "mTBILL",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x056339C044055819E8Db84E71f5f2E1F536b2E5b",
+      "startBlock": 20578232,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mBASIS",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0xE4f2AE539442e1D3Fb40F03ceEbF4A372a390d24",
+      "startBlock": 20578300,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mBTC",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0xA537EF0343e83761ED42B8E017a1e495c9a189Ee",
+      "startBlock": 20991400,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mEDGE",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x698dA5D987a71b68EbF30C1555cfd38F190406b7",
+      "startBlock": 21673331,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mMEV",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x5f09Aff8B9b1f488B7d1bbaD4D89648579e55d61",
+      "startBlock": 21771638,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mRE7",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x0a2a51f2f206447dE3E3a80FCf92240244722395",
+      "startBlock": 21786070,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mSL",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x12570b84b633629b1DB532fD3420F34a30ACfc68",
+      "startBlock": 22275149,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mFONE",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x8D51DBC85cEef637c97D02bdaAbb5E274850e68C",
+      "startBlock": 22438041,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mFONE",
+      "key": "mFONEUnloop.customFeed",
+      "issuer": "Midas",
+      "address": "0x6dfD4f744273142AcdAaFd96E3A194D604a14Db3",
+      "startBlock": 24992957,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mHYPER",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x43881B05C3BE68B2d33eb70aDdF9F666C5005f68",
+      "startBlock": 22924150,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mAPOLLO",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x84303e5568C7B167fa4fEBc6253CDdfe12b7Ee4B",
+      "startBlock": 22924586,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mLIQUIDITY",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x74508886cDFEF22FddEDcA0d9Caf9E00E876C5aF",
+      "startBlock": 22466432,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "hypeETH",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x1ce3E159F37c36fD1FF9C3b5Af8725EF890955DD",
+      "startBlock": 22516893,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "hypeBTC",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0xF89D50aff35f9e57125B7eDfE6394e943Ed2b3C7",
+      "startBlock": 22517102,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "hypeUSD",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x0f50b401509798F1919a4e8D38192F78734e49C0",
+      "startBlock": 22530594,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "tUSDe",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0xa384E76d44bF8ac899B489354fB1A5aAB53893DB",
+      "startBlock": 22594336,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "tETH",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0xEA6a495bA398FAE5f9780335FE27f33E6cCC995E",
+      "startBlock": 22594512,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "tBTC",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x65C4e04Cc26aAdd1eC95C54Cd6dBa61a270F15ca",
+      "startBlock": 22594576,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mevBTC",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0xffd462e0602Dd9FF3F038fd4e77a533f8c474b65",
+      "startBlock": 22867653,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mFARM",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x65df7299A9010E399A38d6B7159d25239cDF039b",
+      "startBlock": 23073904,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "msyrupUSD",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x41c60765fA36109b19B21719F4593F19dDeFa663",
+      "startBlock": 23232885,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "msyrupUSDp",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x337d914ff6622510FC2C63ac59c1D07983895241",
+      "startBlock": 23339371,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "zeroGUSDV",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0xB5721B11883aEc70696A1082051d36c79cA9B10c",
+      "startBlock": 23269905,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "zeroGETHV",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x03fDA274c303b128EBA9E00Bf555A3f4f4f26ec3",
+      "startBlock": 23274262,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "zeroGBTCV",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x8c7400777bD4B05864f21c446f6a3e996BC047d2",
+      "startBlock": 23274503,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "JIV",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0xc4fB4B8641ac466758Dc05276c00EB570F587ED1",
+      "startBlock": 23274862,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mRE7BTC",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x9de073685AEb382B7c6Dd0FB93fa0AEF80eB8967",
+      "startBlock": 23288683,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "acremBTC1",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0xD0eEd92DB46B099f8DEA366a7198b5Dd249Af61F",
+      "startBlock": 23367433,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mWildUSD",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0xb70eCe4F1a87c419E1082691Bb9a49eb7CaAe6a6",
+      "startBlock": 23432137,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mEVUSD",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x6f51d8aF5bE2cF3517B8d6Cd07361bE382E83be6",
+      "startBlock": 23496862,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mEVETH",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x8B747cDC36418c7AD822f9e21F69C6bE878e7510",
+      "startBlock": 25172988,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mHyperETH",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x5C81ee2C3Ee8AaAC2eEF68Ecb512472D9E08A0fd",
+      "startBlock": 23547176,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mHyperBTC",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x3359921992C33ef23169193a6C91F2944A82517C",
+      "startBlock": 23576666,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mPortofino",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x88956C00A5Fa046c823eAED747F21A95D2264403",
+      "startBlock": 23676502,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mKRalpha",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x38092073c5483bA9D844cC6733976957011e8AEe",
+      "startBlock": 24084321,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mROX",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x7fF56C3a31476c231e74E4F64e9d9718572B54Aa",
+      "startBlock": 24425794,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mTU",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x464cF50c350B09a3201403F3bB89feee08D0b6F8",
+      "startBlock": 24527305,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mM1USD",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0xad316aA927c0970C2e8f0B903211D0bd19A10702",
+      "startBlock": 24534349,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mGLOBAL",
+      "key": "customFeedGrowth",
+      "issuer": "Midas",
+      "address": "0x66Aa9fcD63DF74e1f67A9452E6E59Fbc67f75E38",
+      "startBlock": 24798563,
+      "abi": "CustomFeedGrowth"
+    },
+    {
+      "product": "mGLOBAL",
+      "key": "mGLOBALDialectic.customFeed",
+      "issuer": "Midas",
+      "address": "0x355FD9Ef2AfBF812963A8be8481F08298F401080",
+      "startBlock": 25732023,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "bondUSD",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0xBD143c51F448f9F882a4C8CFbD04f3226Bb914C6",
+      "startBlock": 24849910,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "bondETH",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x1C53c83553a71D88c1B1e4bf479bb9D9db0c23a6",
+      "startBlock": 24850373,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "bondBTC",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0xc7871E40712f2D769a2dEA7a2a72d23f12b88A6e",
+      "startBlock": 24869338,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "stockMarketTRBasisTrade",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x1c7bEc0281080C0A4f85e55151191aF27EC69940",
+      "startBlock": 25122855,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "carryTradeUSDTRYLeverage",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0xc69731B51C6dBb2fb818D8DB1F4116FB8A379288",
+      "startBlock": 25128249,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mWIN",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x1725A66D810C0775f6B3B0FD85646D371dA19517",
+      "startBlock": 25236953,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mWIN",
+      "key": "mWINDialectic.customFeed",
+      "issuer": "Midas",
+      "address": "0x17d3C24a956641983377975f0E903D4B87894E2B",
+      "startBlock": 25732488,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "qHVNUSD",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x7023625CBc91e752FdD49b9233252B8F6b731c8B",
+      "startBlock": 25286363,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "sGold",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x4402D9E2A00E22E1708A66b72eCEc662046E0b35",
+      "startBlock": 25342773,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "turtlePST",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0xF64c653Cb1B0E454Aa6Eb4a45a87A81d1dE89970",
+      "startBlock": 25387184,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mGLO",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x59313b6ae481e39B8E7710C8C26dC0ada3C532Ca",
+      "startBlock": 25523572,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mGLO",
+      "key": "mGLO3F.customFeed",
+      "issuer": "Midas",
+      "address": "0xeef8B6C0F079d8a156867E47f7d75890fD376701",
+      "startBlock": 25732833,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mM1BTC",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x0066B0Cf5d7185cC30345AAAe258568f564b46d1",
+      "startBlock": 25529890,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mGLOeuro",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x8B7B1689396ef4468df1c0faB181D29B47089609",
+      "startBlock": 25638918,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mALPHA",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0xB7cc7498dc7ac2da5f59fEFfeE2dbF5Ac1061616",
+      "startBlock": 25781594,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "Re7YIELD",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0xCcd2ad28c575dc67CE77b324dC24061d7D4fCb11",
+      "startBlock": 25831572,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "Re7BTC",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0xc70844D566E7B1445a8B1005565E4ccf5acE010b",
+      "startBlock": 25831625,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mArb",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0xDf5B71c27A3639455B160e0D78D6D3248EA5a718",
+      "startBlock": 25831634,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mArbETH",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x3445F16666D3f81F6bEf93b14830E32C999D72DF",
+      "startBlock": 25831574,
+      "abi": "CustomFeed"
+    },
+    {
+      "product": "mArbBTC",
+      "key": "customFeed",
+      "issuer": "Midas",
+      "address": "0x4c7e246F09c4D3FA8d20691dd532C599cBF2d5FD",
+      "startBlock": 25831643,
+      "abi": "CustomFeed"
+    }
+  ]
+}

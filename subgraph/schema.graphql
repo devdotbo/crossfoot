@@ -1,0 +1,169 @@
+# Crossfoot feed subgraph: the posted side of two feed families with one schema.
+# POSTED: the 60 bounded Midas customFeed proxies (an admin posts a value).
+# DERIVED: svZCHF (the value follows from Frankencoin savings module state).
+# On-chain facts only; Crossfoot verdicts and bundle hashes stay off chain.
+# Spec: docs/specs/04-subgraph.md.
+
+enum Family {
+  POSTED
+  DERIVED
+}
+
+enum Path {
+  SAFE       # guarded setter: setRoundDataSafe(int256) 0x89d6e95f or setRoundDataSafe(int256,uint256,int80) 0x92260352
+  UNCHECKED  # unguarded setter: setRoundData(int256) 0xa4381d1f or setRoundData(int256,uint256,int80) 0x2b6e02c7
+  UNKNOWN    # neither the outer transaction nor a call trace attributed the post
+  PROTOCOL   # DERIVED feeds: a state transition of the protocol, not an admin post
+}
+
+enum FlowKind {
+  SAVED
+  WITHDRAWN
+  INTEREST_COLLECTED
+}
+
+type Feed @entity(immutable: false) {
+  id: Bytes!                       # proxy address (POSTED) or the svZCHF vault address (DERIVED)
+  family: Family!
+  issuer: String!                  # data source context: "Midas", "Frankencoin"
+  product: String!                 # data source context: "mRE7", "svZCHF"
+  registryKey: String              # data source context: customFeed, customFeedGrowth, mFONEUnloop.customFeed
+  description: String              # description() at creation via try_
+  decimals: Int!                   # decimals() at creation via try_ (8 on every Midas feed), 18 for svZCHF
+  inputsFrom: Bytes                # DERIVED only: the savings module the rounds are derived from
+  bound: BigInt                    # maxAnswerDeviation() as stored, 1e8 = 1 percent; null for DERIVED
+  minAnswer: BigInt
+  maxAnswer: BigInt
+  implementation: Bytes            # latest Upgraded(address) argument
+  createdAtBlock: BigInt!
+  createdAtTimestamp: BigInt!
+  createdBy: Bytes!                # transaction.from of the first event on the source
+  latestRound: Round
+  latestAnswer: BigInt
+  latestUpdatedAt: BigInt
+  latestRateProposal: RateProposal # DERIVED only: the most recent RateProposed, joined by RateChanged
+  roundCount: Int!
+  uncheckedCount: Int!             # rounds with path UNCHECKED and first false
+  overBoundCount: Int!             # rounds with overBound true
+  boundChangeCount: Int!
+  upgradeCount: Int!
+  rounds: [Round!]! @derivedFrom(field: "feed")
+  boundChanges: [BoundChange!]! @derivedFrom(field: "feed")
+  upgrades: [Upgrade!]! @derivedFrom(field: "feed")
+  posters: [Poster!]! @derivedFrom(field: "feeds")
+}
+
+# One AnswerUpdated event (POSTED) or one protocol state transition (DERIVED).
+# Immutable: the only later write is the setter call handler of the same
+# transaction, which the store allows inside the creation block.
+type Round @entity(immutable: true) {
+  id: Bytes!                       # feed address ++ roundId as a 32-byte big-endian word
+  feed: Feed!
+  roundId: BigInt!                 # AnswerUpdated.roundId; running counter for DERIVED feeds
+  answer: BigInt!                  # AnswerUpdated.data; vault price() for DERIVED feeds
+  updatedAt: BigInt!               # AnswerUpdated.timestamp; block timestamp for DERIVED feeds
+  block: BigInt!
+  blockTimestamp: BigInt!
+  tx: Bytes!
+  logIndex: BigInt!
+  poster: Bytes!                   # transaction.from (the EOA that sent the outer transaction)
+  caller: Bytes                    # immediate caller of the setter from the call trace (a Safe for routed posts, the poster for direct posts); null when unattributed
+  path: Path!
+  selector: Bytes                  # four-byte selector of the setter, kept raw; null when unattributed
+  attributedBy: String!            # TRANSACTION (outer calldata), CALL (call handler at any depth), NONE, PROTOCOL
+  first: Boolean!                  # no previous round on this feed; the guard does not apply
+  previousAnswer: BigInt
+  secondsSincePrevious: BigInt
+  deviationFromPrevious: BigInt    # |answer - previous| * 1e8 * 100 / previous (contract formula); null if previous is absent or zero
+  boundAtPost: BigInt              # maxAnswerDeviation() at the event block (declared eth_call), null if the call failed
+  overBound: Boolean!              # !first && deviationFromPrevious > boundAtPost; always false for DERIVED
+  extra: BigInt                    # the unindexed int80 of the four-argument AnswerUpdated (mGLOBAL growth), else null
+  totalAssets: BigInt              # DERIVED only: vault totalAssets() at the event block
+  totalSupply: BigInt              # DERIVED only: vault totalSupply() at the event block
+  trigger: String                  # DERIVED only: RATE_CHANGED, SAVED, WITHDRAWN, INTEREST_COLLECTED
+}
+
+# Bookkeeping for the event-to-call join: the rounds one feed emitted in one
+# transaction, consumed in order by the setter call handlers of that transaction.
+type PostTx @entity(immutable: true) {
+  id: Bytes!                       # feed address ++ tx hash
+  feed: Feed!
+  tx: Bytes!
+  firstRoundId: BigInt!
+  count: Int!                      # AnswerUpdated events of this feed in this transaction
+  attributed: Int!                 # setter calls of this feed already joined
+}
+
+type BoundChange @entity(immutable: true) {
+  id: Bytes!                       # tx hash ++ logIndex
+  feed: Feed!
+  initializerVersion: Int!         # Initialized(uint8).version; 0 when detectedBy is ROUND
+  changed: Boolean!                # a previous value existed and any of the three differs
+  detectedBy: String!              # INITIALIZED or ROUND
+  oldBound: BigInt
+  newBound: BigInt
+  oldMinAnswer: BigInt
+  newMinAnswer: BigInt
+  oldMaxAnswer: BigInt
+  newMaxAnswer: BigInt
+  block: BigInt!
+  blockTimestamp: BigInt!
+  tx: Bytes!
+  caller: Bytes!                   # transaction.from
+}
+
+type Upgrade @entity(immutable: true) {
+  id: Bytes!                       # feed address ++ tx hash (one Upgraded per proxy per transaction)
+  feed: Feed!
+  implementation: Bytes!
+  withInitializer: Boolean!        # an Initialized event of the same feed in the same transaction (set by that handler, same block)
+  block: BigInt!
+  blockTimestamp: BigInt!
+  tx: Bytes!
+  logIndex: BigInt!
+}
+
+type Poster @entity(immutable: false) {
+  id: Bytes!                       # transaction.from
+  feeds: [Feed!]!
+  roundCount: Int!
+  uncheckedCount: Int!
+  firstSeenBlock: BigInt!
+  lastSeenBlock: BigInt!
+}
+
+type RateChange @entity(immutable: true) {
+  id: Bytes!                       # tx hash ++ logIndex
+  feed: Feed!
+  ratePPM: Int!
+  applier: Bytes!                  # transaction.from
+  proposal: RateProposal           # the latest RateProposal with the same rate and nextChange <= blockTimestamp
+  block: BigInt!
+  blockTimestamp: BigInt!
+  tx: Bytes!
+}
+
+type RateProposal @entity(immutable: true) {
+  id: Bytes!                       # tx hash ++ logIndex
+  feed: Feed!
+  proposer: Bytes!                 # RateProposed.who
+  nextRatePPM: Int!
+  nextChange: BigInt!
+  block: BigInt!
+  blockTimestamp: BigInt!
+  tx: Bytes!
+}
+
+type VaultFlow @entity(immutable: true) {
+  id: Bytes!                       # tx hash ++ logIndex
+  feed: Feed!
+  kind: FlowKind!
+  account: Bytes!                  # the indexed address (the vault, by the manifest topic filter)
+  amount: BigInt!                  # Saved and Withdrawn amount; InterestCollected gross interest
+  referralFee: BigInt              # InterestCollected referrerFee
+  block: BigInt!
+  blockTimestamp: BigInt!
+  tx: Bytes!
+  logIndex: BigInt!
+  round: Round                     # the DERIVED round written by the same handler (null below the vault deployment block)
+}

@@ -1,0 +1,23 @@
+{
+  "name": "crossfoot-feed-subgraph",
+  "version": "0.0.1",
+  "private": true,
+  "description": "The Graph subgraph for the Midas customFeed family (POSTED) and svZCHF (DERIVED) on Ethereum mainnet",
+  "license": "MIT",
+  "scripts": {
+    "gen": "bun run scripts/gen-manifest.ts",
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "test": "graph test",
+    "check-try": "sh scripts/check-try.sh",
+    "check-queries": "bun run scripts/check-queries.ts"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.97.1",
+    "@graphprotocol/graph-ts": "0.38.2"
+  },
+  "devDependencies": {
+    "graphql": "16.11.0",
+    "matchstick-as": "0.6.0"
+  }
+}

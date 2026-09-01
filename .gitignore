@@ -12,3 +12,11 @@ site/
 .env
 *.DS_Store
 .DS_Store
+
+# Subgraph toolchain output (subgraph/): dependencies, codegen, build, and the
+# matchstick binary cache. subgraph.yaml is generated but committed (04 R1).
+subgraph/node_modules/
+subgraph/build/
+subgraph/generated/
+subgraph/tests/.bin/
+subgraph/tests/.latest.json
