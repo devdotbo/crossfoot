@@ -69,22 +69,57 @@ switched by environment variables only.
   `subscription.active`, `subscription.uncanceled`, `subscription.canceled`,
   `subscription.revoked`, `order.refunded`. Sandbox and production hosts
   chosen by `POLAR_ENV`.
-- x402: the v2 protocol as shipped by upstream (`x402-rs` v1.3.0 of
-  2026-02-15 speaks v2 with CAIP-2 network ids, the `exact` scheme on
-  EIP-3009 `transferWithAuthorization`, and an `upto` scheme; verified in
-  the continuity memo). Facilitator endpoints `/supported`, `/verify`,
-  `/settle`. Header names of v2 (`PAYMENT-REQUIRED`, `PAYMENT-SIGNATURE`,
-  `PAYMENT-RESPONSE`), the TypeScript package names, the Coinbase
-  facilitator URL and its key requirement are unverified as of
-  2026-09-01 and are checked on kickoff day (Q2).
-- Networks: Base mainnet `eip155:8453` and Base Sepolia `eip155:84532`
-  with their USDC contracts (addresses unverified here, copied from the
-  Circle developer page at scaffold time); Arc testnet `eip155:5042002`
-  with native USDC (06 "Inputs").
+- x402: Protocol Version 2 of the x402 Foundation (checklist X1, from
+  the archived spec): the server answers an unpaid request with 402 and a
+  base64 `PAYMENT-REQUIRED` header carrying `PaymentRequired`
+  (`x402Version: 2`, `resource`, `accepts[]` with `scheme`, CAIP-2
+  `network`, atomic `amount`, `asset`, `payTo`, `maxTimeoutSeconds`,
+  `extra.name` and `extra.version` for the EIP-712 domain); the client
+  retries with a base64 `PAYMENT-SIGNATURE` header; the server verifies
+  and settles through a facilitator (`/verify`, `/settle`, `/supported`)
+  and answers 200 with a `PAYMENT-RESPONSE` header (`success`,
+  `transaction`, `network`, `payer`). Scheme `exact` on EVM is EIP-3009
+  `transferWithAuthorization`; the facilitator broadcasts and pays gas.
+- x402 packages, as the checklist records them (npm dist-tags of
+  2026-09-01, 2.24.0; re-read on kickoff day): server `@x402/core`
+  (`x402ResourceServer`, `HTTPFacilitatorClient`), `@x402/evm`
+  (`ExactEvmScheme`), middleware `@x402/hono` (`paymentMiddleware`; the
+  Express shape is `@x402/express`); client `@x402/fetch`
+  (`wrapFetchWithPayment`, `x402Client`). The v1 packages `x402`,
+  `x402-hono`, `x402-express`, `x402-fetch` (1.2.0) coexist on npm and
+  are never installed or mixed in. `@coinbase/cdp-sdk` is optional for
+  the CDP facilitator client and faucet.
+- Facilitators (checklist X1): the public x402.org facilitator
+  `https://x402.org/facilitator` (Base Sepolia, no account, testnet
+  only, never for mainnet routes) for the demo and the tests; the
+  Coinbase CDP facilitator `https://api.cdp.coinbase.com/platform/v2/x402`
+  (CDP API key id and secret; first 1,000 settlements per month free,
+  then $0.001 each; verification free) for the paid path on Base
+  mainnet; the x402 reference facilitator example or the x402-rs Docker
+  image as a self-hosted fallback with its own funded key, separate from
+  the payTo wallet. Arc appears in no facilitator list and not in the
+  SDK's default asset table, so Arc is not an x402 network in this spec.
+- Networks and assets from the v2 SDK default asset table: Base mainnet
+  `eip155:8453` USDC `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`, Base
+  Sepolia `eip155:84532` USDC `0x036CbD53842c5426634e7929541eC2318f3dCF7e`.
+  The payTo wallet is a fresh key holding no gas.
+- Hosting (checklist X3): the app is a TanStack Start project on Vercel
+  with Convex as the backend; Convex Free has no custom domains, so the
+  public API and the x402 handshake are served by Start server routes on
+  Vercel at `api.crossfoot.tech` (CNAME to the project target, same
+  project as `app.crossfoot.tech`) and call Convex queries; the Convex
+  HTTP action stays only as the ingestion endpoint (07 R1). Account
+  prerequisite: Vercel Hobby is restricted to non-commercial use, so the
+  paid tier requires Vercel Pro ($20 per developer seat per month; a
+  14-day trial exists). Secrets sit in Vercel environment variables
+  without the `VITE_` prefix for server routes and in Convex deployment
+  variables for functions.
 
 Derived from: `raw/teammate-memos/2026-09-01-loreluna-audit.md` (sections
-3 to 6), `raw/teammate-memos/2026-09-01-alt-thesis-continuity.md` (x402
-v2 facts, the fork), `wiki/ecosystem-status.md` (Base carries the largest
+3 to 6), `wiki/sponsor-setup-checklist.md` X1 to X3 and X5 (x402 v2 wire
+flow, packages, facilitators, USDC addresses, Vercel and Convex hosting,
+accounts and costs, with its raw captures),
+`raw/teammate-memos/2026-09-01-alt-thesis-continuity.md` (the fork), `wiki/ecosystem-status.md` (Base carries the largest
 x402 volume by the agenteconomy dashboard, a claim with a manufacturability
 caveat), `wiki/product-vision.md` (who pays, alert event types),
 `wiki/crossfoot-build-plan.md` (items 5, 7, 8, kill order),
@@ -206,12 +241,14 @@ Entitlements and Polar:
   a host parameter, and the README lists every variable with the value
   source.
 
-Public risk-feed API (Convex HTTP actions):
+Public risk-feed API (TanStack Start server routes on Vercel at
+`api.crossfoot.tech`, calling the Convex queries of 07 R6; not Convex
+HTTP actions, which serve `/ingest` only):
 
-- R15. `GET /api/v1/feeds/<address>` returns `{"format":
+- R15. `GET /v1/feeds/<address>` on `api.crossfoot.tech` returns `{"format":
   "crossfoot-risk-feed-v1", "feed": <the 07 feeds row>, "decision": <the
   latest decision record of 05 R9 verbatim>, "findings": [...], "served":
-  {"at": <unix>, "ingestion": "<id>"}}`. `GET /api/v1/feeds` returns the
+  {"at": <unix>, "ingestion": "<id>"}}`. `GET /v1/feeds` returns the
   family summary: one object per feed with address, product, family,
   verdict, posting_path, liveness, consumer_action, decision, reason,
   bundle_root, plus the decision run header. Both read the same Convex
@@ -228,36 +265,46 @@ Public risk-feed API (Convex HTTP actions):
 
 x402 pay-per-query:
 
-- R18. Network default: Base (`eip155:8453` in production, `eip155:84532`
-  in the demo) with USDC. Reasons: the x402 reference facilitators support
-  Base out of the box, USDC on Base implements EIP-3009 which the `exact`
-  scheme needs, and Base carries the largest x402 volume by the only
-  dashboard the wiki cites (claim, manufacturable). Arc is the option kept
-  open: native USDC on Arc testnet is verified for gas, whether an x402
-  facilitator lists `eip155:5042002` is unverified; if one does, Arc is
-  added as a second accepted requirement in the same 402 response, never
-  as the only one.
-- R19. An unauthenticated request receives HTTP 402 with the v2 payment
-  requirements header (base64 JSON) and the same JSON in the body: `x402
-  Version 2`, `accepts: [{scheme: "exact", network: <CAIP-2>, asset:
-  <USDC>, payTo: <CROSSFOOT_PAY_TO>, maxAmountRequired: <atomic units>,
-  resource: <the request URL>, description, mimeType: "application/json",
-  maxTimeoutSeconds: 60, extra: {name: "USD Coin", version: "2"}}]`.
-  Amounts: per-feed query 1000 atomic units (0.001 USDC), family summary
-  10000 (0.01 USDC); constants in one file, printed on `/method`.
-- R20. Facilitator: `X402_FACILITATOR_URL`, default the x402.org
-  facilitator for Base Sepolia (no key) and the Coinbase facilitator for
-  Base mainnet (key in `X402_FACILITATOR_KEY`, unverified); on boot the
-  action reads `/supported` once and refuses to advertise a network the
-  facilitator does not list. A self-hosted facilitator (x402-rs) is the
-  fallback and is configured by the same variable.
-- R21. Flow on a request carrying the payment header: the action posts
-  `/verify` with the payload and the requirement; on success it posts
-  `/settle`; only after settle succeeds it runs the query and returns
-  200 with the settlement (transaction hash, network, payer) in the v2
-  response header. A verify or settle failure returns 402 again with the
-  facilitator's reason in the body and no data. Verify then settle then
-  serve, so no response is served on a payment that did not settle.
+- R18. Network: Base only, `eip155:84532` (Base Sepolia) in the demo and
+  the tests, `eip155:8453` (Base mainnet) on the paid path, asset USDC
+  from the default asset table. Reasons: Base is the one network with a
+  public no-account testnet facilitator, has the widest production
+  facilitator coverage, and is where The Graph's own x402 gateway
+  settles, so one buyer wallet on Base pays both this API and the gateway
+  in the same demo. Arc is not an accepted x402 network: no facilitator
+  lists it; the Arc attestation of 06 is a separate on-chain write, not
+  the payment rail. Exactly one `accepts` entry is advertised per
+  environment.
+- R19. An unauthenticated request receives HTTP 402 with the base64
+  `PAYMENT-REQUIRED` header and the same `PaymentRequired` JSON in the
+  body: `x402Version: 2`, `resource` (the request URL, description,
+  `mimeType: "application/json"`), `accepts: [{scheme: "exact", network:
+  <CAIP-2>, amount: <atomic units>, asset: <USDC>, payTo:
+  <X402_PAY_TO>, maxTimeoutSeconds: 60, extra: {name: "USD Coin",
+  version: "2"}}]`, field names as in the archived v2 spec. Amounts:
+  per-feed query 1000 atomic units (0.001 USDC), family summary 10000
+  (0.01 USDC), expressed as route prices in the middleware config;
+  constants in one file, printed on `/method`.
+- R20. Facilitator by `FACILITATOR_URL`: `https://x402.org/facilitator`
+  on Preview and in the demo (Base Sepolia, no account), the CDP
+  facilitator URL on Production with `CDP_API_KEY_ID` and
+  `CDP_API_KEY_SECRET` (Base mainnet, free tier). On boot the server
+  reads `/supported` once and refuses to advertise a network the
+  facilitator does not list; a mainnet route configured against the
+  x402.org URL fails the boot check. A self-hosted facilitator is
+  configured by the same variable.
+- R21. Server: `x402ResourceServer` with `HTTPFacilitatorClient` from
+  `@x402/core`, `ExactEvmScheme` from `@x402/evm` registered for the
+  configured network, and `paymentMiddleware` from `@x402/hono` mounted
+  in the Start server route (mounting is Q2). On a request carrying
+  `PAYMENT-SIGNATURE` the server verifies, settles, and only after a
+  successful settlement returns 200 with the query result and the
+  `PAYMENT-RESPONSE` header (transaction hash, network, payer). A verify
+  or settle failure returns 402 with the facilitator's reason in the body
+  and no data. If the middleware's default order is verify, handler,
+  settle, the handler's body is held until settle succeeds; whether 2.24
+  supports that ordering is checked on kickoff day, else the handshake
+  is written directly on `x402ResourceServer` without the middleware.
 - R22. Replay protection: the EIP-3009 nonce of the authorization is
   unique per (network, payer) by the token contract; the app additionally
   records every accepted payment in `x402Payments` keyed by (network,
@@ -271,27 +318,32 @@ x402 pay-per-query:
   The log is the `x402Payments` table plus a redacted line in the
   function log.
 - R24. Demo client: `scripts/pay-query.ts` in the Crossfoot repository
-  (00 commit 18e) pays one query on Base Sepolia from a funded test key
-  and prints the 402 requirements, the settlement hash and the JSON; the
-  same script with `--api-key` shows the subscriber path returning an
-  identical body.
+  (00 commit 18e) uses `x402Client` with `setSpendControls({
+  maxAmountPerPayment: "$0.05" })`, `ExactEvmScheme(privateKeyToAccount(
+  key))` registered for `eip155:*`, and `wrapFetchWithPayment` from
+  `@x402/fetch`; it pays one query on Base Sepolia from a test key
+  funded with faucet USDC and prints the 402 requirements, the decoded
+  `PAYMENT-RESPONSE` (settlement hash) and the JSON; the same script with
+  `--api-key` shows the subscriber path returning an identical body.
 
 Security:
 
 - R25. No secret reaches the client bundle: Polar tokens, the webhook
-  secret, the ingest secret, the facilitator key, the mail key and the
-  pay-to private key (which the app never holds; `payTo` is an address)
-  live in Convex environment variables; a build-time scan fails CI if a
-  `POLAR_`, `X402_FACILITATOR_KEY`, `CROSSFOOT_INGEST_SECRET` or `SCW_`
-  value appears in the client output.
+  secret, the ingest secret, the CDP key id and secret, the mail key and
+  the pay-to private key (which the app never holds; `payTo` is an
+  address) live in Vercel environment variables without the `VITE_`
+  prefix (server routes) or in Convex deployment variables (functions);
+  a build-time scan fails CI if a `POLAR_`, `CDP_API_KEY`,
+  `CROSSFOOT_INGEST_SECRET`, `CONVEX_DEPLOY_KEY` or `SCW_` value appears
+  in the client output.
 - R26. Rate limits: sign-in codes (R1), API keys (R16), 402 issuance 120
   per minute per IP and verify calls 30 per minute per IP (each verify
   costs a facilitator call), ingestion 10 per minute. Limits are one
   table and one helper.
 - R27. Webhook and ingest bodies are verified before parsing (R12, 07
   R1); CORS allows the app origin only for authenticated routes and `*`
-  for `GET /api/v1/*` and `/ingest` rejects cross-origin browsers by
-  requiring the bearer header.
+  for `GET /v1/*` on the API host, and `/ingest` rejects cross-origin
+  browsers by requiring the bearer header.
 - R28. API keys and one-time codes are compared by hash; revocation is
   immediate; `bun audit` runs in CI and a high finding blocks merge.
 
@@ -329,30 +381,33 @@ facilitatorStatus, responseSha256, ingestionId, createdAt),
 
 Environment variables: `POLAR_ENV`, `POLAR_ACCESS_TOKEN`,
 `POLAR_WEBHOOK_SECRET`, `POLAR_PRODUCT_ID_MONITORING`,
-`POLAR_PRODUCT_ID_API`, `CROSSFOOT_INGEST_SECRET`, `X402_NETWORK`,
-`X402_ASSET`, `X402_FACILITATOR_URL`, `X402_FACILITATOR_KEY`,
-`CROSSFOOT_PAY_TO`, `X402_PRICE_FEED`, `X402_PRICE_FAMILY`, mail transport
-keys, `SITE_URL`, `SIWE_CHAIN_IDS`, `ENS_RPC_URL` (server, mainnet),
-`VITE_WALLETCONNECT_PROJECT_ID` (client, public). The README lists each with sandbox and production
+`POLAR_PRODUCT_ID_API`, `CROSSFOOT_INGEST_SECRET` (Convex),
+`X402_NETWORK`, `FACILITATOR_URL`, `CDP_API_KEY_ID`, `CDP_API_KEY_SECRET`
+(Production only), `X402_PAY_TO`, `X402_PRICE_FEED`, `X402_PRICE_FAMILY`
+(Vercel, server routes), `CONVEX_DEPLOY_KEY` (Vercel, per environment),
+mail transport keys, `SITE_URL`, `SIWE_CHAIN_IDS`, `ENS_RPC_URL` (server,
+mainnet), `VITE_WALLETCONNECT_PROJECT_ID` (client, public). Preview
+carries the Polar sandbox values and the x402.org facilitator;
+Production the Polar production values and the CDP facilitator. The README lists each with sandbox and production
 values or their source.
 
 402 body example (demo values):
 
 ```json
-{"x402Version": 2, "error": "payment required",
- "accepts": [{"scheme": "exact", "network": "eip155:84532", "asset": "<USDC on Base Sepolia>",
-   "payTo": "0x...", "maxAmountRequired": "1000", "resource": "https://app.crossfoot.tech/api/v1/feeds/0x0a2a...2395",
-   "description": "Crossfoot risk feed, one feed", "mimeType": "application/json", "maxTimeoutSeconds": 60,
+{"x402Version": 2,
+ "resource": {"url": "https://api.crossfoot.tech/v1/feeds/0x0a2a...2395", "description": "Crossfoot risk feed, one feed", "mimeType": "application/json"},
+ "accepts": [{"scheme": "exact", "network": "eip155:84532", "amount": "1000",
+   "asset": "0x036CbD53842c5426634e7929541eC2318f3dCF7e", "payTo": "0x...", "maxTimeoutSeconds": 60,
    "extra": {"name": "USD Coin", "version": "2"}}]}
 ```
 
 ## CLI or API surface
 
 ```
-GET  /api/v1/feeds                      # family summary; key or x402
-GET  /api/v1/feeds/<address>            # one feed; key or x402
-POST /polar/webhook                     # Polar, Standard Webhooks signature
-POST /ingest                            # 07 R1
+GET  https://api.crossfoot.tech/v1/feeds            # family summary; key or x402 (Vercel server route)
+GET  https://api.crossfoot.tech/v1/feeds/<address>  # one feed; key or x402 (Vercel server route)
+POST https://app.crossfoot.tech/polar/webhook       # Polar, Standard Webhooks signature
+POST https://<deployment>.convex.site/ingest        # 07 R1, the only Convex HTTP action
 bun scripts/pay-query.ts --url <api url> [--api-key cf_...] [--private-key-env X402_TEST_KEY]
 ```
 
@@ -381,7 +436,7 @@ required or failed, body says which), 403 (key without quota), 404
 | R14 | `sandbox_and_production_hosts_differ_only_by_env` (host parameter); README variable table present (CI grep) |
 | R15, R17 | `risk_feed_json_matches_the_explorer_query` (byte equality of the `decision` object with `decisions.byFeed`); `key_path_and_paid_path_return_identical_bodies` (facilitator mocked) |
 | R16 | `api_key_is_stored_hashed_and_shown_once`; `quota_and_burst_return_429_with_retry_after`; `revoked_key_is_401` |
-| R18, R20 | `advertised_networks_are_a_subset_of_facilitator_supported` (`/supported` mocked with and without Arc) |
+| R18, R20 | `advertised_network_is_listed_by_the_facilitator` (`/supported` mocked with and without `eip155:84532`; a mainnet route against the x402.org URL fails the boot check); `only_one_accepts_entry_and_never_arc` |
 | R19 | `unauthenticated_request_returns_402_with_requirements` (header and body equal, amounts from constants) |
 | R21 | `verify_then_settle_then_serve` (call order asserted; settle failure returns 402 and no body) |
 | R22 | `repeated_nonce_is_rejected_before_the_facilitator`; `expired_valid_before_is_rejected` |
@@ -398,7 +453,8 @@ required or failed, body says which), 403 (key without quota), 404
   delivery, team billing seats, invoices beyond Polar's own.
 - The `upto` scheme, streaming payments, and anything from the ws-stream
   fork; a Rust buyer could replace `pay-query.ts` after the fork is read.
-- Payment on Hedera or through Blocky402 (HBAR only, Hedera dropped).
+- Payment on Hedera or through Blocky402 (HBAR only, Hedera dropped),
+  and payment on Arc (no facilitator lists it; 06 is not a payment rail).
 
 ## Open questions
 
@@ -406,12 +462,13 @@ required or failed, body says which), 403 (key without quota), 404
   R1e), passkey primary, SIWE wallet, email code. What remains to verify
   on kickoff day is listed under "Inputs and sources" (plugin
   pass-through, EIP-1271 hook, ConnectKit state).
-- Q2. x402 v2 header names, package names, the Coinbase facilitator URL
-  and whether the handshake runs inside a Convex HTTP action (fetch only,
-  no Node middleware). Default: the handshake is hand-written against
-  `/verify` and `/settle` with pinned upstream types; if the Convex
-  runtime cannot host it, the two API routes move to TanStack Start
-  server routes that call the same Convex query.
+- Q2. How a Hono app with `paymentMiddleware` is mounted inside a
+  TanStack Start server route on Vercel (checklist X6, no document
+  fetched), and whether the 2.24 middleware can hold the body until
+  settlement (R21). Default: mount the Hono app under `/v1/*` in one
+  server route; if that fails, drive `x402ResourceServer` directly from
+  the route handler with the same facilitator client. Package versions
+  are re-read from npm on kickoff day before `bun add`.
 - Q3. Prices: the Monitoring monthly price and the per-query amounts.
   Default: amounts of R19; the subscription price is set in Polar by the
   user and printed from the catalog, never hard-coded in copy.
