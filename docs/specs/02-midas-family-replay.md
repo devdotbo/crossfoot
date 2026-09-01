@@ -27,33 +27,28 @@ line "66 feeds replayed, 29 unchecked posts over the bound on 14 feeds".
 
 ## Inputs and sources
 
-Contract shape (from the verified mRE7 implementation
-`0x9d14d6ab8cb76a1a497139eca76bcb3afb141411`, CustomAggregatorV3CompatibleFeed
-by RedDuck Software): 8 decimals; `maxAnswerDeviation` in percent at 1e8
-scale (36,000,000 is 0.36 percent); `setRoundData(int256)` selector
-`0xa4381d1f`, gated by the feed admin role, checks only
-`minAnswer <= value <= maxAnswer`; `setRoundDataSafe(int256)` selector
-`0x89d6e95f` additionally requires `deviation(lastAnswer, value) <=
-maxAnswerDeviation` when a previous round exists and strictly more than one
-hour since the last update, then calls `setRoundData`; deviation is
-`|value - last| * 1e8 * 100 / last` with Solidity truncation
-(`model::mtbill::deviation` is the transcription). Three-argument variants
-seen only on the mGLOBAL growth feed: `setRoundDataSafe(int256,uint256,int80)`
-`0x92260352`, `setRoundData(int256,uint256,int80)` `0x2b6e02c7`; their extra
-arguments' semantics are unverified. Other selectors seen: `initializeV3`
-`0x3c3d8410`, `emergencyWithdraw(address,uint256)` `0x95ccea67`.
+Contract shape, from the verified mRE7 implementation
+`0x9d14d6ab8cb76a1a497139eca76bcb3afb141411` (CustomAggregatorV3CompatibleFeed,
+RedDuck Software): 8 decimals; `maxAnswerDeviation` in percent at 1e8 scale
+(36,000,000 is 0.36 percent). Selectors: `setRoundData(int256)` `0xa4381d1f`
+(feed admin role, checks only `minAnswer <= value <= maxAnswer`);
+`setRoundDataSafe(int256)` `0x89d6e95f` (additionally `deviation(last, value)
+<= maxAnswerDeviation` when a round exists, and strictly more than one hour
+since the last update; deviation is `|value - last| * 1e8 * 100 / last` with
+Solidity truncation, transcribed in `model::mtbill::deviation`);
+three-argument variants on the mGLOBAL growth feed only,
+`setRoundDataSafe(int256,uint256,int80)` `0x92260352` and
+`setRoundData(int256,uint256,int80)` `0x2b6e02c7`, extra arguments
+unverified; `initializeV3` `0x3c3d8410`; `emergencyWithdraw(address,uint256)`
+`0x95ccea67`.
 
-Reads per feed, all at pinned blocks: `description()`, `decimals()`,
+Reads per feed at pinned blocks: `description()`, `decimals()`,
 `maxAnswerDeviation()`, `minAnswer()`, `maxAnswer()`, `latestRound()`,
-`latestRoundData()`, `lastTimestamp()`; `AnswerUpdated(int256,uint256,uint256)`
-logs (topic0 `0x0559884f...`, all three parameters indexed);
-`Upgraded(address)` logs (topic0 `0xbc7cd75a...`). Transaction history from
-Blockscout `module=account&action=txlist` (the log endpoint already
-configured in `cli/src/rpc.rs`). Archive reads at block minus one from the
-configured JSON-RPC endpoints.
-
-Feed list: the 66 addresses whose key contains `customFeed` under the
-Ethereum mainnet entries of the Midas address registry.
+`latestRoundData()`, `lastTimestamp()`; logs `AnswerUpdated(int256,uint256,uint256)`
+(topic0 `0x0559884f...`, all parameters indexed) and `Upgraded(address)`
+(topic0 `0xbc7cd75a...`); Blockscout `module=account&action=txlist` on the
+configured log endpoint; archive `eth_call` at block minus one. Feed list:
+the 66 mainnet addresses whose registry key contains `customFeed`.
 
 Derived from: `cli/src/mtbill.rs`, `cli/src/run_mtbill.rs`,
 `cli/src/model/mtbill.rs`, `cli/src/rpc.rs`. Research repository:
@@ -151,10 +146,14 @@ Guard replay:
   mSL 0.05 to 0.35 (interval between 2026-03-31 and 2026-05-04).
 - R13. Failed setter transactions are `FAILED_SETTER` findings with sender,
   path, value and whether the sender ever posted successfully on that feed.
-- R14. Liveness: `STALE` when the last successful post is older than
-  `--stale-after-days` (default 30) at the B1 timestamp; `INIT_ONLY` when
-  `latestRound` is 1. Both are reported per feed alongside the posting-path
-  result, not folded into one word.
+- R14. Liveness, one of four words, reported alongside the posting-path
+  result and never folded into it: `INIT_ONLY` when `latestRound` is 1 and
+  the answer is exactly 1e8 (a placeholder, whatever its age);
+  `PLACEHOLDER` when `latestRound` is above 1, the answer is exactly 1e8 and
+  the last post is older than `--stale-after-days` (default 30) at the B1
+  timestamp; `STALE` when the last post is older than the threshold and the
+  answer is not the placeholder; `LIVE` otherwise. On the survey data: 17
+  init-only, 5 placeholder, 12 stale, 26 live.
 - R15. Classification of a `GUARD_BYPASS`: `valuation_move` by default;
   `from_placeholder` when the last answer at block minus one equals 1e8 and
   the feed's first post was exactly 1e8; `scale_change` when
@@ -166,10 +165,10 @@ Verdicts and summaries:
 - R16. Per feed: `nav_recomputation: "INPUT_GAP"` always; `posting_path` is
   `ADMIN_GUARD_BYPASSED` when at least one `GUARD_BYPASS` exists, else
   `GUARDED` (or `UNATTRIBUTED` when R6 left rounds unresolved and no bypass
-  was found); `liveness` is `LIVE`, `STALE` or `INIT_ONLY`; `verdict` uses
-  the shared vocabulary: `INPUT_GAP` for R2 failures, `OBSERVED_DEVIATION`
-  when bypassed, `INSUFFICIENT_WINDOW` when `UNATTRIBUTED`, `SOURCE_STALE`
-  when stale or init-only without a bypass, else `CONSISTENT`.
+  was found); `liveness` per R14; `verdict` uses the shared vocabulary:
+  `INPUT_GAP` for R2 failures, `OBSERVED_DEVIATION` when bypassed,
+  `INSUFFICIENT_WINDOW` when `UNATTRIBUTED`, `SOURCE_STALE` when the
+  liveness is not `LIVE` and no bypass exists, else `CONSISTENT`.
   `consumer_action` is `REVIEW` unless the verdict is `CONSISTENT`, then
   `ALLOW`. `REFUSE` is never emitted: the finding does not prove the posted
   value wrong.
@@ -216,25 +215,24 @@ Verdicts and summaries:
 ```
 
 `result.json` (target `midas`): `format`, `target`, `summary` (per
-`01-svzchf-control.md` R3 with `family: "guarded-setter"`, `posted` the
-family's `survey_line`), `window {block, block_timestamp_unix}`,
-`family_summary`, `feeds[]`. Each feed entry: `product`, `key`, `address`,
-`kind` (`bounded` or `derived`), `description`, `decimals`, `bound_at_block`
-(string, 1e8 scale), `min_answer`, `max_answer`, `latest_round`,
-`latest_answer`, `last_post_utc`, `poster_addresses[]`, `posts {safe, safe3,
-raw, raw3, failed, unattributed}`, `implementation_eras[]`, `bypass_posts`,
+`01-svzchf-control.md` R3, `family: "guarded-setter"`, `posted` holds the
+`survey_line`), `window {block, block_timestamp_unix}`, `family_summary`,
+`feeds[]`. Each feed: `product`, `key`, `address`, `kind` (`bounded` or
+`derived`), `description`, `decimals`, `bound_at_block` (string, 1e8
+scale), `min_answer`, `max_answer`, `latest_round`, `latest_answer`,
+`last_post_utc`, `poster_addresses[]`, `posts {safe, safe3, raw, raw3,
+failed, unattributed}`, `implementation_eras[]`, `bypass_posts`,
 `bypass_posts_internal`, `findings[]`, `posting_path`, `liveness`,
 `verdict`, `consumer_action`, `timeline_file`.
 
-Finding shape (every kind): `{"kind": "GUARD_BYPASS", "feed": "mRE7.customFeed",
+Finding shape: `{"kind": "GUARD_BYPASS", "feed": "mRE7.customFeed",
 "transaction_hash": "0x...", "block": 25037959, "timestamp_unix": ...,
 "path": "raw", "selector": "0xa4381d1f", "value": "106438116",
 "last_answer_at_block_minus_one": "108859885", "deviation_in_force": "222466613",
 "deviation_percent": "2.22466613", "bound_in_force": "36000000",
 "bound_percent": "0.36", "classification": "valuation_move",
 "same_block": false, "initialization": false}`. Other kinds reuse the keys
-that apply and add `rule`, `interval`, `sender`, `sender_posted_successfully`
-as named in R10 to R14.
+that apply and add `rule`, `interval`, `sender`, `sender_posted_successfully`.
 
 Timeline file `timelines/<product>-<key>.json`:
 
@@ -281,7 +279,7 @@ applies.
 | R11 | `spacing_rule_is_strict_and_era_aware` (offline, synthetic) |
 | R12 | `bound_changes_are_located_between_samples` (offline, fixture: mRE7 and mSL rows) |
 | R13 | `failed_setters_are_reported_with_sender_history` (offline, fixture: five rows) |
-| R14 | `liveness_thresholds` (offline, synthetic); fixture asserts 12 stale, 17 init-only |
+| R14 | `liveness_words` (offline, synthetic, all four branches); fixture asserts 17 init-only, 5 placeholder, 12 stale, 26 live |
 | R15 | `bypass_classification` (offline, fixture: mROX, qHVNUSD, mWIN) |
 | R16 | `feed_verdict_precedence` (offline, synthetic, every branch) |
 | R17, R19 | `family_replay_reproduces_the_survey_counts_offline` (offline, checked-in bundle under `cli/tests/fixtures/midas-25884405/`, replayed through the bundle-backed source of `03-bundle-verify.md` R6) |
