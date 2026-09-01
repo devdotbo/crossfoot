@@ -1,25 +1,26 @@
 # Crossfoot specifications
 
-This directory holds the specification for every feature built during the
-ETHOnline 2026 event. Specs were written before the event started (kickoff
-2026-09-04 18:00 Vienna) and committed to the repository so that the
-implementation can be judged as event work. Every implementation commit after
-kickoff cites the spec and the requirement ids it satisfies. Specs are not
-code; nothing in this directory changes the binary.
+This directory holds the specification for every feature of the Crossfoot
+build around the ETHOnline 2026 event. Specs were written before the event
+started (kickoff 2026-09-04 18:00 Vienna) and committed to the repository.
+Every implementation commit cites the spec and the requirement ids it
+satisfies. Specs are not code; nothing in this directory changes the binary.
+The shipping target since 2026-09-02 is five outcomes; see the table and the
+corrections section at the end of this file.
 
 ## Files
 
 | File | Feature | Build plan item |
 |---|---|---|
 | `00-architecture.md` | Data flow across sources, cache, bundle, result, renderer, subgraph and consumer, plus the event commit plan | all |
-| `01-svzchf-control.md` | svZCHF as the exact control in the demo | 1 |
-| `02-midas-family-replay.md` | Midas customFeed family target: posting-path replay, guard bypass detection, timelines | 2 |
-| `03-bundle-verify.md` | Self-contained evidence bundles and `crossfoot verify` | bundle and verify |
-| `04-subgraph.md` | Feed subgraph: 60 Midas customFeed sources plus svZCHF, one schema, path from calldata, bound at post, Studio deployment | 3 |
-| `05-consumer-agent.md` | `crossfoot consume`: provenance-gated ALLOW or REVIEW per feed from live subgraph data joined with Crossfoot results | 4 |
-| `06-arc-hook.md` | Conditional: `CrossfootAttestations` on Arc testnet, mainnet-ready config, Chainlink stretch, kill criterion | partner pick Arc |
-| `07-app-explorer.md` | The app (separate repository `crossfoot-app`): explorer routes, Convex ingestion contract for `site/data` and `decisions.json`, the 66-square field, the timeline chart, public read path | 4 (SaaS layer) |
-| `08-saas-billing-and-x402.md` | The app's SaaS layer: email-code accounts and workspaces, watchlists and alerts, Polar Monitoring subscription, risk-feed API with keys, x402 pay-per-query, kill order | 5, 7, 8 |
+| `01-svzchf-control.md` | svZCHF as the exact control in the demo | outcome 1 |
+| `02-midas-family-replay.md` | Midas customFeed family target: posting-path replay, guard bypass detection, timelines | outcome 1 |
+| `03-bundle-verify.md` | Self-contained evidence bundles and `crossfoot verify` | outcome 2 |
+| `04-subgraph.md` | Feed subgraph: 60 Midas customFeed sources plus svZCHF, one schema, path from calldata and call handlers, bound at post, Studio deployment | outcome 3 |
+| `05-consumer-agent.md` | `crossfoot consume`: provenance-gated ALLOW or REVIEW per feed from live subgraph data joined with Crossfoot results | outcome 4 |
+| `06-arc-hook.md` | Deferred 2026-09-02: `CrossfootAttestations` on Arc testnet, mainnet-ready config, Chainlink stretch | deferred (Arc and Chainlink out of the plan) |
+| `07-app-explorer.md` | The app (separate repository `crossfoot-app`): explorer routes, chunked Convex ingestion for `site/data` and `decisions.json`, the 66-square field, the timeline chart, public read path | outcome 5 |
+| `08-saas-billing-and-x402.md` | The app's SaaS layer: accounts and workspaces, watchlists and alerts, Polar Monitoring subscription, risk-feed API with keys, x402 pay-per-query | x402 first optional feature after the five; the rest deferred |
 
 ## Spec format
 
@@ -79,3 +80,36 @@ baseline the specs build on is the repository state at commit `98424c0`
 verdict aggregation, redacted evidence). The README's provenance section
 discloses that baseline; the commit plan in `00-architecture.md` lists the
 event commits in order so the history reads as incremental event work.
+
+## Corrections 2026-09-02
+
+Applied after the external review of the whole project on 2026-09-02
+(research repository `raw/codex-review-verdict-2026-09-02.md`; the user's
+decision the same night). Each spec from 04 to 08 carries its own
+"Corrections 2026-09-02" section; `00-architecture.md` holds the
+narrowed plan. Where a paragraph above reads differently, this section
+wins.
+
+- Shipping target: five outcomes, numbered as in the review and in the
+  table's last column: (1) Midas family replay plus the svZCHF exact
+  control, specs 01 and 02; (2) self-contained bundles and `crossfoot
+  verify`, spec 03; (3) live Graph subgraph, spec 04; (4) deterministic
+  ALLOW or REVIEW consumer, spec 05; (5) polished explorer showing the
+  complete evidence flow, spec 07. The earlier numbering of the table
+  (specs 02, 04 and 05 as items 2, 3 and 4) and the ten-item kill order of
+  the research repository's build plan are superseded by these numbers.
+- x402 pay-per-query on the public risk-feed API (spec 08, R15 and R17 to
+  R24) is the first optional commercial feature and starts only when the
+  five outcomes are green. Accounts, passkeys, email login, workspaces,
+  watchlists, alerts and Polar (spec 08) are deferred. The Arc hook and
+  the Chainlink read (spec 06) are deferred and out of the sponsor plan:
+  the contract anchors a hash without a payment or settlement flow.
+- Timeline note, corrected. The app repository `crossfoot-app` was
+  scaffolded on 2026-09-01 at 23:02 Vienna and the specs were copied into
+  it the same night, not on kickoff day. Implementation of the five
+  outcomes started on the night of 2026-09-02, before kickoff, by the
+  user's decision. The sentence "Implementation commits start after
+  kickoff" above is superseded. The commit history is not rewritten;
+  everything committed before kickoff is disclosed as pre-event work in
+  the repository README and the submission, and only work committed after
+  kickoff is claimed as event work.

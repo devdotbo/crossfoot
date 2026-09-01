@@ -474,3 +474,41 @@ required or failed, body says which), 403 (key without quota), 404
   user and printed from the catalog, never hard-coded in copy.
 - Q4. Whether a workspace should be able to pay per query with its own
   key instead of subscribing (prepaid credit). Default: no; two paths only.
+
+## Corrections 2026-09-02
+
+Applied after the external review of the whole project on 2026-09-02
+(research repository `raw/codex-review-verdict-2026-09-02.md`, blockers
+3.5 and 3.6 and correction 2). Where a paragraph above reads differently,
+this section wins.
+
+- C1. Position in the plan. The shipping target is the five outcomes
+  recorded in `00-architecture.md` (corrections section). Of this spec,
+  only the public risk-feed API (R15) and the x402 pay-per-query path
+  (R17 to R24, without the API-key branch) may start once the five are
+  green, as the first optional commercial feature. Accounts, passkeys,
+  SIWE, email code, workspaces, watchlists, alerts, the Polar Monitoring
+  subscription, API keys and quotas (R1 to R14, R16) are deferred and do
+  not start before that. Nothing in this spec is deleted; the requirement
+  ids stay stable for the roadmap.
+- C2. `served.at` and byte-identical answers. R15 puts a dynamic `served:
+  {at, ingestion}` into the body, while the Goal states that a paid and a
+  subscribed answer are byte-identical; both cannot hold. Corrected: the
+  body carries only deterministic content, `format`, `feed`, `decision`,
+  `findings` and `served: {"ingestion": "<id>"}`; the serving time moves
+  to the response header `X-Crossfoot-Served-At` (unix seconds). The body
+  sha256 that R15 logs and R23 records is over the body alone, so two
+  answers for the same feed from the same applied ingestion have the same
+  sha256 regardless of path and time. The byte-identical claim reads: for
+  the same feed and the same applied ingestion, the API-key answer and the
+  x402 answer have byte-identical bodies. Test:
+  `paid_and_keyed_answers_share_one_body_sha256` compares the two bodies
+  and asserts that only the time header differs.
+- C3. Replay-protection key. R22 states that the EIP-3009 nonce is unique
+  per (network, payer) but keys `x402Payments` by (network, nonce), so two
+  payers using the same nonce value would collide and the second honest
+  payment would be rejected. Corrected: the table is keyed by (network,
+  payer, nonce) with a unique index `by_network_payer_nonce`; the payer
+  field already exists in the table definition. Tests: R22 keeps
+  `repeated_nonce_is_rejected_before_the_facilitator` (same payer, same
+  nonce) and gains `same_nonce_from_two_payers_is_accepted`.

@@ -110,7 +110,10 @@ Small commits, one concern each, in this order. Titles are the commit
 subjects. Each body cites the spec and requirement ids. Lettered rows were
 inserted by specs 04 to 06 without renumbering the engine commits; the
 subgraph rows sit early because the Studio sync time is unknown and the
-Midas side must be syncing before the engine work ends. Kill order: the
+Midas side must be syncing before the engine work ends. Kill order
+(superseded 2026-09-02 by the five-outcome shipping target in the
+corrections section at the end of this spec; kept for the history of the
+commit rows): the
 ten-item list of the research repository's `wiki/crossfoot-build-plan.md`
 (the source of truth; this is a copy): 1 svZCHF control and Midas family
 replay, 2 subgraph, 3 consumer agent, 4 explorer app with Convex ingestion
@@ -197,3 +200,57 @@ tests run before commits 5, 14, 18c and 20.
 - Q2. Whether the subgraph should carry a `bundleRoot` field per feed that
   the agent could fill from Crossfoot. Default no: verdicts and hashes stay
   off chain (review C5); revisit only if a track requires it.
+
+## Corrections 2026-09-02
+
+Applied after the external review of the whole project on 2026-09-02
+(research repository `raw/codex-review-verdict-2026-09-02.md`; the user's
+decision the same night). Where a paragraph above reads differently, this
+section wins.
+
+- C1. Shipping target narrowed to five outcomes, numbered as in the
+  review. Later outcomes are not cut before earlier ones are green.
+  1. Midas family replay plus the svZCHF exact control
+     (`01-svzchf-control.md`, `02-midas-family-replay.md`).
+  2. Self-contained bundles and `crossfoot verify` (`03-bundle-verify.md`).
+  3. Live Graph subgraph (`04-subgraph.md`), with the call-handler
+     correction so Safe-routed rounds get a path.
+  4. Deterministic ALLOW or REVIEW consumer (`05-consumer-agent.md`),
+     live Graph data load-bearing: the decision depends on the live
+     indexed block, the latest state, the freshness gate and the posting
+     path.
+  5. Polished explorer showing the complete evidence flow
+     (`07-app-explorer.md`, explorer routes and chunked ingestion; no
+     account needed).
+- C2. First optional commercial feature, only after the five are green:
+  the public risk-feed API and x402 pay-per-query
+  (`08-saas-billing-and-x402.md` R15, R17 to R24). Commit row 18e maps to
+  it.
+- C3. Deferred, not started before the five are green, with the reason:
+  accounts, passkeys, SIWE, email code, workspaces, watchlists, alerts,
+  Polar Monitoring and API keys (08 R1 to R14, R16; they compete with the
+  core product for the same nights); the Arc hook and the Chainlink read
+  (`06-arc-hook.md`, all of it; the contract anchors a hash without a
+  payment or settlement flow and does not fit Arc's existing-project
+  track, and the Chainlink read is a stretch integration without product
+  purpose). The Arbitrum One publish (04 R15) stays optional per 04 Q2.
+  Commit rows 19a to 19c stay in the table as deferred rows. The
+  ten-item kill order and the midpoint cut rule above are superseded;
+  2026-09-09 04:00 UTC remains the date on which the five outcomes are
+  checked for being demoable.
+- C4. Sponsor strategy: primary target The Graph AI Continuity pool
+  (deterministic reasoning qualifies; no language model); Composable
+  stays conditional on the eligibility answer; Arc and Chainlink are out
+  unless a later redesign gives them product purpose.
+- C5. Timing disclosure. Implementation of all five outcomes started on
+  the night of 2026-09-02, before kickoff (2026-09-04 18:00 Vienna), by
+  the user's decision. The commit history is not rewritten; the
+  repository README's provenance section and the submission disclose
+  every pre-kickoff commit as pre-event work, and only work committed
+  after kickoff is claimed as event work. The "Implementation commits
+  start after kickoff" sentence in the README of this directory is
+  superseded accordingly.
+- C6. The winning demo is one continuous flow: the 66-feed overview, the
+  mRE7 posting path, a live Graph-backed REVIEW, the downloadable bundle,
+  offline verification. Storyboard in the research repository's
+  `wiki/crossfoot-build-plan.md`.

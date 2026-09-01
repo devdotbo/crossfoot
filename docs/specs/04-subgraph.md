@@ -372,3 +372,63 @@ recorded in this spec, not patched in (02 R19 policy).
   internal calls included) and the subgraph (no previous Round) only if a
   feed's earliest rounds arrived through internal calls; mTBILL is the
   known case. R17 compares the pair set, so the difference surfaces.
+
+## Corrections 2026-09-02
+
+Applied after the external review of the whole project on 2026-09-02
+(research repository `raw/codex-review-verdict-2026-09-02.md`, blockers
+3.1 and 3.2, plus the consumer's block variable, blocker 3.3). Where a
+paragraph above reads differently, this section wins.
+
+- C1. Safe-routed rounds get a path. R6 labels every round whose outer
+  transaction does not target the feed `UNKNOWN`. That covers the 215
+  Safe-era rounds of the six oldest feeds and hides their 28 unchecked
+  posts over the bound, so the subgraph alone reproduces the 29-on-14 base
+  from transaction lists and cannot reproduce the headline 57 on 16. The
+  manifest therefore declares Ethereum `callHandlers` on every Midas data
+  source for the four setter functions, `setRoundData(int256)`
+  (`0xa4381d1f`), `setRoundDataSafe(int256)` (`0x89d6e95f`) and the two
+  three-argument variants (`0x2b6e02c7`, `0x92260352`). A call handler
+  fires for a successful invocation of that function on that feed whether
+  the call is the outer transaction or a nested call from a Safe,
+  multicall or relayer, and it records the selector for (transaction,
+  feed). The path rule of R6 becomes: the outer transaction's selector if
+  the transaction targets the feed, else the selector recorded by the call
+  handler for the same transaction and feed, else `UNKNOWN`. Ordering:
+  graph-node runs a transaction's event triggers before its call triggers,
+  so `handleAnswerUpdated` cannot read the call record; the call handler
+  patches the Round(s) of its transaction after the fact. Round therefore
+  loses `@entity(immutable: true)` (or, if the implementer prefers, the
+  path lives in a `RoundPath` entity keyed by transaction and feed that the
+  queries join), and the Feed and Poster counters of R9 are updated by
+  whichever handler resolves the path. Expected effect on R17: `path:
+  UNKNOWN` drops from at least 131 to the residue of transactions that
+  neither target the feed nor pass through a setter call (expected 0),
+  `path: UNCHECKED && !first && overBound` reaches 57 across 16 feeds. If
+  Studio's mainnet indexers do not serve call handlers (unverified on
+  2026-09-01; The Graph documents call handler support as network
+  dependent), the fallback is stated plainly in the explorer, the demo and
+  the submission: the Graph view carries the transaction-list base (29 on
+  14) and the 57 is the engine's count from AnswerUpdated logs with the
+  outer transaction unwrapped (02 R-series). Never present the two as one
+  number without saying which base is on screen.
+- C2. `Upgrade.withInitializer` cannot be known when the Upgrade is
+  written. In an `upgradeAndCall` the proxy emits `Upgraded` before the
+  initializer runs and emits `Initialized`, and handlers within a
+  transaction run in log index order, so `handleUpgraded` runs first. R10
+  is corrected: Upgrade loses `@entity(immutable: true)` and is written
+  with `withInitializer: false` and id = the transaction hash (one Upgrade
+  per transaction; the ProxyAdmin path never upgrades a feed twice in one
+  transaction); `handleInitialized` loads the Upgrade with that id, if any,
+  and sets `withInitializer: true` and `boundChange` to the BoundChange it
+  wrote. The live test `g4_upgrades_with_initializer_match_the_value_changes`
+  is unchanged in meaning: every `changed: true` BoundChange shares a
+  transaction with an Upgrade whose flag is true after the sync completes.
+- C3. Block variable in the query files (from blocker 3.3, owned by
+  05 R1 and R2). The three query texts in R16 declare no block variable,
+  so the agent cannot pin them without rewriting the text it hashes. Each
+  query file declares `$block: Int!` and passes `block: {number: $block}`
+  on every root field, including `_meta`, and a fourth file `Head` with
+  `query Head { _meta { deployment hasIndexingErrors block { number hash
+  timestamp } } }` gives the agent the head it pins to. See the
+  corrections section of `05-consumer-agent.md` for the run sequence.

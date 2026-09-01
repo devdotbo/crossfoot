@@ -197,3 +197,17 @@ cast call <addr> "latest(address,address)" <attester> <feed> --rpc-url $ARC_TEST
   burden (one constructor argument, three fields, three tests). Default:
   included in the contract from the start so mainnet needs no new code;
   the track claim is made only if the mainnet deployment reads the feed.
+
+## Corrections 2026-09-02
+
+Status changed to DEFERRED after the external review of the whole project
+on 2026-09-02 (research repository `raw/codex-review-verdict-2026-09-02.md`,
+correction 4): the contract anchors a hash and has no USDC payment or
+settlement flow, while Arc's existing-project track asks for an
+integration centred on payments, stablecoin settlement, treasury or
+agentic transactions; the Chainlink read (R3) is a stretch integration
+without product purpose. Neither starts during the event unless a later
+redesign gives them a genuine product purpose. The spec stays as a
+design; the midpoint condition in the status line above no longer
+applies. The five-outcome shipping target is recorded in
+`00-architecture.md` (corrections section).

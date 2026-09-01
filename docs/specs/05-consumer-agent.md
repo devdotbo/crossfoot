@@ -250,3 +250,33 @@ crossfoot consume --replay cli/tests/fixtures/consume-<id> --feeds cli/tests/fix
   Crossfoot run. Default: REVIEW; the agent never runs the engine.
 - Q3. Whether `feeds.json` should carry the mtbill target at all once the
   midas target exists. Default: both, with the R3 join rule.
+
+## Corrections 2026-09-02
+
+Applied after the external review of the whole project on 2026-09-02
+(research repository `raw/codex-review-verdict-2026-09-02.md`, blocker
+3.3). Where a paragraph above reads differently, this section wins.
+
+- C1. R1 adds `block: {number: n}` to every query under `--block`, and R2
+  hashes the query files verbatim, but the query texts of 04 R16 declare
+  no block variable, so the agent could only pin a query by rewriting the
+  text it hashes. Corrected run sequence: every live run is pinned. The
+  agent first executes the fourth query file `Head` (04 corrections C3),
+  takes `_meta.block.number` as the pinned block unless `--block <n>` is
+  given, then executes `FeedStatus`, `WindowFindings` and `FeedTimeline`
+  with `$block` set to that number. The query files declare `$block: Int!`
+  and pass it on every root field, so the text is never rewritten and
+  `query_sha256` stays the hash of the file bytes; the pinned block is a
+  variable and enters `variables_sha256`. The freshness gate of the
+  provenance rules reads the head from `Head` and the pinned block from
+  the record; a replay with `--block` and the recorded responses is
+  byte-identical, as before. Q1 is unaffected (four queries per run, not
+  three). The record gains no field: `block` already holds the pinned
+  number and `deployment` the deployment ID.
+- C2. Position in the plan (from the same review, correction 2): this
+  spec is outcome 4 of the five-outcome shipping target recorded in
+  `00-architecture.md` (corrections section). The live Graph data must be
+  load-bearing: the decision must depend on the live indexed block, the
+  latest state, the freshness gate and the posting path, never on a
+  mock. The Arc anchor mentioned in R9 and in the Out of scope pointer to
+  `06-arc-hook.md` is deferred with that spec.

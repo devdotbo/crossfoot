@@ -325,3 +325,54 @@ bun scripts/ingest.ts post --to $CROSSFOOT_INGEST_URL p.json`, then open
 - Q3. Hosting of the TanStack Start server. Default: a Node adapter on the
   same kind of host as the audited boilerplate or Vercel; the choice
   affects only cookies for 08 and is recorded in the app README.
+
+## Corrections 2026-09-02
+
+Applied after the external review of the whole project on 2026-09-02
+(research repository `raw/codex-review-verdict-2026-09-02.md`, blocker
+3.4). Where a paragraph above reads differently, this section wins.
+
+- C1. R2 applies a payload "in one mutation". A `render` payload holds
+  the feeds table, every finding and comparison and about 2,535 timeline
+  rows across the 60 bounded feeds, and Convex limits one function
+  execution to 1,000 concurrent I/O operations (the review's figure; the
+  other per-function limits are not re-verified here), so that shape is
+  not implementable. Corrected shape, chunked staged ingestion with one
+  timeline document per feed:
+  1. The `/ingest` HTTP action verifies the signature, timestamp and body
+     hash as in R1, writes the `ingestions` row with `status: "staged"`,
+     the payload sha256 and the expected counts, and then schedules or
+     runs internal mutations in chunks: feeds and `feed_runs` in one
+     chunk, findings and comparisons in chunks of at most 500 writes, and
+     timelines as one document per feed.
+  2. The `timeline_rounds` table and its index
+     `by_bundle_root_address_round` are replaced by a `timelines` table
+     with one document per (`bundle_root`, `address`) holding the
+     timeline's header fields, `bound_samples` and the `rounds` array
+     verbatim (R4 field fidelity unchanged). The largest feed timeline
+     (mTBILL, 444 rounds) stays far below the per-document size limit;
+     the app records the measured size of the largest document in its
+     README after the first ingestion.
+  3. Every chunk mutation is idempotent under the R3 keys, so a retry of
+     a failed or repeated chunk leaves the tables byte-identical to a
+     single application. The ingestion row records applied chunk counts
+     and turns `status: "applied"` only when the last chunk commits; a
+     chunk failure leaves `status: "failed"` with the chunk index and the
+     error, and a repeat of the same payload resumes from the first
+     unapplied chunk.
+  4. Readers never see a partial payload: `feeds.list`, `feeds.get`,
+     `timelines.get` and the decision queries of R6 read only rows whose
+     ingestion is `applied` (the latest applied ingestion per kind), so
+     the atomicity R2 promised is delivered at the read path instead of
+     inside one mutation.
+  5. Tests: `ingest_fixture_twice_is_byte_identical` runs over the chunked
+     path; `staged_ingestion_is_invisible_until_applied` asserts that a
+     payload stopped after its first chunk does not change any public
+     query result; `timeline_svg_marks_round_36_and_the_bound_step` and
+     `mre7_detail_shows_the_2026_05_06_unchecked_post_as_review` read the
+     mRE7 `timelines` document instead of `timeline_rounds`.
+- C2. Position in the plan (from the same review, correction 2): the
+  explorer routes of this spec are outcome 5 of the five-outcome shipping
+  target recorded in `00-architecture.md` (corrections section). The
+  public read path needs no account; nothing in this spec depends on
+  `08-saas-billing-and-x402.md`.
