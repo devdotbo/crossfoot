@@ -487,3 +487,56 @@ paragraph above reads differently, this section wins.
   `query Head { _meta { deployment hasIndexingErrors block { number hash
   timestamp } } }` gives the agent the head it pins to. See the
   corrections section of `05-consumer-agent.md` for the run sequence.
+
+## Extension E1 (2026-09-02): OpenEden, Ondo and Superstate feeds
+
+Added while the Studio deploy key was pending, from
+`wiki/asset-feed-candidates.md` (rows 1 to 3 of its ranked table; evidence
+`raw/openeden-tbill-oracle-usdo-rpc-2026-09-02.md`,
+`raw/ondo-ousg-oracle-rpc-2026-09-02.md`,
+`raw/superstate-ustb-uscc-oracle-rpc-2026-09-02.md`). The Midas and
+Frankencoin behaviour, manifest blocks and counts of R1 to R18 are
+unchanged; the three sources are appended to the generated manifest.
+
+- E1.1 `feeds.json` rows carry `handler` (midas, openeden, ondo,
+  superstate) and `abi`; the generator emits one data source per row from
+  a per-handler template (events, call handlers, entities, mapping file).
+  Sources: OpenEden TBillPriceOracle 0xCe9a6626 from block 18,375,985, Ondo
+  RWAOracleExternalComparisonCheck 0x0502c5ae from 17,124,713, Superstate
+  SuperstateOracle 0xe4fa682f from 21,340,412.
+- E1.2 Schema additions, all nullable or defaulted so the R16 queries are
+  unchanged: `Feed.boundKind` (RELATIVE in the 1e8-per-percent scale, or
+  ABSOLUTE in answer units), `Feed.reference`, `Feed.referenceUpdateCount`;
+  `Round.deltaFromPrevious`, `reference`, `referencePrevious`,
+  `deviationFromReference`, `override`; entities `ReferenceUpdate`
+  (OpenEden closeNav updates, guarded or manual, and Ondo
+  ChainlinkPriceIgnored) and `PendingUpdate` (OpenEden's UpdatePrice
+  parked until RoundUpdated of the same transaction); `BoundChange.detectedBy`
+  gains EVENT (UpdateMaxPriceDeviation, SetMaximumAcceptablePriceDelta).
+- E1.3 OpenEden: one Round per RoundUpdated with the answer of the
+  preceding UpdatePrice; `reference` = closeNavPrice before the post,
+  `deviationFromReference` = |reference - answer| * 1e8 * 100 / mean (the
+  contract's formula), `boundAtPost` = maxPriceDeviation * 1e6, `overBound`
+  = !first and deviationFromReference > boundAtPost; path SAFE from
+  `updatePrice` 0x8d6cc56d (event and call handler); ReferenceUpdate for
+  UpdateCloseNavPrice (guarded) and UpdateCloseNavPriceManually
+  (unguarded, expected count 0).
+- E1.4 Ondo: one Round per RWAExternalComparisonCheckPriceSet, roundId =
+  event count; `previousAnswer` from the event, `reference` and
+  `referencePrevious` = the SHV answers, `deviationFromReference` = |OUSG
+  bps change - SHV bps change| * 1e6 (basis points computed with truncation
+  toward zero as in the contract), `boundAtPost` 200 bps = 200000000,
+  `overBound` on deviationFromPrevious; path SAFE from `setPrice`
+  0xf7a30806, attributed by the call handler through the Safe.
+- E1.5 Superstate: one Round per NewCheckpoint, zero-based roundId to match
+  latestRoundData, `answer` = navs, `updatedAt` = effectiveAt, `extra` = the
+  checkpoint's NAV timestamp, `deltaFromPrevious` against
+  maximumAcceptablePriceDelta (ABSOLUTE), `override` from the fourth
+  calldata word of a direct addCheckpoint or from the call handler's typed
+  input; path SAFE for `addCheckpoint` 0xf6fd15f4, UNCHECKED for the batch
+  `addCheckpoints` 0xae1d77d3 (forces the override; never called).
+- E1.6 Verification: `tests/openeden.test.ts`, `tests/ondo.test.ts`,
+  `tests/superstate.test.ts` (matchstick, offline, the spot-checked last
+  rounds of each evidence file); `tests/expected-counts.json` rows
+  `rounds_openeden` 1158, `rounds_ondo` 757, `rounds_superstate` 433 at
+  block 25,884,405, `bound_changes` 66, `reference_updates` 1056, feeds 64.

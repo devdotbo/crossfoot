@@ -8,7 +8,7 @@ Target: Subgraph Studio (04-subgraph.md D4, R14). Publishing to the network
 | Item | State |
 |---|---|
 | `bun install`, `bun run gen`, `graph codegen`, `graph build` | pass (2026-09-02, graph-cli 0.97.1, darwin-arm64) |
-| `graph test` (matchstick 0.6.0, `binary-macos-12-m1`) | 24 tests pass |
+| `graph test` (matchstick 0.6.0, `binary-macos-12-m1`) | 31 tests pass (shared, midas, openeden, ondo, superstate, frankencoin) |
 | Studio deploy | attempted 2026-09-02 with the key from `.env` (`graph_deploy_key`): rejected by api.studio.thegraph.com with "Deploy key not found" (build hash QmP4Uxtpo9Wzs1ZgKWXr8msGgVdNq4eUoKvjpwHR5iAJTZ uploaded fine); waiting for a re-copied Deploy Key |
 | Local graph-node (docker, dRPC with traces) | bounded manifest deployed; graph-node accepts the call handlers and finds one event plus one call trigger per Safe-routed round; entity checks below |
 | Network publish | not done |
@@ -139,8 +139,22 @@ Entity checks against the research archive (2026-09-02, store head
   version 1 BoundChange has `changed: false`; one PostTx per round, all
   consumed. 20 of 20 checks pass, so the call handler join works on real
   traces.
-- mRE7 round 36 and the Frankencoin module: pending the store reaching
-  those ranges (recorded here when done).
+- mRE7 25,037,900 to 25,040,000 (no Initialized in range): round 36 reads
+  `path: UNCHECKED`, `selector: 0xa4381d1f`, `attributedBy: CALL`,
+  `boundAtPost: 36000000` from the declared eth_call, answer 106438116, tx
+  0x7579ba75; the Feed was created at the round with description
+  mRe7YIELD/USD and decimals 8, and one `detectedBy: ROUND` BoundChange
+  (null to 36000000) records the bound the range could not see being set.
+- Frankencoin module 22,536,327 to 24,200,000: the constructor's RateChanged
+  (30000 ppm) and the 2025-12 RateChanged (40000 ppm) joined to its
+  RateProposal (nextChange 1765382663 before the change block); the first
+  vault flow after the deployment block (SAVED at 24,118,273) carries a
+  PROTOCOL round with price() 1e18; the svZCHF Feed is DERIVED with 18
+  decimals and no bound. Store head 25,041,899 at the end of the run,
+  healthy, no non-fatal errors.
+
+Extension E1 (OpenEden, Ondo, Superstate) was added after this run and is
+covered by the offline tests only until the next local or Studio sync.
 
 ## Publish (stretch, R15)
 

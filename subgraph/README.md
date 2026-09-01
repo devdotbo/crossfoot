@@ -10,6 +10,12 @@ families with one schema:
   integer formula) and the bound in force (`boundAtPost`). Bound changes are
   recorded from `Initialized(uint8)` (`BoundChange`), upgrades from
   `Upgraded(address)` (`Upgrade`).
+- POSTED, other issuers (extension E1): OpenEden TBILL (guard of 15 bps
+  against `closeNavPrice`, a reference the operator moves minutes earlier),
+  Ondo OUSG (200 bps cap plus a 74 bps comparison against the Chainlink SHV
+  move, every input in the event) and Superstate USTB (absolute delta cap
+  per checkpoint, override flag from the calldata). Same Feed and Round
+  shape; `Feed.issuer` and `boundKind` tell them apart.
 - DERIVED: svZCHF. Every state transition of the Frankencoin savings module
   that concerns the vault (rate changes, deposits, withdrawals, interest)
   becomes a `Round` with `path: PROTOCOL` carrying the vault's `price()`.
@@ -26,15 +32,17 @@ Specification: `docs/specs/04-subgraph.md`. Design study:
 
 | Path | Purpose |
 |---|---|
-| `feeds.json` | The 60 bounded feeds (address, creation block, ABI, registry key) and the `callHandlers` switch |
+| `feeds.json` | The 60 bounded Midas feeds plus the OpenEden, Ondo and Superstate oracles (address, creation block, `abi`, `handler` family, registry key) and the `callHandlers` switch |
 | `scripts/gen-manifest.ts` | Writes `subgraph.yaml` from `feeds.json`; byte identical on every run |
-| `subgraph.yaml` | Generated manifest, committed: 60 Midas sources plus the Frankencoin module |
-| `schema.graphql` | Entities: Feed, Round, PostTx, BoundChange, Upgrade, Poster, RateChange, RateProposal, VaultFlow |
-| `abis/` | `CustomFeed` (verified mRE7 implementation plus the proxy events), `CustomFeedGrowth` (four-argument AnswerUpdated, mGLOBAL only), `SavingsModule`, `SavingsVault` |
+| `subgraph.yaml` | Generated manifest, committed: 60 Midas sources, 3 other issuer sources, the Frankencoin module |
+| `schema.graphql` | Entities: Feed, Round, PostTx, PendingUpdate, ReferenceUpdate, BoundChange, Upgrade, Poster, RateChange, RateProposal, VaultFlow |
+| `abis/` | `CustomFeed` (verified mRE7 implementation plus the proxy events), `CustomFeedGrowth` (four-argument AnswerUpdated, mGLOBAL only), `OpenEdenTBillOracle`, `OndoComparisonOracle`, `SuperstateOracle`, `SavingsModule`, `SavingsVault` |
 | `src/shared.ts` | Pure helpers: selector to path, outer-transaction selector, deviation formula, entity ids |
 | `src/midas.ts` | Event handlers (AnswerUpdated, Initialized, Upgraded) and the four setter call handlers |
+| `src/posted.ts` | Shared Feed, Round, PostTx, Poster and call attribution logic of the other POSTED families |
+| `src/openeden.ts`, `src/ondo.ts`, `src/superstate.ts` | The issuer handlers of extension E1 |
 | `src/frankencoin.ts` | RateChanged, RateProposed, Saved, Withdrawn, InterestCollected |
-| `tests/` | matchstick tests (`shared`, `midas`, `frankencoin`) and `expected-counts.json` |
+| `tests/` | matchstick tests (`shared`, `midas`, `openeden`, `ondo`, `superstate`, `frankencoin`) and `expected-counts.json` |
 | `queries/` | The three agent queries used verbatim by `crossfoot consume` |
 | `scripts/check-try.sh` | Every contract call goes through a `try_` variant |
 | `scripts/check-queries.ts` | Validates `queries/*.graphql` against the schema offline |
@@ -89,6 +97,20 @@ exists and exceeds `boundAtPost`, which is `maxAnswerDeviation()` read at the
 event block through a declared eth_call. If that read disagrees with the
 stored `Feed.bound`, a `BoundChange` with `detectedBy: ROUND` is written
 first; the expected count of those is zero.
+
+## The other issuer families
+
+| Issuer, feed | Rounds from | Guard and `boundKind` | `path` | Reference fields |
+|---|---|---|---|---|
+| OpenEden TBILL 0xCe9a6626 | `RoundUpdated` (answer parked from the preceding `UpdatePrice` in `PendingUpdate`) | `maxPriceDeviation` bps against `closeNavPrice`, deviation over the mean; RELATIVE, 15 bps = 15000000 | SAFE (`updatePrice`, the only round setter); `ReferenceUpdate` records `updateCloseNavPrice` (guarded) and `updateCloseNavPriceManually` (unguarded) | `reference` = closeNav before the post, `deviationFromReference` |
+| Ondo OUSG 0x0502c5ae | `RWAExternalComparisonCheckPriceSet` | 200 bps on the OUSG move (RELATIVE, 200000000); the 74 bps comparison against the SHV move is `deviationFromReference` | SAFE (`setPrice`, through a Safe: `caller` is the Safe) | `reference`, `referencePrevious` = the SHV answers of the event |
+| Superstate USTB 0xe4fa682f | `NewCheckpoint`; round ids zero-based like `latestRoundData` | `maximumAcceptablePriceDelta`, absolute; `deltaFromPrevious` against it (ABSOLUTE, 1000000) | SAFE (`addCheckpoint`), UNCHECKED (`addCheckpoints` batch, which forces the override); `override` from the calldata | `updatedAt` = effectiveAt, `extra` = the NAV date |
+
+`overBound` uses each family's own measure (Midas and Ondo the deviation
+from the previous answer, OpenEden the deviation from the reference,
+Superstate the absolute delta) against `boundAtPost` in the same units, so
+the consumer's `path: UNCHECKED, first: false` filter keeps its meaning
+across families.
 
 ## Fixture counts
 
