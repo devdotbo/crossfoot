@@ -483,7 +483,44 @@ fn refetch(
     Ok((agreed, sampled.len()))
 }
 
-pub fn verify(dir: &Path, options: &Options) -> Report {
+/// Verifies a bundle directory, or an archive written by `bundle pack`
+/// (or any gzip'd tar holding one bundle directory): the archive is
+/// unpacked into a temporary directory, verified like a directory, and the
+/// report starts with the archive path and its sha256.
+pub fn verify(path: &Path, options: &Options) -> Report {
+    if !crate::pack::is_archive(path) {
+        return verify_dir(path, options);
+    }
+    let mut report = Report::new();
+    report.line("archive", path.display());
+    let archive_sha256 = match fs::read(path) {
+        Ok(bytes) => sha256_hex(&bytes),
+        Err(err) => return report.fail(OTHER, "UNREADABLE", format!("{}: {err}", path.display())),
+    };
+    report.line("archive sha256", &archive_sha256);
+    static UNPACKS: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
+    let scratch = std::env::temp_dir().join(format!(
+        "crossfoot-unpack-{}-{}-{}",
+        crate::util::now_stamp(),
+        std::process::id(),
+        UNPACKS.fetch_add(1, std::sync::atomic::Ordering::SeqCst)
+    ));
+    let dir = match crate::pack::unpack(path, &scratch) {
+        Ok(dir) => dir,
+        Err(err) => {
+            let _ = fs::remove_dir_all(&scratch);
+            return report.fail(OTHER, "UNREADABLE", err);
+        }
+    };
+    let inner = verify_dir(&dir, options);
+    let _ = fs::remove_dir_all(&scratch);
+    report.lines.extend(inner.lines);
+    report.exit_code = inner.exit_code;
+    report.status = inner.status;
+    report
+}
+
+fn verify_dir(dir: &Path, options: &Options) -> Report {
     let require_same_code = options.require_same_code;
     let mut report = Report::new();
     report.line("bundle", dir.display());
@@ -1033,6 +1070,71 @@ mod tests {
             print(&report).contains("SHA256SUMS differs from the files at timelines/"),
             "{}",
             print(&report)
+        );
+    }
+
+    /// A packed archive verifies like the directory it holds, the report
+    /// leads with the archive's sha256, and an archive repacked after a
+    /// change to one raw body is HASH_MISMATCH naming the file.
+    #[test]
+    fn verify_accepts_a_packed_archive_and_detects_a_tampered_one() {
+        let dir =
+            std::env::temp_dir().join(format!("crossfoot-verify-archive-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(&dir).unwrap();
+        let packed = crate::pack::pack(&fixture(), &dir.join("demo.tar.gz")).unwrap();
+        let report = verify(&packed.archive, &Options::default());
+        let text = print(&report);
+        assert_eq!(report.exit_code, VERIFIED, "{text}");
+        assert!(
+            text.starts_with(&format!("archive         {}", packed.archive.display())),
+            "{text}"
+        );
+        assert!(
+            text.contains(&format!("archive sha256  {}", packed.archive_sha256)),
+            "{text}"
+        );
+        assert!(
+            text.contains("result.json reproduced byte for byte"),
+            "{text}"
+        );
+        assert!(
+            text.contains(&format!("root hash       {}", packed.root_hash.unwrap())),
+            "{text}"
+        );
+
+        // Unpack, change one byte, pack again: the hashes catch it.
+        let unpacked = crate::pack::unpack(&packed.archive, &dir.join("unpacked")).unwrap();
+        let file = unpacked.join("raw").join("003-vault-asset.json");
+        let mut bytes = fs::read(&file).unwrap();
+        let at = bytes.len() - 5;
+        bytes[at] = if bytes[at] == b'0' { b'1' } else { b'0' };
+        fs::write(&file, bytes).unwrap();
+        let tampered = crate::pack::pack(&unpacked, &dir.join("tampered.tar.gz")).unwrap();
+        assert_ne!(tampered.archive_sha256, packed.archive_sha256);
+        let report = verify(&tampered.archive, &Options::default());
+        assert_eq!(report.exit_code, HASH_MISMATCH, "{}", print(&report));
+        assert!(print(&report).contains("raw/003-vault-asset.json: sha256 differs"));
+
+        // A file that is not an archive is verified as a directory would be.
+        let report = verify(&dir.join("missing.tar.gz"), &Options::default());
+        assert_eq!(report.exit_code, OTHER);
+    }
+
+    /// The Midas fixture archive verifies as checked in, without extracting
+    /// it by hand.
+    #[test]
+    fn verify_accepts_the_midas_archive_directly() {
+        let archive = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests")
+            .join("fixtures")
+            .join("midas-25884405.tar.gz");
+        let report = verify(&archive, &Options::default());
+        let text = print(&report);
+        assert_eq!(report.exit_code, VERIFIED, "{text}");
+        assert!(
+            text.contains("entries         1812 checked, hashes ok"),
+            "{text}"
         );
     }
 

@@ -188,6 +188,7 @@ run.
 
 ```
 crossfoot verify bundles/svzchf-run-24570000-25853000-<stamp>
+crossfoot verify cli/tests/fixtures/midas-25884405.tar.gz
 crossfoot verify bundles/<bundle> --require-same-code
 crossfoot verify bundles/<bundle> --refetch 4
 crossfoot verify bundles/<bundle> --refetch all --endpoint https://eth.drpc.org
@@ -205,6 +206,23 @@ A match proves that the stated result follows from the stated responses
 under the stated code. It does not prove that the responses are what the
 chain holds; for that, re-read the pinned blocks from an endpoint you trust,
 or run `verify --refetch`.
+
+### bundle pack
+
+```
+crossfoot bundle pack bundles/svzchf-run-24570000-25853000-<stamp>
+crossfoot bundle pack bundles/<bundle> --out downloads/<bundle>.tar.gz
+crossfoot verify downloads/<bundle>.tar.gz
+```
+
+Writes one archive per bundle with every varying field fixed (entries
+sorted, mtime 0, uid and gid 0, a fixed gzip header), so two packs of one
+bundle are byte-identical and the archive's sha256 is as citable as the root
+hash inside it. Prints the archive path, its sha256, the bundle root hash
+and the file count. `verify` takes such an archive directly: it unpacks
+into a temporary directory, runs every step, and leads the report with the
+archive path and sha256. The demo beat "download the bundle, verify
+offline" is one command.
 
 ### render
 
@@ -296,7 +314,7 @@ served a body is recorded next to it instead.
 |---|---|---|
 | 0 | `VERIFIED` | every file matches its hash, the replay reproduced `result.json`, and the refetch sample (if any) agreed |
 | 0 | `NO_RESULT` | a fetch bundle: hashes checked, nothing to replay |
-| 1 | `UNREADABLE`, `UNSUPPORTED_FORMAT`, `REPLAY_FAILED`, `REFETCH_FAILED` | an unreadable bundle, a manifest format other than v2, an unknown target, or a re-read the endpoints did not answer |
+| 1 | `UNREADABLE`, `UNSUPPORTED_FORMAT`, `REPLAY_FAILED`, `REFETCH_FAILED` | an unreadable bundle or archive, a manifest format other than v2, an unknown target, or a re-read the endpoints did not answer |
 | 2 | `HASH_MISMATCH` | a raw file differs from its manifest entry, is missing or unlisted, a cache key does not hash from its preimage, or `SHA256SUMS` or `bundle.sha256` differ from the files |
 | 3 | `REPLAY_MISMATCH` | the replayed `result.json` differs; the report prints the earliest differing JSON path with both values |
 | 4 | `BUNDLE_INCOMPLETE` | the replay needed a read the bundle does not hold; the label and cache key are printed |

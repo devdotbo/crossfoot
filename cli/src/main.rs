@@ -18,6 +18,7 @@ mod midas;
 mod midas_fixture_tests;
 mod model;
 mod mtbill;
+mod pack;
 mod render;
 mod rpc;
 mod run_midas;
@@ -29,7 +30,7 @@ mod svzchf;
 mod util;
 mod verify;
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use clap::{Args, Parser, Subcommand};
@@ -78,10 +79,15 @@ enum Command {
         #[arg(long, default_value = "bundles")]
         bundles: PathBuf,
     },
+    /// Pack an evidence bundle into a deterministic archive.
+    Bundle {
+        #[command(subcommand)]
+        action: BundleAction,
+    },
     /// Re-hash every file of an evidence bundle and recompute its result
     /// from the bundle's own raw responses, without the network.
     Verify {
-        /// The bundle directory.
+        /// The bundle directory, or a .tar.gz written by `bundle pack`.
         bundle: PathBuf,
 
         /// Exit 5 when the bundle was produced by different code. Without
@@ -107,6 +113,22 @@ enum Command {
     Selectors {
         /// Signatures to hash, for example "RateChanged(uint24)".
         signatures: Vec<String>,
+    },
+}
+
+#[derive(Subcommand)]
+enum BundleAction {
+    /// Write <bundle>.tar.gz: entries sorted, mtime 0, uid and gid 0, a
+    /// fixed gzip header, so two packs of one bundle are byte-identical.
+    /// Prints the archive sha256 and the bundle root hash.
+    Pack {
+        /// The bundle directory.
+        bundle: PathBuf,
+
+        /// Where to write the archive. Default: next to the bundle, named
+        /// after it.
+        #[arg(long)]
+        out: Option<PathBuf>,
     },
 }
 
@@ -397,6 +419,37 @@ fn main() -> ExitCode {
         Command::Selectors { signatures } => {
             print_selectors(&signatures);
             ExitCode::SUCCESS
+        }
+        Command::Bundle {
+            action: BundleAction::Pack { bundle, out },
+        } => {
+            let out = out.unwrap_or_else(|| {
+                let name = bundle
+                    .file_name()
+                    .map(|n| n.to_string_lossy().to_string())
+                    .unwrap_or_else(|| "bundle".to_string());
+                bundle
+                    .parent()
+                    .map(Path::to_path_buf)
+                    .unwrap_or_default()
+                    .join(format!("{name}.tar.gz"))
+            });
+            match pack::pack(&bundle, &out) {
+                Ok(packed) => {
+                    println!("archive         {}", packed.archive.display());
+                    println!("archive sha256  {}", packed.archive_sha256);
+                    println!(
+                        "root hash       {}",
+                        packed.root_hash.as_deref().unwrap_or("not sealed")
+                    );
+                    println!("files           {}", packed.files);
+                    ExitCode::SUCCESS
+                }
+                Err(message) => {
+                    eprintln!("crossfoot: {message}");
+                    ExitCode::FAILURE
+                }
+            }
         }
         Command::Verify {
             bundle,

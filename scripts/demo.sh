@@ -17,6 +17,8 @@
 #   4. consume --replay: the consumer agent over the recorded subgraph
 #      responses, ALLOW or REVIEW per feed.
 #   5. verify: every bundle written above, re-hashed and recomputed.
+#   6. bundle pack: the svZCHF bundle as one deterministic archive, then
+#      verify on the archive alone.
 
 set -euo pipefail
 
@@ -114,6 +116,12 @@ for bundle in "${bundles[@]}"; do
   echo "-- $bundle"
   "$crossfoot" verify "$bundle" | grep -E "^(target|entries|root hash|replay|status) "
 done
+
+say "6. pack and verify: the bundle as one downloadable archive, verified from the archive alone"
+"$crossfoot" bundle pack "$svzchf_bundle" --out "$work/$(basename "$svzchf_bundle").tar.gz" \
+  | tee "$work/pack.out"
+archive="$(sed -n 's/^archive  *//p' "$work/pack.out")"
+"$crossfoot" verify "$archive" | grep -E "^(archive|archive sha256|root hash|replay|status) "
 
 say "Done. Everything is under $work"
 echo "   bundles:   $work/bundles"
