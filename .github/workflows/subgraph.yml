@@ -1,0 +1,46 @@
+name: Subgraph
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "subgraph/**"
+      - ".github/workflows/subgraph.yml"
+  pull_request:
+    paths:
+      - "subgraph/**"
+      - ".github/workflows/subgraph.yml"
+
+concurrency:
+  group: subgraph-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Generate, build, test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: subgraph
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.5
+      - run: bun install --frozen-lockfile
+      # 04 R1: the committed manifest is the generator's output, byte for byte.
+      - run: bun run gen && git diff --exit-code subgraph.yaml
+      # 04 R4: every contract call goes through a try_ variant.
+      - run: sh scripts/check-try.sh
+      - run: bunx graph codegen
+      - run: bunx graph build
+      # 04 R16: the agent's query files are valid against the schema.
+      - run: bun run check-queries
+      # matchstick needs postgres on Linux; the binary is fetched by graph test.
+      - name: Install matchstick runtime dependency
+        run: sudo apt-get update && sudo apt-get install -y libpq5
+      - run: bunx graph test
