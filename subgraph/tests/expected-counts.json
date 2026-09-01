@@ -1,0 +1,142 @@
+{
+  "description": "Entity counts the live subgraph must reproduce at the survey head (docs/specs/04-subgraph.md R17, R18). Queried with block: {number: 25884405}. Values marked exact come from the research archive; values marked expected are own inference from it and are confirmed or corrected at capture (02 R19 policy: differences are investigated and recorded, not patched in).",
+  "block": 25884405,
+  "sources": [
+    "raw/midas-customfeed-survey-2026-09-01.md",
+    "raw/midas-customfeed-replay-2026-09-01.md",
+    "raw/teammate-memos/2026-09-01-midas-hidden-rounds.md",
+    "raw/teammate-memos/2026-09-01-midas-bound-history.md",
+    "raw/graph-feasibility-chain-checks-2026-09-01.md"
+  ],
+  "counts": {
+    "feeds": { "value": 61, "status": "exact", "note": "60 POSTED plus svZCHF" },
+    "rounds_posted": {
+      "value": 2535,
+      "status": "exact",
+      "note": "sum of latestRound over the 60 bounded feeds: 2320 external posts plus 215 Safe-routed rounds on six feeds"
+    },
+    "rounds_posted_with_extra": { "value": 5, "status": "exact", "note": "the four-argument AnswerUpdated on mGLOBAL customFeedGrowth" },
+    "rounds_unchecked_not_first": {
+      "min": 60,
+      "max": 65,
+      "status": "expected",
+      "note": "32 external (spec R17) plus 28 Safe-routed bypasses plus up to 5 Safe-routed unchecked rounds that are round 1 or within bound (mBTC 2, mEDGE 1, mMEV 1, mRE7 1); exact value recorded at capture"
+    },
+    "rounds_over_bound": {
+      "value": 57,
+      "status": "expected",
+      "note": "29 external on 14 feeds plus 28 Safe-routed on mTBILL, mBASIS, mBTC; 16 distinct feeds"
+    },
+    "rounds_unknown": {
+      "value": 0,
+      "status": "expected",
+      "note": "every Safe-routed round is attributed by the setter call handlers; 215 if call handlers are disabled (feeds.json callHandlers false)"
+    },
+    "rounds_attributed_by_call": {
+      "value": 2535,
+      "status": "expected",
+      "note": "the call handlers also fire for direct EOA posts; a lower count means missing traces"
+    },
+    "bound_changes": { "value": 65, "status": "exact", "note": "60 version 1, 4 version 2, 1 version 3" },
+    "bound_changes_changed": { "value": 4, "status": "exact", "note": "mRE7, mSL, mKRalpha (bound), mWIN (min and max)" },
+    "bound_changes_detected_by_round": { "value": 0, "status": "exact" },
+    "upgrades": { "value": 98, "status": "exact", "note": "60 deployment events plus 38 post-deployment upgrades" },
+    "upgrades_with_initializer": {
+      "value": 64,
+      "status": "expected",
+      "note": "60 deployments (upgradeToAndCall in the proxy constructor emits Upgraded then Initialized(1)) plus 4 upgradeAndCall; spec floor is 4"
+    },
+    "rate_changes": { "value": 4, "status": "exact" },
+    "rate_proposals": { "value": 3, "status": "exact" },
+    "vault_flows": {
+      "value": 140,
+      "status": "expected",
+      "note": "Saved 73, Withdrawn 21, InterestCollected 46 counted at head 25884516; unchanged at 25884405 is unverified"
+    },
+    "rounds_derived": {
+      "value": 142,
+      "status": "expected",
+      "note": "140 flows plus the 2 RateChanged at or after the vault deployment block 24118272 (blocks 24426856, 24750879)"
+    },
+    "posters": { "status": "recorded at capture", "note": "one EOA per feed with a few shared keys, plus the 9 Safe executor EOAs of the hidden rounds" }
+  },
+  "over_bound_per_feed": {
+    "mTBILL": 7,
+    "mBASIS": 7,
+    "mBTC": 15,
+    "mSL": 10,
+    "mevBTC": 5,
+    "mRE7BTC": 2,
+    "acremBTC1": 2,
+    "mRE7": 1,
+    "mFONE": 1,
+    "hypeBTC": 1,
+    "mFARM": 1,
+    "msyrupUSD": 1,
+    "mHyperETH": 1,
+    "mROX": 1,
+    "qHVNUSD": 1,
+    "mWIN": 1
+  },
+  "spot_checks": [
+    {
+      "feed": "0x0a2a51f2f206447dE3E3a80FCf92240244722395",
+      "product": "mRE7",
+      "roundId": 36,
+      "expect": {
+        "path": "UNCHECKED",
+        "selector": "0xa4381d1f",
+        "attributedBy": "CALL",
+        "first": false,
+        "previousAnswer": "108859885",
+        "answer": "106438116",
+        "deviationFromPrevious": "222466613",
+        "boundAtPost": "36000000",
+        "overBound": true,
+        "tx": "0x7579ba75b3c0d38f79377999aca75c93be26ec891826163e608adfff13a65733",
+        "block": 25037959
+      }
+    },
+    {
+      "feed": "0x0a2a51f2f206447dE3E3a80FCf92240244722395",
+      "product": "mRE7",
+      "roundId": 56,
+      "expect": {
+        "path": "SAFE",
+        "selector": "0x89d6e95f",
+        "answer": "107833620",
+        "overBound": false,
+        "tx": "0x35a7ccbbd5794a5425defec6e848239e5d7538254d8c472236967470023159e7",
+        "block": 25883841
+      }
+    },
+    {
+      "feed": "0x0a2a51f2f206447dE3E3a80FCf92240244722395",
+      "product": "mRE7",
+      "feedFields": { "roundCount": 56, "uncheckedCount": 1, "overBoundCount": 1, "bound": "36000000", "boundChangeCount": 3, "upgradeCount": 3 }
+    },
+    {
+      "feed": "0x056339C044055819E8Db84E71f5f2E1F536b2E5b",
+      "product": "mTBILL",
+      "roundId": 3,
+      "expect": {
+        "path": "UNCHECKED",
+        "attributedBy": "CALL",
+        "caller": "0x8e45e6bbcc17103193c482a2d93e200aa134d08e",
+        "answer": "100000000",
+        "previousAnswer": "11214000000",
+        "deviationFromPrevious": "9910825753",
+        "boundAtPost": "5000000",
+        "overBound": true,
+        "tx": "0x2b2bcd49cfbab2a0570c3c3f00e911846ed65d41ee6dd5755881aec82e4a3a99",
+        "block": 20693687
+      }
+    },
+    {
+      "feed": "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
+      "product": "svZCHF",
+      "feedFields": { "family": "DERIVED", "decimals": 18, "bound": null, "inputsFrom": "0x27d9ad987bde08a0d083ef7e0e4043c857a17b38" },
+      "note": "every Round has path PROTOCOL and a trigger; no Round below block 24118272"
+    }
+  ]
+}
