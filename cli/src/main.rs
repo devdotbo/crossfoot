@@ -1,9 +1,9 @@
 //! crossfoot: Crossfoot evidence collection CLI.
 //!
 //! Read-only by construction. The RPC layer issues eth_chainId, eth_call,
-//! eth_getCode, eth_getBlockByNumber and eth_getLogs and nothing else; there
-//! is no signing key, no eth_sendTransaction and no eth_sendRawTransaction
-//! anywhere in this binary.
+//! eth_getCode, eth_getBlockByNumber, eth_getLogs, eth_getTransactionByHash
+//! and web3_clientVersion and nothing else; there is no signing key, no
+//! eth_sendTransaction and no eth_sendRawTransaction anywhere in this binary.
 
 mod abi;
 mod bundle;

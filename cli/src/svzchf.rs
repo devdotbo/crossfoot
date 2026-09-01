@@ -721,8 +721,12 @@ fn sweep_blockscout_all(
 pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<Outcome, String> {
     let started = now_utc();
     let bundle_name = format!("svzchf-{}-{}", args.block, now_stamp());
-    let mut bundle = BundleWriter::create(&verify_root.join("bundles"), &bundle_name)
-        .map_err(|err| format!("could not create the bundle directory: {err}"))?;
+    let mut bundle = BundleWriter::create(
+        &verify_root.join("bundles"),
+        &bundle_name,
+        EXPECTED_CHAIN_ID,
+    )
+    .map_err(|err| format!("could not create the bundle directory: {err}"))?;
 
     let fetched = fetch(client, &mut bundle, args)?;
     let finished = now_utc();
@@ -752,6 +756,7 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
         "network_calls_this_run": client.network_calls,
         "cache_hits_this_run": client.cache_hits,
         "rpc_observations": client.observations,
+        "endpoint_fingerprints": client.endpoint_fingerprints(),
     });
     bundle
         .write_meta(meta)

@@ -288,6 +288,7 @@ pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<Ru
             args.block,
             crate::util::now_stamp()
         ),
+        svzchf::EXPECTED_CHAIN_ID,
     )
     .map_err(|err| format!("could not create the run directory: {err}"))?;
 
@@ -566,6 +567,7 @@ pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<Ru
             "log_endpoints_configured": client.log_endpoints(),
             "network_calls_this_run": client.network_calls,
             "cache_hits_this_run": client.cache_hits,
+            "endpoint_fingerprints": client.endpoint_fingerprints(),
         }))
         .map_err(|err| format!("could not write the run meta: {err}"))?;
 

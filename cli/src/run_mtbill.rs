@@ -14,6 +14,7 @@ use crate::bundle::BundleWriter;
 use crate::model::mtbill::{self as checks, CheckResult, CheckVerdict};
 use crate::mtbill;
 use crate::rpc::Client;
+use crate::svzchf;
 use crate::util::now_utc;
 
 /// A gap above this makes the interval stale for C3.
@@ -176,6 +177,7 @@ pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<Ru
             args.block,
             crate::util::now_stamp()
         ),
+        svzchf::EXPECTED_CHAIN_ID,
     )
     .map_err(|err| format!("could not create the run directory: {err}"))?;
 
@@ -485,6 +487,7 @@ pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<Ru
             "log_endpoints_configured": client.log_endpoints(),
             "network_calls_this_run": client.network_calls,
             "cache_hits_this_run": client.cache_hits,
+            "endpoint_fingerprints": client.endpoint_fingerprints(),
             "rpc_observations": client.observations,
         }))
         .map_err(|err| format!("could not write the run meta: {err}"))?;

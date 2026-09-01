@@ -503,6 +503,7 @@ fn t8_run_bundle_holds_every_raw_read_of_both_fetches() {
         let mut bundle = crate::bundle::BundleWriter::create(
             &scratch_root(),
             &format!("svzchf-plan-{block}-{}", crate::util::now_stamp()),
+            1,
         )
         .unwrap();
         crate::svzchf::fetch(
@@ -605,6 +606,7 @@ fn mtbill_inputs() -> (mtbill::MtbillInputs, crate::bundle::BundleWriter) {
     let mut bundle = crate::bundle::BundleWriter::create(
         &scratch_root(),
         &format!("mtbill-test-{}", crate::util::now_stamp()),
+        1,
     )
     .unwrap();
     let inputs = mtbill::fetch(&mut client, &mut bundle, MTBILL_B1, MTBILL_B0, &[1]).unwrap();

@@ -15,9 +15,11 @@ use serde::Serialize;
 use serde_json::Value;
 
 use crate::abi::Decoded;
-use crate::cache::sha256_hex;
-use crate::rpc::Fetched;
+use crate::cache::{key_preimage, sha256_hex, PREIMAGE_VERSION};
+use crate::rpc::{Fetched, Wire};
 use crate::util::slug;
+
+pub const MANIFEST_FORMAT: &str = "crossfoot-manifest-v2";
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Entry {
@@ -26,12 +28,17 @@ pub struct Entry {
     pub sha256: String,
     pub byte_len: usize,
     pub label: String,
+    /// "json_rpc" or "http_get".
+    pub wire: &'static str,
     pub method: String,
     /// Pinned block, or the inclusive range for eth_getLogs.
     pub block: String,
     pub to: String,
     pub calldata: String,
     pub request: Value,
+    /// The exact cache key preimage, so a reader recomputes the key without
+    /// this code: sha256 over these bytes is `cache_key`.
+    pub preimage: String,
     pub cache_key: String,
     /// "hit" or "miss" for this run.
     pub cache: &'static str,
@@ -55,6 +62,7 @@ pub struct Finding {
 pub struct BundleWriter {
     dir: PathBuf,
     raw_dir: PathBuf,
+    chain_id: u64,
     entries: Vec<Entry>,
     findings: Vec<Finding>,
 }
@@ -64,7 +72,7 @@ impl BundleWriter {
     /// second resolution, so two runs started in the same second would
     /// otherwise write into one directory and overwrite each other. A numeric
     /// suffix keeps every run's evidence separate.
-    pub fn create(bundles_root: &Path, name: &str) -> io::Result<Self> {
+    pub fn create(bundles_root: &Path, name: &str, chain_id: u64) -> io::Result<Self> {
         fs::create_dir_all(bundles_root)?;
         // Claiming the directory is the check: create_dir fails when it
         // exists, so two runs racing for one name cannot both win it.
@@ -90,9 +98,14 @@ impl BundleWriter {
         Ok(Self {
             dir,
             raw_dir,
+            chain_id,
             entries: Vec::new(),
             findings: Vec::new(),
         })
+    }
+
+    pub fn chain_id(&self) -> u64 {
+        self.chain_id
     }
 
     pub fn dir(&self) -> &Path {
@@ -134,11 +147,16 @@ impl BundleWriter {
             sha256: sha256_hex(fetched.body.as_bytes()),
             byte_len: fetched.body.len(),
             label: fetched.descriptor.label.clone(),
+            wire: match fetched.descriptor.wire {
+                Wire::JsonRpc => "json_rpc",
+                Wire::HttpGet { .. } => "http_get",
+            },
             method: fetched.descriptor.method.clone(),
             block: fetched.descriptor.block.clone(),
             to: fetched.descriptor.to.clone(),
             calldata: fetched.descriptor.calldata.clone(),
             request: fetched.descriptor.request_body(),
+            preimage: key_preimage(self.chain_id, &fetched.descriptor),
             cache_key: fetched.key.clone(),
             cache: if fetched.cache_hit { "hit" } else { "miss" },
             endpoint: fetched.endpoint.clone(),
@@ -151,9 +169,12 @@ impl BundleWriter {
 
     pub fn write_manifest(&self, target: &str, extra: Value) -> io::Result<()> {
         let manifest = serde_json::json!({
-            "format": "crossfoot-manifest-v1",
+            "format": MANIFEST_FORMAT,
             "target": target,
             "bundle": self.dir.file_name().and_then(|n| n.to_str()).unwrap_or_default(),
+            "chain_id": self.chain_id,
+            "cache_preimage_version": PREIMAGE_VERSION,
+            "code": crate::util::code_identity(),
             "entry_count": self.entries.len(),
             "cache_hits": self.entries.iter().filter(|e| e.cache == "hit").count(),
             "cache_misses": self.entries.iter().filter(|e| e.cache == "miss").count(),
@@ -247,7 +268,77 @@ fn write_json(path: &Path, value: &Value) -> io::Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::cache::cache_key;
+    use crate::rpc::{
+        blockscout_logs_descriptor, call_descriptor, chain_id_descriptor, Descriptor,
+    };
     use serde_json::json;
+
+    fn fetched(chain_id: u64, descriptor: Descriptor, body: &str) -> Fetched {
+        Fetched {
+            key: cache_key(chain_id, &descriptor),
+            descriptor,
+            body: body.to_string(),
+            cache_hit: false,
+            endpoint: "https://rpc.example/v1/<redacted>".to_string(),
+            stored_utc: "2026-01-01T00:00:00.000Z".to_string(),
+        }
+    }
+
+    /// Spec 03 R2: every entry's preimage hashes to its cache key, the
+    /// header names the chain, the preimage version and the code identity.
+    #[test]
+    fn manifest_v2_preimage_recomputes_the_cache_key() {
+        let root = std::env::temp_dir().join("crossfoot-manifest-v2");
+        let _ = fs::remove_dir_all(&root);
+        let mut writer = BundleWriter::create(&root, "svzchf-run-1-2-stamp", 1).unwrap();
+        let reads = [
+            fetched(
+                1,
+                chain_id_descriptor(),
+                r#"{"jsonrpc":"2.0","id":1,"result":"0x1"}"#,
+            ),
+            fetched(
+                1,
+                call_descriptor("vault.price()", "0xAbC", "0xA035B1FE", "0x2"),
+                r#"{"jsonrpc":"2.0","id":1,"result":"0x1"}"#,
+            ),
+            fetched(
+                1,
+                blockscout_logs_descriptor("rate history", "0xAbC", Some("0xD76D"), None, 0, 2),
+                r#"{"message":"OK","result":[],"status":"1"}"#,
+            ),
+        ];
+        for read in &reads {
+            writer.record(read, None, None).unwrap();
+        }
+        writer.write_manifest("svzchf-run", json!({})).unwrap();
+
+        let manifest: Value =
+            serde_json::from_str(&fs::read_to_string(writer.dir().join("manifest.json")).unwrap())
+                .unwrap();
+        assert_eq!(manifest["format"], "crossfoot-manifest-v2");
+        assert_eq!(manifest["chain_id"], 1);
+        assert_eq!(manifest["cache_preimage_version"], "crossfoot-cache-v1");
+        assert_eq!(manifest["code"], crate::util::code_identity());
+        let entries = manifest["entries"].as_array().unwrap();
+        assert_eq!(entries.len(), 3);
+        for entry in entries {
+            let preimage = entry["preimage"].as_str().unwrap();
+            assert_eq!(
+                sha256_hex(preimage.as_bytes()),
+                entry["cache_key"].as_str().unwrap(),
+                "entry {}",
+                entry["file"]
+            );
+            assert!(preimage.starts_with("crossfoot-cache-v1\nchain_id=1\n"));
+            let body = fs::read(writer.dir().join(entry["file"].as_str().unwrap())).unwrap();
+            assert_eq!(sha256_hex(&body), entry["sha256"].as_str().unwrap());
+            assert_eq!(body.len() as u64, entry["byte_len"].as_u64().unwrap());
+        }
+        assert_eq!(entries[0]["wire"], "json_rpc");
+        assert_eq!(entries[2]["wire"], "http_get");
+    }
 
     /// Two writers asking for one name in the same second get two
     /// directories, whichever order the file system answers in.
@@ -259,7 +350,7 @@ mod tests {
             .map(|_| {
                 let root = root.clone();
                 std::thread::spawn(move || {
-                    BundleWriter::create(&root, "run-1-2-stamp")
+                    BundleWriter::create(&root, "run-1-2-stamp", 1)
                         .unwrap()
                         .dir()
                         .to_path_buf()
@@ -312,7 +403,7 @@ mod tests {
         // And the writer refuses such a result instead of writing it.
         let dir = std::env::temp_dir().join("crossfoot-bundle-purity");
         let _ = fs::remove_dir_all(&dir);
-        let writer = BundleWriter::create(&dir, "run").unwrap();
+        let writer = BundleWriter::create(&dir, "run", 1).unwrap();
         let err = writer
             .write_result(&json!({ "verdict": "MODEL_MATCH", "run_started_utc": "now" }))
             .unwrap_err();

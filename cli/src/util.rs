@@ -103,9 +103,51 @@ pub fn workspace_packages() -> Vec<PackageVersion> {
         .collect()
 }
 
+/// sha256 of the embedded workspace package list, exactly as embedded.
+pub fn packages_sha256() -> String {
+    crate::cache::sha256_hex(env!("CROSSFOOT_LOCK_PACKAGES").as_bytes())
+}
+
+/// The identity of this binary, as written into a manifest's `code` header
+/// and compared by `crossfoot verify` (spec 03 R2). The git fields are the
+/// build-time state of the tree; `git_dirty` is null when it was unknown at
+/// build time.
+pub fn code_identity() -> serde_json::Value {
+    let dirty = match env!("CROSSFOOT_GIT_DIRTY") {
+        "true" => Some(true),
+        "false" => Some(false),
+        _ => None,
+    };
+    serde_json::json!({
+        "tool_version": env!("CARGO_PKG_VERSION"),
+        "git_commit": env!("CROSSFOOT_GIT_COMMIT"),
+        "git_dirty": dirty,
+        "packages_sha256": packages_sha256(),
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Spec 03 R2: the hash in the manifest is over the embedded list, so a
+    /// reader can recompute it from meta.json's workspace_packages.
+    #[test]
+    fn packages_sha256_matches_the_embedded_list() {
+        let rebuilt = workspace_packages()
+            .iter()
+            .map(|p| format!("{} {}", p.name, p.version))
+            .collect::<Vec<String>>()
+            .join(";");
+        assert_eq!(
+            packages_sha256(),
+            crate::cache::sha256_hex(rebuilt.as_bytes())
+        );
+        let identity = code_identity();
+        assert_eq!(identity["packages_sha256"], packages_sha256());
+        assert_eq!(identity["tool_version"], env!("CARGO_PKG_VERSION"));
+        assert!(identity["git_commit"].as_str().unwrap().len() >= 7);
+    }
 
     #[test]
     fn block_hex_round_trips() {

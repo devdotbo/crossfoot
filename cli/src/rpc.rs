@@ -1,10 +1,12 @@
 //! Read-only JSON-RPC client: cache first, then network with retry and
 //! endpoint failover.
 //!
-//! This client issues eth_chainId, eth_call, eth_getCode, eth_getBlockByNumber
-//! and eth_getLogs only. There is no code path here that can send a
-//! transaction.
+//! This client issues eth_chainId, eth_call, eth_getCode, eth_getBlockByNumber,
+//! eth_getLogs and eth_getTransactionByHash, plus web3_clientVersion to
+//! fingerprint an endpoint for meta.json. There is no code path here that can
+//! send a transaction.
 
+use std::collections::BTreeMap;
 use std::thread::sleep;
 use std::time::Duration;
 
@@ -327,6 +329,15 @@ fn classify(body: &str) -> (Classification, String) {
     (Classification::Fatal, description)
 }
 
+/// One endpoint that served at least one body this run: when it was first
+/// used and whether it speaks JSON-RPC (so it can be asked for its chain id
+/// and client version).
+#[derive(Debug, Clone)]
+pub struct Served {
+    pub first_used_utc: String,
+    pub json_rpc: bool,
+}
+
 pub struct Client {
     agent: ureq::Agent,
     endpoints: Vec<String>,
@@ -335,6 +346,8 @@ pub struct Client {
     chain_id: u64,
     offline: bool,
     pacing: Option<Duration>,
+    /// Full URLs, private to the client; redacted on the way out.
+    served: BTreeMap<String, Served>,
     pub network_calls: usize,
     pub cache_hits: usize,
     pub observations: Vec<Observation>,
@@ -362,6 +375,7 @@ impl Client {
             chain_id,
             offline,
             pacing: (pacing_ms > 0).then(|| Duration::from_millis(pacing_ms)),
+            served: BTreeMap::new(),
             network_calls: 0,
             cache_hits: 0,
             observations: Vec::new(),
@@ -397,6 +411,32 @@ impl Client {
 
     pub fn cache(&self) -> &Cache {
         &self.cache
+    }
+
+    /// Spec 03 R3: one fingerprint per endpoint that served a body this run.
+    /// JSON-RPC endpoints are asked directly for eth_chainId and
+    /// web3_clientVersion; the answers are not cached and not evidence, so
+    /// they go to meta.json only. A refusal leaves the field null.
+    pub fn endpoint_fingerprints(&self) -> Vec<Value> {
+        let agent = &self.agent;
+        let probe = |url: &str| -> (Option<u64>, Option<String>) {
+            let ask = |method: &str| -> Option<Value> {
+                let body = json!({"jsonrpc": "2.0", "id": 1, "method": method, "params": []});
+                let response = agent
+                    .post(url)
+                    .set("content-type", "application/json")
+                    .send_string(&body.to_string())
+                    .ok()?;
+                let parsed: Value = serde_json::from_str(&response.into_string().ok()?).ok()?;
+                parsed.get("result").cloned()
+            };
+            let chain_id = ask("eth_chainId")
+                .and_then(|v| v.as_str().map(str::to_string))
+                .and_then(|hex| crate::util::parse_hex_u64(&hex));
+            let version = ask("web3_clientVersion").and_then(|v| v.as_str().map(str::to_string));
+            (chain_id, version)
+        };
+        fingerprint_entries(&self.served, probe)
     }
 
     fn observe(
@@ -576,6 +616,12 @@ impl Client {
                                 detail,
                             );
                         }
+                        self.served
+                            .entry(endpoint.clone())
+                            .or_insert_with(|| Served {
+                                first_used_utc: now_utc(),
+                                json_rpc: matches!(descriptor.wire, Wire::JsonRpc),
+                            });
                         let meta = CacheMeta {
                             key: key.clone(),
                             chain_id: self.chain_id,
@@ -652,6 +698,32 @@ impl Client {
             ),
         })
     }
+}
+
+/// The fingerprint list for meta.json, from the served map and a probe. The
+/// probe sees the full URL (it has to reach the endpoint); only the redacted
+/// form is written. Non-JSON-RPC endpoints are listed without a probe.
+pub fn fingerprint_entries(
+    served: &BTreeMap<String, Served>,
+    probe: impl Fn(&str) -> (Option<u64>, Option<String>),
+) -> Vec<Value> {
+    served
+        .iter()
+        .map(|(url, served)| {
+            let (chain_id, client_version) = if served.json_rpc {
+                probe(url)
+            } else {
+                (None, None)
+            };
+            json!({
+                "endpoint": redact_endpoint(url),
+                "wire": if served.json_rpc { "json_rpc" } else { "http_get" },
+                "chain_id": chain_id,
+                "client_version": client_version,
+                "first_used_utc": served.first_used_utc,
+            })
+        })
+        .collect()
 }
 
 fn truncate(text: &str, max: usize) -> String {
@@ -900,6 +972,63 @@ mod tests {
             redact_endpoint("https://x.example/api/v1/eth"),
             "https://x.example/api/v1/eth"
         );
+    }
+
+    /// Spec 03 R3: fingerprints carry the chain id the endpoint reported and
+    /// never the credential in its URL.
+    #[test]
+    fn endpoint_fingerprints_are_redacted_and_carry_the_chain_id() {
+        let mut served = BTreeMap::new();
+        served.insert(
+            "https://lb.drpc.org/ogrpc?network=ethereum&dkey=SECRETKEY123".to_string(),
+            Served {
+                first_used_utc: "2026-01-01T00:00:00.000Z".to_string(),
+                json_rpc: true,
+            },
+        );
+        served.insert(
+            "https://mainnet.infura.io/v3/0123456789abcdef0123456789abcdef".to_string(),
+            Served {
+                first_used_utc: "2026-01-01T00:00:01.000Z".to_string(),
+                json_rpc: true,
+            },
+        );
+        served.insert(
+            "https://eth.blockscout.com/api?apikey=ALSOSECRET".to_string(),
+            Served {
+                first_used_utc: "2026-01-01T00:00:02.000Z".to_string(),
+                json_rpc: false,
+            },
+        );
+        let probe = |url: &str| -> (Option<u64>, Option<String>) {
+            if url.contains("infura") {
+                // The client version refused, the chain id answered.
+                (Some(1), None)
+            } else {
+                (Some(1), Some("Geth/v1.14.0".to_string()))
+            }
+        };
+        let entries = fingerprint_entries(&served, probe);
+        assert_eq!(entries.len(), 3);
+        let text = serde_json::to_string(&entries).unwrap();
+        assert!(!text.contains("SECRET"), "{text}");
+        assert!(!text.contains("0123456789abcdef"), "{text}");
+        let by_endpoint = |endpoint: &str| -> &Value {
+            entries
+                .iter()
+                .find(|e| e["endpoint"] == endpoint)
+                .unwrap_or_else(|| panic!("{endpoint} is listed in {text}"))
+        };
+        let drpc = by_endpoint("https://lb.drpc.org/ogrpc");
+        assert_eq!(drpc["chain_id"], 1);
+        assert_eq!(drpc["client_version"], "Geth/v1.14.0");
+        assert_eq!(drpc["first_used_utc"], "2026-01-01T00:00:00.000Z");
+        let infura = by_endpoint("https://mainnet.infura.io/v3/<redacted>");
+        assert_eq!(infura["chain_id"], 1);
+        assert_eq!(infura["client_version"], Value::Null);
+        let blockscout = by_endpoint("https://eth.blockscout.com/api");
+        assert_eq!(blockscout["wire"], "http_get");
+        assert_eq!(blockscout["chain_id"], Value::Null);
     }
 
     #[test]

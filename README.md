@@ -13,7 +13,8 @@ planned.
 
 It is read-only by construction. The binary issues only `eth_chainId`,
 `eth_call`, `eth_getCode`, `eth_getBlockByNumber`, `eth_getLogs` (plus
-`eth_getTransactionByHash` for attribution and keyless HTTP GETs against
+`eth_getTransactionByHash` for attribution, `web3_clientVersion` to
+fingerprint an endpoint in `meta.json`, and keyless HTTP GETs against
 Blockscout and public benchmark sources). It holds no key and has no code
 path that can sign or send a transaction.
 
