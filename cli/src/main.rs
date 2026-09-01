@@ -201,9 +201,47 @@ struct RunOpts {
     #[arg(long)]
     offline: bool,
 
+    /// Serve every read from this evidence bundle's raw responses instead
+    /// of the cache or the network, and fail on a read it does not hold.
+    /// Reproduces a run from a checked-in fixture without a cache.
+    #[arg(long, conflicts_with_all = ["offline", "endpoints", "log_endpoints"])]
+    from_bundle: Option<PathBuf>,
+
     /// Wait this many milliseconds before each network call.
     #[arg(long, default_value_t = 0)]
     rpc_delay_ms: u64,
+}
+
+/// The read source a run command uses: a bundle when `--from-bundle` was
+/// given, else the network client over the workspace cache.
+fn read_source(
+    opts: &RunOpts,
+    verify_root: &std::path::Path,
+) -> Result<Box<dyn rpc::ReadSource>, String> {
+    if let Some(bundle) = &opts.from_bundle {
+        return Ok(Box::new(source::BundleSource::open(bundle)?));
+    }
+    let endpoints = if opts.endpoints.is_empty() {
+        vec![
+            DEFAULT_ARCHIVE_ENDPOINT.to_string(),
+            DEFAULT_LATEST_ENDPOINT.to_string(),
+        ]
+    } else {
+        opts.endpoints.clone()
+    };
+    let log_endpoints = if opts.log_endpoints.is_empty() {
+        vec![DEFAULT_LOG_HISTORY_ENDPOINT.to_string()]
+    } else {
+        opts.log_endpoints.clone()
+    };
+    Ok(Box::new(Client::new(
+        endpoints,
+        log_endpoints,
+        Cache::new(verify_root.join("cache")),
+        svzchf::EXPECTED_CHAIN_ID,
+        opts.offline,
+        opts.rpc_delay_ms,
+    )))
 }
 
 #[derive(Subcommand)]
@@ -507,34 +545,11 @@ fn recompute_svzchf(opts: RunOpts) -> Result<(), String> {
             opts.verify_root.display()
         )
     })?;
-
-    let endpoints = if opts.endpoints.is_empty() {
-        vec![
-            DEFAULT_ARCHIVE_ENDPOINT.to_string(),
-            DEFAULT_LATEST_ENDPOINT.to_string(),
-        ]
-    } else {
-        opts.endpoints.clone()
-    };
-    let log_endpoints = if opts.log_endpoints.is_empty() {
-        vec![DEFAULT_LOG_HISTORY_ENDPOINT.to_string()]
-    } else {
-        opts.log_endpoints.clone()
-    };
-
     let window = resolve_window("svzchf", &opts)?;
-    let cache = Cache::new(verify_root.join("cache"));
-    let mut client = Client::new(
-        endpoints,
-        log_endpoints,
-        cache,
-        svzchf::EXPECTED_CHAIN_ID,
-        opts.offline,
-        opts.rpc_delay_ms,
-    );
+    let mut client = read_source(&opts, &verify_root)?;
 
     let outcome = run_svzchf::run(
-        &mut client,
+        client.as_mut(),
         &run_svzchf::RunArgs {
             baseline_block: window.baseline_block,
             block: window.block,
@@ -560,34 +575,11 @@ fn check_mtbill(opts: RunOpts) -> Result<(), String> {
             opts.verify_root.display()
         )
     })?;
-
-    let endpoints = if opts.endpoints.is_empty() {
-        vec![
-            DEFAULT_ARCHIVE_ENDPOINT.to_string(),
-            DEFAULT_LATEST_ENDPOINT.to_string(),
-        ]
-    } else {
-        opts.endpoints.clone()
-    };
-    let log_endpoints = if opts.log_endpoints.is_empty() {
-        vec![DEFAULT_LOG_HISTORY_ENDPOINT.to_string()]
-    } else {
-        opts.log_endpoints.clone()
-    };
-
     let window = resolve_window("mtbill", &opts)?;
-    let cache = Cache::new(verify_root.join("cache"));
-    let mut client = Client::new(
-        endpoints,
-        log_endpoints,
-        cache,
-        svzchf::EXPECTED_CHAIN_ID,
-        opts.offline,
-        opts.rpc_delay_ms,
-    );
+    let mut client = read_source(&opts, &verify_root)?;
 
     let outcome = run_mtbill::run(
-        &mut client,
+        client.as_mut(),
         &run_mtbill::RunArgs {
             baseline_block: window.baseline_block,
             block: window.block,
@@ -738,6 +730,46 @@ mod tests {
         assert!(
             err.contains("no window preset named demo for mtbill"),
             "{err}"
+        );
+    }
+
+    /// `--from-bundle` replaces the cache and the network: it conflicts
+    /// with the flags that describe those, and a run from the checked-in
+    /// fixture writes the fixture's result.json byte for byte.
+    #[test]
+    fn run_from_bundle_reproduces_the_fixture_result() {
+        assert!(run_opts(&["--window", "demo", "--from-bundle", "x", "--offline"]).is_err());
+        assert!(run_opts(&["--window", "demo", "--from-bundle", "x", "--endpoint", "u"]).is_err());
+        let fixture = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/svzchf-demo-24570000-25853000");
+        let opts = run_opts(&[
+            "--window",
+            "demo",
+            "--from-bundle",
+            fixture.to_str().unwrap(),
+        ])
+        .unwrap();
+        let root =
+            std::env::temp_dir().join(format!("crossfoot-from-bundle-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(&root).unwrap();
+        let window = resolve_window("svzchf", &opts).unwrap();
+        let mut source = read_source(&opts, &root).unwrap();
+        let outcome = run_svzchf::run(
+            source.as_mut(),
+            &run_svzchf::RunArgs {
+                baseline_block: window.baseline_block,
+                block: window.block,
+                window_name: window.name,
+            },
+            &root,
+        )
+        .unwrap();
+        assert_eq!(outcome.verdict, model::verdict::Verdict::ModelMatch);
+        assert_eq!(outcome.network_calls, 0);
+        assert_eq!(
+            std::fs::read(&outcome.result_path).unwrap(),
+            std::fs::read(fixture.join("result.json")).unwrap()
         );
     }
 
