@@ -104,10 +104,6 @@ impl BundleWriter {
         })
     }
 
-    pub fn chain_id(&self) -> u64 {
-        self.chain_id
-    }
-
     pub fn dir(&self) -> &Path {
         &self.dir
     }
@@ -256,6 +252,16 @@ pub fn impure_result_field(value: &Value) -> Option<String> {
         }
     }
     walk(value, "")
+}
+
+/// Adds every top-level key of `extra` to `base`, so a run's meta.json can
+/// carry what its read source reports without knowing which source it was.
+pub fn merge_meta(base: &mut Value, extra: Value) {
+    if let (Value::Object(base), Value::Object(extra)) = (base, extra) {
+        for (key, value) in extra {
+            base.insert(key, value);
+        }
+    }
 }
 
 fn write_json(path: &Path, value: &Value) -> io::Result<()> {

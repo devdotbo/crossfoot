@@ -329,6 +329,50 @@ fn classify(body: &str) -> (Classification, String) {
     (Classification::Fatal, description)
 }
 
+/// Where reads come from. The network client and the bundle-backed source
+/// (`source::BundleSource`) both implement it, so a run function recomputes
+/// from either without knowing which (spec 03 R6).
+pub trait ReadSource {
+    /// One read, by descriptor: the body verbatim, from wherever the source
+    /// holds it.
+    fn fetch(&mut self, descriptor: Descriptor) -> Result<Fetched, RpcError>;
+    /// The chain the source is bound to. Cache keys are computed under it.
+    fn chain_id(&self) -> u64;
+    /// (network calls, cache or bundle hits) so far.
+    fn counters(&self) -> (usize, usize);
+    /// What the source is, for meta.json: endpoints, counters, observations,
+    /// fingerprints. Never a credential.
+    fn meta(&self) -> Value;
+}
+
+impl ReadSource for Client {
+    fn fetch(&mut self, descriptor: Descriptor) -> Result<Fetched, RpcError> {
+        Client::fetch(self, descriptor)
+    }
+
+    fn chain_id(&self) -> u64 {
+        self.chain_id
+    }
+
+    fn counters(&self) -> (usize, usize) {
+        (self.network_calls, self.cache_hits)
+    }
+
+    fn meta(&self) -> Value {
+        json!({
+            "source": "network",
+            "endpoints_configured": self.endpoints(),
+            "log_endpoints_configured": self.log_endpoints(),
+            "cache_root": self.cache.root().display().to_string(),
+            "offline": self.offline,
+            "network_calls_this_run": self.network_calls,
+            "cache_hits_this_run": self.cache_hits,
+            "rpc_observations": self.observations,
+            "endpoint_fingerprints": self.endpoint_fingerprints(),
+        })
+    }
+}
+
 /// One endpoint that served at least one body this run: when it was first
 /// used and whether it speaks JSON-RPC (so it can be asked for its chain id
 /// and client version).
@@ -407,10 +451,6 @@ impl Client {
             } => vec![base.clone()],
             Wire::HttpGet { base: None, .. } => self.log_endpoints.clone(),
         }
-    }
-
-    pub fn cache(&self) -> &Cache {
-        &self.cache
     }
 
     /// Spec 03 R3: one fingerprint per endpoint that served a body this run.

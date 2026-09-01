@@ -15,8 +15,8 @@ use crate::abi::{
 use crate::bundle::BundleWriter;
 use crate::model::mtbill::{FeedParams, Round, SupplyFlow};
 use crate::rpc::{
-    call_descriptor, get_block_descriptor, get_transaction_descriptor, http_get_descriptor, Client,
-    BLOCKSCOUT_RESULT_CAP,
+    call_descriptor, get_block_descriptor, get_transaction_descriptor, http_get_descriptor,
+    ReadSource, BLOCKSCOUT_RESULT_CAP,
 };
 use crate::util::parse_hex_u64;
 
@@ -210,7 +210,7 @@ pub struct MtbillInputs {
 /// One eth_call, recorded, returning the raw hex result. A revert is a
 /// finding and yields None rather than aborting the run.
 fn call(
-    client: &mut Client,
+    client: &mut dyn ReadSource,
     bundle: &mut BundleWriter,
     label: &str,
     to: &str,
@@ -262,7 +262,7 @@ fn decode_round(data: &str) -> Option<Round> {
 /// cap checked rather than assumed.
 #[allow(clippy::too_many_arguments)]
 fn blockscout_logs(
-    client: &mut Client,
+    client: &mut dyn ReadSource,
     bundle: &mut BundleWriter,
     label: &str,
     address: &str,
@@ -372,7 +372,7 @@ pub fn flow_totals(mints: &[SupplyEvent], burns: &[SupplyEvent]) -> Result<Suppl
 /// The Treasury daily bill rates CSV for one year. Timestamp pinned, not
 /// block pinned: the bundle records that and the fetch timestamp.
 fn fetch_treasury_csv(
-    client: &mut Client,
+    client: &mut dyn ReadSource,
     bundle: &mut BundleWriter,
     year: i32,
 ) -> Result<Option<String>, String> {
@@ -494,7 +494,7 @@ pub fn benchmark_average(series: &[(u64, f64)], from: u64, to: u64) -> Option<f6
 }
 
 fn fetch_defillama(
-    client: &mut Client,
+    client: &mut dyn ReadSource,
     bundle: &mut BundleWriter,
     timestamp: u64,
 ) -> Result<Value, String> {
@@ -531,7 +531,7 @@ fn fetch_defillama(
 
 #[allow(clippy::too_many_arguments)]
 pub fn fetch(
-    client: &mut Client,
+    client: &mut dyn ReadSource,
     bundle: &mut BundleWriter,
     block: u64,
     baseline_block: u64,

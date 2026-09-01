@@ -20,7 +20,8 @@ use crate::abi::{
 use crate::bundle::BundleWriter;
 use crate::rpc::{
     blockscout_logs_descriptor, call_descriptor, chain_id_descriptor, get_block_descriptor,
-    get_code_descriptor, get_logs_descriptor, Client, Fetched, RpcErrorKind, BLOCKSCOUT_RESULT_CAP,
+    get_code_descriptor, get_logs_descriptor, Fetched, ReadSource, RpcErrorKind,
+    BLOCKSCOUT_RESULT_CAP,
 };
 use crate::util::{
     block_hex, git_provenance, now_stamp, now_utc, parse_hex_u64, workspace_packages,
@@ -169,7 +170,7 @@ pub struct Fetch {
 /// One eth_call: fetch, decode, record. A revert or empty return data is a
 /// finding recorded in the bundle, not a failure of the run.
 fn read_call(
-    client: &mut Client,
+    client: &mut dyn ReadSource,
     bundle: &mut BundleWriter,
     label: &str,
     to: &str,
@@ -231,31 +232,33 @@ fn has_code(fetched: &Fetched) -> Result<bool, String> {
 /// eth_getCode. All probes are cached, so the search costs about 25 requests
 /// once and nothing on later runs.
 fn find_deployment_block(
-    client: &mut Client,
+    client: &mut dyn ReadSource,
     bundle: &mut BundleWriter,
     address: &str,
     upper: u64,
 ) -> Result<Option<u64>, String> {
-    let probe =
-        |client: &mut Client, bundle: &mut BundleWriter, block: u64| -> Result<bool, String> {
-            let hex = block_hex(block);
-            let label = format!("deployment probe eth_getCode @ {block}");
-            let fetched = client
-                .fetch(get_code_descriptor(&label, address, &hex))
-                .map_err(|err| err.message)?;
-            let present = has_code(&fetched)?;
-            bundle
-                .record(
-                    &fetched,
-                    Some(Decoded::Other {
-                        hex: format!("code_present={present}"),
-                        byte_len: 0,
-                    }),
-                    None,
-                )
-                .map_err(|e| e.to_string())?;
-            Ok(present)
-        };
+    let probe = |client: &mut dyn ReadSource,
+                 bundle: &mut BundleWriter,
+                 block: u64|
+     -> Result<bool, String> {
+        let hex = block_hex(block);
+        let label = format!("deployment probe eth_getCode @ {block}");
+        let fetched = client
+            .fetch(get_code_descriptor(&label, address, &hex))
+            .map_err(|err| err.message)?;
+        let present = has_code(&fetched)?;
+        bundle
+            .record(
+                &fetched,
+                Some(Decoded::Other {
+                    hex: format!("code_present={present}"),
+                    byte_len: 0,
+                }),
+                None,
+            )
+            .map_err(|e| e.to_string())?;
+        Ok(present)
+    };
 
     if !probe(client, bundle, upper)? {
         bundle.add_finding(
@@ -291,7 +294,7 @@ fn find_deployment_block(
 /// when an endpoint says the range is too broad.
 #[allow(clippy::too_many_arguments)]
 fn sweep_logs(
-    client: &mut Client,
+    client: &mut dyn ReadSource,
     bundle: &mut BundleWriter,
     address: &str,
     from: u64,
@@ -519,7 +522,7 @@ fn cross_check_rate_series(bundle: &mut BundleWriter, series: &[Value], to_block
 /// The rate change history, in one Blockscout request. The filter keeps the
 /// result far below the result cap, which is checked rather than assumed.
 fn fetch_rate_history(
-    client: &mut Client,
+    client: &mut dyn ReadSource,
     bundle: &mut BundleWriter,
     address: &str,
     to_block: u64,
@@ -603,7 +606,7 @@ fn fetch_rate_history(
 /// ignored, so the only safe reading of a response at the cap is that the
 /// window was too wide. The window halves until every response is under it.
 fn sweep_blockscout_all(
-    client: &mut Client,
+    client: &mut dyn ReadSource,
     bundle: &mut BundleWriter,
     address: &str,
     from: u64,
@@ -718,13 +721,17 @@ fn sweep_blockscout_all(
 }
 
 /// The fetch command: one pinned fetch in a bundle of its own.
-pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<Outcome, String> {
+pub fn run(
+    client: &mut dyn ReadSource,
+    args: &FetchArgs,
+    verify_root: &Path,
+) -> Result<Outcome, String> {
     let started = now_utc();
     let bundle_name = format!("svzchf-{}-{}", args.block, now_stamp());
     let mut bundle = BundleWriter::create(
         &verify_root.join("bundles"),
         &bundle_name,
-        EXPECTED_CHAIN_ID,
+        client.chain_id(),
     )
     .map_err(|err| format!("could not create the bundle directory: {err}"))?;
 
@@ -735,11 +742,12 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
         .write_manifest("svzchf", fetched.summary.clone())
         .map_err(|err| format!("could not write manifest.json: {err}"))?;
 
-    let meta = json!({
+    let mut meta = json!({
         "format": "crossfoot-meta-v1",
         "tool": "crossfoot",
         "tool_version": env!("CARGO_PKG_VERSION"),
         "target": "svzchf",
+        "code": crate::util::code_identity(),
         "repo_git": git_provenance(verify_root),
         "workspace_packages": workspace_packages(),
         "chain_id": fetched.chain_id,
@@ -748,24 +756,19 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
         "block_hex": block_hex(args.block),
         "block_timestamp_unix": fetched.block_timestamp,
         "baseline_block": args.baseline_block,
-        "endpoints_configured": client.endpoints(),
-        "log_endpoints_configured": client.log_endpoints(),
-        "cache_root": client.cache().root().display().to_string(),
         "fetch_started_utc": started,
         "fetch_finished_utc": finished,
-        "network_calls_this_run": client.network_calls,
-        "cache_hits_this_run": client.cache_hits,
-        "rpc_observations": client.observations,
-        "endpoint_fingerprints": client.endpoint_fingerprints(),
     });
+    crate::bundle::merge_meta(&mut meta, client.meta());
     bundle
         .write_meta(meta)
         .map_err(|err| format!("could not write meta.json: {err}"))?;
 
+    let (network_calls, cache_hits) = client.counters();
     Ok(Outcome {
         bundle_dir: bundle.dir().to_path_buf(),
-        network_calls: client.network_calls,
-        cache_hits: client.cache_hits,
+        network_calls,
+        cache_hits,
         entry_count: bundle.entries().len(),
         findings: bundle.findings().to_vec(),
         flow_events: fetched.flow_events,
@@ -777,7 +780,7 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
 /// eth_call at an explicit block number; the caller decides which bundle the
 /// evidence lands in.
 pub fn fetch(
-    client: &mut Client,
+    client: &mut dyn ReadSource,
     bundle: &mut BundleWriter,
     args: &FetchArgs,
 ) -> Result<Fetch, String> {
@@ -1244,7 +1247,7 @@ fn decode_flow_events(rows: &[Value]) -> Result<Vec<FlowEvent>, String> {
 /// Filtering by topic1 alone returns Saved, Withdrawn and InterestCollected
 /// together, which is what the replay needs and keeps the ordering exact.
 pub fn fetch_vault_flows(
-    client: &mut Client,
+    client: &mut dyn ReadSource,
     bundle: &mut BundleWriter,
     module: &str,
     vault: &str,
@@ -1311,7 +1314,7 @@ pub fn fetch_vault_flows(
 /// The vault's own InterestClaimed series, used only to cross-check the
 /// module's InterestCollected count.
 pub fn fetch_interest_claimed(
-    client: &mut Client,
+    client: &mut dyn ReadSource,
     bundle: &mut BundleWriter,
     vault: &str,
     to_block: u64,

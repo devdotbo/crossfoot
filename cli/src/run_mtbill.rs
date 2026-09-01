@@ -13,8 +13,7 @@ use serde_json::{json, Value};
 use crate::bundle::BundleWriter;
 use crate::model::mtbill::{self as checks, CheckResult, CheckVerdict};
 use crate::mtbill;
-use crate::rpc::Client;
-use crate::svzchf;
+use crate::rpc::ReadSource;
 use crate::util::now_utc;
 
 /// A gap above this makes the interval stale for C3.
@@ -161,7 +160,11 @@ fn c8_cross_source(defillama: &Value, oracle_answer: i128, feed_decimals: u32) -
     }
 }
 
-pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<RunOutcome, String> {
+pub fn run(
+    client: &mut dyn ReadSource,
+    args: &RunArgs,
+    verify_root: &Path,
+) -> Result<RunOutcome, String> {
     if args.baseline_block >= args.block {
         return Err(format!(
             "--baseline-block {} must be below --block {}",
@@ -177,7 +180,7 @@ pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<Ru
             args.block,
             crate::util::now_stamp()
         ),
-        svzchf::EXPECTED_CHAIN_ID,
+        client.chain_id(),
     )
     .map_err(|err| format!("could not create the run directory: {err}"))?;
 
@@ -459,46 +462,44 @@ pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<Ru
     bundle
         .write_manifest("mtbill-run", json!({ "consistency": overall }))
         .map_err(|err| format!("could not write the run manifest: {err}"))?;
-    bundle
-        .write_meta(json!({
-            "format": "crossfoot-meta-v1",
-            "tool": "crossfoot",
-            "tool_version": env!("CARGO_PKG_VERSION"),
-            "target": "mtbill-run",
-            "repo_git": crate::util::git_provenance(verify_root),
-            "workspace_packages": crate::util::workspace_packages(),
-            "governance": {
+    let mut meta = json!({
+        "format": "crossfoot-meta-v1",
+        "tool": "crossfoot",
+        "tool_version": env!("CARGO_PKG_VERSION"),
+        "target": "mtbill-run",
+        "code": crate::util::code_identity(),
+        "repo_git": crate::util::git_provenance(verify_root),
+        "workspace_packages": crate::util::workspace_packages(),
+        "governance": {
             "access_control": mtbill::ACCESS_CONTROL,
             "timelock": mtbill::TIMELOCK,
             "feed_admin_role": mtbill::FEED_ADMIN_ROLE,
             "note": "role holders are not enumerated; the grant and revoke history for the feed admin role is under C2",
         },
         "contract_sources": {
-                "repo": mtbill::SOURCE_REPO,
-                "commit": mtbill::SOURCE_COMMIT,
-                "paths": mtbill::SOURCE_PATHS,
-            },
-            "baseline_block": args.baseline_block,
-            "block": args.block,
-            "window": args.window_name.as_ref().map(|name| json!({ "name": name })),
-            "run_started_utc": started,
-            "run_finished_utc": now_utc(),
-            "endpoints_configured": client.endpoints(),
-            "log_endpoints_configured": client.log_endpoints(),
-            "network_calls_this_run": client.network_calls,
-            "cache_hits_this_run": client.cache_hits,
-            "endpoint_fingerprints": client.endpoint_fingerprints(),
-            "rpc_observations": client.observations,
-        }))
+            "repo": mtbill::SOURCE_REPO,
+            "commit": mtbill::SOURCE_COMMIT,
+            "paths": mtbill::SOURCE_PATHS,
+        },
+        "baseline_block": args.baseline_block,
+        "block": args.block,
+        "window": args.window_name.as_ref().map(|name| json!({ "name": name })),
+        "run_started_utc": started,
+        "run_finished_utc": now_utc(),
+    });
+    crate::bundle::merge_meta(&mut meta, client.meta());
+    bundle
+        .write_meta(meta)
         .map_err(|err| format!("could not write the run meta: {err}"))?;
 
+    let (network_calls, cache_hits) = client.counters();
     Ok(RunOutcome {
         bundle_dir: bundle.dir().to_path_buf(),
         result_path,
         overall,
         summary: summary_block,
         checks: all,
-        network_calls: client.network_calls,
-        cache_hits: client.cache_hits,
+        network_calls,
+        cache_hits,
     })
 }

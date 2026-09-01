@@ -16,6 +16,7 @@ mod render;
 mod rpc;
 mod run_mtbill;
 mod run_svzchf;
+mod source;
 mod summary;
 mod svzchf;
 mod util;

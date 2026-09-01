@@ -15,7 +15,7 @@ use crate::model::actus;
 use crate::model::clock::{RateSegment, TickClock};
 use crate::model::replay::{self, AccountState, Action, RecognitionEvent};
 use crate::model::verdict::{ComparisonSet, FieldComparison, Verdict};
-use crate::rpc::Client;
+use crate::rpc::ReadSource;
 use crate::svzchf::{self, FlowKind};
 use crate::util::now_utc;
 
@@ -35,7 +35,7 @@ pub struct ModelInputs {
 
 #[allow(dead_code)]
 pub fn load_inputs(
-    client: &mut Client,
+    client: &mut dyn ReadSource,
     verify_root: &Path,
     block: u64,
 ) -> Result<ModelInputs, String> {
@@ -271,7 +271,11 @@ fn cross_check_actus(
 }
 
 #[allow(clippy::too_many_arguments)]
-pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<RunOutcome, String> {
+pub fn run(
+    client: &mut dyn ReadSource,
+    args: &RunArgs,
+    verify_root: &Path,
+) -> Result<RunOutcome, String> {
     if args.baseline_block >= args.block {
         return Err(format!(
             "--baseline-block {} must be below --block {}",
@@ -288,7 +292,7 @@ pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<Ru
             args.block,
             crate::util::now_stamp()
         ),
-        svzchf::EXPECTED_CHAIN_ID,
+        client.chain_id(),
     )
     .map_err(|err| format!("could not create the run directory: {err}"))?;
 
@@ -550,33 +554,32 @@ pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<Ru
             }),
         )
         .map_err(|err| format!("could not write the run manifest: {err}"))?;
+    let mut meta = json!({
+        "format": "crossfoot-meta-v1",
+        "tool": "crossfoot",
+        "tool_version": env!("CARGO_PKG_VERSION"),
+        "target": "svzchf-run",
+        "code": crate::util::code_identity(),
+        "repo_git": crate::util::git_provenance(verify_root),
+        "workspace_packages": crate::util::workspace_packages(),
+        "baseline_block": args.baseline_block,
+        "block": args.block,
+        "window": args.window_name.as_ref().map(|name| json!({ "name": name })),
+        "run_started_utc": started,
+        "run_finished_utc": now_utc(),
+    });
+    crate::bundle::merge_meta(&mut meta, client.meta());
     bundle
-        .write_meta(json!({
-            "format": "crossfoot-meta-v1",
-            "tool": "crossfoot",
-            "tool_version": env!("CARGO_PKG_VERSION"),
-            "target": "svzchf-run",
-            "repo_git": crate::util::git_provenance(verify_root),
-            "workspace_packages": crate::util::workspace_packages(),
-            "baseline_block": args.baseline_block,
-            "block": args.block,
-            "window": args.window_name.as_ref().map(|name| json!({ "name": name })),
-            "run_started_utc": started,
-            "run_finished_utc": now_utc(),
-            "endpoints_configured": client.endpoints(),
-            "log_endpoints_configured": client.log_endpoints(),
-            "network_calls_this_run": client.network_calls,
-            "cache_hits_this_run": client.cache_hits,
-            "endpoint_fingerprints": client.endpoint_fingerprints(),
-        }))
+        .write_meta(meta)
         .map_err(|err| format!("could not write the run meta: {err}"))?;
 
+    let (network_calls, cache_hits) = client.counters();
     Ok(RunOutcome {
         bundle_dir: bundle.dir().to_path_buf(),
         verdict,
         summary,
         result_path,
-        network_calls: client.network_calls,
-        cache_hits: client.cache_hits,
+        network_calls,
+        cache_hits,
     })
 }
