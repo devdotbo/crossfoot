@@ -1448,11 +1448,26 @@ fn midas_body(run: &Run) -> String {
     // Timelines and findings for every feed with at least one post that took
     // the path without the on-chain check and exceeded the bound in force.
     for feed in &feeds {
-        let bypasses = feed
-            .get("bypass_posts")
-            .and_then(Value::as_u64)
+        let guard_findings = feed
+            .get("findings")
+            .and_then(Value::as_array)
+            .map(|f| {
+                f.iter()
+                    .filter(|x| {
+                        matches!(
+                            x.get("kind").and_then(Value::as_str),
+                            Some(
+                                "GUARD_BYPASS"
+                                    | "GUARD_INCONSISTENT"
+                                    | "GUARD_AT_BOUND"
+                                    | "GUARD_CLAMPED"
+                            )
+                        )
+                    })
+                    .count()
+            })
             .unwrap_or(0);
-        if bypasses == 0 {
+        if guard_findings == 0 {
             continue;
         }
         let name = format!(
@@ -1494,7 +1509,12 @@ fn midas_body(run: &Run) -> String {
                 let kind = s("kind");
                 if !matches!(
                     kind.as_str(),
-                    "GUARD_BYPASS" | "UNGUARDED_POST" | "GUARD_INCONSISTENT" | "BOUND_CHANGED"
+                    "GUARD_BYPASS"
+                        | "UNGUARDED_POST"
+                        | "GUARD_INCONSISTENT"
+                        | "GUARD_AT_BOUND"
+                        | "GUARD_CLAMPED"
+                        | "BOUND_CHANGED"
                 ) {
                     continue;
                 }

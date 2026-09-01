@@ -72,12 +72,45 @@ pub struct SetterSpec {
 }
 
 /// The on-chain guard the checked path enforces. Absent for a family whose
-/// posting functions carry no deviation bound.
+/// posting functions carry no deviation bound. `kind` is `max_deviation`
+/// (the default: a revert when the deviation exceeds the getter's value,
+/// read at block minus one) or `clamp` (the stored answer is truncated to
+/// `band_percent` of the previous answer, a constant in the code).
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct GuardSpec {
+    #[serde(default = "default_guard_kind")]
+    pub kind: String,
+    #[serde(default)]
     pub max_deviation: String,
+    #[serde(default)]
     pub min_answer: String,
+    #[serde(default)]
     pub max_answer: String,
+    #[serde(default)]
+    pub band_percent: Option<u64>,
+}
+
+fn default_guard_kind() -> String {
+    "max_deviation".to_string()
+}
+
+impl GuardSpec {
+    pub fn is_clamp(&self) -> bool {
+        self.kind == "clamp"
+    }
+}
+
+/// A contract that forwards posting calls to the feed: the transaction goes
+/// to the relay, whose calldata carries a `bytes[]` of feed calls at head
+/// word `calls_word`. The k-th setter call in the array posted the k-th
+/// round of the transaction.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct RelaySpec {
+    pub address: String,
+    pub selector: String,
+    pub calls_word: usize,
+    #[serde(default)]
+    pub note: String,
 }
 
 /// The state getters read at the pinned block.
@@ -169,6 +202,8 @@ pub struct Mechanism {
     /// when the series stays short of `latestRound()`.
     pub round_events: Vec<String>,
     pub setters: Vec<SetterSpec>,
+    #[serde(default)]
+    pub relays: Vec<RelaySpec>,
     #[serde(default)]
     pub other_calls: Vec<Value>,
     #[serde(default)]
@@ -268,6 +303,14 @@ pub fn parse_feed_list(text: &str) -> Result<FeedList, String> {
     }
     if list.mechanism.round_events.is_empty() {
         return Err("the mechanism needs at least one round event".to_string());
+    }
+    if let Some(guard) = &list.mechanism.guard {
+        if guard.is_clamp() && guard.band_percent.is_none() {
+            return Err("a clamp guard needs band_percent".to_string());
+        }
+        if !guard.is_clamp() && guard.max_deviation.is_empty() {
+            return Err("a max_deviation guard needs the max_deviation getter".to_string());
+        }
     }
     for setter in &list.mechanism.setters {
         if !setter.path.is_setter() {
@@ -393,7 +436,15 @@ pub fn decode_answer_updated(row: &Value) -> Option<RoundEvent> {
     let topics = row.get("topics")?.as_array()?;
     let answer = topics.get(1)?.as_str()?;
     let round_id = topics.get(2)?.as_str().and_then(parse_hex_u64)?;
-    let timestamp = topics.get(3)?.as_str().and_then(parse_hex_u64)?;
+    // The Chainlink shape leaves updatedAt non-indexed: Blockscout pads the
+    // topics to four with a null and the timestamp sits in the data word.
+    let timestamp = match topics.get(3).and_then(Value::as_str) {
+        Some(topic) => parse_hex_u64(topic)?,
+        None => row
+            .get("data")
+            .and_then(Value::as_str)
+            .and_then(|d| u64_word(d, 0))?,
+    };
     Some(RoundEvent {
         round_id,
         answer: i128_word(answer, 0)?,
@@ -443,6 +494,26 @@ pub fn decode_multi_send(input: &str) -> Option<Vec<(String, String)>> {
         let data = packed.get(cursor + 170..cursor + 170 + data_length)?;
         out.push((to, format!("0x{data}")));
         cursor += 170 + data_length;
+    }
+    Some(out)
+}
+
+/// Decodes a `bytes[]` argument at head word `word` of a call: the head
+/// word holds the array offset; at the offset the length, then one offset
+/// per element (relative to the array start), each pointing at a length
+/// and the bytes. Returns the elements in order.
+pub fn decode_bytes_array(input: &str, word: usize) -> Option<Vec<String>> {
+    let body = input.strip_prefix("0x").unwrap_or(input);
+    let args = body.get(8..)?;
+    let array = usize::from_str_radix(args.get(word * 64..(word + 1) * 64)?, 16).ok()? * 2;
+    let count = usize::from_str_radix(args.get(array..array + 64)?, 16).ok()?;
+    let mut out = Vec::with_capacity(count);
+    for index in 0..count {
+        let head = array + 64 + index * 64;
+        let offset = usize::from_str_radix(args.get(head..head + 64)?, 16).ok()? * 2;
+        let start = array + 64 + offset;
+        let length = usize::from_str_radix(args.get(start..start + 64)?, 16).ok()? * 2;
+        out.push(format!("0x{}", args.get(start + 64..start + 64 + length)?));
     }
     Some(out)
 }
@@ -735,6 +806,8 @@ pub struct FeedInputs {
     pub description: Option<String>,
     pub decimals: Option<u32>,
     pub bounds: Option<Bounds>,
+    /// The clamp band at 10^decimals scale for a clamp guard.
+    pub clamp_band: Option<i128>,
     pub latest_round: Option<u64>,
     pub latest: Option<LatestRound>,
     pub last_timestamp: Option<u64>,
@@ -780,7 +853,7 @@ fn read_bounds(
     address: &str,
     block: u64,
 ) -> Result<Option<Bounds>, String> {
-    let Some(guard) = guard else {
+    let Some(guard) = guard.filter(|g| !g.is_clamp()) else {
         return Ok(None);
     };
     let deviation = call_i128(
@@ -907,6 +980,16 @@ pub fn fetch(
         )?
         .and_then(|data| u64_word(&data, 0));
 
+        // A feed without latestRound() still names its round in
+        // latestRoundData.
+        let latest_round = latest_round.or(latest.as_ref().map(|l| l.round_id));
+        let clamp = mechanism.guard.as_ref().is_some_and(|g| g.is_clamp());
+        let clamp_band = match (&mechanism.guard, decimals) {
+            (Some(guard), Some(decimals)) if guard.is_clamp() => guard
+                .band_percent
+                .map(|band| band as i128 * 10i128.pow(decimals)),
+            _ => None,
+        };
         let kind = if description.is_none()
             && decimals.is_none()
             && bounds.is_none()
@@ -916,6 +999,8 @@ pub fn fetch(
             FeedKind::Unreadable
         } else if mechanism.guard.is_none() {
             FeedKind::Unguarded
+        } else if clamp {
+            FeedKind::Bounded
         } else if bounds.is_none() {
             FeedKind::Derived
         } else {
@@ -945,6 +1030,7 @@ pub fn fetch(
             description,
             decimals,
             bounds,
+            clamp_band,
             latest_round,
             latest,
             last_timestamp,
@@ -1130,6 +1216,33 @@ pub fn fetch(
                         safe_chain: chain,
                         batch_index,
                     },
+                    None if relay_call(
+                        mechanism,
+                        &to,
+                        &input,
+                        &feed_lower,
+                        &seen_in_tx_before(&seen_in_tx, &event.transaction_hash),
+                    )
+                    .is_some() =>
+                    {
+                        let (selector, calldata, position, relay) = relay_call(
+                            mechanism,
+                            &to,
+                            &input,
+                            &feed_lower,
+                            &seen_in_tx_before(&seen_in_tx, &event.transaction_hash),
+                        )
+                        .expect("checked above");
+                        Attribution {
+                            via: Via::Relay,
+                            path: mechanism.path_of(&selector),
+                            selector,
+                            value: mechanism.value_of(&calldata),
+                            sender: from,
+                            safe_chain: vec![to.clone(), relay, feed_lower.clone()],
+                            batch_index: Some(position),
+                        }
+                    }
                     None => {
                         let mut resolved = None;
                         if let Some(tracer) = trace.as_deref_mut() {
@@ -1288,7 +1401,7 @@ pub fn fetch(
         }
 
         // R8, R10: the guard state at block minus one for every checked post.
-        if let Some(guard) = mechanism.guard.as_ref() {
+        if let Some(guard) = mechanism.guard.as_ref().filter(|g| !g.is_clamp()) {
             let bound_at_b1 = bounds.map(|b| b.max_answer_deviation);
             for block_minus_one in checked_blocks(&inputs.rounds, bound_at_b1) {
                 let bound = call_i128(
@@ -1331,6 +1444,41 @@ pub fn fetch(
         feeds,
         implementation_scan,
     })
+}
+
+/// The number of rounds of this transaction attributed before the current
+/// one (the counter was already advanced for the current round).
+fn seen_in_tx_before(seen: &BTreeMap<String, usize>, hash: &str) -> usize {
+    seen.get(hash).copied().unwrap_or(1).saturating_sub(1)
+}
+
+/// A round posted through a configured relay: the k-th setter call in the
+/// relay's `bytes[]` argument posted the k-th round of the transaction.
+/// Returns (selector, calldata, position, relay address).
+fn relay_call(
+    mechanism: &Mechanism,
+    to: &str,
+    input: &str,
+    feed: &str,
+    position: &usize,
+) -> Option<(String, String, usize, String)> {
+    let _ = feed;
+    let selector = selector_of(input);
+    let relay = mechanism.relays.iter().find(|r| {
+        r.address.eq_ignore_ascii_case(to) && r.selector.eq_ignore_ascii_case(&selector)
+    })?;
+    let calls = decode_bytes_array(input, relay.calls_word)?;
+    let setter_calls: Vec<&String> = calls
+        .iter()
+        .filter(|c| mechanism.setter(&selector_of(c)).is_some())
+        .collect();
+    let call = setter_calls.get(*position)?;
+    Some((
+        selector_of(call),
+        (*call).clone(),
+        *position,
+        relay.address.to_lowercase(),
+    ))
 }
 
 /// R6 step (c): trace_transaction first, then debug_traceTransaction.
@@ -1634,5 +1782,23 @@ mod tests {
             "0x7f26b83ff96e1f2b6a682f133852f6798a09c465da95921460cefb3847402498"
         );
         assert_eq!(encode_no_args("multiSend(bytes)"), MULTI_SEND_SELECTOR);
+    }
+
+    /// The Hashnote reporter's two selectors carry a bytes[] of feed calls
+    /// at head word 5 and 6 respectively.
+    #[test]
+    fn bytes_array_relay_calldata_is_decoded() {
+        let input = "0xec46d0f6000000000000000000000000136471a34f6ef19fe571effc1ca711fdb8e49f2b000000000000000000000000000000000000000000000000000aada745e7cf3000000000000000000000000000000000000000000000000000000042774a4e8000000000000000000000000000000000000000000000000000096f2211c025c7000000000000000000000000000000000000000000000000000000006a635d2b00000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000242303_7a850000000000000000000000000000000000000000000000000fb6c547a5d6cf7e00000000000000000000000000000000000000000000000000000000".replace('_', "");
+        let calls = decode_bytes_array(&input, 5).unwrap();
+        assert_eq!(calls.len(), 1);
+        assert_eq!(selector_of(&calls[0]), "0x23037a85");
+        assert_eq!(
+            argument_word_at(&calls[0], 0),
+            Some(1_132_309_267_845_926_782)
+        );
+        assert!(
+            decode_bytes_array(&input, 4).is_none()
+                || decode_bytes_array(&input, 4).unwrap().len() != 1
+        );
     }
 }

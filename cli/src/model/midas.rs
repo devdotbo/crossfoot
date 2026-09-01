@@ -97,6 +97,8 @@ pub enum Via {
     SafeRouted,
     /// Resolved from a transaction trace.
     Trace,
+    /// Resolved through a configured relay contract's bytes[] of calls.
+    Relay,
     /// Could not be resolved.
     Unattributed,
 }
@@ -380,6 +382,11 @@ pub struct FeedReplayInput<'a> {
     pub bound_at_b1: Option<i128>,
     /// The checked path's minimum spacing, when the family has that rule.
     pub spacing_seconds: Option<u64>,
+    /// For a clamp guard: the band at 10^decimals scale. The stored answer
+    /// can never exceed the previous one by more than this; an answer that
+    /// sits exactly on the band, or a posted value the contract truncated,
+    /// is reported.
+    pub clamp_band: Option<i128>,
     pub rounds: &'a [AttributedRound],
     pub failed: &'a [SetterTx],
     pub states: &'a BTreeMap<u64, StateAtBlock>,
@@ -402,6 +409,8 @@ pub struct FeedReplay {
     pub bypass_classifications: BTreeMap<String, usize>,
     pub bypass_posts_recent: usize,
     pub unguarded_posts: usize,
+    pub at_bound_posts: usize,
+    pub clamped_posts: usize,
     pub bound_changes: usize,
     pub unattributed: usize,
     pub poster_addresses: Vec<String>,
@@ -439,6 +448,8 @@ pub fn replay_feed(input: &FeedReplayInput) -> FeedReplay {
     let mut bypass_internal = 0usize;
     let mut bypass_recent = 0usize;
     let mut unguarded = 0usize;
+    let mut at_bound = 0usize;
+    let mut clamped = 0usize;
     let mut classifications: BTreeMap<String, usize> = BTreeMap::new();
     let mut posters: BTreeSet<String> = BTreeSet::new();
     let mut bound_samples: BTreeMap<u64, i128> = BTreeMap::new();
@@ -564,6 +575,48 @@ pub fn replay_feed(input: &FeedReplayInput) -> FeedReplay {
             }
         }
 
+        if let Some(band) = input.clamp_band {
+            // A clamp guard: the contract truncates instead of reverting, so
+            // the series itself carries the evidence. A zero previous answer
+            // (the launch placeholder) gives the clamp no reference.
+            if last_answer == 0 {
+                timeline.push(row);
+                continue;
+            }
+            let dev = deviation(last_answer, round.event.answer).unwrap_or(i128::MAX);
+            row.deviation_in_force = Some(dev.to_string());
+            row.bound_in_force = Some(band.to_string());
+            let mut finding = base(round);
+            finding["last_answer_at_block_minus_one"] = json!(last_answer.to_string());
+            finding["deviation_in_force"] = json!(dev.to_string());
+            finding["deviation_percent"] = json!(percent(dev, one));
+            finding["bound_in_force"] = json!(band.to_string());
+            finding["bound_percent"] = json!(percent(band, one));
+            finding["same_block"] = json!(same_block);
+            finding["initialization"] = json!(false);
+            let posted = round.attribution.value;
+            if posted.is_some_and(|v| v != round.event.answer) {
+                finding["kind"] = json!("GUARD_CLAMPED");
+                finding["posted_value"] = json!(posted.map(|v| v.to_string()));
+                finding["note"] = json!("the posted value differs from the stored answer: the on-chain clamp truncated it to the band");
+                clamped += 1;
+                row.finding = Some("GUARD_CLAMPED".to_string());
+                findings.push(finding);
+            } else if dev > band {
+                finding["kind"] = json!("GUARD_INCONSISTENT");
+                finding["rule"] = json!("clamp_band");
+                row.finding = Some("GUARD_INCONSISTENT".to_string());
+                findings.push(finding);
+            } else if dev == band {
+                finding["kind"] = json!("GUARD_AT_BOUND");
+                finding["note"] = json!("the stored answer sits exactly on the clamp band and equals the posted value: the poster submitted an already-clamped figure, the true figure is at least the band away");
+                at_bound += 1;
+                row.finding = Some("GUARD_AT_BOUND".to_string());
+                findings.push(finding);
+            }
+            timeline.push(row);
+            continue;
+        }
         let Some(bound_at_b1) = input.bound_at_b1 else {
             // No guard in this family: an unchecked post is listed, never
             // measured against a bound.
@@ -751,6 +804,8 @@ pub fn replay_feed(input: &FeedReplayInput) -> FeedReplay {
         bypass_classifications: classifications,
         bypass_posts_recent: bypass_recent,
         unguarded_posts: unguarded,
+        at_bound_posts: at_bound,
+        clamped_posts: clamped,
         bound_changes,
         unattributed,
         poster_addresses: posters.into_iter().collect(),
@@ -865,6 +920,7 @@ mod tests {
             decimals: 8,
             bound_at_b1: Some(bound_at_b1),
             spacing_seconds: Some(3600),
+            clamp_band: None,
             rounds,
             failed: &[],
             states: &states,
@@ -1222,5 +1278,43 @@ mod tests {
         assert_eq!(percent(222_466_613, ONE), "2.22466613");
         assert_eq!(percent(200_000_000, ONE), "2.0");
         assert_eq!(percent(0, ONE), "0.0");
+    }
+
+    /// A clamp guard: an answer exactly on the band is reported, an answer
+    /// beyond it is inconsistent, a posted value the contract truncated is
+    /// a clamped post.
+    #[test]
+    fn clamp_guard_reports_at_bound_and_clamped_posts() {
+        let states: BTreeMap<u64, StateAtBlock> = BTreeMap::new();
+        let mut rounds = vec![
+            round(1, 10_373_000_000, 100, PostPath::Safe, Via::External),
+            round(2, 11_410_300_000, 200, PostPath::Safe, Via::External),
+            round(3, 11_000_000_000, 300, PostPath::Safe, Via::External),
+            round(4, 12_100_000_000, 400, PostPath::Safe, Via::External),
+        ];
+        rounds[3].attribution.value = Some(13_000_000_000);
+        let replay = replay_feed(&FeedReplayInput {
+            feed_name: "bNVDA.oracle".to_string(),
+            decimals: 8,
+            bound_at_b1: None,
+            spacing_seconds: None,
+            clamp_band: Some(10 * ONE),
+            rounds: &rounds,
+            failed: &[],
+            states: &states,
+            bound_groups: &[],
+            eras: &[],
+            b1_timestamp: 1_800_000_000,
+            recent_seconds: 183 * 86_400,
+            round_id_gap: None,
+        });
+        assert_eq!(kinds(&replay), vec!["GUARD_AT_BOUND", "GUARD_CLAMPED"]);
+        assert_eq!(replay.findings[0]["round_id"], 2);
+        assert_eq!(replay.findings[0]["deviation_percent"], "10.0");
+        assert_eq!(replay.findings[1]["round_id"], 4);
+        assert_eq!(replay.findings[1]["posted_value"], "13000000000");
+        assert_eq!(replay.at_bound_posts, 1);
+        assert_eq!(replay.clamped_posts, 1);
+        assert_eq!(replay.bypass_posts_external, 0);
     }
 }
