@@ -616,6 +616,7 @@ fn check_class_words(result: &Value) -> &'static str {
     match result.get("target").and_then(Value::as_str) {
         Some("svzchf") => "Full recomputation, zero tolerance. Every compared value is recomputed from public inputs and must match the chain to the wei.",
         Some("mtbill") => "Consistency bundle. The NAV itself is INPUT_GAP: the underlying portfolio is not observable, so it is not recomputed here. Everything below checks the issuer's own contractual and on-chain rules against itself.",
+        Some("midas") => "Posting-path replay. No Midas NAV is recomputed (INPUT_GAP on every feed). Every posted round is attributed to the function that posted it, and the guard state in force at the previous block is read from an archive node. A post that took the documented path without the on-chain deviation check and moved more than the bound in force is reported; nothing here says a posted value was wrong.",
         _ => "Unknown target.",
     }
 }
@@ -647,6 +648,9 @@ fn headline(result: &Value) -> String {
                 None => "no comparison".to_string(),
             }
         }
+        Some("midas") => str_at(result, &["summary", "headline"])
+            .unwrap_or("")
+            .to_string(),
         Some("mtbill") => {
             let checks = result.get("checks").and_then(Value::as_array);
             match checks {
@@ -686,6 +690,7 @@ fn reproduce_command(result: &Value) -> String {
         (Some(target), Some(baseline), Some(block)) => {
             format!("crossfoot run {target} --baseline-block {baseline} --block {block}")
         }
+        (Some("midas"), None, Some(block)) => format!("crossfoot run midas --block {block}"),
         _ => "unknown".to_string(),
     }
 }
@@ -803,6 +808,13 @@ fn window_block(result: &Value) -> String {
     let t1 = w
         .and_then(|w| w.get("block_timestamp_unix"))
         .and_then(Value::as_u64);
+    if b0.is_none() && t0.is_none() {
+        return format!(
+            "block {}<br><span class=\"note\">{}, history from block 0</span>",
+            b1.map(|v| v.to_string()).unwrap_or("?".into()),
+            t1.map(utc).unwrap_or("?".into())
+        );
+    }
     format!(
         "block {} to {}<br><span class=\"note\">{} to {}</span>",
         b0.map(|v| v.to_string()).unwrap_or("?".into()),
@@ -1041,6 +1053,668 @@ fn mtbill_body(run: &Run) -> String {
     html
 }
 
+// ---------------------------------------------------------------------------
+// Midas family page
+// ---------------------------------------------------------------------------
+
+/// The per-feed timeline, read from the timeline file the run wrote, never
+/// from the result: the file is what the consumer agent reads too.
+fn midas_timeline(run: &Run, feed: &Value) -> Option<Value> {
+    let file = feed.get("timeline_file")?.as_str()?;
+    read_json(&run.dir.join(file))
+}
+
+/// Draws one feed's posting history from its timeline file: rounds that went
+/// through the checked path in the plain colour, every post that took the
+/// unchecked path in the accent colour with its transaction hash as text,
+/// and in a second panel the deviation in force of every checked post
+/// against the bound in force as a stepped line.
+fn svg_midas_timeline(timeline: &Value, feed_name: &str) -> Option<String> {
+    let rounds = timeline.get("rounds")?.as_array()?;
+    if rounds.is_empty() {
+        return None;
+    }
+    let decimals = timeline
+        .get("decimals")
+        .and_then(Value::as_u64)
+        .unwrap_or(8) as i32;
+    // (round id, answer, path, transaction hash, finding, deviation, bound)
+    type Mark<'a> = (
+        u64,
+        f64,
+        &'a str,
+        &'a str,
+        Option<&'a str>,
+        Option<f64>,
+        Option<f64>,
+    );
+    let answers: Vec<Mark> = rounds
+        .iter()
+        .filter_map(|r| {
+            let answer: f64 =
+                r.get("answer")?.as_str()?.parse::<i128>().ok()? as f64 / 10f64.powi(decimals);
+            let percent = |key: &str| -> Option<f64> {
+                r.get(key)?
+                    .as_str()?
+                    .parse::<i128>()
+                    .ok()
+                    .map(|v| v as f64 / 10f64.powi(decimals))
+            };
+            Some((
+                r.get("round_id")?.as_u64()?,
+                answer,
+                r.get("path")?.as_str()?,
+                r.get("transaction_hash")?.as_str()?,
+                r.get("finding").and_then(Value::as_str),
+                percent("deviation_in_force"),
+                percent("bound_in_force"),
+            ))
+        })
+        .collect();
+    if answers.is_empty() {
+        return None;
+    }
+
+    let width = 900.0;
+    let left = 70.0;
+    let right = 20.0;
+    let plot_width = width - left - right;
+    let top_height = 220.0;
+    let gap = 40.0;
+    let bottom_height = 150.0;
+    let height = 30.0 + top_height + gap + bottom_height + 40.0;
+    let n = answers.len() as f64;
+    let x_of = |index: usize| left + (index as f64 + 0.5) / n * plot_width;
+
+    // Top panel: answers. Values more than 100x away from the median are
+    // placeholders or scale resets and are drawn off scale at the edge so
+    // they do not flatten the axis.
+    let mut sorted: Vec<f64> = answers.iter().map(|a| a.1).collect();
+    sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    let median = sorted[sorted.len() / 2];
+    let in_scale: Vec<f64> = sorted
+        .iter()
+        .copied()
+        .filter(|v| *v > median / 100.0 && *v < median * 100.0)
+        .collect();
+    let (min_v, max_v) = (
+        in_scale.first().copied().unwrap_or(median),
+        in_scale.last().copied().unwrap_or(median),
+    );
+    let span = if max_v > min_v {
+        max_v - min_v
+    } else {
+        median.abs().max(1.0) * 0.01
+    };
+    let top_y0 = 30.0;
+    let y_of = |value: f64| {
+        let clamped = value.max(min_v - span * 0.5).min(max_v + span * 0.5);
+        top_y0 + top_height - (clamped - (min_v - span * 0.05)) / (span * 1.1) * top_height
+    };
+
+    let mut svg = String::new();
+    svg.push_str(&format!(
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 {width} {height}\" width=\"100%\" role=\"img\" aria-label=\"{}\">\n",
+        escape(&format!("{feed_name} posting history"))
+    ));
+    svg.push_str(&format!(
+        "<text x=\"{left}\" y=\"18\" font-size=\"12\" fill=\"var(--muted)\">{} answers, one mark per round, in round order; accent marks took the path without the on-chain deviation check</text>\n",
+        escape(feed_name)
+    ));
+    svg.push_str(&format!(
+        "<line x1=\"{left}\" y1=\"{}\" x2=\"{}\" y2=\"{}\" stroke=\"var(--rule)\"/>\n",
+        top_y0 + top_height,
+        width - right,
+        top_y0 + top_height
+    ));
+    for (label, value) in [("high", max_v), ("low", min_v)] {
+        svg.push_str(&format!(
+            "<text x=\"{}\" y=\"{:.1}\" font-size=\"10\" fill=\"var(--muted)\" text-anchor=\"end\">{label} {:.6}</text>\n",
+            left - 6.0,
+            y_of(value) + 3.0,
+            value
+        ));
+    }
+    // The checked path as a polyline, so the eye follows the series.
+    let mut points = String::new();
+    for (index, a) in answers.iter().enumerate() {
+        points.push_str(&format!("{:.1},{:.1} ", x_of(index), y_of(a.1)));
+    }
+    svg.push_str(&format!(
+        "<polyline points=\"{}\" fill=\"none\" stroke=\"var(--rule)\" stroke-width=\"1\"/>\n",
+        points.trim_end()
+    ));
+    for (index, a) in answers.iter().enumerate() {
+        let unchecked = a.2 == "raw" || a.2 == "raw3";
+        let colour = if unchecked {
+            "var(--accent)"
+        } else {
+            "var(--ink)"
+        };
+        let radius = if unchecked { 4.5 } else { 2.0 };
+        svg.push_str(&format!(
+            "<circle cx=\"{:.1}\" cy=\"{:.1}\" r=\"{radius}\" fill=\"{colour}\"><title>round {} {} {}{}</title></circle>\n",
+            x_of(index),
+            y_of(a.1),
+            a.0,
+            a.2,
+            a.1,
+            a.4.map(|f| format!(" {f}")).unwrap_or_default()
+        ));
+        if unchecked {
+            svg.push_str(&format!(
+                "<text x=\"{:.1}\" y=\"{:.1}\" font-size=\"9\" fill=\"var(--accent)\" text-anchor=\"middle\">r{} {}</text>\n",
+                x_of(index),
+                y_of(a.1) - 8.0,
+                a.0,
+                escape(a.3)
+            ));
+        }
+    }
+
+    // Bottom panel: deviation in force against the bound in force.
+    let bottom_y0 = top_y0 + top_height + gap;
+    let bound_samples: Vec<(u64, f64)> = timeline
+        .get("bound_samples")
+        .and_then(Value::as_array)
+        .map(|samples| {
+            samples
+                .iter()
+                .filter_map(|s| {
+                    Some((
+                        s.get("block")?.as_u64()?,
+                        s.get("bound")?.as_str()?.parse::<i128>().ok()? as f64
+                            / 10f64.powi(decimals),
+                    ))
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+    let mut max_percent = bound_samples.iter().map(|(_, b)| *b).fold(0.0f64, f64::max);
+    for a in &answers {
+        if let Some(dev) = a.5 {
+            // Scale resets are off the chart by construction; cap the axis.
+            max_percent = max_percent.max(dev.min(25.0));
+        }
+    }
+    let max_percent = if max_percent > 0.0 {
+        max_percent * 1.15
+    } else {
+        1.0
+    };
+    let py_of = |percent: f64| {
+        bottom_y0 + bottom_height - percent.min(max_percent) / max_percent * bottom_height
+    };
+    svg.push_str(&format!(
+        "<text x=\"{left}\" y=\"{:.1}\" font-size=\"12\" fill=\"var(--muted)\">deviation in force of every checked post (percent) against the bound in force (stepped line)</text>\n",
+        bottom_y0 - 10.0
+    ));
+    svg.push_str(&format!(
+        "<line x1=\"{left}\" y1=\"{:.1}\" x2=\"{}\" y2=\"{:.1}\" stroke=\"var(--rule)\"/>\n",
+        bottom_y0 + bottom_height,
+        width - right,
+        bottom_y0 + bottom_height
+    ));
+    svg.push_str(&format!(
+        "<text x=\"{}\" y=\"{:.1}\" font-size=\"10\" fill=\"var(--muted)\" text-anchor=\"end\">{:.2}%</text>\n",
+        left - 6.0,
+        py_of(max_percent) + 3.0,
+        max_percent
+    ));
+    // Bound in force: the bound at each round is the latest sample at or
+    // before the round's block, drawn as a step function over round index.
+    let blocks: Vec<u64> = rounds
+        .iter()
+        .filter_map(|r| r.get("block").and_then(Value::as_u64))
+        .collect();
+    if !bound_samples.is_empty() && blocks.len() == answers.len() {
+        let mut step = String::new();
+        for (index, block) in blocks.iter().enumerate() {
+            let bound = bound_samples
+                .iter()
+                .rev()
+                .find(|(b, _)| *b <= *block)
+                .or(bound_samples.first())
+                .map(|(_, v)| *v)
+                .unwrap_or(0.0);
+            let x0 = left + index as f64 / n * plot_width;
+            let x1 = left + (index as f64 + 1.0) / n * plot_width;
+            step.push_str(&format!(
+                "{:.1},{:.1} {:.1},{:.1} ",
+                x0,
+                py_of(bound),
+                x1,
+                py_of(bound)
+            ));
+        }
+        svg.push_str(&format!(
+            "<polyline points=\"{}\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"1.5\" stroke-dasharray=\"4 3\"><title>bound in force</title></polyline>\n",
+            step.trim_end()
+        ));
+    }
+    for (index, a) in answers.iter().enumerate() {
+        let Some(dev) = a.5 else { continue };
+        let unchecked = a.2 == "raw" || a.2 == "raw3";
+        let colour = if unchecked {
+            "var(--accent)"
+        } else {
+            "var(--ink)"
+        };
+        let over = a.6.is_some_and(|bound| dev > bound);
+        svg.push_str(&format!(
+            "<line x1=\"{:.1}\" y1=\"{:.1}\" x2=\"{:.1}\" y2=\"{:.1}\" stroke=\"{colour}\" stroke-width=\"{}\"><title>round {} deviation {:.5}% bound {}</title></line>\n",
+            x_of(index),
+            bottom_y0 + bottom_height,
+            x_of(index),
+            py_of(dev),
+            if over { 3.0 } else { 1.5 },
+            a.0,
+            dev,
+            a.6.map(|b| format!("{b:.3}%")).unwrap_or("n/a".into())
+        ));
+    }
+    svg.push_str("</svg>\n");
+    Some(svg)
+}
+
+fn midas_body(run: &Run) -> String {
+    let result = &run.result;
+    let mut html = String::new();
+
+    html.push_str("<div class=\"panel\">\n<p><strong>nav_recomputation: INPUT_GAP</strong> (no Midas NAV is recomputed)</p>\n");
+    if let Some(reason) = result
+        .get("nav_recomputation_reason")
+        .and_then(Value::as_str)
+    {
+        html.push_str(&format!("<p class=\"note\">{}</p>\n", escape(reason)));
+    }
+    if let Some(line) = str_at(result, &["summary", "headline"]) {
+        html.push_str(&format!("<p class=\"verdict\">{}</p>\n", escape(line)));
+    }
+    html.push_str("</div>\n");
+
+    // Family summary.
+    if let Some(summary) = result.get("family_summary") {
+        html.push_str("<h2>Family summary</h2>\n<dl class=\"kv\">\n");
+        let counts = |key: &str| -> String {
+            summary
+                .get(key)
+                .map(|v| match v {
+                    Value::Object(map) => map
+                        .iter()
+                        .map(|(k, v)| format!("{k} {v}"))
+                        .collect::<Vec<String>>()
+                        .join(", "),
+                    other => other.to_string(),
+                })
+                .unwrap_or("n/a".into())
+        };
+        for (label, key) in [
+            ("feeds configured", "feeds_configured"),
+            ("feeds replayed", "feeds_replayed"),
+            ("feeds derived (no guard to replay)", "feeds_derived"),
+            ("feeds unreadable", "feeds_unreadable"),
+            ("rounds", "rounds_total"),
+            ("successful posts, external", "posts_external"),
+            ("successful posts, Safe-routed", "posts_internal"),
+            ("failed setters", "failed_setters"),
+            (
+                "unchecked posts over the bound in force, external",
+                "bypass_posts_external",
+            ),
+            (
+                "unchecked posts over the bound in force, Safe-routed",
+                "bypass_posts_internal",
+            ),
+            (
+                "unchecked posts over the bound in force, total",
+                "bypass_posts_total",
+            ),
+            ("feeds with at least one", "feeds_with_bypass"),
+            ("classification", "bypass_classification"),
+            ("recent subset", "recent"),
+            ("liveness", "liveness"),
+            ("bound changes", "bound_changes"),
+            ("attribution gaps", "attribution_gaps"),
+        ] {
+            html.push_str(&format!(
+                "<dt>{}</dt><dd>{}</dd>\n",
+                escape(label),
+                escape(&counts(key))
+            ));
+        }
+        html.push_str("</dl>\n");
+    }
+
+    // One row per feed.
+    let feeds = result
+        .get("feeds")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
+    html.push_str("<h2>Feeds</h2>\n<table>\n<tr><th>feed</th><th>address</th><th>kind</th><th>posts (safe / safe3 / raw / raw3 / failed)</th><th>over bound</th><th>posting path</th><th>liveness</th><th>verdict</th><th>action</th></tr>\n");
+    for feed in &feeds {
+        let s = |key: &str| {
+            feed.get(key)
+                .and_then(Value::as_str)
+                .unwrap_or("")
+                .to_string()
+        };
+        let posts = feed.get("posts");
+        let count = |key: &str| {
+            posts
+                .and_then(|p| p.get(key))
+                .and_then(Value::as_u64)
+                .map(|v| v.to_string())
+                .unwrap_or("-".into())
+        };
+        let verdict = s("verdict");
+        let flag = verdict != "CONSISTENT";
+        html.push_str(&format!(
+            "<tr><td>{}.{}</td><td class=\"mono\">{}</td><td>{}</td><td class=\"mono\">{} / {} / {} / {} / {}</td><td>{}</td><td>{}</td><td>{}</td><td class=\"verdict{}\">{}</td><td>{}</td></tr>\n",
+            escape(&s("product")),
+            escape(&s("key")),
+            escape(&s("address")),
+            escape(&s("kind")),
+            count("safe"),
+            count("safe3"),
+            count("raw"),
+            count("raw3"),
+            count("failed"),
+            feed.get("bypass_posts").and_then(Value::as_u64).unwrap_or(0),
+            escape(&s("posting_path")),
+            escape(&s("liveness")),
+            if flag { " flag" } else { "" },
+            escape(&verdict),
+            escape(&s("consumer_action"))
+        ));
+    }
+    html.push_str("</table>\n");
+
+    // Timelines and findings for every feed with at least one post that took
+    // the path without the on-chain check and exceeded the bound in force.
+    for feed in &feeds {
+        let bypasses = feed
+            .get("bypass_posts")
+            .and_then(Value::as_u64)
+            .unwrap_or(0);
+        if bypasses == 0 {
+            continue;
+        }
+        let name = format!(
+            "{}.{}",
+            feed.get("product").and_then(Value::as_str).unwrap_or(""),
+            feed.get("key").and_then(Value::as_str).unwrap_or("")
+        );
+        html.push_str(&format!("<h2>{}</h2>\n", escape(&name)));
+        if let Some(timeline) = midas_timeline(run, feed) {
+            if let Some(svg) = svg_midas_timeline(&timeline, &name) {
+                html.push_str("<div class=\"figure\">\n");
+                html.push_str(&svg);
+                html.push_str("</div>\n");
+                html.push_str(&format!(
+                    "<p class=\"note\">Drawn from {} in the bundle, {} rounds.</p>\n",
+                    escape(
+                        feed.get("timeline_file")
+                            .and_then(Value::as_str)
+                            .unwrap_or("")
+                    ),
+                    timeline
+                        .get("rounds")
+                        .and_then(Value::as_array)
+                        .map(|r| r.len())
+                        .unwrap_or(0)
+                ));
+            }
+        }
+        html.push_str("<table>\n<tr><th>finding</th><th>round</th><th>block</th><th>time (UTC)</th><th>path</th><th>value</th><th>last answer at block minus one</th><th>deviation in force</th><th>bound in force</th><th>classification</th><th>transaction</th></tr>\n");
+        if let Some(findings) = feed.get("findings").and_then(Value::as_array) {
+            for finding in findings {
+                let s = |key: &str| {
+                    finding
+                        .get(key)
+                        .and_then(Value::as_str)
+                        .unwrap_or("")
+                        .to_string()
+                };
+                let kind = s("kind");
+                if !matches!(
+                    kind.as_str(),
+                    "GUARD_BYPASS" | "UNGUARDED_POST" | "GUARD_INCONSISTENT" | "BOUND_CHANGED"
+                ) {
+                    continue;
+                }
+                let timestamp = finding
+                    .get("timestamp_unix")
+                    .and_then(Value::as_u64)
+                    .map(utc)
+                    .unwrap_or_default();
+                let (value, old_new) = if kind == "BOUND_CHANGED" {
+                    (
+                        String::new(),
+                        format!(
+                            "{} to {}",
+                            finding
+                                .get("old")
+                                .and_then(|o| o.get("bound_percent"))
+                                .and_then(Value::as_str)
+                                .unwrap_or("?"),
+                            finding
+                                .get("new")
+                                .and_then(|o| o.get("bound_percent"))
+                                .and_then(Value::as_str)
+                                .unwrap_or("?")
+                        ),
+                    )
+                } else {
+                    (s("value"), String::new())
+                };
+                html.push_str(&format!(
+                    "<tr><td class=\"mono\">{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td class=\"mono\">{}</td><td class=\"mono\">{}</td><td class=\"mono\">{}</td><td class=\"mono\">{}</td><td>{}</td><td class=\"mono\">{}</td></tr>\n",
+                    escape(&kind),
+                    finding.get("round_id").and_then(Value::as_u64).map(|r| r.to_string()).unwrap_or_default(),
+                    finding.get("block").and_then(Value::as_u64).map(|b| b.to_string()).unwrap_or_default(),
+                    escape(&timestamp),
+                    escape(&s("path")),
+                    escape(&value),
+                    escape(&s("last_answer_at_block_minus_one")),
+                    escape(&if kind == "BOUND_CHANGED" { old_new.clone() } else { format!("{}%", s("deviation_percent")) }),
+                    escape(&if kind == "BOUND_CHANGED" { String::new() } else { format!("{}%", s("bound_percent")) }),
+                    escape(&s("classification")),
+                    escape(&s("transaction_hash"))
+                ));
+            }
+        }
+        html.push_str("</table>\n");
+    }
+
+    if let Some(method) = result.get("method").and_then(Value::as_object) {
+        html.push_str("<h2>Method</h2>\n<dl class=\"kv\">\n");
+        for (key, value) in method {
+            html.push_str(&format!(
+                "<dt>{}</dt><dd>{}</dd>\n",
+                escape(key),
+                escape(value.as_str().unwrap_or(""))
+            ));
+        }
+        html.push_str("</dl>\n");
+    }
+    html
+}
+
+// ---------------------------------------------------------------------------
+// Machine readable export: site/data/feeds.json and site/data/timelines/
+// ---------------------------------------------------------------------------
+
+/// One feeds.json row. The index row and this row read `summary` for the
+/// verdict, the consumer action and the headline whenever the result carries
+/// one, and fall back to the target specific fields otherwise.
+fn feed_row(run: &Run, feed: Option<&Value>) -> Value {
+    let result = &run.result;
+    let summary = result.get("summary");
+    let target = result.get("target").and_then(Value::as_str).unwrap_or("");
+    let s = |value: Option<&Value>, key: &str| -> Option<String> {
+        value?.get(key)?.as_str().map(|s| s.to_string())
+    };
+    let (
+        address,
+        product,
+        key,
+        kind,
+        verdict,
+        posting_path,
+        liveness,
+        action,
+        nav,
+        headline_text,
+        timeline,
+    ) = match (target, feed) {
+        ("midas", Some(feed)) => (
+            s(Some(feed), "address"),
+            s(Some(feed), "product"),
+            s(Some(feed), "key"),
+            s(Some(feed), "kind"),
+            s(Some(feed), "verdict"),
+            s(Some(feed), "posting_path"),
+            s(Some(feed), "liveness"),
+            s(Some(feed), "consumer_action"),
+            s(Some(feed), "nav_recomputation"),
+            Some(format!(
+                "{} unchecked post(s) over the bound in force, posting path {}, liveness {}",
+                feed.get("bypass_posts")
+                    .and_then(Value::as_u64)
+                    .unwrap_or(0),
+                s(Some(feed), "posting_path").unwrap_or("n/a".into()),
+                s(Some(feed), "liveness").unwrap_or("n/a".into())
+            )),
+            s(Some(feed), "timeline_file")
+                .map(|file| format!("data/timelines/{}", file.trim_start_matches("timelines/"))),
+        ),
+        ("svzchf", _) => (
+            Some(crate::svzchf::VAULT.to_string()),
+            Some("svZCHF".to_string()),
+            Some("vault".to_string()),
+            Some("recomputable".to_string()),
+            s(summary, "verdict").or_else(|| Some(verdict_of(result))),
+            None,
+            None,
+            s(summary, "consumer_action").or_else(|| {
+                Some(
+                    if verdict_of(result) == "MODEL_MATCH" {
+                        "ALLOW"
+                    } else {
+                        "REVIEW"
+                    }
+                    .to_string(),
+                )
+            }),
+            s(summary, "nav_recomputation").or(Some("FULL".to_string())),
+            s(summary, "headline").or_else(|| Some(headline(result))),
+            None,
+        ),
+        _ => (
+            Some(crate::mtbill::ORACLE.to_string()),
+            Some("mTBILL".to_string()),
+            Some("customFeed".to_string()),
+            Some("bounded".to_string()),
+            s(summary, "verdict").or_else(|| Some(verdict_of(result))),
+            None,
+            None,
+            s(summary, "consumer_action").or_else(|| {
+                Some(
+                    if verdict_of(result) == "CONSISTENT" {
+                        "ALLOW"
+                    } else {
+                        "REVIEW"
+                    }
+                    .to_string(),
+                )
+            }),
+            s(summary, "nav_recomputation").or(Some("INPUT_GAP".to_string())),
+            s(summary, "headline").or_else(|| Some(headline(result))),
+            None,
+        ),
+    };
+    let family = s(summary, "family").unwrap_or_else(|| {
+        match target {
+            "svzchf" => "recomputable-accrual",
+            _ => "guarded-setter",
+        }
+        .to_string()
+    });
+    serde_json::json!({
+        "address": address,
+        "target": target,
+        "product": product,
+        "key": key,
+        "kind": kind,
+        "family": family,
+        "verdict": verdict,
+        "posting_path": posting_path,
+        "liveness": liveness,
+        "consumer_action": action,
+        "nav_recomputation": nav,
+        "headline": headline_text,
+        "bundle": run.name,
+        "bundle_root": run.root_hash,
+        "result_path": format!("bundles/{}/result.json", run.name),
+        "result_sha256": run.result_sha256,
+        "block": u64_at(result, &["window", "block"]),
+        "baseline_block": u64_at(result, &["window", "baseline_block"]),
+        "timeline_file": timeline,
+    })
+}
+
+fn write_data_files(runs: &[Run], out_dir: &Path) -> Result<Vec<PathBuf>, String> {
+    let data_dir = out_dir.join("data");
+    let timelines_dir = data_dir.join("timelines");
+    fs::create_dir_all(&timelines_dir)
+        .map_err(|err| format!("could not create {}: {err}", timelines_dir.display()))?;
+    let mut rows: Vec<Value> = Vec::new();
+    let mut written = Vec::new();
+    for run in runs {
+        let target = run
+            .result
+            .get("target")
+            .and_then(Value::as_str)
+            .unwrap_or("");
+        if target == "midas" {
+            for feed in run
+                .result
+                .get("feeds")
+                .and_then(Value::as_array)
+                .into_iter()
+                .flatten()
+            {
+                rows.push(feed_row(run, Some(feed)));
+                if let Some(file) = feed.get("timeline_file").and_then(Value::as_str) {
+                    let source = run.dir.join(file);
+                    let name = file.trim_start_matches("timelines/");
+                    if let Ok(bytes) = fs::read(&source) {
+                        let path = timelines_dir.join(name);
+                        fs::write(&path, bytes)
+                            .map_err(|err| format!("could not write {}: {err}", path.display()))?;
+                        written.push(path);
+                    }
+                }
+            }
+        } else {
+            rows.push(feed_row(run, None));
+        }
+    }
+    let feeds = serde_json::json!({
+        "format": "crossfoot-feeds-v1",
+        "rows": rows,
+    });
+    let path = data_dir.join("feeds.json");
+    let mut text = serde_json::to_string_pretty(&feeds).map_err(|err| err.to_string())?;
+    text.push('\n');
+    fs::write(&path, text.as_bytes())
+        .map_err(|err| format!("could not write {}: {err}", path.display()))?;
+    written.insert(0, path);
+    Ok(written)
+}
+
 fn run_page(run: &Run) -> String {
     let result = &run.result;
     let target = result.get("target").and_then(Value::as_str).unwrap_or("");
@@ -1107,6 +1781,7 @@ fn run_page(run: &Run) -> String {
     html.push_str(&match target {
         "svzchf" => svzchf_body(run),
         "mtbill" => mtbill_body(run),
+        "midas" => midas_body(run),
         _ => String::new(),
     });
 
@@ -1249,6 +1924,7 @@ pub fn render(bundles_dir: &Path, out_dir: &Path) -> Result<RenderOutcome, Strin
             .map_err(|err| format!("could not write {}: {err}", path.display()))?;
         pages.push(path);
     }
+    pages.extend(write_data_files(&runs, out_dir)?);
 
     Ok(RenderOutcome {
         out_dir: out_dir.to_path_buf(),
@@ -1505,7 +2181,11 @@ mod tests {
 
         let outcome = render(&input, &out).unwrap();
         assert_eq!(outcome.rendered, 2, "both run bundles should render");
-        assert_eq!(outcome.pages.len(), 3, "index plus one page per run");
+        assert_eq!(
+            outcome.pages.len(),
+            4,
+            "index, one page per run, and data/feeds.json"
+        );
         assert_eq!(
             outcome.skipped,
             vec!["svzchf-200-20260101T000000Z".to_string()]
@@ -1651,5 +2331,116 @@ mod tests {
         assert!(balanced("<p><span>x</p></span>").is_err());
         assert!(balanced("<div>").is_err());
         assert!(balanced("<br><hr>").is_ok());
+    }
+    /// A1: one feeds.json row per run, carrying what the consumer reads.
+    #[test]
+    fn feeds_json_has_one_row_per_run() {
+        let input = synthetic_input("feeds-json");
+        let out = std::env::temp_dir().join("crossfoot-render-feeds-json-out");
+        let _ = fs::remove_dir_all(&out);
+        render(&input, &out).unwrap();
+        let feeds: Value =
+            serde_json::from_str(&fs::read_to_string(out.join("data/feeds.json")).unwrap())
+                .unwrap();
+        let rows = feeds["rows"].as_array().unwrap();
+        assert_eq!(rows.len(), 2, "svzchf and mtbill, one row each");
+        for row in rows {
+            for key in [
+                "address",
+                "target",
+                "product",
+                "family",
+                "verdict",
+                "consumer_action",
+                "nav_recomputation",
+                "headline",
+                "result_path",
+                "block",
+            ] {
+                assert!(!row[key].is_null(), "{key} is set on {row}");
+            }
+            assert!(row.get("bundle_root").is_some());
+            assert!(row.get("posting_path").is_some());
+            assert!(row.get("liveness").is_some());
+        }
+        let svzchf = rows.iter().find(|r| r["target"] == "svzchf").unwrap();
+        assert_eq!(svzchf["verdict"], "MODEL_MATCH");
+        assert_eq!(svzchf["consumer_action"], "ALLOW");
+        assert_eq!(svzchf["nav_recomputation"], "FULL");
+        assert_eq!(svzchf["block"], 200);
+        let mtbill = rows.iter().find(|r| r["target"] == "mtbill").unwrap();
+        assert_eq!(mtbill["verdict"], "OBSERVED_DEVIATION");
+        assert_eq!(mtbill["consumer_action"], "REVIEW");
+        assert_eq!(mtbill["nav_recomputation"], "INPUT_GAP");
+    }
+
+    /// A3: the Midas run page draws the mRE7 timeline from the timeline file
+    /// of the checked-in bundle, and the data export carries one row per
+    /// feed plus a byte identical copy of every timeline file.
+    #[test]
+    fn midas_page_draws_the_timeline_from_the_timeline_file() {
+        let fixture = crate::fixtures::midas_bundle();
+        let input = std::env::temp_dir().join("crossfoot-render-midas-in");
+        let _ = fs::remove_dir_all(&input);
+        fs::create_dir_all(&input).unwrap();
+        // Symlink the fixture in as one bundle directory.
+        std::os::unix::fs::symlink(&fixture, input.join("midas-run-25884405")).unwrap();
+        let out = std::env::temp_dir().join("crossfoot-render-midas-out");
+        let _ = fs::remove_dir_all(&out);
+        let outcome = render(&input, &out).unwrap();
+        assert_eq!(outcome.rendered, 1);
+
+        let html = fs::read_to_string(out.join("midas-run-25884405.html")).unwrap();
+        balanced(&html).unwrap();
+        assert!(html.contains("<h2>mRE7.customFeed</h2>"));
+        assert!(
+            html.contains("Drawn from timelines/mre7-customfeed.json in the bundle, 56 rounds.")
+        );
+        // The unchecked post in the accent colour with its hash as text.
+        assert!(
+            html.contains("r36 0x7579ba75b3c0d38f79377999aca75c93be26ec891826163e608adfff13a65733")
+        );
+        assert!(html.contains("fill=\"var(--accent)\""));
+        // The bound in force as a stepped line.
+        assert!(html.contains("<title>bound in force</title>"));
+        // The survey line, from summary only.
+        assert!(html.contains("66 feeds replayed, 57 unchecked posts over the bound on 16 feeds"));
+        assert!(html.contains("nav_recomputation: INPUT_GAP"));
+        for construct in ["<script", "<link", " src=", "url(http", "@import"] {
+            assert!(!html.contains(construct));
+        }
+        // Public wording: the technical identifier stays, the accusation does not.
+        assert!(!html.to_lowercase().contains("bypassed the guard"));
+
+        let index = fs::read_to_string(out.join("index.html")).unwrap();
+        assert!(index.contains("66 feeds replayed, 57 unchecked posts over the bound on 16 feeds"));
+
+        let feeds: Value =
+            serde_json::from_str(&fs::read_to_string(out.join("data/feeds.json")).unwrap())
+                .unwrap();
+        let rows = feeds["rows"].as_array().unwrap();
+        assert_eq!(rows.len(), 66);
+        let mre7 = rows
+            .iter()
+            .find(|r| r["product"] == "mRE7" && r["key"] == "customFeed")
+            .unwrap();
+        assert_eq!(
+            mre7["address"],
+            "0x0a2a51f2f206447dE3E3a80FCf92240244722395"
+        );
+        assert_eq!(mre7["verdict"], "OBSERVED_DEVIATION");
+        assert_eq!(mre7["posting_path"], "ADMIN_GUARD_BYPASSED");
+        assert_eq!(mre7["liveness"], "LIVE");
+        assert_eq!(mre7["consumer_action"], "REVIEW");
+        assert_eq!(mre7["nav_recomputation"], "INPUT_GAP");
+        assert_eq!(mre7["family"], "guarded-setter");
+        assert_eq!(mre7["block"], 25_884_405);
+        assert_eq!(mre7["timeline_file"], "data/timelines/mre7-customfeed.json");
+        assert_eq!(
+            fs::read(out.join("data/timelines/mre7-customfeed.json")).unwrap(),
+            fs::read(fixture.join("timelines/mre7-customfeed.json")).unwrap()
+        );
+        let derived = rows.iter().filter(|r| r["kind"] == "derived").count();
+        assert_eq!(derived, 6);
     }
 }
