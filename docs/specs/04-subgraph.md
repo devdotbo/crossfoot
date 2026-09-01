@@ -20,7 +20,8 @@ hashes stay off chain (review C5); the subgraph carries on-chain facts only.
   consumer action (`00-architecture.md` Q2, default kept).
 - No claim on failed setter attempts: failed transactions emit no events;
   `02-midas-family-replay.md` R13 keeps them from Blockscout.
-- No timeseries or aggregation entities, no call handlers, no other chain.
+- No timeseries or aggregation entities, no other chain. Call handlers exist
+  only for the four setter functions (R6a); no other call is indexed.
 - No recomputation of svZCHF in mappings: derived rounds record `price()`
   at each state transition; MODEL_MATCH is Crossfoot's job.
 
@@ -110,9 +111,31 @@ Midas mappings (`subgraph/src/midas.ts`, `subgraph/src/shared.ts`):
   outer transaction only: if `transaction.to` equals `event.address` and
   `transaction.input.length >= 4`, `selector` = the first four bytes and
   `path` is `SAFE` for `0x89d6e95f` or `0x92260352`, `UNCHECKED` for
-  `0xa4381d1f` or `0x2b6e02c7`, else `UNKNOWN`; if the transaction did not
-  target the feed (Safe, multicall, relayer), `selector` is null and `path`
-  is `UNKNOWN`. Inner calldata is never parsed.
+  `0xa4381d1f` or `0x2b6e02c7`, else `UNKNOWN`, and `attributedBy` is
+  `TRANSACTION`; if the transaction did not target the feed (Safe,
+  multicall, relayer), `selector` is null, `path` is `UNKNOWN` and
+  `attributedBy` is `NONE`. Inner calldata is never parsed. The handler also
+  writes or extends a `PostTx` record (id = feed ++ tx hash: first roundId,
+  count of rounds of this feed in the transaction, rounds attributed so far).
+- R6a (correction of 2026-09-02, raw/codex-review-verdict-2026-09-02.md).
+  Every Midas data source declares `callHandlers` on `setRoundDataSafe(int256)`,
+  `setRoundData(int256)` (59 feeds) or the three-argument variants (growth
+  feed). Call triggers fire at any call depth, and graph-node orders the
+  call triggers of a transaction after its event triggers, so each setter
+  call handler loads the `PostTx` of (call.to, tx hash), takes the next
+  unattributed round, and sets `path` from the handler's selector,
+  `selector`, `caller` = `call.from` (the Safe for routed posts, the poster
+  for direct ones) and `attributedBy: CALL`, adjusting `uncheckedCount` on
+  the Feed and the Poster when the path moves to or from UNCHECKED. The
+  Round stays immutable: graph-node accepts the write inside the creation
+  block. A direct EOA post is re-attributed with identical values, so at
+  head every Round reads `attributedBy: CALL`; the 215 Safe-routed rounds of
+  mTBILL, mBASIS, mBTC, mEDGE, mMEV and mRE7 (28 of them over-bound
+  unchecked posts) are attributed this way. The event handler stays the
+  source of truth for rounds; a call without a round in its transaction
+  changes nothing. `feeds.json` carries a `callHandlers` switch; with it off
+  the manifest has event handlers only and the rounds above stay UNKNOWN
+  (fallback documented in `DEPLOYMENT.md`).
 - R7. `first` is true when the Feed has no `latestRound`. `previousAnswer`
   is the Feed's `latestAnswer`; `secondsSincePrevious` = `updatedAt` minus
   the Feed's `latestUpdatedAt`; `deviationFromPrevious` =
@@ -135,11 +158,19 @@ Midas mappings (`subgraph/src/midas.ts`, `subgraph/src/shared.ts`):
   `path: UNCHECKED && !first`, `overBoundCount`) and the Poster (`id` =
   `poster`, `feeds` extended if new, `roundCount`, `uncheckedCount`,
   `firstSeenBlock`, `lastSeenBlock`). Posters exist for POSTED feeds only.
-- R10. `handleUpgraded` writes an immutable Upgrade with `implementation`,
-  `withInitializer` = an Initialized event of the same feed exists in the
-  same transaction (checked by id `tx ++ logIndex` of the BoundChange
-  written earlier in the transaction, or by a per-transaction marker),
-  and sets `Feed.implementation` and `upgradeCount`.
+- R10. `handleUpgraded` writes an immutable Upgrade with id = feed address
+  ++ tx hash (one Upgraded per proxy per transaction; a second one in the
+  same transaction gets the id extended by its log index and is not joined),
+  `implementation`, `logIndex`, `withInitializer: false`, and sets
+  `Feed.implementation` and `upgradeCount`. The Upgraded event precedes the
+  Initialized event of the same transaction (ERC1967 `upgradeToAndCall`
+  emits before it delegatecalls the initializer), so `handleInitialized`
+  loads the Upgrade by (feed, tx hash) and sets `withInitializer: true`;
+  the write is inside the creation block, which graph-node allows on
+  immutable entities. Deterministic, no mutable Upgrade needed. Deployment
+  transactions carry Initialized(1) after Upgraded, so `withInitializer` is
+  true for the 60 deployment upgrades as well as the four upgradeAndCall
+  ones (expected 64 of 98).
 
 Frankencoin mappings (`subgraph/src/frankencoin.ts`):
 
@@ -192,20 +223,25 @@ Fixtures (queried with `block: {number: 25884405}`, the survey head of 02
 R19; the Studio endpoint from `CROSSFOOT_SUBGRAPH_URL`):
 
 - R17. `subgraph/tests/expected-counts.json` holds and the live subgraph
-  reproduces: Feed 61; Round with `family: POSTED` 2,320 (2,315
-  three-argument plus 5 with `extra`); Round with `path: UNCHECKED, first:
-  false` 32, of which `overBound: true` 29 on 14 distinct feeds, the set of
-  (feed, roundId) pairs equal to the 29 `GUARD_BYPASS` rows of the Midas
-  fixture bundle's timelines; Round with `path: UNKNOWN` at least 131
-  (mTBILL rounds 1 to 131, 02 R6), exact count recorded at capture;
+  reproduces: Feed 61; Round with `family: POSTED` 2,535 (the survey's
+  latestRound sum: 2,320 external posts plus the 215 Safe-routed rounds of
+  raw/teammate-memos/2026-09-01-midas-hidden-rounds.md; 5 with `extra`);
+  Round with `path: UNCHECKED, first: false` between 60 and 65 (32 external
+  plus 28 Safe-routed bypasses plus up to 5 Safe-routed unchecked rounds
+  that are round 1 or within bound; exact value recorded at capture), of
+  which `overBound: true` 57 on 16 distinct feeds, the 29 external pairs
+  equal to the 29 `GUARD_BYPASS` rows of the Midas fixture bundle's
+  timelines and the 28 others to the memo's bypass table; Round with
+  `path: UNKNOWN` 0 with call handlers (215 without, `DEPLOYMENT.md`);
   BoundChange 65 (60 version 1, 4 version 2, 1 version 3), `changed: true`
-  4, `detectedBy: ROUND` 0; Upgrade 98, `withInitializer: true` at least 4;
-  RateChange 4; RateProposal 3; VaultFlow 140 (counted at head 25,884,516,
-  expected unchanged at 25,884,405, unverified); derived Rounds 140 plus the
-  RateChanged events at or after block 24,118,272 (unverified); Poster count
-  recorded at capture. Per-feed `overBoundCount`: mSL 10, mevBTC 5, mRE7BTC
-  2, acremBTC1 2, mTBILL 1, mRE7 1, mFONE 1, hypeBTC 1, mFARM 1, msyrupUSD
-  1, mHyperETH 1, mROX 1, qHVNUSD 1, mWIN 1.
+  4, `detectedBy: ROUND` 0; Upgrade 98, `withInitializer: true` 64 expected
+  (at least 4); RateChange 4; RateProposal 3; VaultFlow 140 (counted at
+  head 25,884,516, expected unchanged at 25,884,405, unverified); derived
+  Rounds 142 (140 flows plus the RateChanged at blocks 24,426,856 and
+  24,750,879, unverified); Poster count recorded at capture. Per-feed
+  `overBoundCount`: mBTC 15, mSL 10, mTBILL 7, mBASIS 7, mevBTC 5, mRE7BTC
+  2, acremBTC1 2, mRE7 1, mFONE 1, hypeBTC 1, mFARM 1, msyrupUSD 1,
+  mHyperETH 1, mROX 1, qHVNUSD 1, mWIN 1.
 - R18. mRE7 (`0x0a2a51f2...2395`) round 36 reads `path: UNCHECKED, selector:
   0xa4381d1f, first: false, previousAnswer: 108859885, deviationFromPrevious:
   222466613, boundAtPost: 36000000, overBound: true`, tx `0x7579ba75...`,
@@ -232,12 +268,16 @@ Generated manifest, per Midas source: `name: Midas_mRE7_customFeed`,
 `network: mainnet`, `source {address, abi, startBlock}`, `context {issuer,
 product, registryKey}`, handlers AnswerUpdated (with `calls: {bound:
 CustomFeed[event.address].maxAnswerDeviation()}`), Initialized, Upgraded,
-`file: ./src/midas.ts`. The module source carries the five handlers of R12
+call handlers on the two setters of the ABI (R6a), `file: ./src/midas.ts`.
+`indexerHints: prune: never`, because the consumer replays with
+`block: {number: $block}`. The module source carries the five handlers of R12
 and R13 with `topic1: [<vault>]` on the three flow events.
 
 Final schema (`subgraph/schema.graphql`; the feasibility draft plus
-`Feed.inputsFrom` and the id decision of R11; ids are `tx ++ logIndex`
-unless stated in R6; `Round.id` is feed address ++ roundId as 32 bytes;
+`Feed.inputsFrom`, `Feed.latestRateProposal` (the join input of R12),
+`Round.caller`, `Round.attributedBy`, `Upgrade.logIndex` and the `PostTx`
+join record of R6; ids are `tx ++ logIndex` unless stated in R6, R6a and
+R10; `Round.id` is feed address ++ roundId as 32 bytes;
 `BoundChange.initializerVersion` is 0 when `detectedBy` is `ROUND`;
 `extra`, `totalAssets`, `totalSupply`, `trigger` are family-specific and
 null elsewhere):
@@ -252,7 +292,7 @@ type Feed @entity {
   description: String  decimals: Int!  inputsFrom: Bytes
   bound: BigInt  minAnswer: BigInt  maxAnswer: BigInt  implementation: Bytes
   createdAtBlock: BigInt!  createdAtTimestamp: BigInt!  createdBy: Bytes!
-  latestRound: Round  latestAnswer: BigInt  latestUpdatedAt: BigInt
+  latestRound: Round  latestAnswer: BigInt  latestUpdatedAt: BigInt  latestRateProposal: RateProposal
   roundCount: Int!  uncheckedCount: Int!  overBoundCount: Int!  boundChangeCount: Int!  upgradeCount: Int!
   rounds: [Round!]! @derivedFrom(field: "feed")
   boundChanges: [BoundChange!]! @derivedFrom(field: "feed")
@@ -261,11 +301,14 @@ type Feed @entity {
 }
 type Round @entity(immutable: true) {
   id: Bytes!  feed: Feed!  roundId: BigInt!  answer: BigInt!  updatedAt: BigInt!
-  block: BigInt!  blockTimestamp: BigInt!  tx: Bytes!  logIndex: BigInt!  poster: Bytes!
-  path: Path!  selector: Bytes  first: Boolean!
+  block: BigInt!  blockTimestamp: BigInt!  tx: Bytes!  logIndex: BigInt!  poster: Bytes!  caller: Bytes
+  path: Path!  selector: Bytes  attributedBy: String!  first: Boolean!
   previousAnswer: BigInt  secondsSincePrevious: BigInt  deviationFromPrevious: BigInt
   boundAtPost: BigInt  overBound: Boolean!  extra: BigInt
   totalAssets: BigInt  totalSupply: BigInt  trigger: String
+}
+type PostTx @entity(immutable: true) {
+  id: Bytes!  feed: Feed!  tx: Bytes!  firstRoundId: BigInt!  count: Int!  attributed: Int!
 }
 type BoundChange @entity(immutable: true) {
   id: Bytes!  feed: Feed!  initializerVersion: Int!  changed: Boolean!  detectedBy: String!
@@ -275,7 +318,7 @@ type BoundChange @entity(immutable: true) {
 }
 type Upgrade @entity(immutable: true) {
   id: Bytes!  feed: Feed!  implementation: Bytes!  withInitializer: Boolean!
-  block: BigInt!  blockTimestamp: BigInt!  tx: Bytes!
+  block: BigInt!  blockTimestamp: BigInt!  tx: Bytes!  logIndex: BigInt!
 }
 type Poster @entity {
   id: Bytes!  feeds: [Feed!]!  roundCount: Int!  uncheckedCount: Int!
@@ -338,12 +381,13 @@ bunx graph publish               # stretch, R15
 | R4 | `subgraph/package.json` pins the versions; `grep -c "try_" subgraph/src/*.ts` equals the number of `.bind(` calls (CI step `scripts/check-try.sh`) |
 | R5, R8 | `g3_mre7_bound_changes_match_the_memo` (live, ignored: three BoundChange rows for mRE7, version 1 `changed: false`, version 2 `changed: true` with 200000000 to 36000000, version 3 `changed: false`, no `detectedBy: ROUND` rows anywhere) |
 | R6, R7 | `path_and_deviation` in `subgraph/tests/shared.test.ts` (matchstick, offline: the four selectors, a non-targeting transaction gives UNKNOWN, round 36 gives 222466613, previous 0 gives null) |
+| R6a | `subgraph/tests/midas.test.ts` (matchstick, offline: a Safe-routed round is UNKNOWN after the event and SAFE or UNCHECKED with `caller` = the Safe after the call handler; two rounds in one transaction attributed in order; a call without a round changes nothing); `rounds_unknown` 0 and `rounds_attributed_by_call` 2,535 in R17 (live) |
 | R7 (same block) | `same_block_rounds_chain_their_previous_answer` (matchstick, offline, two synthetic events) |
-| R9, R10 | counts in R17; `g4_upgrades_with_initializer_match_the_value_changes` (live, ignored: every `changed: true` BoundChange shares a transaction with an Upgrade whose `withInitializer` is true) |
+| R9, R10 | counts in R17; `subgraph/tests/midas.test.ts` (offline: deployment transaction gives `withInitializer: true`, a plain upgrade false, upgradeAndCall with a new bound true plus `changed: true`); `g4_upgrades_with_initializer_match_the_value_changes` (live, ignored: every `changed: true` BoundChange shares a transaction with an Upgrade whose `withInitializer` is true) |
 | R11, R12, R13 | `g5_svzchf_feed_rounds_are_protocol_rounds` (live, ignored: Feed id = vault, `family: DERIVED`, every Round `path: PROTOCOL` with a `trigger`, no Round below block 24,118,272, RateChange count 4) |
 | R14 | `subgraph/DEPLOYMENT.md` exists with a deployment ID and a Studio URL; `curl` of `_meta` on that URL returns the same deployment ID (CI step, network) |
 | R15 | `DEPLOYMENT.md` gateway row present, only if published |
-| R16 | `queries_on_disk_match_the_hashes_in_the_fixture_records` (offline Rust test, see 05 R11) |
+| R16 | `queries_on_disk_match_the_hashes_in_the_fixture_records` (offline Rust test, see 05 R11); `bun run check-queries` (offline: the query files resolve against `schema.graphql`, CI step) |
 | R17 | `g1_entity_counts_match_the_fixture` (live, ignored: every count and the 29 pair set) |
 | R18 | `g2_mre7_round_36_is_unchecked_and_over_bound_and_round_56_is_safe` (live, ignored) |
 
@@ -361,17 +405,18 @@ recorded in this spec, not patched in (02 R19 policy).
 
 ## Open questions
 
-- Q1. Whether matchstick runs on this machine (arm64 binary, unverified).
-  Fallback: the deviation formula is already under Rust unit test in
-  `model::mtbill`; the path rule test moves to a Rust test over recorded
-  transaction inputs.
+- Q1 (resolved 2026-09-02). matchstick 0.6.0 runs on this machine
+  (`binary-macos-12-m1`); 24 offline tests pass. One caveat: its
+  `assert.assertNull` crashes the AssemblyScript compiler on graph-ts types
+  with an overloaded `==` (BigInt, Bytes); the tests compare with `===`.
 - Q2. Whether judges of the AI Continuity track expect a published
   subgraph. Default: Studio (D4); publish if the sponsor says so or when
   the schema is final and gas is on hand.
-- Q3. `first` semantics differ between the survey (first successful post,
-  internal calls included) and the subgraph (no previous Round) only if a
-  feed's earliest rounds arrived through internal calls; mTBILL is the
-  known case. R17 compares the pair set, so the difference surfaces.
+- Q3 (resolved by R6a). The subgraph indexes the Safe-routed rounds from
+  their events, so `first` is round 1 of every feed, the survey's meaning.
+- Q4. Whether the Studio Upgrade Indexer serves traces for the call
+  handlers on mainnet (unverified until the first deployment; fallback in
+  `DEPLOYMENT.md`).
 
 ## Corrections 2026-09-02
 
@@ -397,11 +442,13 @@ paragraph above reads differently, this section wins.
   handler for the same transaction and feed, else `UNKNOWN`. Ordering:
   graph-node runs a transaction's event triggers before its call triggers,
   so `handleAnswerUpdated` cannot read the call record; the call handler
-  patches the Round(s) of its transaction after the fact. Round therefore
-  loses `@entity(immutable: true)` (or, if the implementer prefers, the
-  path lives in a `RoundPath` entity keyed by transaction and feed that the
-  queries join), and the Feed and Poster counters of R9 are updated by
-  whichever handler resolves the path. Expected effect on R17: `path:
+  patches the Round(s) of its transaction after the fact. Implemented as
+  R6a: Round keeps `@entity(immutable: true)` because graph-node accepts
+  writes to an immutable entity inside the block that created it (schema
+  documentation, "If changes happen in the same block in which the entity
+  was created"); the call handler finds the Round through the `PostTx`
+  record of (feed, transaction), and the Feed and Poster counters of R9
+  are updated by whichever handler resolves the path. Expected effect on R17: `path:
   UNKNOWN` drops from at least 131 to the residue of transactions that
   neither target the feed nor pass through a setter call (expected 0),
   `path: UNCHECKED && !first && overBound` reaches 57 across 16 feeds. If
@@ -416,12 +463,13 @@ paragraph above reads differently, this section wins.
   written. In an `upgradeAndCall` the proxy emits `Upgraded` before the
   initializer runs and emits `Initialized`, and handlers within a
   transaction run in log index order, so `handleUpgraded` runs first. R10
-  is corrected: Upgrade loses `@entity(immutable: true)` and is written
-  with `withInitializer: false` and id = the transaction hash (one Upgrade
-  per transaction; the ProxyAdmin path never upgrades a feed twice in one
+  is corrected as implemented: Upgrade keeps `@entity(immutable: true)`
+  (same-block write, as in C1) and is written with `withInitializer: false`
+  and id = feed address ++ transaction hash (one Upgrade per feed per
+  transaction; the ProxyAdmin path never upgrades a feed twice in one
   transaction); `handleInitialized` loads the Upgrade with that id, if any,
-  and sets `withInitializer: true` and `boundChange` to the BoundChange it
-  wrote. The live test `g4_upgrades_with_initializer_match_the_value_changes`
+  and sets `withInitializer: true`. The BoundChange of the same transaction
+  is found by its `tx` field; no `boundChange` link is stored. The live test `g4_upgrades_with_initializer_match_the_value_changes`
   is unchanged in meaning: every `changed: true` BoundChange shares a
   transaction with an Upgrade whose flag is true after the sync completes.
 - C3. Block variable in the query files (from blocker 3.3, owned by
