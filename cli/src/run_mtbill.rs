@@ -354,7 +354,7 @@ pub fn run(
         latest_answer,
         inputs.feed_decimals,
         crate::summary::Window {
-            baseline_block: args.baseline_block,
+            baseline_block: Some(args.baseline_block),
             block: args.block,
         },
         bundle.findings().len(),

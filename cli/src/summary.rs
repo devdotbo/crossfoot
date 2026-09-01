@@ -15,7 +15,9 @@ use crate::model::verdict::{ComparisonSet, Verdict};
 pub struct Quantity {
     pub field: String,
     pub value: String,
-    pub decimals: u32,
+    /// Null for a quantity that is a sentence rather than a number, such
+    /// as the Midas survey line.
+    pub decimals: Option<u32>,
 }
 
 /// The largest absolute residual of a deviating run, with the field it sits on.
@@ -27,7 +29,8 @@ pub struct Residual {
 
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]
 pub struct Window {
-    pub baseline_block: u64,
+    /// Null for a target that reads one pinned block, such as midas.
+    pub baseline_block: Option<u64>,
     pub block: u64,
 }
 
@@ -113,12 +116,12 @@ pub fn svzchf(
         posted: price.map(|field| Quantity {
             field: field.field.clone(),
             value: field.observed.clone(),
-            decimals: 18,
+            decimals: Some(18),
         }),
         recomputed: price.map(|field| Quantity {
             field: field.field.clone(),
             value: field.modeled.clone(),
-            decimals: 18,
+            decimals: Some(18),
         }),
         window,
         findings_count,
@@ -171,7 +174,7 @@ pub fn mtbill(
         posted: Some(Quantity {
             field: "oracle.latestAnswer()".to_string(),
             value: latest_answer.to_string(),
-            decimals: feed_decimals,
+            decimals: Some(feed_decimals),
         }),
         recomputed: None,
         window,
@@ -239,7 +242,7 @@ mod tests {
     #[test]
     fn summary_block_is_target_neutral() {
         let window = Window {
-            baseline_block: 24_570_000,
+            baseline_block: Some(24_570_000),
             block: 25_853_000,
         };
 
