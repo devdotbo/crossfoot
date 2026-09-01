@@ -692,13 +692,6 @@ fn replay_midas(opts: MidasOpts) -> Result<(), String> {
     };
 
     let list = midas::load_feed_list(&opts.feeds)?;
-    if list.chain_id != midas::EXPECTED_CHAIN_ID {
-        return Err(format!(
-            "the feed list is for chain {}, this target replays chain {}",
-            list.chain_id,
-            midas::EXPECTED_CHAIN_ID
-        ));
-    }
     let feeds = midas::select_feeds(&list, opts.feed.as_deref())?;
 
     let mut client: Box<dyn rpc::ReadSource> = match &opts.from_bundle {
@@ -707,7 +700,7 @@ fn replay_midas(opts: MidasOpts) -> Result<(), String> {
             endpoints,
             log_endpoints,
             Cache::new(verify_root.join("cache")),
-            midas::EXPECTED_CHAIN_ID,
+            list.chain_id,
             opts.offline,
             opts.rpc_delay_ms,
         )),
@@ -717,7 +710,7 @@ fn replay_midas(opts: MidasOpts) -> Result<(), String> {
             vec![url.clone()],
             Vec::new(),
             Cache::new(verify_root.join("cache")),
-            midas::EXPECTED_CHAIN_ID,
+            list.chain_id,
             opts.offline,
             opts.rpc_delay_ms,
         )
@@ -727,6 +720,9 @@ fn replay_midas(opts: MidasOpts) -> Result<(), String> {
         client.as_mut(),
         run_midas::RunArgs {
             block: opts.block,
+            family: list.family.clone(),
+            explorer: list.explorer.clone(),
+            mechanism: list.mechanism.clone(),
             feeds,
             feed_list_source: opts.feeds.display().to_string(),
             stale_after_days: opts.stale_after_days,
@@ -736,7 +732,9 @@ fn replay_midas(opts: MidasOpts) -> Result<(), String> {
         &verify_root,
     )?;
 
-    println!("nav_recomputation  INPUT_GAP (no Midas NAV is recomputed; findings are about the posting path)");
+    println!(
+        "nav_recomputation  INPUT_GAP (no NAV is recomputed; findings are about the posting path)"
+    );
     println!("survey             {}", outcome.survey_line);
     println!("verdict            {}", outcome.verdict);
     for row in &outcome.rows {

@@ -24,53 +24,20 @@ use crate::rpc::{
 };
 use crate::util::parse_hex_u64;
 
-pub const EXPECTED_CHAIN_ID: u64 = 1;
-
-/// setRoundData(int256): feed admin role, min/max bound only.
-pub const SET_ROUND_DATA_SELECTOR: &str = "0xa4381d1f";
-/// setRoundDataSafe(int256): additionally the deviation guard.
-pub const SET_ROUND_DATA_SAFE_SELECTOR: &str = "0x89d6e95f";
-/// setRoundDataSafe(int256,uint256,int80), mGLOBAL growth feed only.
-pub const SET_ROUND_DATA_SAFE3_SELECTOR: &str = "0x92260352";
-/// setRoundData(int256,uint256,int80), mGLOBAL growth feed only.
-pub const SET_ROUND_DATA3_SELECTOR: &str = "0x2b6e02c7";
-/// initializeV3(uint256).
-pub const INITIALIZE_V3_SELECTOR: &str = "0x3c3d8410";
-/// Gnosis Safe execTransaction.
+/// Gnosis Safe execTransaction and multiSend(bytes): posting infrastructure
+/// shared by every family, not a family fact, so they stay in code. Every
+/// family decision (setters, guard, events, spacing marker, verified
+/// implementations) comes from the family config.
 pub const EXEC_TRANSACTION_SELECTOR: &str = "0x6a761202";
-
-/// keccak256("AnswerUpdated(int256,uint256,uint256)"), all three indexed.
-pub const ANSWER_UPDATED_TOPIC0: &str =
-    "0x0559884fd3a460db3073b7fc896cc77986f16e378210ded43186175bf646fc5f";
-/// keccak256("AnswerUpdated(int256,uint256,uint256,int80)"), the round event
-/// of the mGLOBAL growth feed: the same three indexed parameters plus one
-/// data word. Swept only when the standard event leaves the series short of
-/// `latestRound()`.
-pub const ANSWER_UPDATED_GROWTH_TOPIC0: &str =
-    "0xe012d696f661afa25265e797b4eb1ba2e0c146a00d39c97014bac5aba66ff220";
-/// Gnosis Safe multiSend(bytes): a packed batch of calls, executed by the
-/// Safe through delegatecall. Two rounds in one block share one such batch.
 pub const MULTI_SEND_SELECTOR: &str = "0x8d80ff0a";
-/// keccak256("Upgraded(address)").
-pub const UPGRADED_TOPIC0: &str =
-    "0xbc7cd75a20ee27fd9adebab32041f755214dbc6bffa90cc0225b39da2e5c2d3b";
-/// keccak256("Initialized(uint8)"), OpenZeppelin Initializable.
-pub const INITIALIZED_TOPIC0: &str =
-    "0x7f26b83ff96e1f2b6a682f133852f6798a09c465da95921460cefb3847402498";
 
-/// The revert string that only the spacing check emits.
-pub const SPACING_REVERT_STRING: &str = "CA: not enough time passed";
-
-/// Implementations whose verified source was read: mRE7's current one and
-/// the two mTBILL implementations in `mtbill::KNOWN_IMPLEMENTATIONS`.
-pub const VERIFIED_IMPLEMENTATIONS: [&str; 3] = [
-    "0x9d14d6ab8cb76a1a497139eca76bcb3afb141411",
-    "0x0d84ec93e9a734184c7f59f61342f432444efc1b",
-    "0xe6792edb139b8bf83ededf05c03e91b0c7775007",
-];
-
-pub const SOURCE_REPO: &str = "https://github.com/midas-apps/contracts";
-pub const SOURCE_PATH: &str = "contracts/feeds/CustomAggregatorV3CompatibleFeed.sol";
+/// keccak256 of an event signature, as the 0x prefixed topic0.
+pub fn topic0_of(signature: &str) -> String {
+    format!(
+        "0x{}",
+        crate::abi::hex_encode(&crate::abi::keccak256(signature.as_bytes()))
+    )
+}
 
 // ---------------------------------------------------------------------------
 // Feed list
@@ -94,10 +61,168 @@ impl FeedEntry {
     }
 }
 
+/// One posting function of the family: its signature, the path class it
+/// belongs to and which argument word carries the posted value.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct SetterSpec {
+    pub signature: String,
+    pub path: PostPath,
+    #[serde(default)]
+    pub value_arg: usize,
+}
+
+/// The on-chain guard the checked path enforces. Absent for a family whose
+/// posting functions carry no deviation bound.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct GuardSpec {
+    pub max_deviation: String,
+    pub min_answer: String,
+    pub max_answer: String,
+}
+
+/// The state getters read at the pinned block.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ReadSpec {
+    #[serde(default = "default_description")]
+    pub description: String,
+    #[serde(default = "default_decimals")]
+    pub decimals: String,
+    #[serde(default = "default_latest_round")]
+    pub latest_round: String,
+    #[serde(default = "default_latest_round_data")]
+    pub latest_round_data: String,
+    #[serde(default = "default_last_timestamp")]
+    pub last_timestamp: String,
+}
+
+fn default_description() -> String {
+    "description()".to_string()
+}
+fn default_decimals() -> String {
+    "decimals()".to_string()
+}
+fn default_latest_round() -> String {
+    "latestRound()".to_string()
+}
+fn default_latest_round_data() -> String {
+    "latestRoundData()".to_string()
+}
+fn default_last_timestamp() -> String {
+    "lastTimestamp()".to_string()
+}
+
+impl Default for ReadSpec {
+    fn default() -> Self {
+        Self {
+            description: default_description(),
+            decimals: default_decimals(),
+            latest_round: default_latest_round(),
+            latest_round_data: default_latest_round_data(),
+            last_timestamp: default_last_timestamp(),
+        }
+    }
+}
+
+/// The events that mark a possible change of the guarded values.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct BoundEventsSpec {
+    pub upgraded: String,
+    pub initialized: String,
+    #[serde(default = "default_min_version")]
+    pub initialized_min_version: u64,
+}
+
+fn default_min_version() -> u64 {
+    2
+}
+
+impl Default for BoundEventsSpec {
+    fn default() -> Self {
+        Self {
+            upgraded: "Upgraded(address)".to_string(),
+            initialized: "Initialized(uint8)".to_string(),
+            initialized_min_version: 2,
+        }
+    }
+}
+
+/// The minimum spacing rule of the checked path, recognised in an
+/// implementation's bytecode by its revert string.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct SpacingSpec {
+    pub revert_string: String,
+    pub seconds: u64,
+}
+
+/// Everything the replay needs to know about how a family posts.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct Mechanism {
+    #[serde(default)]
+    pub description: String,
+    #[serde(default)]
+    pub source: Value,
+    #[serde(default)]
+    pub reads: ReadSpec,
+    #[serde(default)]
+    pub guard: Option<GuardSpec>,
+    /// Round event signatures; the first is swept always, the rest only
+    /// when the series stays short of `latestRound()`.
+    pub round_events: Vec<String>,
+    pub setters: Vec<SetterSpec>,
+    #[serde(default)]
+    pub other_calls: Vec<Value>,
+    #[serde(default)]
+    pub bound_events: BoundEventsSpec,
+    #[serde(default)]
+    pub spacing_rule: Option<SpacingSpec>,
+    #[serde(default)]
+    pub verified_implementations: Vec<String>,
+}
+
+impl Mechanism {
+    /// The setter whose selector opens `input`, if any.
+    pub fn setter(&self, selector: &str) -> Option<&SetterSpec> {
+        let selector = selector.to_lowercase();
+        self.setters
+            .iter()
+            .find(|s| encode_no_args(&s.signature) == selector)
+    }
+
+    pub fn path_of(&self, selector: &str) -> PostPath {
+        self.setter(selector)
+            .map(|s| s.path)
+            .unwrap_or(PostPath::Other)
+    }
+
+    /// The posted value of a setter call, from the configured argument word.
+    pub fn value_of(&self, input: &str) -> Option<i128> {
+        let spec = self.setter(&selector_of(input))?;
+        argument_word_at(input, spec.value_arg)
+    }
+
+    /// (signature, selector, path) for every setter.
+    pub fn selector_table(&self) -> Vec<(String, String, PostPath)> {
+        self.setters
+            .iter()
+            .map(|s| (s.signature.clone(), encode_no_args(&s.signature), s.path))
+            .collect()
+    }
+
+    pub fn is_verified(&self, implementation: &str) -> bool {
+        self.verified_implementations
+            .iter()
+            .any(|v| v.eq_ignore_ascii_case(implementation))
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FeedList {
     pub family: String,
     pub chain_id: u64,
+    /// Where a reader looks the addresses up; carried through to the result.
+    #[serde(default)]
+    pub explorer: Value,
+    pub mechanism: Mechanism,
     pub feeds: Vec<FeedEntry>,
 }
 
@@ -120,6 +245,20 @@ pub fn parse_feed_list(text: &str) -> Result<FeedList, String> {
         }
         if feed.product.is_empty() || feed.key.is_empty() {
             return Err("every feed needs a product and a key".to_string());
+        }
+    }
+    if list.mechanism.setters.is_empty() {
+        return Err("the mechanism needs at least one setter".to_string());
+    }
+    if list.mechanism.round_events.is_empty() {
+        return Err("the mechanism needs at least one round event".to_string());
+    }
+    for setter in &list.mechanism.setters {
+        if !setter.path.is_setter() {
+            return Err(format!(
+                "setter {} must map to one of safe, safe3, raw, raw3",
+                setter.signature
+            ));
         }
     }
     Ok(list)
@@ -181,10 +320,10 @@ fn selector_of(input: &str) -> String {
         .unwrap_or_default()
 }
 
-/// The first int256 argument of a setter call, from the calldata.
-fn argument_word(input: &str) -> Option<i128> {
+/// The int256 argument at word `index` of a call, from the calldata.
+fn argument_word_at(input: &str, index: usize) -> Option<i128> {
     let body = input.strip_prefix("0x").unwrap_or(input);
-    i128_word(&format!("0x{}", body.get(8..)?), 0)
+    i128_word(&format!("0x{}", body.get(8..)?), index)
 }
 
 fn dec_u64(row: &Value, key: &str) -> Option<u64> {
@@ -199,14 +338,14 @@ fn address_of_topic(topic: &str) -> String {
 
 /// R5. Decodes one Blockscout txlist row. Contract creation rows (empty
 /// `to`) yield None.
-pub fn decode_txlist_row(row: &Value) -> Option<SetterTx> {
+pub fn decode_txlist_row(row: &Value, mechanism: &Mechanism) -> Option<SetterTx> {
     let to = row.get("to").and_then(Value::as_str).unwrap_or("");
     if to.is_empty() {
         return None;
     }
     let input = row.get("input").and_then(Value::as_str).unwrap_or("0x");
     let selector = selector_of(input);
-    let path = PostPath::from_selector(&selector);
+    let path = mechanism.path_of(&selector);
     let is_error = row.get("isError").and_then(Value::as_str) == Some("1");
     let receipt_failed = row.get("txreceipt_status").and_then(Value::as_str) == Some("0");
     Some(SetterTx {
@@ -225,7 +364,7 @@ pub fn decode_txlist_row(row: &Value) -> Option<SetterTx> {
         path,
         selector,
         value: if path.is_setter() {
-            argument_word(input)
+            mechanism.value_of(input)
         } else {
             None
         },
@@ -293,13 +432,13 @@ pub fn decode_multi_send(input: &str) -> Option<Vec<(String, String)>> {
 }
 
 /// R6 steps (a) and (b): unwraps up to six nested Safe layers. Returns the
-/// final target, the inner selector, the first argument and the chain
+/// final target, the inner selector, the inner calldata and the chain
 /// (executor, each Safe). None when the outer selector is not a Safe call.
 pub fn unwrap_safe_chain(
     from: &str,
     to: &str,
     input: &str,
-) -> Option<(String, String, Option<i128>, Vec<String>)> {
+) -> Option<(String, String, String, Vec<String>)> {
     let mut chain = vec![from.to_lowercase(), to.to_lowercase()];
     let mut current = input.to_string();
     let mut target = to.to_lowercase();
@@ -316,15 +455,11 @@ pub fn unwrap_safe_chain(
     if depth == 0 {
         return None;
     }
-    Some((
-        target,
-        selector_of(&current),
-        argument_word(&current),
-        chain,
-    ))
+    Some((target, selector_of(&current), current, chain))
 }
 
 /// The innermost calldata after every Safe execTransaction layer.
+#[cfg(test)]
 fn unwrap_inner_calldata(input: &str) -> String {
     let mut current = input.to_string();
     let mut depth = 0;
@@ -338,8 +473,8 @@ fn unwrap_inner_calldata(input: &str) -> String {
     current
 }
 
-/// A resolved posting call: selector, first argument, and the callers seen.
-pub type ResolvedCall = (String, Option<i128>, Vec<String>);
+/// A resolved posting call: selector, calldata, and the callers seen.
+pub type ResolvedCall = (String, String, Vec<String>);
 
 /// R6 step (c): the deepest call to the feed in a trace result, from either
 /// the Parity flat trace list or the Geth callTracer tree.
@@ -365,7 +500,7 @@ pub fn deepest_call_to(trace: &Value, feed: &str) -> Option<ResolvedCall> {
         let (_, item) = best?;
         let input = item["action"]["input"].as_str()?;
         let from = item["action"]["from"].as_str().unwrap_or("").to_lowercase();
-        return Some((selector_of(input), argument_word(input), vec![from]));
+        return Some((selector_of(input), input.to_string(), vec![from]));
     }
     fn walk<'a>(node: &'a Value, feed: &str, depth: usize, best: &mut Option<(usize, &'a Value)>) {
         if node
@@ -392,7 +527,7 @@ pub fn deepest_call_to(trace: &Value, feed: &str) -> Option<ResolvedCall> {
         .and_then(Value::as_str)
         .unwrap_or("")
         .to_lowercase();
-    Some((selector_of(input), argument_word(input), vec![from]))
+    Some((selector_of(input), input.to_string(), vec![from]))
 }
 
 /// Decodes an ABI string return: offset, length, then the bytes.
@@ -403,9 +538,9 @@ pub fn decode_string(data: &str) -> Option<String> {
     String::from_utf8(hex_decode(slice)?).ok()
 }
 
-/// Whether a bytecode hex string carries the spacing revert string.
-pub fn bytecode_enforces_spacing(code_hex: &str) -> bool {
-    let needle = crate::abi::hex_encode(SPACING_REVERT_STRING.as_bytes());
+/// Whether a bytecode hex string carries the given revert string.
+pub fn bytecode_contains(code_hex: &str, revert_string: &str) -> bool {
+    let needle = crate::abi::hex_encode(revert_string.as_bytes());
     code_hex.to_lowercase().contains(&needle)
 }
 
@@ -563,6 +698,9 @@ pub fn sweep_txlist(
 #[serde(rename_all = "lowercase")]
 pub enum FeedKind {
     Bounded,
+    /// A family without an on-chain deviation guard: posts are attributed
+    /// by path, nothing is replayed against a bound.
+    Unguarded,
     Derived,
     Unreadable,
 }
@@ -592,7 +730,7 @@ pub struct FeedInputs {
     pub eras: Vec<Era>,
     pub round_id_gap: Option<String>,
     /// The event signatures the round series was read from.
-    pub round_events: Vec<&'static str>,
+    pub round_events: Vec<String>,
 }
 
 pub struct FamilyInputs {
@@ -605,6 +743,7 @@ pub struct FamilyInputs {
 pub struct FetchArgs<'a, 'b> {
     pub block: u64,
     pub feeds: &'b [FeedEntry],
+    pub mechanism: &'b Mechanism,
     pub trace: Option<&'a mut dyn ReadSource>,
 }
 
@@ -620,32 +759,36 @@ fn latest_round_data(data: &str) -> Option<LatestRound> {
 fn read_bounds(
     source: &mut dyn ReadSource,
     bundle: &mut BundleWriter,
+    guard: Option<&GuardSpec>,
     name: &str,
     address: &str,
     block: u64,
 ) -> Result<Option<Bounds>, String> {
+    let Some(guard) = guard else {
+        return Ok(None);
+    };
     let deviation = call_i128(
         source,
         bundle,
-        &format!("{name} maxAnswerDeviation() @ {block}"),
+        &format!("{name} {} @ {block}", guard.max_deviation),
         address,
-        "maxAnswerDeviation()",
+        &guard.max_deviation,
         block,
     )?;
     let minimum = call_i128(
         source,
         bundle,
-        &format!("{name} minAnswer() @ {block}"),
+        &format!("{name} {} @ {block}", guard.min_answer),
         address,
-        "minAnswer()",
+        &guard.min_answer,
         block,
     )?;
     let maximum = call_i128(
         source,
         bundle,
-        &format!("{name} maxAnswer() @ {block}"),
+        &format!("{name} {} @ {block}", guard.max_answer),
         address,
-        "maxAnswer()",
+        &guard.max_answer,
         block,
     )?;
     Ok(match (deviation, minimum, maximum) {
@@ -680,6 +823,8 @@ pub fn fetch(
         .record(&header, None, None)
         .map_err(|e| e.to_string())?;
 
+    let mechanism = args.mechanism;
+    let reads = &mechanism.reads;
     let mut implementation_scan: BTreeMap<String, bool> = BTreeMap::new();
     let mut trace = args.trace;
     let mut feeds = Vec::with_capacity(args.feeds.len());
@@ -692,9 +837,9 @@ pub fn fetch(
         let description = call(
             source,
             bundle,
-            &format!("{name} description() @ {block}"),
+            &format!("{name} {} @ {block}", reads.description),
             address,
-            &encode_no_args("description()"),
+            &encode_no_args(&reads.description),
             block,
         )?
         .as_deref()
@@ -702,29 +847,36 @@ pub fn fetch(
         let decimals = call(
             source,
             bundle,
-            &format!("{name} decimals() @ {block}"),
+            &format!("{name} {} @ {block}", reads.decimals),
             address,
-            &encode_no_args("decimals()"),
+            &encode_no_args(&reads.decimals),
             block,
         )?
         .and_then(|data| u64_word(&data, 0))
         .map(|d| d as u32);
-        let bounds = read_bounds(source, bundle, &name, address, block)?;
+        let bounds = read_bounds(
+            source,
+            bundle,
+            mechanism.guard.as_ref(),
+            &name,
+            address,
+            block,
+        )?;
         let latest_round = call(
             source,
             bundle,
-            &format!("{name} latestRound() @ {block}"),
+            &format!("{name} {} @ {block}", reads.latest_round),
             address,
-            &encode_no_args("latestRound()"),
+            &encode_no_args(&reads.latest_round),
             block,
         )?
         .and_then(|data| u64_word(&data, 0));
         let latest = call(
             source,
             bundle,
-            &format!("{name} latestRoundData() @ {block}"),
+            &format!("{name} {} @ {block}", reads.latest_round_data),
             address,
-            &encode_no_args("latestRoundData()"),
+            &encode_no_args(&reads.latest_round_data),
             block,
         )?
         .as_deref()
@@ -732,9 +884,9 @@ pub fn fetch(
         let last_timestamp = call(
             source,
             bundle,
-            &format!("{name} lastTimestamp() @ {block}"),
+            &format!("{name} {} @ {block}", reads.last_timestamp),
             address,
-            &encode_no_args("lastTimestamp()"),
+            &encode_no_args(&reads.last_timestamp),
             block,
         )?
         .and_then(|data| u64_word(&data, 0));
@@ -746,6 +898,8 @@ pub fn fetch(
             && latest.is_none()
         {
             FeedKind::Unreadable
+        } else if mechanism.guard.is_none() {
+            FeedKind::Unguarded
         } else if bounds.is_none() {
             FeedKind::Derived
         } else {
@@ -755,6 +909,7 @@ pub fn fetch(
         if let Some(expected) = entry.kind.as_deref() {
             let observed = match kind {
                 FeedKind::Bounded => "bounded",
+                FeedKind::Unguarded => "unguarded",
                 FeedKind::Derived => "derived",
                 FeedKind::Unreadable => "unreadable",
             };
@@ -786,25 +941,16 @@ pub fn fetch(
             round_id_gap: None,
             round_events: Vec::new(),
         };
-        if kind != FeedKind::Bounded {
+        if !matches!(kind, FeedKind::Bounded | FeedKind::Unguarded) {
             feeds.push(inputs);
             continue;
         }
 
-        // R3: the round series from AnswerUpdated.
-        let answer_rows = sweep_logs(
-            source,
-            bundle,
-            &format!("{name} AnswerUpdated"),
-            address,
-            ANSWER_UPDATED_TOPIC0,
-            block,
-        )?;
-        let mut events: Vec<RoundEvent> = answer_rows
-            .iter()
-            .filter_map(decode_answer_updated)
-            .collect();
-        let mut round_events = vec!["AnswerUpdated(int256,uint256,uint256)"];
+        // R3: the round series from the configured round events. The first
+        // signature is swept always, the rest only while the series stays
+        // short of latestRound().
+        let mut events: Vec<RoundEvent> = Vec::new();
+        let mut round_events: Vec<String> = Vec::new();
         let distinct = |events: &[RoundEvent]| {
             events
                 .iter()
@@ -812,23 +958,23 @@ pub fn fetch(
                 .collect::<BTreeSet<u64>>()
                 .len() as u64
         };
-        if latest_round.is_some_and(|latest| distinct(&events) < latest) {
-            let growth_rows = sweep_logs(
+        for (index, signature) in mechanism.round_events.iter().enumerate() {
+            if index > 0 && latest_round.is_none_or(|latest| distinct(&events) >= latest) {
+                break;
+            }
+            let rows = sweep_logs(
                 source,
                 bundle,
-                &format!("{name} AnswerUpdated growth"),
+                &format!("{name} {signature}"),
                 address,
-                ANSWER_UPDATED_GROWTH_TOPIC0,
+                &topic0_of(signature),
                 block,
             )?;
-            let growth: Vec<RoundEvent> = growth_rows
-                .iter()
-                .filter_map(decode_answer_updated)
-                .collect();
-            if !growth.is_empty() {
-                round_events.push("AnswerUpdated(int256,uint256,uint256,int80)");
-                events.extend(growth);
+            let decoded: Vec<RoundEvent> = rows.iter().filter_map(decode_answer_updated).collect();
+            if index == 0 || !decoded.is_empty() {
+                round_events.push(signature.clone());
             }
+            events.extend(decoded);
         }
         inputs.round_events = round_events;
         events.sort_by_key(|e| (e.round_id, e.block, e.log_index));
@@ -857,17 +1003,17 @@ pub fn fetch(
         let upgrade_rows = sweep_logs(
             source,
             bundle,
-            &format!("{name} Upgraded"),
+            &format!("{name} {}", mechanism.bound_events.upgraded),
             address,
-            UPGRADED_TOPIC0,
+            &topic0_of(&mechanism.bound_events.upgraded),
             block,
         )?;
         let init_rows = sweep_logs(
             source,
             bundle,
-            &format!("{name} Initialized"),
+            &format!("{name} {}", mechanism.bound_events.initialized),
             address,
-            INITIALIZED_TOPIC0,
+            &topic0_of(&mechanism.bound_events.initialized),
             block,
         )?;
 
@@ -875,7 +1021,7 @@ pub fn fetch(
         let tx_rows = sweep_txlist(source, bundle, &format!("{name} txlist"), address, block)?;
         let mut by_hash: BTreeMap<String, SetterTx> = BTreeMap::new();
         for row in &tx_rows {
-            if let Some(tx) = decode_txlist_row(row) {
+            if let Some(tx) = decode_txlist_row(row, mechanism) {
                 if tx.failed {
                     if tx.path.is_setter() {
                         inputs.failed.push(tx.clone());
@@ -932,15 +1078,14 @@ pub fn fetch(
                     .unwrap_or("0x")
                     .to_string();
                 let unwrapped = unwrap_safe_chain(&from, &to, &input).and_then(
-                    |(target, selector, value, mut chain)| {
+                    |(target, selector, inner, mut chain)| {
                         if target == feed_lower {
                             chain.push(feed_lower.clone());
-                            return Some((selector, value, chain, None));
+                            return Some((selector, mechanism.value_of(&inner), chain, None));
                         }
                         // A multiSend batch executed by the Safe: the k-th
                         // call to the feed in the batch posted the k-th round
                         // of this transaction.
-                        let inner = unwrap_inner_calldata(&input);
                         let entries = decode_multi_send(&inner)?;
                         let calls: Vec<&(String, String)> =
                             entries.iter().filter(|(to, _)| *to == feed_lower).collect();
@@ -950,7 +1095,7 @@ pub fn fetch(
                         chain.push(feed_lower.clone());
                         Some((
                             selector_of(data),
-                            argument_word(data),
+                            mechanism.value_of(data),
                             chain,
                             Some(position),
                         ))
@@ -962,7 +1107,7 @@ pub fn fetch(
                 match unwrapped {
                     Some((selector, value, chain, batch_index)) => Attribution {
                         via: Via::SafeRouted,
-                        path: PostPath::from_selector(&selector),
+                        path: mechanism.path_of(&selector),
                         selector,
                         value,
                         sender: from,
@@ -981,11 +1126,11 @@ pub fn fetch(
                             )?;
                         }
                         match resolved {
-                            Some((selector, value, chain)) => Attribution {
+                            Some((selector, calldata, chain)) => Attribution {
                                 via: Via::Trace,
-                                path: PostPath::from_selector(&selector),
+                                path: mechanism.path_of(&selector),
                                 selector,
-                                value,
+                                value: mechanism.value_of(&calldata),
                                 sender: from,
                                 safe_chain: chain,
                                 batch_index: None,
@@ -1031,7 +1176,10 @@ pub fn fetch(
                     ))
                     .map_err(|err| err.message)?;
                 let code = fetched.result_str().unwrap_or_default();
-                let spacing = bytecode_enforces_spacing(&code);
+                let spacing = mechanism
+                    .spacing_rule
+                    .as_ref()
+                    .is_some_and(|rule| bytecode_contains(&code, &rule.revert_string));
                 bundle
                     .record(
                         &fetched,
@@ -1049,10 +1197,13 @@ pub fn fetch(
                 implementation: implementation.clone(),
                 from_block: *from_block,
                 to_block: upgrades.get(index + 1).map(|next| next.0.saturating_sub(1)),
-                implementation_verified: VERIFIED_IMPLEMENTATIONS
-                    .contains(&implementation.as_str()),
+                implementation_verified: mechanism.is_verified(implementation),
                 enforces_spacing: implementation_scan[implementation],
-                spacing_source: "bytecode_scan",
+                spacing_source: if mechanism.spacing_rule.is_some() {
+                    "bytecode_scan"
+                } else {
+                    "none"
+                },
                 transaction_hash: tx.clone(),
             });
         }
@@ -1084,7 +1235,7 @@ pub fn fetch(
             else {
                 continue;
             };
-            if version < 2 {
+            if version < mechanism.bound_events.initialized_min_version {
                 continue;
             }
             let Some(block_number) = dec_u64(row, "blockNumber") else {
@@ -1111,44 +1262,48 @@ pub fn fetch(
             group.initialized_version = Some(version);
         }
         for ((block_number, _), mut group) in groups {
+            let guard = mechanism.guard.as_ref();
             if block_number > 0 {
-                group.before = read_bounds(source, bundle, &name, address, block_number - 1)?;
+                group.before =
+                    read_bounds(source, bundle, guard, &name, address, block_number - 1)?;
             }
-            group.after = read_bounds(source, bundle, &name, address, block_number)?;
+            group.after = read_bounds(source, bundle, guard, &name, address, block_number)?;
             inputs.bound_groups.push(group);
         }
 
         // R8, R10: the guard state at block minus one for every checked post.
-        let bound_at_b1 = bounds.map(|b| b.max_answer_deviation).unwrap_or(0);
-        for block_minus_one in checked_blocks(&inputs.rounds, bound_at_b1) {
-            let bound = call_i128(
-                source,
-                bundle,
-                &format!("{name} maxAnswerDeviation() @ {block_minus_one}"),
-                address,
-                "maxAnswerDeviation()",
-                block_minus_one,
-            )?;
-            let latest = call(
-                source,
-                bundle,
-                &format!("{name} latestRoundData() @ {block_minus_one}"),
-                address,
-                &encode_no_args("latestRoundData()"),
-                block_minus_one,
-            )?
-            .as_deref()
-            .and_then(latest_round_data);
-            if let (Some(bound), Some(latest)) = (bound, latest) {
-                inputs.states.insert(
+        if let Some(guard) = mechanism.guard.as_ref() {
+            let bound_at_b1 = bounds.map(|b| b.max_answer_deviation);
+            for block_minus_one in checked_blocks(&inputs.rounds, bound_at_b1) {
+                let bound = call_i128(
+                    source,
+                    bundle,
+                    &format!("{name} {} @ {block_minus_one}", guard.max_deviation),
+                    address,
+                    &guard.max_deviation,
                     block_minus_one,
-                    StateAtBlock {
-                        block: block_minus_one,
-                        bound,
-                        last_round_id: latest.round_id,
-                        last_answer: latest.answer,
-                    },
-                );
+                )?;
+                let latest = call(
+                    source,
+                    bundle,
+                    &format!("{name} {} @ {block_minus_one}", reads.latest_round_data),
+                    address,
+                    &encode_no_args(&reads.latest_round_data),
+                    block_minus_one,
+                )?
+                .as_deref()
+                .and_then(latest_round_data);
+                if let (Some(bound), Some(latest)) = (bound, latest) {
+                    inputs.states.insert(
+                        block_minus_one,
+                        StateAtBlock {
+                            block: block_minus_one,
+                            bound,
+                            last_round_id: latest.round_id,
+                            last_answer: latest.answer,
+                        },
+                    );
+                }
             }
         }
 
@@ -1203,6 +1358,19 @@ mod tests {
     use super::*;
     use serde_json::json;
 
+    /// The Midas mechanism, from the checked-in family config.
+    fn mechanism() -> Mechanism {
+        parse_feed_list(
+            &std::fs::read_to_string(
+                std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                    .join("../config/midas-mainnet.json"),
+            )
+            .unwrap(),
+        )
+        .unwrap()
+        .mechanism
+    }
+
     #[test]
     fn feed_list_parses_and_rejects_duplicates() {
         let text = std::fs::read_to_string(
@@ -1240,26 +1408,17 @@ mod tests {
 
     #[test]
     fn setter_decoding_matches_cast_sig() {
-        assert_eq!(
-            encode_no_args("setRoundData(int256)"),
-            SET_ROUND_DATA_SELECTOR
-        );
-        assert_eq!(
-            encode_no_args("setRoundDataSafe(int256)"),
-            SET_ROUND_DATA_SAFE_SELECTOR
-        );
+        assert_eq!(encode_no_args("setRoundData(int256)"), "0xa4381d1f");
+        assert_eq!(encode_no_args("setRoundDataSafe(int256)"), "0x89d6e95f");
         assert_eq!(
             encode_no_args("setRoundDataSafe(int256,uint256,int80)"),
-            SET_ROUND_DATA_SAFE3_SELECTOR
+            "0x92260352"
         );
         assert_eq!(
             encode_no_args("setRoundData(int256,uint256,int80)"),
-            SET_ROUND_DATA3_SELECTOR
+            "0x2b6e02c7"
         );
-        assert_eq!(
-            encode_no_args("initializeV3(uint256)"),
-            INITIALIZE_V3_SELECTOR
-        );
+        assert_eq!(encode_no_args("initializeV3(uint256)"), "0x3c3d8410");
         assert_eq!(
             encode_no_args("execTransaction(address,uint256,bytes,uint8,uint256,uint256,uint256,address,address,bytes)"),
             EXEC_TRANSACTION_SELECTOR
@@ -1273,7 +1432,7 @@ mod tests {
             "input": "0x89d6e95f00000000000000000000000000000000000000000000000000000000066cc201",
             "isError": "0", "txreceipt_status": "1",
         });
-        let tx = decode_txlist_row(&row).unwrap();
+        let tx = decode_txlist_row(&row, &mechanism()).unwrap();
         assert_eq!(tx.path, PostPath::Safe);
         assert_eq!(tx.value, Some(107_790_849));
         assert!(!tx.failed);
@@ -1282,33 +1441,39 @@ mod tests {
 
         let mut failed = row.clone();
         failed["isError"] = json!("1");
-        assert!(decode_txlist_row(&failed).unwrap().failed);
+        assert!(decode_txlist_row(&failed, &mechanism()).unwrap().failed);
         let mut receipt = row.clone();
         receipt["txreceipt_status"] = json!("0");
-        assert!(decode_txlist_row(&receipt).unwrap().failed);
+        assert!(decode_txlist_row(&receipt, &mechanism()).unwrap().failed);
 
         let mut raw = row.clone();
         raw["input"] =
             json!("0xa4381d1f00000000000000000000000000000000000000000000000000000000065826a4");
-        assert_eq!(decode_txlist_row(&raw).unwrap().path, PostPath::Raw);
+        assert_eq!(
+            decode_txlist_row(&raw, &mechanism()).unwrap().path,
+            PostPath::Raw
+        );
         let mut raw3 = row.clone();
         raw3["input"] = json!("0x2b6e02c70000000000000000000000000000000000000000000000000000000005f5e10000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001");
-        let raw3 = decode_txlist_row(&raw3).unwrap();
+        let raw3 = decode_txlist_row(&raw3, &mechanism()).unwrap();
         assert_eq!(raw3.path, PostPath::Raw3);
         assert_eq!(raw3.value, Some(100_000_000));
         let mut safe3 = row.clone();
         safe3["input"] = json!("0x92260352000000000000000000000000000000000000000000000000000000000600ecf10000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002a");
-        assert_eq!(decode_txlist_row(&safe3).unwrap().path, PostPath::Safe3);
+        assert_eq!(
+            decode_txlist_row(&safe3, &mechanism()).unwrap().path,
+            PostPath::Safe3
+        );
         let mut other = row.clone();
         other["input"] =
             json!("0x3c3d84100000000000000000000000000000000000000000000000000000000002255100");
-        let other = decode_txlist_row(&other).unwrap();
+        let other = decode_txlist_row(&other, &mechanism()).unwrap();
         assert_eq!(other.path, PostPath::Other);
         assert_eq!(other.value, None);
 
         let mut creation = row.clone();
         creation["to"] = json!("");
-        assert!(decode_txlist_row(&creation).is_none());
+        assert!(decode_txlist_row(&creation, &mechanism()).is_none());
     }
 
     #[test]
@@ -1318,7 +1483,7 @@ mod tests {
         assert!(unwrap_safe_chain("0xaa", "0xbb", input).is_none());
         // And a plain EOA call to the feed with an unknown selector is
         // `other`, never a setter.
-        assert_eq!(PostPath::from_selector("0x12345678"), PostPath::Other);
+        assert_eq!(mechanism().path_of("0x12345678"), PostPath::Other);
     }
 
     #[test]
@@ -1328,15 +1493,15 @@ mod tests {
             {"action": {"from": "0xsafe", "to": "0xFEED", "input": "0xa4381d1f0000000000000000000000000000000000000000000000000000000005f5e100"}, "traceAddress": [0]},
             {"action": {"from": "0xfeed", "to": "0xacl", "input": "0x91d14854"}, "traceAddress": [0, 0]},
         ]);
-        let (selector, value, chain) = deepest_call_to(&trace, "0xfeed").unwrap();
-        assert_eq!(selector, SET_ROUND_DATA_SELECTOR);
-        assert_eq!(value, Some(100_000_000));
+        let (selector, calldata, chain) = deepest_call_to(&trace, "0xfeed").unwrap();
+        assert_eq!(selector, "0xa4381d1f");
+        assert_eq!(argument_word_at(&calldata, 0), Some(100_000_000));
         assert_eq!(chain, vec!["0xsafe"]);
         let tree = json!({"from": "0xe", "to": "0xsafe", "input": "0x6a761202", "calls": [
             {"from": "0xsafe", "to": "0xfeed", "input": "0x89d6e95f0000000000000000000000000000000000000000000000000000000005f5e100"}
         ]});
         let (selector, _, _) = deepest_call_to(&tree, "0xfeed").unwrap();
-        assert_eq!(selector, SET_ROUND_DATA_SAFE_SELECTOR);
+        assert_eq!(selector, "0x89d6e95f");
         assert!(deepest_call_to(&tree, "0xnone").is_none());
     }
 
@@ -1344,10 +1509,13 @@ mod tests {
     fn bytecode_scan_finds_the_spacing_string() {
         let with = format!(
             "0x6080{}6000",
-            crate::abi::hex_encode(SPACING_REVERT_STRING.as_bytes())
+            crate::abi::hex_encode("CA: not enough time passed".as_bytes())
         );
-        assert!(bytecode_enforces_spacing(&with));
-        assert!(!bytecode_enforces_spacing("0x60806040"));
+        assert!(bytecode_contains(&with, "CA: not enough time passed"));
+        assert!(!bytecode_contains(
+            "0x60806040",
+            "CA: not enough time passed"
+        ));
     }
 
     #[test]
@@ -1364,16 +1532,16 @@ mod tests {
         let input = "0x6a761202000000000000000000000000056339c044055819e8db84e71f5f2e1f536b2e5b0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001a00000000000000000000000000000000000000000000000000000000000000024a4381d1f000000000000000000000000000000000000000000000000000000029c680f80000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000041000000000000000000000000f651032419e3a19a3f8b1a350427b94356c86bf400000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000";
         let (target, inner) = decode_safe_exec_transaction(input).unwrap();
         assert_eq!(target, "0x056339c044055819e8db84e71f5f2e1f536b2e5b");
-        assert_eq!(selector_of(&inner), SET_ROUND_DATA_SELECTOR);
-        let (target, selector, value, chain) = unwrap_safe_chain(
+        assert_eq!(selector_of(&inner), "0xa4381d1f");
+        let (target, selector, inner, chain) = unwrap_safe_chain(
             "0xf651032419e3a19a3f8b1a350427b94356c86bf4",
             "0x8e45e6bbcc17103193c482a2d93e200aa134d08e",
             input,
         )
         .unwrap();
         assert_eq!(target, "0x056339c044055819e8db84e71f5f2e1f536b2e5b");
-        assert_eq!(selector, SET_ROUND_DATA_SELECTOR);
-        assert_eq!(value, Some(11_214_000_000));
+        assert_eq!(selector, "0xa4381d1f");
+        assert_eq!(argument_word_at(&inner, 0), Some(11_214_000_000));
         assert_eq!(
             chain,
             vec![
@@ -1387,15 +1555,15 @@ mod tests {
     #[test]
     fn nested_safe_unwraps_to_the_feed_call() {
         let input = "0x6a7612020000000000000000000000008e45e6bbcc17103193c482a2d93e200aa134d08e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003e000000000000000000000000000000000000000000000000000000000000002646a761202000000000000000000000000056339c044055819e8db84e71f5f2e1f536b2e5b0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001a00000000000000000000000000000000000000000000000000000000000000024a4381d1f00000000000000000000000000000000000000000000000000000000060f273400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008200000000000000000000000046ff4ae5e5b0d9d5dd0f555c91c82597f0f51fa100000000000000000000000000000000000000000000000000000000000000000100000000000000000000000082b30194beae06d991bc71850f949ec8cb7e0cb7000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000082cfdab0aadf513dafd10321044355b638cb317d7e64e57036aa5a0cfb4b35814c26e080d1abec71a5abef68662fbe27af015ecd5c52dac8a4e1881c6b155fd76d1c000000000000000000000000296b4a523b27b0bc28a8e9c659491a75f17010bb000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000";
-        let (target, selector, value, chain) = unwrap_safe_chain(
+        let (target, selector, inner, chain) = unwrap_safe_chain(
             "0x296b4a523b27b0bc28a8e9c659491a75f17010bb",
             "0x46ff4ae5e5b0d9d5dd0f555c91c82597f0f51fa1",
             input,
         )
         .unwrap();
         assert_eq!(target, "0x056339c044055819e8db84e71f5f2e1f536b2e5b");
-        assert_eq!(selector, SET_ROUND_DATA_SELECTOR);
-        assert_eq!(value, Some(101_656_372));
+        assert_eq!(selector, "0xa4381d1f");
+        assert_eq!(argument_word_at(&inner, 0), Some(101_656_372));
         assert_eq!(
             chain,
             vec![
@@ -1419,9 +1587,9 @@ mod tests {
         assert!(entries
             .iter()
             .all(|(to, _)| to == "0xa537ef0343e83761ed42b8e017a1e495c9a189ee"));
-        assert_eq!(selector_of(&entries[0].1), SET_ROUND_DATA_SAFE_SELECTOR);
-        assert_eq!(argument_word(&entries[0].1), Some(100_050_000));
-        assert_eq!(argument_word(&entries[1].1), Some(100076926));
+        assert_eq!(selector_of(&entries[0].1), "0x89d6e95f");
+        assert_eq!(argument_word_at(&entries[0].1, 0), Some(100_050_000));
+        assert_eq!(argument_word_at(&entries[1].1, 0), Some(100076926));
         assert!(decode_multi_send("0xa4381d1f").is_none());
     }
 
@@ -1435,14 +1603,20 @@ mod tests {
         };
         assert_eq!(
             topic("AnswerUpdated(int256,uint256,uint256)"),
-            ANSWER_UPDATED_TOPIC0
+            "0x0559884fd3a460db3073b7fc896cc77986f16e378210ded43186175bf646fc5f"
         );
         assert_eq!(
             topic("AnswerUpdated(int256,uint256,uint256,int80)"),
-            ANSWER_UPDATED_GROWTH_TOPIC0
+            "0xe012d696f661afa25265e797b4eb1ba2e0c146a00d39c97014bac5aba66ff220"
         );
-        assert_eq!(topic("Upgraded(address)"), UPGRADED_TOPIC0);
-        assert_eq!(topic("Initialized(uint8)"), INITIALIZED_TOPIC0);
+        assert_eq!(
+            topic("Upgraded(address)"),
+            "0xbc7cd75a20ee27fd9adebab32041f755214dbc6bffa90cc0225b39da2e5c2d3b"
+        );
+        assert_eq!(
+            topic("Initialized(uint8)"),
+            "0x7f26b83ff96e1f2b6a682f133852f6798a09c465da95921460cefb3847402498"
+        );
         assert_eq!(encode_no_args("multiSend(bytes)"), MULTI_SEND_SELECTOR);
     }
 }

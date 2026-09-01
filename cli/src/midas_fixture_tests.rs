@@ -44,6 +44,9 @@ fn replay_into(tag: &str, feeds: Option<Vec<FeedEntry>>) -> Replayed {
         &mut source,
         RunArgs {
             block,
+            family: summary["family"].as_str().unwrap().to_string(),
+            explorer: summary["explorer"].clone(),
+            mechanism: serde_json::from_value(summary["mechanism"].clone()).unwrap(),
             feeds,
             feed_list_source: summary["feed_list_source"].as_str().unwrap().to_string(),
             stale_after_days: summary["stale_after_days"].as_u64().unwrap(),
@@ -227,6 +230,8 @@ fn feed_filter_selects_one_feed() {
     let list = crate::midas::FeedList {
         family: "midas-customfeed".to_string(),
         chain_id: 1,
+        explorer: manifest["summary"]["explorer"].clone(),
+        mechanism: serde_json::from_value(manifest["summary"]["mechanism"].clone()).unwrap(),
         feeds: all,
     };
     let one = crate::midas::select_feeds(&list, Some("mRE7.customFeed")).unwrap();

@@ -15,17 +15,15 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
 use crate::model::mtbill::deviation;
 
-/// setRoundDataSafe requires strictly more than one hour since the previous
-/// round in the implementations that enforce spacing.
-pub const MIN_ROUND_SPACING_SECONDS: u64 = 3600;
-
-/// The four posting selectors plus the two shapes that are not posts.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize)]
+/// The four posting path classes plus the two shapes that are not posts.
+/// `safe` and `safe3` are the checked path, `raw` and `raw3` the unchecked
+/// one; which selector maps to which class is a family config fact.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum PostPath {
     Safe,
@@ -45,16 +43,6 @@ impl PostPath {
             PostPath::Raw3 => "raw3",
             PostPath::Other => "other",
             PostPath::Unattributed => "unattributed",
-        }
-    }
-
-    pub fn from_selector(selector: &str) -> PostPath {
-        match selector.to_lowercase().as_str() {
-            crate::midas::SET_ROUND_DATA_SAFE_SELECTOR => PostPath::Safe,
-            crate::midas::SET_ROUND_DATA_SAFE3_SELECTOR => PostPath::Safe3,
-            crate::midas::SET_ROUND_DATA_SELECTOR => PostPath::Raw,
-            crate::midas::SET_ROUND_DATA3_SELECTOR => PostPath::Raw3,
-            _ => PostPath::Other,
         }
     }
 
@@ -218,8 +206,11 @@ pub fn implied_bounds(segments: &[BoundSegment], block: u64) -> Option<Bounds> {
 /// Which blocks need a state read at block minus one: every unchecked post
 /// after the first successful post, and every checked post whose naive
 /// deviation against the previous round exceeds the bound at B1.
-pub fn checked_blocks(rounds: &[AttributedRound], bound_at_b1: i128) -> Vec<u64> {
+pub fn checked_blocks(rounds: &[AttributedRound], bound_at_b1: Option<i128>) -> Vec<u64> {
     let mut out = BTreeSet::new();
+    let Some(bound_at_b1) = bound_at_b1 else {
+        return Vec::new();
+    };
     for (index, round) in rounds.iter().enumerate() {
         if index == 0 {
             continue;
@@ -384,7 +375,11 @@ pub struct PostCountsByOrigin {
 pub struct FeedReplayInput<'a> {
     pub feed_name: String,
     pub decimals: u32,
-    pub bound_at_b1: i128,
+    /// None for a family without an on-chain guard: nothing is replayed
+    /// against a bound, unchecked posts are listed as such.
+    pub bound_at_b1: Option<i128>,
+    /// The checked path's minimum spacing, when the family has that rule.
+    pub spacing_seconds: Option<u64>,
     pub rounds: &'a [AttributedRound],
     pub failed: &'a [SetterTx],
     pub states: &'a BTreeMap<u64, StateAtBlock>,
@@ -548,12 +543,12 @@ pub fn replay_feed(input: &FeedReplayInput) -> FeedReplay {
         let state = input.states.get(&block_minus_one);
 
         // R11: spacing on the checked path.
-        if path.is_checked() {
+        if let (true, Some(limit)) = (path.is_checked(), input.spacing_seconds) {
             let gap = round
                 .event
                 .timestamp
                 .saturating_sub(previous.event.timestamp);
-            if gap <= MIN_ROUND_SPACING_SECONDS {
+            if gap <= limit {
                 let enforces = era.map(|e| e.enforces_spacing).unwrap_or(false);
                 if enforces {
                     let mut finding = base(round);
@@ -569,10 +564,25 @@ pub fn replay_feed(input: &FeedReplayInput) -> FeedReplay {
             }
         }
 
+        let Some(bound_at_b1) = input.bound_at_b1 else {
+            // No guard in this family: an unchecked post is listed, never
+            // measured against a bound.
+            if path.is_unchecked() {
+                let mut finding = base(round);
+                finding["kind"] = json!("UNGUARDED_POST");
+                finding["initialization"] = json!(false);
+                finding["same_block"] = json!(same_block);
+                finding["classification"] = json!("no_guard");
+                unguarded += 1;
+                row.finding = Some("UNGUARDED_POST".to_string());
+                findings.push(finding);
+            }
+            timeline.push(row);
+            continue;
+        };
         let needs_state = path.is_unchecked()
             || (path.is_checked()
-                && deviation(last_answer, round.event.answer).unwrap_or(i128::MAX)
-                    > input.bound_at_b1);
+                && deviation(last_answer, round.event.answer).unwrap_or(i128::MAX) > bound_at_b1);
         if !needs_state {
             timeline.push(row);
             continue;
@@ -791,8 +801,8 @@ mod tests {
                 via,
                 path,
                 selector: match path {
-                    PostPath::Raw => crate::midas::SET_ROUND_DATA_SELECTOR.to_string(),
-                    PostPath::Safe => crate::midas::SET_ROUND_DATA_SAFE_SELECTOR.to_string(),
+                    PostPath::Raw => "0xa4381d1f".to_string(),
+                    PostPath::Safe => "0x89d6e95f".to_string(),
                     _ => String::new(),
                 },
                 value: Some(answer),
@@ -853,7 +863,8 @@ mod tests {
         replay_feed(&FeedReplayInput {
             feed_name: "test.customFeed".to_string(),
             decimals: 8,
-            bound_at_b1,
+            bound_at_b1: Some(bound_at_b1),
+            spacing_seconds: Some(3600),
             rounds,
             failed: &[],
             states: &states,
@@ -1190,7 +1201,8 @@ mod tests {
             round(3, 100_002_000, 300, PostPath::Raw, Via::External),
             round(4, 110_000_000, 400, PostPath::Safe, Via::External),
         ];
-        assert_eq!(checked_blocks(&rounds, 5_000_000), vec![299, 399]);
+        assert_eq!(checked_blocks(&rounds, Some(5_000_000)), vec![299, 399]);
+        assert!(checked_blocks(&rounds, None).is_empty());
     }
 
     #[test]

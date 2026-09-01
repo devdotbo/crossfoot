@@ -301,10 +301,23 @@ fn replay(
                         format!("the manifest summary carries no feeds_configured list: {err}"),
                     )
                 })?;
+            let mechanism: crate::midas::Mechanism =
+                serde_json::from_value(summary["mechanism"].clone()).map_err(|err| {
+                    (
+                        OTHER,
+                        format!("the manifest summary carries no mechanism: {err}"),
+                    )
+                })?;
             crate::run_midas::run(
                 &mut source,
                 crate::run_midas::RunArgs {
                     block,
+                    family: summary["family"]
+                        .as_str()
+                        .unwrap_or("midas-customfeed")
+                        .to_string(),
+                    explorer: summary["explorer"].clone(),
+                    mechanism,
                     feeds,
                     feed_list_source: summary["feed_list_source"]
                         .as_str()

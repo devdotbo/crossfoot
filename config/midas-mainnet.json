@@ -1,6 +1,81 @@
 {
   "family": "midas-customfeed",
   "chain_id": 1,
+  "explorer": {
+    "name": "eth.blockscout.com",
+    "api": "https://eth.blockscout.com/api",
+    "address_url": "https://eth.blockscout.com/address/",
+    "transaction_url": "https://eth.blockscout.com/tx/"
+  },
+  "mechanism": {
+    "description": "CustomAggregatorV3CompatibleFeed: a Chainlink-shaped feed with a feed admin role. setRoundData checks only minAnswer <= value <= maxAnswer; setRoundDataSafe additionally requires deviation(last, value) <= maxAnswerDeviation (percent at 10^decimals scale) and, in the 2026-06 implementations, more than one hour since the last post.",
+    "source": {
+      "repo": "https://github.com/midas-apps/contracts",
+      "path": "contracts/feeds/CustomAggregatorV3CompatibleFeed.sol",
+      "note": "selectors and guard semantics were read from the verified mRE7 implementation; every other implementation is marked implementation_verified: false"
+    },
+    "reads": {
+      "description": "description()",
+      "decimals": "decimals()",
+      "latest_round": "latestRound()",
+      "latest_round_data": "latestRoundData()",
+      "last_timestamp": "lastTimestamp()"
+    },
+    "guard": {
+      "max_deviation": "maxAnswerDeviation()",
+      "min_answer": "minAnswer()",
+      "max_answer": "maxAnswer()"
+    },
+    "round_events": [
+      "AnswerUpdated(int256,uint256,uint256)",
+      "AnswerUpdated(int256,uint256,uint256,int80)"
+    ],
+    "setters": [
+      {
+        "signature": "setRoundDataSafe(int256)",
+        "path": "safe",
+        "value_arg": 0
+      },
+      {
+        "signature": "setRoundDataSafe(int256,uint256,int80)",
+        "path": "safe3",
+        "value_arg": 0
+      },
+      {
+        "signature": "setRoundData(int256)",
+        "path": "raw",
+        "value_arg": 0
+      },
+      {
+        "signature": "setRoundData(int256,uint256,int80)",
+        "path": "raw3",
+        "value_arg": 0
+      }
+    ],
+    "other_calls": [
+      {
+        "signature": "initializeV3(uint256)",
+        "note": "reinitializer, writes the bound"
+      },
+      {
+        "signature": "emergencyWithdraw(address,uint256)"
+      }
+    ],
+    "bound_events": {
+      "upgraded": "Upgraded(address)",
+      "initialized": "Initialized(uint8)",
+      "initialized_min_version": 2
+    },
+    "spacing_rule": {
+      "revert_string": "CA: not enough time passed",
+      "seconds": 3600
+    },
+    "verified_implementations": [
+      "0x9d14d6ab8cb76a1a497139eca76bcb3afb141411",
+      "0x0d84ec93e9a734184c7f59f61342f432444efc1b",
+      "0xe6792edb139b8bf83ededf05c03e91b0c7775007"
+    ]
+  },
   "feeds": [
     {
       "product": "mTBILL",

@@ -13,7 +13,7 @@ use std::path::{Path, PathBuf};
 use serde_json::{json, Value};
 
 use crate::bundle::BundleWriter;
-use crate::midas::{self, FeedEntry, FeedInputs, FeedKind};
+use crate::midas::{self, FeedEntry, FeedInputs, FeedKind, Mechanism};
 use crate::model::midas::{
     feed_verdict, liveness, replay_feed, FeedReplay, FeedReplayInput, Liveness, PostCounts,
 };
@@ -23,6 +23,10 @@ use crate::util::{now_utc, unix_to_utc};
 
 pub struct RunArgs<'a> {
     pub block: u64,
+    /// Family name, explorer descriptor and mechanism from the family config.
+    pub family: String,
+    pub explorer: Value,
+    pub mechanism: Mechanism,
     pub feeds: Vec<FeedEntry>,
     /// Where the feed list came from, for the manifest.
     pub feed_list_source: String,
@@ -81,6 +85,7 @@ fn feed_report(
     block_timestamp: u64,
     stale_after_seconds: u64,
     recent_seconds: u64,
+    spacing_seconds: Option<u64>,
 ) -> FeedReport {
     let entry = &inputs.entry;
     let name = entry.name();
@@ -170,12 +175,12 @@ fn feed_report(
                 findings_count: 0,
             }
         }
-        FeedKind::Bounded => {
-            let bounds = inputs.bounds.expect("a bounded feed has bounds");
+        FeedKind::Bounded | FeedKind::Unguarded => {
             let replay = replay_feed(&FeedReplayInput {
                 feed_name: name.clone(),
                 decimals,
-                bound_at_b1: bounds.max_answer_deviation,
+                bound_at_b1: inputs.bounds.map(|b| b.max_answer_deviation),
+                spacing_seconds,
                 rounds: &inputs.rounds,
                 failed: &inputs.failed,
                 states: &inputs.states,
@@ -288,6 +293,7 @@ pub fn run(
         midas::FetchArgs {
             block: args.block,
             feeds: &args.feeds,
+            mechanism: &args.mechanism,
             trace: args.trace,
         },
     )?;
@@ -303,6 +309,10 @@ pub fn run(
                 inputs.block_timestamp,
                 stale_after_seconds,
                 recent_seconds,
+                args.mechanism
+                    .spacing_rule
+                    .as_ref()
+                    .map(|rule| rule.seconds),
             )
         })
         .collect();
@@ -348,7 +358,7 @@ pub fn run(
         match report.kind {
             FeedKind::Unreadable => feeds_unreadable += 1,
             FeedKind::Derived => feeds_derived += 1,
-            FeedKind::Bounded => feeds_replayed += 1,
+            FeedKind::Bounded | FeedKind::Unguarded => feeds_replayed += 1,
         }
         let Some(replay) = &report.replay else {
             continue;
@@ -478,7 +488,7 @@ pub fn run(
         "target": "midas",
         "check_class": "posting-path replay",
         "nav_recomputation": "INPUT_GAP",
-        "nav_recomputation_reason": "no Midas product publishes the portfolio that would recompute its NAV; every finding here is about the posting path, never about the value",
+        "nav_recomputation_reason": "no product of this family publishes the portfolio that would recompute its NAV; every finding here is about the posting path, never about the value",
         "verdict": verdict,
         "summary": json!(summary),
         "window": {
@@ -487,21 +497,13 @@ pub fn run(
             "log_sweep_from_block": 0,
         },
         "family": {
-            "name": "midas-customfeed",
-            "chain_id": midas::EXPECTED_CHAIN_ID,
+            "name": args.family,
+            "chain_id": source.chain_id(),
             "feed_list": args.feed_list_source,
-            "contract_shape": {
-                "repo": midas::SOURCE_REPO,
-                "path": midas::SOURCE_PATH,
-                "verified_implementations": midas::VERIFIED_IMPLEMENTATIONS,
-                "note": "selectors and guard semantics come from the verified mRE7 implementation; every other implementation is marked implementation_verified: false and its spacing rule comes from a bytecode scan",
-            },
-            "selectors": {
-                "setRoundData(int256)": midas::SET_ROUND_DATA_SELECTOR,
-                "setRoundDataSafe(int256)": midas::SET_ROUND_DATA_SAFE_SELECTOR,
-                "setRoundDataSafe(int256,uint256,int80)": midas::SET_ROUND_DATA_SAFE3_SELECTOR,
-                "setRoundData(int256,uint256,int80)": midas::SET_ROUND_DATA3_SELECTOR,
-                "initializeV3(uint256)": midas::INITIALIZE_V3_SELECTOR,
+            "explorer": args.explorer,
+            "mechanism": args.mechanism,
+            "selectors": args.mechanism.selector_table().iter().map(|(signature, selector, path)| json!({"signature": signature, "selector": selector, "path": path})).collect::<Vec<Value>>(),
+            "safe_selectors": {
                 "execTransaction": midas::EXEC_TRANSACTION_SELECTOR,
                 "multiSend(bytes)": midas::MULTI_SEND_SELECTOR,
             },
@@ -536,6 +538,9 @@ pub fn run(
             json!({
                 "verdict": verdict,
                 "block": args.block,
+                "family": args.family,
+                "explorer": args.explorer,
+                "mechanism": args.mechanism,
                 "feeds_configured": args.feeds,
                 "feed_list_source": args.feed_list_source,
                 "stale_after_days": args.stale_after_days,
