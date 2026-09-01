@@ -442,7 +442,14 @@ paragraph above reads differently, this section wins.
   handler for the same transaction and feed, else `UNKNOWN`. Ordering:
   graph-node runs a transaction's event triggers before its call triggers,
   so `handleAnswerUpdated` cannot read the call record; the call handler
-  patches the Round(s) of its transaction after the fact. Implemented as
+  patches the Round(s) of its transaction after the fact. Verified
+  2026-09-02 against graph-node master, `chain/ethereum/src/trigger.rs`,
+  `impl Ord for EthereumTrigger`: a Call and a Log of the same transaction
+  index compare with the Log first ("if they are from the same transaction,
+  events come first"); across transactions both order by transaction
+  index; block triggers surround them. Confirmed on a local graph-node
+  against mainnet traces (`subgraph/DEPLOYMENT.md`): every Safe-routed
+  mTBILL round of the first 320,000 blocks carries `attributedBy: CALL`. Implemented as
   R6a: Round keeps `@entity(immutable: true)` because graph-node accepts
   writes to an immutable entity inside the block that created it (schema
   documentation, "If changes happen in the same block in which the entity
