@@ -11,6 +11,7 @@ mod cache;
 mod consume;
 #[cfg(test)]
 mod live_tests;
+mod midas;
 mod model;
 mod mtbill;
 mod render;

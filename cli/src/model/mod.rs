@@ -14,6 +14,7 @@
 pub mod actus;
 pub mod clock;
 pub mod decision;
+pub mod midas;
 pub mod mtbill;
 pub mod replay;
 pub mod verdict;
