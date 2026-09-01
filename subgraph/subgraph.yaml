@@ -2769,6 +2769,131 @@ dataSources:
           handler: handleSetRoundData
       file: ./src/midas.ts
   - kind: ethereum/contract
+    name: OpenEden_TBILL_tbillPriceOracle
+    network: mainnet
+    source:
+      address: '0xCe9a6626Eb99eaeA829D7fA613d5D0A2eaE45F40'
+      abi: OpenEdenTBillOracle
+      startBlock: 18375985
+    context:
+      issuer:
+        type: String
+        data: 'OpenEden'
+      product:
+        type: String
+        data: 'TBILL'
+      registryKey:
+        type: String
+        data: 'tbillPriceOracle'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - PendingUpdate
+        - ReferenceUpdate
+        - BoundChange
+        - Poster
+      abis:
+        - name: OpenEdenTBillOracle
+          file: ./abis/OpenEdenTBillOracle.json
+      eventHandlers:
+        - event: UpdatePrice(uint256,uint256)
+          handler: handleUpdatePrice
+        - event: RoundUpdated(indexed uint80)
+          handler: handleRoundUpdated
+        - event: UpdateCloseNavPrice(uint256,uint256)
+          handler: handleUpdateCloseNavPrice
+        - event: UpdateCloseNavPriceManually(uint256,uint256)
+          handler: handleUpdateCloseNavPriceManually
+        - event: UpdateMaxPriceDeviation(uint256,uint256)
+          handler: handleUpdateMaxPriceDeviation
+      callHandlers:
+        - function: updatePrice(uint256)
+          handler: handleUpdatePriceCall
+      file: ./src/openeden.ts
+  - kind: ethereum/contract
+    name: Ondo_OUSG_rwaOracle
+    network: mainnet
+    source:
+      address: '0x0502c5ae08E7CD64fe1AEDA7D6e229413eCC6abe'
+      abi: OndoComparisonOracle
+      startBlock: 17124713
+    context:
+      issuer:
+        type: String
+        data: 'Ondo'
+      product:
+        type: String
+        data: 'OUSG'
+      registryKey:
+        type: String
+        data: 'rwaOracle'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - ReferenceUpdate
+        - Poster
+      abis:
+        - name: OndoComparisonOracle
+          file: ./abis/OndoComparisonOracle.json
+      eventHandlers:
+        - event: RWAExternalComparisonCheckPriceSet(int256,indexed uint80,int256,indexed uint80,int256,int256)
+          handler: handlePriceSet
+        - event: ChainlinkPriceIgnored(int256,indexed uint80,int256,indexed uint80)
+          handler: handleChainlinkPriceIgnored
+      callHandlers:
+        - function: setPrice(int256)
+          handler: handleSetPriceCall
+      file: ./src/ondo.ts
+  - kind: ethereum/contract
+    name: Superstate_USTB_superstateOracle
+    network: mainnet
+    source:
+      address: '0xe4fa682f94610ccd170680cc3b045d77d9e528a8'
+      abi: SuperstateOracle
+      startBlock: 21340412
+    context:
+      issuer:
+        type: String
+        data: 'Superstate'
+      product:
+        type: String
+        data: 'USTB'
+      registryKey:
+        type: String
+        data: 'superstateOracle'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - BoundChange
+        - Poster
+      abis:
+        - name: SuperstateOracle
+          file: ./abis/SuperstateOracle.json
+      eventHandlers:
+        - event: NewCheckpoint(uint64,uint64,uint128)
+          handler: handleNewCheckpoint
+        - event: SetMaximumAcceptablePriceDelta(uint256,uint256)
+          handler: handleSetMaximumAcceptablePriceDelta
+      callHandlers:
+        - function: addCheckpoint(uint64,uint64,uint128,bool)
+          handler: handleAddCheckpointCall
+      file: ./src/superstate.ts
+  - kind: ethereum/contract
     name: Frankencoin_svZCHF_savings
     network: mainnet
     source:

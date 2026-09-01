@@ -60,6 +60,7 @@ function ensureFeed(module: Address, block: ethereum.Block, tx: ethereum.Transac
   feed.overBoundCount = 0;
   feed.boundChangeCount = 0;
   feed.upgradeCount = 0;
+  feed.referenceUpdateCount = 0;
   feed.save();
   return feed;
 }

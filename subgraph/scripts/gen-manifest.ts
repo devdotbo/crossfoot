@@ -14,7 +14,8 @@ interface FeedRow {
   issuer: string;
   address: string;
   startBlock: number;
-  abi: "CustomFeed" | "CustomFeedGrowth";
+  abi: string;
+  handler: "midas" | "openeden" | "ondo" | "superstate";
 }
 
 interface FeedsFile {
@@ -45,19 +46,28 @@ const input = JSON.parse(readFileSync(feedsPath, "utf8")) as FeedsFile;
 if (input.chain_id !== 1 || input.network !== "mainnet") {
   throw new Error("feeds.json must describe Ethereum mainnet (chain_id 1)");
 }
-if (input.feeds.length !== 60) {
-  throw new Error(`feeds.json must hold the 60 bounded feeds, found ${input.feeds.length}`);
+const midasFeeds = input.feeds.filter((f) => f.handler === "midas");
+if (midasFeeds.length !== 60) {
+  throw new Error(`feeds.json must hold the 60 bounded Midas feeds, found ${midasFeeds.length}`);
 }
+const ABIS_BY_HANDLER: Record<string, string[]> = {
+  midas: ["CustomFeed", "CustomFeedGrowth"],
+  openeden: ["OpenEdenTBillOracle"],
+  ondo: ["OndoComparisonOracle"],
+  superstate: ["SuperstateOracle"],
+};
 const seen = new Set<string>();
 for (const f of input.feeds) {
   const lower = f.address.toLowerCase();
   if (!/^0x[0-9a-fA-F]{40}$/.test(f.address)) throw new Error(`bad address ${f.address}`);
   if (seen.has(lower)) throw new Error(`duplicate address ${f.address}`);
   seen.add(lower);
-  if (f.abi !== "CustomFeed" && f.abi !== "CustomFeedGrowth") throw new Error(`bad abi ${f.abi} on ${f.product}`);
+  const abis = ABIS_BY_HANDLER[f.handler];
+  if (!abis) throw new Error(`unknown handler ${f.handler} on ${f.product}`);
+  if (!abis.includes(f.abi)) throw new Error(`bad abi ${f.abi} for handler ${f.handler} on ${f.product}`);
   if (!Number.isInteger(f.startBlock) || f.startBlock <= 0) throw new Error(`bad startBlock on ${f.product}`);
 }
-if (input.feeds.filter((f) => f.abi === "CustomFeedGrowth").length !== 1) {
+if (midasFeeds.filter((f) => f.abi === "CustomFeedGrowth").length !== 1) {
   throw new Error("exactly one feed uses the four-argument ABI (mGLOBAL customFeedGrowth)");
 }
 
@@ -149,6 +159,96 @@ function midasSource(f: FeedRow): string[] {
   return lines;
 }
 
+interface IssuerTemplate {
+  entities: string[];
+  eventHandlers: string[];
+  callHandlers: string[];
+  file: string;
+}
+
+// One template per issuer handler (docs/specs/04-subgraph.md, extension E1).
+const ISSUER_TEMPLATES: Record<string, IssuerTemplate> = {
+  openeden: {
+    entities: ["Feed", "Round", "PostTx", "PendingUpdate", "ReferenceUpdate", "BoundChange", "Poster"],
+    eventHandlers: [
+      "        - event: UpdatePrice(uint256,uint256)",
+      "          handler: handleUpdatePrice",
+      "        - event: RoundUpdated(indexed uint80)",
+      "          handler: handleRoundUpdated",
+      "        - event: UpdateCloseNavPrice(uint256,uint256)",
+      "          handler: handleUpdateCloseNavPrice",
+      "        - event: UpdateCloseNavPriceManually(uint256,uint256)",
+      "          handler: handleUpdateCloseNavPriceManually",
+      "        - event: UpdateMaxPriceDeviation(uint256,uint256)",
+      "          handler: handleUpdateMaxPriceDeviation",
+    ],
+    callHandlers: [
+      "        - function: updatePrice(uint256)",
+      "          handler: handleUpdatePriceCall",
+    ],
+    file: "./src/openeden.ts",
+  },
+  ondo: {
+    entities: ["Feed", "Round", "PostTx", "ReferenceUpdate", "Poster"],
+    eventHandlers: [
+      "        - event: RWAExternalComparisonCheckPriceSet(int256,indexed uint80,int256,indexed uint80,int256,int256)",
+      "          handler: handlePriceSet",
+      "        - event: ChainlinkPriceIgnored(int256,indexed uint80,int256,indexed uint80)",
+      "          handler: handleChainlinkPriceIgnored",
+    ],
+    callHandlers: ["        - function: setPrice(int256)", "          handler: handleSetPriceCall"],
+    file: "./src/ondo.ts",
+  },
+  superstate: {
+    entities: ["Feed", "Round", "PostTx", "BoundChange", "Poster"],
+    eventHandlers: [
+      "        - event: NewCheckpoint(uint64,uint64,uint128)",
+      "          handler: handleNewCheckpoint",
+      "        - event: SetMaximumAcceptablePriceDelta(uint256,uint256)",
+      "          handler: handleSetMaximumAcceptablePriceDelta",
+    ],
+    callHandlers: [
+      "        - function: addCheckpoint(uint64,uint64,uint128,bool)",
+      "          handler: handleAddCheckpointCall",
+    ],
+    file: "./src/superstate.ts",
+  },
+};
+
+function issuerSource(f: FeedRow): string[] {
+  const t = ISSUER_TEMPLATES[f.handler];
+  const lines = [
+    "  - kind: ethereum/contract",
+    `    name: ${sourceName(f)}`,
+    `    network: ${input.network}`,
+    "    source:",
+    `      address: '${f.address}'`,
+    `      abi: ${f.abi}`,
+    `      startBlock: ${f.startBlock}`,
+    ...context([
+      ["issuer", f.issuer],
+      ["product", f.product],
+      ["registryKey", f.key],
+    ]),
+    "    mapping:",
+    "      kind: ethereum/events",
+    `      apiVersion: ${API_VERSION}`,
+    "      language: wasm/assemblyscript",
+    "      entities:",
+    ...t.entities.map((e) => `        - ${e}`),
+    "      abis:",
+    `        - name: ${f.abi}`,
+    `          file: ./abis/${f.abi}.json`,
+    "      eventHandlers:",
+    ...t.eventHandlers,
+  ];
+  if (input.callHandlers && t.callHandlers.length > 0) {
+    lines.push("      callHandlers:", ...t.callHandlers);
+  }
+  lines.push(`      file: ${t.file}`);
+  return lines;
+}
+
 function frankencoinSource(): string[] {
   const vaultTopic = topicOfAddress(FRANKENCOIN.vault);
   const flow = (event: string, handler: string, priceCall: boolean): string[] => {
@@ -217,8 +317,10 @@ const out: string[] = [
   "  prune: never",
   "dataSources:",
 ];
-for (const f of input.feeds) out.push(...midasSource(f));
+for (const f of input.feeds) out.push(...(f.handler === "midas" ? midasSource(f) : issuerSource(f)));
 out.push(...frankencoinSource());
 
 writeFileSync(outPath, out.join("\n") + "\n");
-console.log(`wrote ${outPath}: ${input.feeds.length} Midas sources + 1 Frankencoin source, callHandlers=${input.callHandlers}`);
+console.log(
+  `wrote ${outPath}: ${midasFeeds.length} Midas sources + ${input.feeds.length - midasFeeds.length} other issuer sources + 1 Frankencoin source, callHandlers=${input.callHandlers}`,
+);

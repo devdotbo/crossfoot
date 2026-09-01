@@ -1,21 +1,32 @@
 {
-  "description": "Entity counts the live subgraph must reproduce at the survey head (docs/specs/04-subgraph.md R17, R18). Queried with block: {number: 25884405}. Values marked exact come from the research archive; values marked expected are own inference from it and are confirmed or corrected at capture (02 R19 policy: differences are investigated and recorded, not patched in).",
+  "description": "Entity counts the live subgraph must reproduce at the survey head (docs/specs/04-subgraph.md R17, R18). Queried with block: {number: 25884405}. Values marked exact come from the research archive; values marked expected are own inference from it and are confirmed or corrected at capture (02 R19 policy: differences are investigated and recorded, not patched in). Extension E1 (OpenEden, Ondo, Superstate) counts are derived from the raw evidence files of 2026-09-02 at head 25,885,411 and reduced to block 25,884,405 by the last event blocks.",
   "block": 25884405,
   "sources": [
     "raw/midas-customfeed-survey-2026-09-01.md",
     "raw/midas-customfeed-replay-2026-09-01.md",
     "raw/teammate-memos/2026-09-01-midas-hidden-rounds.md",
     "raw/teammate-memos/2026-09-01-midas-bound-history.md",
-    "raw/graph-feasibility-chain-checks-2026-09-01.md"
+    "raw/graph-feasibility-chain-checks-2026-09-01.md",
+    "raw/openeden-tbill-oracle-usdo-rpc-2026-09-02.md",
+    "raw/ondo-ousg-oracle-rpc-2026-09-02.md",
+    "raw/superstate-ustb-uscc-oracle-rpc-2026-09-02.md"
   ],
   "counts": {
-    "feeds": { "value": 61, "status": "exact", "note": "60 POSTED plus svZCHF" },
+    "feeds": {
+      "value": 64,
+      "status": "exact",
+      "note": "60 Midas POSTED, OpenEden TBILL, Ondo OUSG, Superstate USTB, plus svZCHF"
+    },
     "rounds_posted": {
       "value": 2535,
       "status": "exact",
-      "note": "sum of latestRound over the 60 bounded feeds: 2320 external posts plus 215 Safe-routed rounds on six feeds"
+      "note": "Midas only (issuer Midas): sum of latestRound over the 60 bounded feeds, 2320 external posts plus 215 Safe-routed rounds. Other issuers are counted separately below."
     },
-    "rounds_posted_with_extra": { "value": 5, "status": "exact", "note": "the four-argument AnswerUpdated on mGLOBAL customFeedGrowth" },
+    "rounds_posted_with_extra": {
+      "value": 5,
+      "status": "exact",
+      "note": "the four-argument AnswerUpdated on mGLOBAL customFeedGrowth"
+    },
     "rounds_unchecked_not_first": {
       "min": 60,
       "max": 65,
@@ -25,29 +36,50 @@
     "rounds_over_bound": {
       "value": 57,
       "status": "expected",
-      "note": "29 external on 14 feeds plus 28 Safe-routed on mTBILL, mBASIS, mBTC; 16 distinct feeds"
+      "note": "29 external on 14 feeds plus 28 Safe-routed on mTBILL, mBASIS, mBTC; 16 distinct feeds; the three other issuers add none"
     },
     "rounds_unknown": {
       "value": 0,
       "status": "expected",
-      "note": "every Safe-routed round is attributed by the setter call handlers; 215 if call handlers are disabled (feeds.json callHandlers false)"
+      "note": "every Safe-routed round is attributed by the setter call handlers; 215 if call handlers are disabled (feeds.json callHandlers false); OpenEden, Ondo and Superstate add none (their setters are call-handled)"
     },
     "rounds_attributed_by_call": {
-      "value": 2535,
+      "value": 4883,
       "status": "expected",
-      "note": "the call handlers also fire for direct EOA posts; a lower count means missing traces"
+      "note": "2535 Midas plus 1158 OpenEden plus 757 Ondo plus 433 Superstate; the call handlers also fire for direct EOA posts; a lower count means missing traces"
     },
-    "bound_changes": { "value": 65, "status": "exact", "note": "60 version 1, 4 version 2, 1 version 3" },
-    "bound_changes_changed": { "value": 4, "status": "exact", "note": "mRE7, mSL, mKRalpha (bound), mWIN (min and max)" },
-    "bound_changes_detected_by_round": { "value": 0, "status": "exact" },
-    "upgrades": { "value": 98, "status": "exact", "note": "60 deployment events plus 38 post-deployment upgrades" },
+    "bound_changes": {
+      "value": 66,
+      "status": "exact",
+      "note": "Midas 65 (60 version 1, 4 version 2, 1 version 3) plus Superstate's deployment SetMaximumAcceptablePriceDelta"
+    },
+    "bound_changes_changed": {
+      "value": 5,
+      "status": "exact",
+      "note": "mRE7, mSL, mKRalpha (bound), mWIN (min and max), Superstate deployment (0 to 1000000)"
+    },
+    "bound_changes_detected_by_round": {
+      "value": 0,
+      "status": "exact"
+    },
+    "upgrades": {
+      "value": 98,
+      "status": "exact",
+      "note": "60 deployment events plus 38 post-deployment upgrades"
+    },
     "upgrades_with_initializer": {
       "value": 64,
       "status": "expected",
       "note": "60 deployments (upgradeToAndCall in the proxy constructor emits Upgraded then Initialized(1)) plus 4 upgradeAndCall; spec floor is 4"
     },
-    "rate_changes": { "value": 4, "status": "exact" },
-    "rate_proposals": { "value": 3, "status": "exact" },
+    "rate_changes": {
+      "value": 4,
+      "status": "exact"
+    },
+    "rate_proposals": {
+      "value": 3,
+      "status": "exact"
+    },
     "vault_flows": {
       "value": 140,
       "status": "expected",
@@ -58,7 +90,30 @@
       "status": "expected",
       "note": "140 flows plus the 2 RateChanged at or after the vault deployment block 24118272 (blocks 24426856, 24750879)"
     },
-    "posters": { "status": "recorded at capture", "note": "one EOA per feed with a few shared keys, plus the 9 Safe executor EOAs of the hidden rounds" }
+    "posters": {
+      "status": "recorded at capture",
+      "note": "one EOA per feed with a few shared keys, plus the 9 Safe executor EOAs of the hidden rounds"
+    },
+    "rounds_openeden": {
+      "value": 1158,
+      "status": "expected",
+      "note": "1158 UpdatePrice/RoundUpdated pairs at head 25,885,411; the last at block 25,878,750 so the count holds at 25,884,405; round ids 2 to 1159 (the constructor's round 1 has no event); all path SAFE via updatePrice, attributedBy CALL; 0 ReferenceUpdate of kind CLOSE_NAV_MANUAL, 1056 of kind CLOSE_NAV, 0 BoundChange"
+    },
+    "rounds_ondo": {
+      "value": 757,
+      "status": "expected",
+      "note": "758 PriceSet events at head, the last at block 25,885,288 which is after 25,884,405; all path SAFE via setPrice through a Safe (caller a Safe, attributedBy CALL); overBound 0 (largest move 6 bps against 200); 0 ReferenceUpdate (ChainlinkPriceIgnored never fired)"
+    },
+    "rounds_superstate": {
+      "value": 433,
+      "status": "expected",
+      "note": "433 NewCheckpoint events, the last at 25,882,646; round ids 0 to 432 matching latestRoundData; all path SAFE via addCheckpoint from the owner EOA, override false on every one, overBound 0 (largest delta 4981 against the cap 1000000); 1 BoundChange (deployment SetMaximumAcceptablePriceDelta 0 to 1000000, detectedBy EVENT)"
+    },
+    "reference_updates": {
+      "value": 1056,
+      "status": "expected",
+      "note": "OpenEden UpdateCloseNavPrice events, all guarded; 0 manual, 0 Chainlink-ignored"
+    }
   },
   "over_bound_per_feed": {
     "mTBILL": 7,
@@ -113,7 +168,14 @@
     {
       "feed": "0x0a2a51f2f206447dE3E3a80FCf92240244722395",
       "product": "mRE7",
-      "feedFields": { "roundCount": 56, "uncheckedCount": 1, "overBoundCount": 1, "bound": "36000000", "boundChangeCount": 3, "upgradeCount": 3 }
+      "feedFields": {
+        "roundCount": 56,
+        "uncheckedCount": 1,
+        "overBoundCount": 1,
+        "bound": "36000000",
+        "boundChangeCount": 3,
+        "upgradeCount": 3
+      }
     },
     {
       "feed": "0x056339C044055819E8Db84E71f5f2E1F536b2E5b",
@@ -135,8 +197,75 @@
     {
       "feed": "0xE5F130253fF137f9917C0107659A4c5262abf6b0",
       "product": "svZCHF",
-      "feedFields": { "family": "DERIVED", "decimals": 18, "bound": null, "inputsFrom": "0x27d9ad987bde08a0d083ef7e0e4043c857a17b38" },
+      "feedFields": {
+        "family": "DERIVED",
+        "decimals": 18,
+        "bound": null,
+        "inputsFrom": "0x27d9ad987bde08a0d083ef7e0e4043c857a17b38"
+      },
       "note": "every Round has path PROTOCOL and a trigger; no Round below block 24118272"
+    },
+    {
+      "feed": "0xCe9a6626Eb99eaeA829D7fA613d5D0A2eaE45F40",
+      "product": "TBILL",
+      "roundId": 1159,
+      "expect": {
+        "path": "SAFE",
+        "selector": "0x8d6cc56d",
+        "attributedBy": "CALL",
+        "answer": "115496284",
+        "previousAnswer": "115486202",
+        "reference": "115486106",
+        "deviationFromReference": "881279",
+        "boundAtPost": "15000000",
+        "overBound": false,
+        "poster": "0xdbc3c410a9ede40b86482ca0677eccdeaf5a3fde",
+        "tx": "0x8eb1d97aed411dc047e3ef2db05580acfb6dfa0be12ada753ffac4af95dece21",
+        "block": 25878750
+      }
+    },
+    {
+      "feed": "0x0502c5ae08E7CD64fe1AEDA7D6e229413eCC6abe",
+      "product": "OUSG",
+      "roundId": 757,
+      "expect": {
+        "path": "SAFE",
+        "selector": "0xf7a30806",
+        "attributedBy": "CALL",
+        "caller": "0xeaef4335c7db4cd1d1cc3368fa43721e2798befe",
+        "poster": "0x4a15f6bdefbe6320809fe0d3f087e233e24da2d7",
+        "answer": "116411207000000000000",
+        "previousAnswer": "116376937000000000000",
+        "reference": "11036000000",
+        "referencePrevious": "11036750000",
+        "deviationFromReference": "2000000",
+        "boundAtPost": "200000000",
+        "overBound": false,
+        "tx": "0xc4d35ec6c812a056483a4660e935544250d7aba3c2c936797361cdfe186bd7d9",
+        "block": 25877947
+      },
+      "note": "round numbering is the event count from block 18,014,096; 757 is the post of 2026-08-31 if no event was missed"
+    },
+    {
+      "feed": "0xe4fa682f94610ccd170680cc3b045d77d9e528a8",
+      "product": "USTB",
+      "roundId": 432,
+      "expect": {
+        "path": "SAFE",
+        "selector": "0xf6fd15f4",
+        "attributedBy": "CALL",
+        "override": false,
+        "answer": "11197244",
+        "previousAnswer": "11193954",
+        "deltaFromPrevious": "3290",
+        "updatedAt": "1788268560",
+        "extra": "1788210000",
+        "boundAtPost": "1000000",
+        "overBound": false,
+        "poster": "0x4b1df64357a5d484563c9b7c16a80ed8b8fb1395",
+        "tx": "0x3153e6c663166334042cf6a0e59aae6c32f0dc0db506589414d3393adb7550f7",
+        "block": 25882646
+      }
     }
   ]
 }

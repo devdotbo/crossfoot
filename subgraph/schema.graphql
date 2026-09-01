@@ -31,7 +31,9 @@ type Feed @entity(immutable: false) {
   description: String              # description() at creation via try_
   decimals: Int!                   # decimals() at creation via try_ (8 on every Midas feed), 18 for svZCHF
   inputsFrom: Bytes                # DERIVED only: the savings module the rounds are derived from
-  bound: BigInt                    # maxAnswerDeviation() as stored, 1e8 = 1 percent; null for DERIVED
+  bound: BigInt                    # the guard in force: Midas maxAnswerDeviation (1e8 = 1 percent), OpenEden maxPriceDeviation and Ondo 200 bps converted to the same scale, Superstate maximumAcceptablePriceDelta (absolute, 6 decimals); null for DERIVED
+  boundKind: String                # RELATIVE (1e8 = 1 percent of the reference) or ABSOLUTE (raw answer units); null for DERIVED
+  reference: BigInt                # OpenEden only: closeNavPrice, the value the guard compares against
   minAnswer: BigInt
   maxAnswer: BigInt
   implementation: Bytes            # latest Upgraded(address) argument
@@ -47,7 +49,9 @@ type Feed @entity(immutable: false) {
   overBoundCount: Int!             # rounds with overBound true
   boundChangeCount: Int!
   upgradeCount: Int!
+  referenceUpdateCount: Int!       # OpenEden closeNav updates and Ondo Chainlink-ignored events
   rounds: [Round!]! @derivedFrom(field: "feed")
+  referenceUpdates: [ReferenceUpdate!]! @derivedFrom(field: "feed")
   boundChanges: [BoundChange!]! @derivedFrom(field: "feed")
   upgrades: [Upgrade!]! @derivedFrom(field: "feed")
   posters: [Poster!]! @derivedFrom(field: "feeds")
@@ -74,9 +78,14 @@ type Round @entity(immutable: true) {
   first: Boolean!                  # no previous round on this feed; the guard does not apply
   previousAnswer: BigInt
   secondsSincePrevious: BigInt
-  deviationFromPrevious: BigInt    # |answer - previous| * 1e8 * 100 / previous (contract formula); null if previous is absent or zero
-  boundAtPost: BigInt              # maxAnswerDeviation() at the event block (declared eth_call), null if the call failed
-  overBound: Boolean!              # !first && deviationFromPrevious > boundAtPost; always false for DERIVED
+  deviationFromPrevious: BigInt    # |answer - previous| * 1e8 * 100 / previous (Midas formula, every family); null if previous is absent or zero
+  deltaFromPrevious: BigInt        # |answer - previous| in answer units (Superstate's absolute cap reads this)
+  reference: BigInt                # the guard's reference at the post: OpenEden closeNavPrice, Ondo the new Chainlink SHV answer
+  referencePrevious: BigInt        # Ondo only: the previous Chainlink SHV answer of the event
+  deviationFromReference: BigInt   # OpenEden: |reference - answer| * 1e8 * 100 / mean (the contract's formula); Ondo: |OUSG bps change - SHV bps change| * 1e6 (74 bps cap)
+  boundAtPost: BigInt              # the guard value at the post in Feed.bound units; null if unknown
+  overBound: Boolean!              # !first && the family's guard measure > boundAtPost (Midas: deviationFromPrevious; OpenEden: deviationFromReference; Ondo: deviationFromPrevious; Superstate: deltaFromPrevious); false for DERIVED
+  override: Boolean                # Superstate only: the addCheckpoint override flag from the calldata
   extra: BigInt                    # the unindexed int80 of the four-argument AnswerUpdated (mGLOBAL growth), else null
   totalAssets: BigInt              # DERIVED only: vault totalAssets() at the event block
   totalSupply: BigInt              # DERIVED only: vault totalSupply() at the event block
@@ -94,12 +103,40 @@ type PostTx @entity(immutable: true) {
   attributed: Int!                 # setter calls of this feed already joined
 }
 
+# OpenEden closeNav updates (the reference the guard compares against) and
+# Ondo ChainlinkPriceIgnored events (the relative check was skipped).
+type ReferenceUpdate @entity(immutable: true) {
+  id: Bytes!                       # tx hash ++ logIndex
+  feed: Feed!
+  kind: String!                    # CLOSE_NAV (guarded), CLOSE_NAV_MANUAL (unguarded admin setter), CHAINLINK_IGNORED
+  oldValue: BigInt
+  newValue: BigInt
+  guarded: Boolean!                # the setter applied the deviation check
+  deviation: BigInt                # OpenEden: the contract's deviation of newValue against oldValue, 1e8 = 1 percent
+  caller: Bytes!                   # transaction.from
+  block: BigInt!
+  blockTimestamp: BigInt!
+  tx: Bytes!
+  logIndex: BigInt!
+}
+
+# OpenEden bookkeeping: UpdatePrice precedes RoundUpdated in one transaction;
+# the answer waits here until the round id is known.
+type PendingUpdate @entity(immutable: true) {
+  id: Bytes!                       # feed address ++ tx hash
+  feed: Feed!
+  answer: BigInt!
+  previous: BigInt!
+  logIndex: BigInt!
+  consumed: Boolean!
+}
+
 type BoundChange @entity(immutable: true) {
   id: Bytes!                       # tx hash ++ logIndex
   feed: Feed!
-  initializerVersion: Int!         # Initialized(uint8).version; 0 when detectedBy is ROUND
+  initializerVersion: Int!         # Initialized(uint8).version; 0 when detectedBy is ROUND or EVENT
   changed: Boolean!                # a previous value existed and any of the three differs
-  detectedBy: String!              # INITIALIZED or ROUND
+  detectedBy: String!              # INITIALIZED, ROUND, or EVENT (UpdateMaxPriceDeviation, SetMaximumAcceptablePriceDelta)
   oldBound: BigInt
   newBound: BigInt
   oldMinAnswer: BigInt

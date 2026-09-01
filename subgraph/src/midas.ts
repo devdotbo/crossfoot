@@ -21,6 +21,7 @@ import {
   ATTRIBUTED_BY_CALL,
   ATTRIBUTED_BY_NONE,
   ATTRIBUTED_BY_TRANSACTION,
+  BOUND_KIND_RELATIVE,
   FAMILY_POSTED,
   PATH_UNCHECKED,
   PATH_UNKNOWN,
@@ -59,6 +60,7 @@ function ensureFeed(address: Address, block: ethereum.Block, tx: ethereum.Transa
   const decimals = contract.try_decimals();
   // 0 records a reverted call; every Midas feed answers 8.
   feed.decimals = decimals.reverted ? 0 : decimals.value;
+  feed.boundKind = BOUND_KIND_RELATIVE;
   feed.createdAtBlock = block.number;
   feed.createdAtTimestamp = block.timestamp;
   feed.createdBy = tx.from;
@@ -67,6 +69,7 @@ function ensureFeed(address: Address, block: ethereum.Block, tx: ethereum.Transa
   feed.overBoundCount = 0;
   feed.boundChangeCount = 0;
   feed.upgradeCount = 0;
+  feed.referenceUpdateCount = 0;
   feed.save();
   return feed;
 }

@@ -22,6 +22,9 @@ export const ATTRIBUTED_BY_PROTOCOL = "PROTOCOL";
 export const FAMILY_POSTED = "POSTED";
 export const FAMILY_DERIVED = "DERIVED";
 
+export const BOUND_KIND_RELATIVE = "RELATIVE";
+export const BOUND_KIND_ABSOLUTE = "ABSOLUTE";
+
 // 1e8 * 100: the contract scales the deviation so that 1e8 equals 1 percent.
 const DEVIATION_SCALE = BigInt.fromI32(100000000).times(BigInt.fromI32(100));
 
