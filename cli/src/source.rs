@@ -7,9 +7,6 @@
 //! missing. This is what lets `crossfoot verify` recompute a result without
 //! the network and without the producer's cache (spec 03 R6).
 
-// The only caller is `crossfoot verify`, which lands in a later commit.
-#![allow(dead_code)]
-
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -109,11 +106,8 @@ impl BundleSource {
         })
     }
 
-    pub fn dir(&self) -> &Path {
-        &self.dir
-    }
-
     /// Number of distinct bodies the bundle holds.
+    #[cfg(test)]
     pub fn held(&self) -> usize {
         self.by_key.len()
     }

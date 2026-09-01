@@ -20,6 +20,7 @@ mod source;
 mod summary;
 mod svzchf;
 mod util;
+mod verify;
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -66,6 +67,17 @@ enum Command {
         /// result.json are skipped.
         #[arg(long, default_value = "bundles")]
         bundles: PathBuf,
+    },
+    /// Re-hash every file of an evidence bundle and recompute its result
+    /// from the bundle's own raw responses, without the network.
+    Verify {
+        /// The bundle directory.
+        bundle: PathBuf,
+
+        /// Exit 5 when the bundle was produced by different code. Without
+        /// it a code difference is printed as a warning.
+        #[arg(long)]
+        require_same_code: bool,
     },
     /// Print keccak256 of each signature, as a full 32 byte hash (the event
     /// topic0) and as the leading 4 bytes (the function selector). With no
@@ -254,6 +266,16 @@ fn main() -> ExitCode {
         Command::Selectors { signatures } => {
             print_selectors(&signatures);
             ExitCode::SUCCESS
+        }
+        Command::Verify {
+            bundle,
+            require_same_code,
+        } => {
+            let report = verify::verify(&bundle, require_same_code);
+            for line in &report.lines {
+                println!("{line}");
+            }
+            ExitCode::from(report.exit_code)
         }
         Command::Fetch {
             target: Target::Svzchf(opts),

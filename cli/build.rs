@@ -40,13 +40,22 @@ fn main() {
     let lock_path = repo_dir.join("Cargo.lock");
     println!("cargo:rerun-if-changed={}", lock_path.display());
 
-    // Rebuild when HEAD moves. In a worktree .git is a file pointing at the
-    // real directory, so both shapes are watched; the tracked source files
-    // change the build anyway.
-    for probe in [".git/HEAD", ".git/index", ".git"] {
-        let path = repo_dir.join(probe);
-        if path.exists() {
-            println!("cargo:rerun-if-changed={}", path.display());
+    // Rebuild when HEAD moves. git names the directory that holds HEAD, so
+    // a worktree (where .git is a file) is watched as well as a plain
+    // checkout.
+    if let Ok(output) = Command::new("git")
+        .args(["rev-parse", "--git-dir"])
+        .current_dir(&repo_dir)
+        .output()
+    {
+        if output.status.success() {
+            let git_dir = repo_dir.join(String::from_utf8_lossy(&output.stdout).trim());
+            for probe in ["HEAD", "logs/HEAD", "index"] {
+                let path = git_dir.join(probe);
+                if path.exists() {
+                    println!("cargo:rerun-if-changed={}", path.display());
+                }
+            }
         }
     }
     let (commit, dirty) = git_identity(&repo_dir);
