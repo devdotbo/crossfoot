@@ -1,0 +1,78 @@
+{
+ "data": {
+  "_meta": {
+   "deployment": "QmRaeyYsGxJcxVXnAvGEBbvFpSEZkJCa9rUM5dAemwWaxD",
+   "block": {
+    "number": 25884405
+   }
+  },
+  "feed": {
+   "id": "0x0a2a51f2f206447de3e3a80fcf92240244722395",
+   "product": "mRE7",
+   "description": "mRe7YIELD/USD",
+   "bound": "36000000",
+   "roundCount": 56,
+   "uncheckedCount": 1,
+   "overBoundCount": 1,
+   "boundChanges": [
+    {
+     "block": "21786070",
+     "initializerVersion": 1,
+     "oldBound": null,
+     "newBound": "200000000",
+     "changed": false,
+     "caller": "0x0000000000000000000000000000000000000000",
+     "tx": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+     "block": "23520494",
+     "initializerVersion": 2,
+     "oldBound": "200000000",
+     "newBound": "36000000",
+     "changed": true,
+     "caller": "0x0000000000000000000000000000000000000000",
+     "tx": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+     "block": "25482800",
+     "initializerVersion": 3,
+     "oldBound": "36000000",
+     "newBound": "36000000",
+     "changed": false,
+     "caller": "0x0000000000000000000000000000000000000000",
+     "tx": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    }
+   ],
+   "rounds": [
+    {
+     "roundId": "36",
+     "answer": "106438116",
+     "updatedAt": "1778094180",
+     "path": "UNCHECKED",
+     "selector": "0xa4381d1f",
+     "first": false,
+     "deviationFromPrevious": "222466613",
+     "boundAtPost": "36000000",
+     "overBound": true,
+     "secondsSincePrevious": null,
+     "tx": "0x7579ba75b3c0d38f79377999aca75c93be26ec891826163e608adfff13a65733",
+     "block": "25037959"
+    },
+    {
+     "roundId": "56",
+     "answer": "107833620",
+     "updatedAt": "1788282600",
+     "path": "SAFE",
+     "selector": "0x89d6e95f",
+     "first": false,
+     "deviationFromPrevious": null,
+     "boundAtPost": "36000000",
+     "overBound": false,
+     "secondsSincePrevious": null,
+     "tx": "0x35a7ccbb000000000000000000000000000000000000000000000000000000000",
+     "block": "25883841"
+    }
+   ]
+  }
+ }
+}

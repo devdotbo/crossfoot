@@ -8,6 +8,7 @@
 mod abi;
 mod bundle;
 mod cache;
+mod consume;
 #[cfg(test)]
 mod live_tests;
 mod model;
@@ -57,6 +58,9 @@ enum Command {
         #[command(subcommand)]
         target: RunTarget,
     },
+    /// Decide ALLOW or REVIEW per feed from the subgraph joined with the
+    /// Crossfoot feed table, and write decisions/<stamp>/.
+    Consume(consume::ConsumeOpts),
     /// Render a static read-only page over the evidence bundles.
     Render {
         /// Directory the pages are written to.
@@ -247,6 +251,16 @@ fn resolve_window(target: &str, opts: &RunOpts) -> Result<Window, String> {
 fn main() -> ExitCode {
     let cli = Cli::parse();
     match cli.command {
+        Command::Consume(opts) => match consume::run(&opts) {
+            Ok(outcome) => {
+                consume::print_outcome(&outcome);
+                ExitCode::SUCCESS
+            }
+            Err(message) => {
+                eprintln!("crossfoot: {message}");
+                ExitCode::FAILURE
+            }
+        },
         Command::Render { out, bundles } => match render::render(&bundles, &out) {
             Ok(outcome) => {
                 println!("out             {}", outcome.out_dir.display());
