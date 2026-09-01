@@ -9,19 +9,20 @@ Target: Subgraph Studio (04-subgraph.md D4, R14). Publishing to the network
 |---|---|
 | `bun install`, `bun run gen`, `graph codegen`, `graph build` | pass (2026-09-02, graph-cli 0.97.1, darwin-arm64) |
 | `graph test` (matchstick 0.6.0, `binary-macos-12-m1`) | 24 tests pass |
-| Studio deploy | blocked on the deploy key (below) |
+| Studio deploy | attempted 2026-09-02 with the key from `.env` (`graph_deploy_key`): rejected by api.studio.thegraph.com with "Deploy key not found" (build hash QmP4Uxtpo9Wzs1ZgKWXr8msGgVdNq4eUoKvjpwHR5iAJTZ uploaded fine); waiting for a re-copied Deploy Key |
+| Local graph-node (docker, dRPC with traces) | bounded manifest deployed; graph-node accepts the call handlers and finds one event plus one call trigger per Safe-routed round; entity checks below |
 | Network publish | not done |
 
 ## What the user must provide
 
-Studio needs a wallet-signed login; no key is in the repository or in the
-research `.env` (checked 2026-09-02: only `drpc_api_key`, `coingecko_api_key`,
-`etherscan_api_key` and the porkbun keys exist there).
-
-1. Sign in at https://thegraph.com/studio with a wallet.
-2. Create a subgraph named `crossfoot-feeds` (the slug used below; any slug
-   works, it is passed to `graph deploy`).
-3. Copy the deploy key from the subgraph page.
+Studio needs a wallet-signed login. The user created the subgraph on
+2026-09-02: owner 7118.eth, slug `crossfoot`, status Draft. The deploy key
+lives in the research repository's `.env` as `graph_deploy_key` (slug in
+`graph_subgraph_slug`); it is read into the shell for `graph auth` and
+never printed or written. The first key supplied was rejected by Studio
+("Deploy key not found"); the Deploy Key is the one on the subgraph's own
+page (https://thegraph.com/studio/subgraph/crossfoot), not an API key from
+the API Keys page, although both are 32 hex characters.
 
 ## Deploy commands
 
@@ -30,12 +31,12 @@ cd subgraph
 bun install
 bun run gen && git diff --exit-code subgraph.yaml
 bunx graph codegen && bunx graph build
-bunx graph auth <DEPLOY_KEY>
-bunx graph deploy crossfoot-feeds --version-label v0.0.1
+bunx graph auth "$(sed -n 's/^graph_deploy_key=//p' ../../ethonline2026/.env)"
+bunx graph deploy crossfoot --version-label v0.0.1
 ```
 
 `graph deploy` prints the deployment ID (`Qm...`) and the query URL of the
-form `https://api.studio.thegraph.com/query/<id>/crossfoot-feeds/v0.0.1`.
+form `https://api.studio.thegraph.com/query/<id>/crossfoot/v0.0.1`.
 Record both in the table below and set `CROSSFOOT_SUBGRAPH_URL` for the
 consumer. Each new deploy archives the previous version; the Studio limit of
 three unpublished subgraphs per account applies to subgraphs, not versions.
@@ -49,6 +50,34 @@ query and record the first head at which `_meta.block.number` reached it.
 | Version | Deployment ID | Query URL | Date | First head >= 25,884,405 |
 |---|---|---|---|---|
 | none yet | | | | |
+
+## Trigger ordering and the call handler join (verified)
+
+graph-node orders the triggers of one block in `chain/ethereum/src/trigger.rs`
+(`impl Ord for EthereumTrigger`, fetched from the master branch on
+2026-09-02): block-start triggers first, then events and calls by
+transaction index, and within one transaction "events come first" (a
+`Call` compares `Greater` than a `Log` of the same transaction index); block
+triggers last. The manifest documentation states the same rule. So
+`handleAnswerUpdated` always runs before `handleSetRoundData` or
+`handleSetRoundDataSafe` of the same transaction, and the Round exists when
+the call handler runs.
+
+Design chosen: Round stays `@entity(immutable: true)`. graph-node accepts a
+write to an immutable entity inside the block that created it (schema
+documentation; `EntityCache::as_modifications` in
+`graph/src/components/store/entity_cache.rs` folds every update of an
+immutable entity into a single insert), and the call handler always runs in
+the same transaction, hence the same block. The join record is `PostTx`
+(feed ++ tx hash: first roundId, number of rounds, number attributed), so
+two rounds of one feed in one transaction are attributed in order and a
+call without a round changes nothing. The consumer needs no join: `path`,
+`selector`, `caller` and `attributedBy` sit on the Round. Upgrade follows
+the same pattern with id feed ++ tx hash and `withInitializer` set by the
+later Initialized handler. Rejected alternatives: a mutable Round (slower
+writes and queries for no gain, since the only later write is in-block)
+and a separate PathAttribution entity joined by the consumer (moves the
+join into every query and leaves `uncheckedCount` wrong on the Feed).
 
 ## Call handlers on Studio
 
@@ -74,14 +103,28 @@ a trace error:
 
 Record the decision in the table above when it is taken.
 
-## Local graph-node (optional validation)
+## Local graph-node (validation)
 
-`docker compose` in this directory is not provided; the reference layout is
-graph-node's `docker/docker-compose.yml` (graph-node, ipfs, postgres) with
-`ethereum: 'mainnet:https://lb.drpc.org/ogrpc?network=ethereum&dkey=<key>'`.
-A full sync from block 20,578,232 needs traces for the call handlers and
-several million block scans; it is a validation aid, not a deployment path.
-Results of any local run are recorded here.
+Layout used on 2026-09-02 (compose file kept outside the repository because
+it carries the RPC key): graph-node `graphprotocol/graph-node:latest`
+(arm64), `ipfs/kubo:v0.29.0`, `postgres:16` with locale C, and
+`ethereum: 'mainnet:traces,archive:https://lb.drpc.org/ogrpc?network=ethereum&dkey=<key>'`
+(the `traces` capability label is required for call handlers, otherwise
+graph-node refuses the subgraph), `ETHEREUM_TRACE_STREAM_STEP_SIZE=2000`.
+dRPC serves `trace_filter` (checked: the mTBILL round 3 trace shows the
+Safe 0x8e45e6bb calling `0xa4381d1f` at trace address [0, 0]).
+
+Bounded manifest `subgraph-local.yaml` (ignored by git, derived from
+`subgraph.yaml` with `endBlock`s): mTBILL 20,578,232 to 20,900,000, mRE7
+25,037,900 to 25,040,000, the module to 24,200,000. Deployed as
+`crossfoot/local`; graph-node found 2 triggers (event plus call) per
+Safe-routed round and 4 in block 21,217,097 (the same-block pair). Scan
+rate about 170,000 blocks per 40 seconds with logs and traces, so a full
+sync from 20,578,232 is a matter of tens of minutes on this setup.
+Findings from the deploy: an unquoted all-hex context value is parsed as a
+YAML number and rejected ("expected a string"), fixed in the generator;
+kubo's add endpoint hung once and needed a container restart.
+Entity checks against the research archive are recorded below when done.
 
 ## Publish (stretch, R15)
 
