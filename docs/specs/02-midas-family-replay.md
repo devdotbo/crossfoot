@@ -257,9 +257,27 @@ Verdicts and summaries:
 
 ## Data and file formats
 
-`config/midas-mainnet.json`: `{"family": "midas-customfeed", "chain_id": 1,
-"feeds": [{"product": "mRE7", "key": "customFeed", "address": "0x0a2a...2395",
-"decimals": 8}, ...]}`.
+`config/midas-mainnet.json` is a posted-feed family config, the only place
+where the family's facts live (no selector, event, revert string or address
+is hard coded in the adapter; a second family with the same mechanism needs
+only a second file): `{"family": "midas-customfeed", "chain_id": 1,
+"explorer": {"name", "api", "address_url", "transaction_url"},
+"mechanism": {"description", "source": {"repo", "path", "note"},
+"reads": {"description", "decimals", "latest_round", "latest_round_data",
+"last_timestamp"} (getter signatures), "guard": {"max_deviation",
+"min_answer", "max_answer"} (or null for a family without an on-chain
+deviation guard, whose feeds are then `kind: "unguarded"`: attributed by
+path, never measured against a bound), "round_events": [signatures; the
+first is swept always, the rest only while the series is short of
+`latestRound()`], "setters": [{"signature", "path": safe | safe3 | raw |
+raw3, "value_arg"}], "other_calls": [...], "bound_events": {"upgraded",
+"initialized", "initialized_min_version"}, "spacing_rule":
+{"revert_string", "seconds"} (or null), "verified_implementations": [...]},
+"feeds": [{"product": "mRE7", "key": "customFeed", "address":
+"0x0a2a...2395", "decimals": 8, "kind": "bounded"}, ...]}`. Selectors and
+topics are keccak-derived from the signatures at run time; the manifest
+summary embeds `family`, `explorer`, `mechanism` and `feeds_configured`,
+so a replay (`verify`) needs nothing from the working tree.
 
 `result.json` (target `midas`): `format`, `target`, `summary` (per
 `01-svzchf-control.md` R3, `family: "guarded-setter"`, `posted` holds the
