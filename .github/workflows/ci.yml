@@ -67,3 +67,22 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo build --workspace --release
+      # The checked-in evidence bundles verify with the binary just built:
+      # every file re-hashed, every cache key recomputed, the result
+      # replayed from the bundle's own raw responses without the network.
+      # A fixture directory without a manifest.json is not a bundle and is
+      # skipped. The producer's code identity differs from CI's build, so
+      # --require-same-code is deliberately not given; a replay mismatch
+      # still fails the job.
+      - name: Verify the checked-in fixture bundles
+        run: |
+          set -eu
+          found=0
+          for dir in cli/tests/fixtures/*/; do
+            [ -f "$dir/manifest.json" ] || continue
+            found=1
+            echo "== $dir"
+            ./target/release/crossfoot verify "$dir"
+            (cd "$dir" && sha256sum -c --quiet SHA256SUMS)
+          done
+          [ "$found" = 1 ] || { echo "no fixture bundle found"; exit 1; }
