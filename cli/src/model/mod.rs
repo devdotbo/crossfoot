@@ -13,6 +13,7 @@
 
 pub mod actus;
 pub mod clock;
+pub mod decision;
 pub mod mtbill;
 pub mod replay;
 pub mod verdict;
