@@ -77,8 +77,15 @@ jobs:
       - name: Verify the checked-in fixture bundles
         run: |
           set -eu
+          # Larger bundles are committed as tar.gz; unpack them next to the
+          # plain directories before the loop.
+          mkdir -p target/fixtures-ci
+          for archive in cli/tests/fixtures/*.tar.gz; do
+            [ -f "$archive" ] || continue
+            tar -xzf "$archive" -C target/fixtures-ci
+          done
           found=0
-          for dir in cli/tests/fixtures/*/; do
+          for dir in cli/tests/fixtures/*/ target/fixtures-ci/*/; do
             [ -f "$dir/manifest.json" ] || continue
             found=1
             echo "== $dir"

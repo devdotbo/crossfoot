@@ -985,6 +985,57 @@ mod tests {
         assert!(Sample::from_str("some").is_err());
     }
 
+    /// The Midas family fixture (spec 02 R19) verifies: 1,812 entries, the
+    /// replay through the midas arm reproduces result.json byte for byte
+    /// with the feed list taken from the manifest, and the window line
+    /// names the survey block.
+    #[test]
+    fn verify_passes_on_the_midas_fixture() {
+        let fixture = crate::fixtures::midas_bundle();
+        let report = verify(&fixture, &Options::default());
+        let text = print(&report);
+        assert_eq!(report.exit_code, VERIFIED, "{text}");
+        assert!(
+            text.contains("target          midas, window 0 to 25884405"),
+            "{text}"
+        );
+        assert!(
+            text.contains("entries         1812 checked, hashes ok"),
+            "{text}"
+        );
+        assert!(
+            text.contains("result.json reproduced byte for byte"),
+            "{text}"
+        );
+    }
+
+    /// A timeline file is not a manifest entry, so a change to it is caught
+    /// by the checksum list rather than by the entry hashes.
+    #[test]
+    fn verify_detects_a_tampered_timeline() {
+        let dir = std::env::temp_dir().join("crossfoot-verify-midas-timeline");
+        let _ = fs::remove_dir_all(&dir);
+        copy_dir(&crate::fixtures::midas_bundle(), &dir);
+        let timeline = fs::read_dir(dir.join("timelines"))
+            .unwrap()
+            .map(|e| e.unwrap().path())
+            .find(|p| {
+                p.file_name()
+                    .is_some_and(|n| n.to_string_lossy().starts_with("mre7"))
+            })
+            .expect("the mRE7 timeline is in the fixture");
+        let mut text = fs::read_to_string(&timeline).unwrap();
+        text.push(' ');
+        fs::write(&timeline, text).unwrap();
+        let report = verify(&dir, &Options::default());
+        assert_eq!(report.exit_code, HASH_MISMATCH, "{}", print(&report));
+        assert!(
+            print(&report).contains("SHA256SUMS differs from the files at timelines/"),
+            "{}",
+            print(&report)
+        );
+    }
+
     /// The README claims exactly what the verifier proves, in the same
     /// words.
     #[test]

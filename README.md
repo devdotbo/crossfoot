@@ -65,10 +65,13 @@ Crossfoot writes nothing to any chain.
   emitted events, measure cadence, monotonicity, drift against the
   contractual benchmark, the mint and burn supply identity, and the
   wrapper's scaling.
-- `midas`, the Midas customFeed family, specified in
-  [`docs/specs/02-midas-family-replay.md`](docs/specs/02-midas-family-replay.md):
-  every round of every feed attributed to the setter that posted it and
-  replayed against the bound in force at the previous block.
+- `midas`, the Midas customFeed family
+  ([`docs/specs/02-midas-family-replay.md`](docs/specs/02-midas-family-replay.md)).
+  Every round of every feed in the list is attributed to the transaction
+  and setter that posted it (Safe wrappers unwrapped) and replayed against
+  the bound in force at the previous block; the result carries a verdict
+  per feed, the family summary with its survey line, and one timeline file
+  per feed. `nav_recomputation: INPUT_GAP` on every feed.
 
 This README states no results for any target. Results live in bundles.
 
@@ -170,6 +173,8 @@ crossfoot run svzchf --baseline-block 24570000 --block 25853000
 crossfoot run svzchf --window demo --offline
 crossfoot run svzchf --window demo --from-bundle cli/tests/fixtures/svzchf-demo-24570000-25853000
 crossfoot run mtbill --baseline-block 25598000 --block 25850000
+crossfoot run midas --block 25884405 --feeds config/midas-mainnet.json
+crossfoot run midas --block 25884405 --feed mRE7 --offline
 ```
 
 Prints the verdict, the summary headline, the result and bundle paths, the

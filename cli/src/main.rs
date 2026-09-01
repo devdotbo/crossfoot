@@ -165,6 +165,15 @@ struct MidasOpts {
     #[arg(long)]
     offline: bool,
 
+    /// Serve every read from this evidence bundle's raw responses instead
+    /// of the cache or the network, and fail on a read it does not hold.
+    /// Reproduces a run from a checked-in fixture without a cache.
+    #[arg(
+        long,
+        conflicts_with_all = ["offline", "endpoints", "log_endpoints", "trace_endpoint"]
+    )]
+    from_bundle: Option<PathBuf>,
+
     /// Wait this many milliseconds before each network call.
     #[arg(long, default_value_t = 0)]
     rpc_delay_ms: u64,
@@ -639,15 +648,17 @@ fn replay_midas(opts: MidasOpts) -> Result<(), String> {
     }
     let feeds = midas::select_feeds(&list, opts.feed.as_deref())?;
 
-    let cache = Cache::new(verify_root.join("cache"));
-    let mut client = Client::new(
-        endpoints,
-        log_endpoints,
-        cache,
-        midas::EXPECTED_CHAIN_ID,
-        opts.offline,
-        opts.rpc_delay_ms,
-    );
+    let mut client: Box<dyn rpc::ReadSource> = match &opts.from_bundle {
+        Some(bundle) => Box::new(source::BundleSource::open(bundle)?),
+        None => Box::new(Client::new(
+            endpoints,
+            log_endpoints,
+            Cache::new(verify_root.join("cache")),
+            midas::EXPECTED_CHAIN_ID,
+            opts.offline,
+            opts.rpc_delay_ms,
+        )),
+    };
     let mut trace_client = opts.trace_endpoint.as_ref().map(|url| {
         Client::new(
             vec![url.clone()],
@@ -660,7 +671,7 @@ fn replay_midas(opts: MidasOpts) -> Result<(), String> {
     });
 
     let outcome = run_midas::run(
-        &mut client,
+        client.as_mut(),
         run_midas::RunArgs {
             block: opts.block,
             feeds,

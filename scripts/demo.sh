@@ -11,8 +11,8 @@
 # Steps:
 #   1. svZCHF demo window, replayed from the fixture bundle's raw responses
 #      into a fresh bundle: verdict, summary, root hash.
-#   2. Midas family replay from its fixture bundle, once that fixture is
-#      checked in; skipped with a message until then.
+#   2. Midas customFeed family, replayed from its fixture archive the same
+#      way: survey line, verdict, root hash.
 #   3. render: static pages over the bundles just written.
 #   4. consume --replay: the consumer agent over the recorded subgraph
 #      responses, ALLOW or REVIEW per feed.
@@ -62,27 +62,37 @@ else
 fi
 
 say "2. Midas customFeed family: every round attributed and replayed against the bound in force"
-midas_fixture=""
-for candidate in cli/tests/fixtures/midas-*/; do
-  if [ -d "$candidate" ]; then
-    midas_fixture="$candidate"
-    break
-  fi
-done
-if [ -z "$midas_fixture" ]; then
-  echo "skipped: no fixture under cli/tests/fixtures/midas-*/ yet (spec 02 R19). Once it is"
-  echo "checked in, this step replays it with: crossfoot run midas --from-bundle <fixture>"
-  echo "and reports the survey line from its summary block."
+midas_archive="cli/tests/fixtures/midas-25884405.tar.gz"
+if [ ! -f "$midas_archive" ]; then
+  echo "skipped: no fixture at $midas_archive (spec 02 R19)."
 else
-  midas_fixture="${midas_fixture%/}"
-  # TODO(midas): replace the copy below with the replay once `crossfoot run
-  # midas --from-bundle` exists; until then the fixture is verified as is.
-  cp -R "$midas_fixture" "$work/bundles/$(basename "$midas_fixture")"
-  midas_bundle="$work/bundles/$(basename "$midas_fixture")"
+  mkdir -p "$work/fixtures"
+  tar -xzf "$midas_archive" -C "$work/fixtures"
+  midas_fixture=""
+  for candidate in "$work"/fixtures/midas-*/; do
+    if [ -d "$candidate" ]; then
+      midas_fixture="${candidate%/}"
+      break
+    fi
+  done
+  [ -n "$midas_fixture" ] || { echo "the archive holds no midas-* directory"; exit 1; }
+  # The pinned block of the fixture, from its manifest summary (entries carry
+  # hex block strings, the summary the number).
+  midas_block="$(grep -o '"block": [0-9][0-9]*' "$midas_fixture/manifest.json" | head -n 1 | tr -dc '0-9')"
+  "$crossfoot" run midas --block "$midas_block" --feeds config/midas-mainnet.json \
+    --from-bundle "$midas_fixture" --verify-root "$work" \
+    | tee "$work/midas.out" | grep -E "^(nav_recomputation|survey|verdict|bundle|root hash|network calls) |mRE7\.customFeed |mTBILL\.customFeed "
+  midas_bundle="$(sed -n 's/^bundle  *//p' "$work/midas.out")"
   bundles+=("$midas_bundle")
   printf 'summary block:  headline %s, consumer_action %s\n' \
     "$(headline "$midas_bundle/result.json")" "$(consumer_action "$midas_bundle/result.json")"
-  line '"survey_line"' "$midas_bundle/result.json" || true
+  printf 'fixture result.json equals the replay:  '
+  if cmp -s "$midas_fixture/result.json" "$midas_bundle/result.json"; then
+    echo "yes"
+  else
+    echo "NO"
+    exit 1
+  fi
 fi
 
 say "3. render: static pages over the bundles, no script, no fetch at view time"
