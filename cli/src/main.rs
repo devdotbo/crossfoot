@@ -16,6 +16,7 @@ mod model;
 mod mtbill;
 mod render;
 mod rpc;
+mod run_midas;
 mod run_mtbill;
 mod run_svzchf;
 mod source;
@@ -111,6 +112,58 @@ enum RunTarget {
     Svzchf(RunOpts),
     /// Midas mTBILL consistency bundle.
     Mtbill(RunOpts),
+    /// Midas customFeed family: posting-path replay of every feed in the list.
+    Midas(MidasOpts),
+}
+
+#[derive(Args)]
+struct MidasOpts {
+    /// Block every state read is pinned to; logs are swept over [0, block].
+    #[arg(long)]
+    block: u64,
+
+    /// Feed list, one entry per feed.
+    #[arg(long, default_value = "config/midas-mainnet.json")]
+    feeds: PathBuf,
+
+    /// Restrict the run to one product (`mRE7`) or one entry (`mFONE.mFONEUnloop.customFeed`).
+    #[arg(long)]
+    feed: Option<String>,
+
+    /// A feed whose last post is older than this at the pinned block is stale.
+    #[arg(long, default_value_t = 30)]
+    stale_after_days: u64,
+
+    /// The recent subset of the family summary counts bypasses within this
+    /// many days before the pinned block.
+    #[arg(long, default_value_t = 183)]
+    recent_days: u64,
+
+    /// JSON-RPC endpoint that serves trace_transaction or
+    /// debug_traceTransaction, consulted only for rounds whose outer call is
+    /// neither the feed nor a Safe.
+    #[arg(long)]
+    trace_endpoint: Option<String>,
+
+    /// Root of the workspace. Cache and bundles live under it.
+    #[arg(long, default_value = ".")]
+    verify_root: PathBuf,
+
+    /// JSON-RPC endpoints, tried in order.
+    #[arg(long = "endpoint")]
+    endpoints: Vec<String>,
+
+    /// Log history endpoints, tried in order.
+    #[arg(long = "log-endpoint")]
+    log_endpoints: Vec<String>,
+
+    /// Serve every read from the cache and fail on a miss.
+    #[arg(long)]
+    offline: bool,
+
+    /// Wait this many milliseconds before each network call.
+    #[arg(long, default_value_t = 0)]
+    rpc_delay_ms: u64,
 }
 
 #[derive(Args)]
@@ -332,6 +385,15 @@ fn main() -> ExitCode {
             }
         },
         Command::Run {
+            target: RunTarget::Midas(opts),
+        } => match replay_midas(opts) {
+            Ok(()) => ExitCode::SUCCESS,
+            Err(message) => {
+                eprintln!("crossfoot: {message}");
+                ExitCode::FAILURE
+            }
+        },
+        Command::Run {
             target: RunTarget::Svzchf(opts),
         } => match recompute_svzchf(opts) {
             Ok(()) => ExitCode::SUCCESS,
@@ -542,6 +604,87 @@ fn check_mtbill(opts: RunOpts) -> Result<(), String> {
         );
     }
     println!("summary            {}", outcome.summary.headline);
+    println!("result             {}", outcome.result_path.display());
+    println!("bundle             {}", outcome.bundle_dir.display());
+    println!("root hash          {}", outcome.root_hash);
+    println!("cache hits         {}", outcome.cache_hits);
+    println!("network calls      {}", outcome.network_calls);
+    Ok(())
+}
+
+fn replay_midas(opts: MidasOpts) -> Result<(), String> {
+    let verify_root = opts.verify_root.canonicalize().map_err(|err| {
+        format!(
+            "--verify-root {} is not readable: {err}",
+            opts.verify_root.display()
+        )
+    })?;
+    let endpoints = if opts.endpoints.is_empty() {
+        vec![
+            DEFAULT_ARCHIVE_ENDPOINT.to_string(),
+            DEFAULT_LATEST_ENDPOINT.to_string(),
+        ]
+    } else {
+        opts.endpoints.clone()
+    };
+    let log_endpoints = if opts.log_endpoints.is_empty() {
+        vec![DEFAULT_LOG_HISTORY_ENDPOINT.to_string()]
+    } else {
+        opts.log_endpoints.clone()
+    };
+
+    let list = midas::load_feed_list(&opts.feeds)?;
+    if list.chain_id != midas::EXPECTED_CHAIN_ID {
+        return Err(format!(
+            "the feed list is for chain {}, this target replays chain {}",
+            list.chain_id,
+            midas::EXPECTED_CHAIN_ID
+        ));
+    }
+    let feeds = midas::select_feeds(&list, opts.feed.as_deref())?;
+
+    let cache = Cache::new(verify_root.join("cache"));
+    let mut client = Client::new(
+        endpoints,
+        log_endpoints,
+        cache,
+        midas::EXPECTED_CHAIN_ID,
+        opts.offline,
+        opts.rpc_delay_ms,
+    );
+    let mut trace_client = opts.trace_endpoint.as_ref().map(|url| {
+        Client::new(
+            vec![url.clone()],
+            Vec::new(),
+            Cache::new(verify_root.join("cache")),
+            midas::EXPECTED_CHAIN_ID,
+            opts.offline,
+            opts.rpc_delay_ms,
+        )
+    });
+
+    let outcome = run_midas::run(
+        &mut client,
+        run_midas::RunArgs {
+            block: opts.block,
+            feeds,
+            feed_list_source: opts.feeds.display().to_string(),
+            stale_after_days: opts.stale_after_days,
+            recent_days: opts.recent_days,
+            trace: trace_client.as_mut().map(|c| c as &mut dyn rpc::ReadSource),
+        },
+        &verify_root,
+    )?;
+
+    println!("nav_recomputation  INPUT_GAP (no Midas NAV is recomputed; findings are about the posting path)");
+    println!("survey             {}", outcome.survey_line);
+    println!("verdict            {}", outcome.verdict);
+    for row in &outcome.rows {
+        println!(
+            "  {:<36} {:<22} {:>3}  {:<22} {:<12} {}",
+            row.name, row.posts, row.bypasses, row.posting_path, row.liveness, row.verdict
+        );
+    }
     println!("result             {}", outcome.result_path.display());
     println!("bundle             {}", outcome.bundle_dir.display());
     println!("root hash          {}", outcome.root_hash);

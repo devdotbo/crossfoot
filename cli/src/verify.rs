@@ -289,6 +289,35 @@ fn replay(
             replay_root,
         )
         .map(|outcome| outcome.result_path),
+        "midas" => {
+            // Spec 03 R7: the feed list comes from the bundle's manifest, not
+            // from the working tree's config file.
+            let manifest = read_json(&dir.join("manifest.json")).map_err(|err| (OTHER, err))?;
+            let summary = manifest.get("summary").cloned().unwrap_or(Value::Null);
+            let feeds: Vec<crate::midas::FeedEntry> =
+                serde_json::from_value(summary["feeds_configured"].clone()).map_err(|err| {
+                    (
+                        OTHER,
+                        format!("the manifest summary carries no feeds_configured list: {err}"),
+                    )
+                })?;
+            crate::run_midas::run(
+                &mut source,
+                crate::run_midas::RunArgs {
+                    block,
+                    feeds,
+                    feed_list_source: summary["feed_list_source"]
+                        .as_str()
+                        .unwrap_or("bundle manifest")
+                        .to_string(),
+                    stale_after_days: summary["stale_after_days"].as_u64().unwrap_or(30),
+                    recent_days: summary["recent_days"].as_u64().unwrap_or(183),
+                    trace: None,
+                },
+                replay_root,
+            )
+            .map(|outcome| outcome.result_path)
+        }
         other => return Err((OTHER, format!("unknown target {other}"))),
     };
     match outcome {
