@@ -938,7 +938,10 @@ fn mtbill_body(run: &Run) -> String {
                 .and_then(Value::as_str)
                 .unwrap_or("")
                 .to_uppercase();
-            let flag = verdict == "OBSERVED_DEVIATION" || verdict == "INPUT_GAP";
+            let flag = matches!(
+                verdict.as_str(),
+                "OBSERVED_DEVIATION" | "INPUT_GAP" | "MODEL_INCONSISTENT" | "INSUFFICIENT_WINDOW"
+            );
             let mut summary = check
                 .get("summary")
                 .and_then(Value::as_str)
@@ -1170,7 +1173,7 @@ fn index_page(runs: &[Run], skipped: &[String]) -> String {
     }
     html.push_str("</table>\n");
 
-    html.push_str("<div class=\"panel\">\n<p class=\"note\"><strong>How to read the verdicts.</strong> MODEL_MATCH means every compared value was recomputed and matched the chain to the wei. CONSISTENT means the issuer's own rules check out against themselves; it is not a recomputation. OBSERVED_DEVIATION names a residual or a rule violation. INPUT_GAP means a required input could not be observed at all, which for mTBILL's NAV is the permanent, expected state.</p>\n</div>\n");
+    html.push_str("<div class=\"panel\">\n<p class=\"note\"><strong>How to read the verdicts.</strong> MODEL_MATCH means every compared value was recomputed and matched the chain to the wei. CONSISTENT means the issuer's own rules check out against themselves; it is not a recomputation. OBSERVED_DEVIATION names a residual or a rule violation. MODEL_INCONSISTENT means the tool's two model paths disagreed with each other, so no statement about the chain is made. INSUFFICIENT_WINDOW means at least one check did not have enough data to run; it is not a pass. INPUT_GAP means a required input could not be observed at all, which for mTBILL's NAV is the permanent, expected state.</p>\n</div>\n");
 
     if !skipped.is_empty() {
         html.push_str(&format!(

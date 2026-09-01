@@ -330,34 +330,14 @@ pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<Ru
         .map(|f| json!({"kind": f.kind, "label": f.label, "detail": f.detail}))
         .collect();
 
-    let failing: Vec<&str> = all
-        .iter()
-        .filter(|check| {
-            matches!(check.id, "C1" | "C4" | "C6" | "C7" | "C5")
-                && check.verdict == CheckVerdict::ObservedDeviation
-        })
-        .map(|check| check.id)
-        .collect();
-    let stale: Vec<&str> = all
-        .iter()
-        .filter(|check| check.verdict == CheckVerdict::SourceStale)
-        .map(|check| check.id)
-        .collect();
-    let input_gap_checks: Vec<&str> = all
-        .iter()
-        .filter(|check| check.verdict == CheckVerdict::InputGap)
-        .map(|check| check.id)
-        .collect();
-
-    let overall = if !gap_summaries.is_empty() || !input_gap_checks.is_empty() {
-        "INPUT_GAP"
-    } else if !stale.is_empty() {
-        "SOURCE_STALE"
-    } else if !failing.is_empty() {
-        "OBSERVED_DEVIATION"
-    } else {
-        "CONSISTENT"
-    };
+    // Every check with a verdict counts, informational ones never do; see
+    // model::mtbill::overall_verdict for the precedence.
+    let summary = checks::overall_verdict(&all, !gap_summaries.is_empty());
+    let overall = summary.overall;
+    let failing = summary.failing_checks.clone();
+    let stale = summary.stale_checks.clone();
+    let input_gap_checks = summary.input_gap_checks.clone();
+    let insufficient = summary.insufficient_checks.clone();
 
     let result = json!({
         "format": "crossfoot-result-v1",
@@ -372,6 +352,7 @@ pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<Ru
         "failing_checks": failing,
         "stale_checks": stale,
         "input_gap_checks": input_gap_checks,
+        "insufficient_checks": insufficient,
         "window": {
             "baseline_block": args.baseline_block,
             "baseline_timestamp_unix": inputs.block_timestamp_b0,

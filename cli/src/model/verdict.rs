@@ -14,6 +14,11 @@ pub enum Verdict {
     ModelMatch,
     /// At least one nonzero residual.
     ObservedDeviation,
+    /// The tool's two independent model paths (the integer transcription of
+    /// the deployed state machine and the ACTUS engine) disagree with each
+    /// other. The model is then not trustworthy for this window, so no
+    /// statement about the chain is made, whatever the residuals say.
+    ModelInconsistent,
     /// Inputs could not be fetched at the pinned blocks, but cached or later
     /// state exists.
     SourceStale,
@@ -26,9 +31,48 @@ impl Verdict {
         match self {
             Verdict::ModelMatch => "MODEL_MATCH",
             Verdict::ObservedDeviation => "OBSERVED_DEVIATION",
+            Verdict::ModelInconsistent => "MODEL_INCONSISTENT",
             Verdict::SourceStale => "SOURCE_STALE",
             Verdict::InputGap => "INPUT_GAP",
         }
+    }
+}
+
+/// The inputs to the run verdict, each already reduced to a fact.
+#[derive(Debug, Clone, Copy)]
+pub struct VerdictInputs {
+    /// A required series is unobtainable (result caps, unanchored rate
+    /// series, incomplete log sweeps).
+    pub input_gap: bool,
+    /// A read at a pinned block reverted or came back empty although the
+    /// source exists.
+    pub stale_read: bool,
+    /// The ACTUS path agreed with the reference replay at every compared
+    /// point, including the horizon.
+    pub model_paths_agree: bool,
+    /// Every compared quantity at the horizon is equal to the wei.
+    pub all_equal: bool,
+    /// Every recognised interest amount in the window was reproduced.
+    pub interest_series_clean: bool,
+}
+
+/// The one place the run verdict is decided.
+///
+/// Order of precedence: an unobtainable input outranks a stale read, which
+/// outranks a disagreement between the tool's own model paths, which outranks
+/// any comparison with the chain. A comparison is only meaningful when the
+/// inputs were observed and the model agrees with itself.
+pub fn aggregate(inputs: VerdictInputs) -> Verdict {
+    if inputs.input_gap {
+        Verdict::InputGap
+    } else if inputs.stale_read {
+        Verdict::SourceStale
+    } else if !inputs.model_paths_agree {
+        Verdict::ModelInconsistent
+    } else if inputs.all_equal && inputs.interest_series_clean {
+        Verdict::ModelMatch
+    } else {
+        Verdict::ObservedDeviation
     }
 }
 
@@ -97,6 +141,48 @@ pub fn first_divergence(interest_mismatches: &[Value]) -> Option<Value> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    const CLEAN: VerdictInputs = VerdictInputs {
+        input_gap: false,
+        stale_read: false,
+        model_paths_agree: true,
+        all_equal: true,
+        interest_series_clean: true,
+    };
+
+    #[test]
+    fn a_clean_run_is_a_model_match() {
+        assert_eq!(aggregate(CLEAN), Verdict::ModelMatch);
+    }
+
+    #[test]
+    fn a_model_path_disagreement_never_passes_as_a_match() {
+        // Fault injection: the chain comparison is perfect, the ACTUS path
+        // disagrees with the reference replay. Before this aggregation
+        // existed the run reported MODEL_MATCH here.
+        let faulty = VerdictInputs { model_paths_agree: false, ..CLEAN };
+        assert_eq!(aggregate(faulty), Verdict::ModelInconsistent);
+        // And a residual on top does not turn it back into a chain finding.
+        let faulty = VerdictInputs { all_equal: false, ..faulty };
+        assert_eq!(aggregate(faulty), Verdict::ModelInconsistent);
+    }
+
+    #[test]
+    fn residuals_and_series_mismatches_are_deviations() {
+        assert_eq!(aggregate(VerdictInputs { all_equal: false, ..CLEAN }), Verdict::ObservedDeviation);
+        assert_eq!(
+            aggregate(VerdictInputs { interest_series_clean: false, ..CLEAN }),
+            Verdict::ObservedDeviation
+        );
+    }
+
+    #[test]
+    fn observation_failures_outrank_everything() {
+        let stale = VerdictInputs { stale_read: true, model_paths_agree: false, all_equal: false, ..CLEAN };
+        assert_eq!(aggregate(stale), Verdict::SourceStale);
+        let gap = VerdictInputs { input_gap: true, ..stale };
+        assert_eq!(aggregate(gap), Verdict::InputGap);
+    }
     use serde_json::json;
 
     #[test]

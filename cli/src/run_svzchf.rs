@@ -462,15 +462,35 @@ pub fn run(
         })
         .collect();
 
-    let verdict = if !input_gaps.is_empty() {
-        Verdict::InputGap
-    } else if !stale_reads.is_empty() {
-        Verdict::SourceStale
-    } else if comparison.all_equal() && replayed.interest_mismatches.is_empty() {
-        Verdict::ModelMatch
-    } else {
-        Verdict::ObservedDeviation
-    };
+    // The ACTUS cross-check is part of the verdict, not a side note. A
+    // missing or malformed `agree` field counts as disagreement.
+    let model_paths_agree = actus_check
+        .get("agree")
+        .and_then(Value::as_bool)
+        .unwrap_or(false);
+
+    let verdict = crate::model::verdict::aggregate(crate::model::verdict::VerdictInputs {
+        input_gap: !input_gaps.is_empty(),
+        stale_read: !stale_reads.is_empty(),
+        model_paths_agree,
+        all_equal: comparison.all_equal(),
+        interest_series_clean: replayed.interest_mismatches.is_empty(),
+    });
+
+    if verdict == Verdict::ModelInconsistent {
+        let count = actus_check
+            .get("divergences")
+            .and_then(Value::as_array)
+            .map(|d| d.len())
+            .unwrap_or(0);
+        bundle.add_finding(
+            "model_paths_disagree",
+            "actus_cross_check",
+            format!(
+                "the ACTUS path and the reference replay disagree at {count} compared point(s); the chain comparison is not reported as a finding"
+            ),
+        );
+    }
 
     if verdict == Verdict::ObservedDeviation {
         for field in comparison.deviations() {

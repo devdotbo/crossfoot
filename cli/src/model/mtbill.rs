@@ -168,6 +168,56 @@ impl CheckResult {
     }
 }
 
+/// The overall consistency verdict of a run, with the check ids behind it.
+#[derive(Debug, Clone, Serialize)]
+pub struct Overall {
+    pub overall: &'static str,
+    pub failing_checks: Vec<&'static str>,
+    pub stale_checks: Vec<&'static str>,
+    pub input_gap_checks: Vec<&'static str>,
+    pub insufficient_checks: Vec<&'static str>,
+}
+
+/// The one place the overall verdict is decided.
+///
+/// Every check that carries a verdict counts; informational checks never do.
+/// Precedence: an unobtainable input (in any check, or in the fetch itself)
+/// outranks a stale read, which outranks a rule violation, which outranks an
+/// incomplete evaluation. CONSISTENT is only reported when every check ran
+/// on enough data and found nothing, so an incomplete window is never
+/// mistaken for a pass.
+pub fn overall_verdict(checks: &[CheckResult], fetch_had_gaps: bool) -> Overall {
+    let ids = |wanted: CheckVerdict| -> Vec<&'static str> {
+        checks
+            .iter()
+            .filter(|check| check.verdict == wanted)
+            .map(|check| check.id)
+            .collect()
+    };
+    let failing_checks = ids(CheckVerdict::ObservedDeviation);
+    let stale_checks = ids(CheckVerdict::SourceStale);
+    let input_gap_checks = ids(CheckVerdict::InputGap);
+    let insufficient_checks = ids(CheckVerdict::InsufficientWindow);
+    let overall = if fetch_had_gaps || !input_gap_checks.is_empty() {
+        "INPUT_GAP"
+    } else if !stale_checks.is_empty() {
+        "SOURCE_STALE"
+    } else if !failing_checks.is_empty() {
+        "OBSERVED_DEVIATION"
+    } else if !insufficient_checks.is_empty() {
+        "INSUFFICIENT_WINDOW"
+    } else {
+        "CONSISTENT"
+    };
+    Overall {
+        overall,
+        failing_checks,
+        stale_checks,
+        input_gap_checks,
+        insufficient_checks,
+    }
+}
+
 // ---------------------------------------------------------------------------
 // C1: posting-rule replay
 // ---------------------------------------------------------------------------
@@ -746,6 +796,81 @@ pub fn c7_wrapper(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn check(id: &'static str, verdict: CheckVerdict) -> CheckResult {
+        CheckResult::new(id, "test", verdict, String::new())
+    }
+
+    fn all_consistent() -> Vec<CheckResult> {
+        let mut checks: Vec<CheckResult> = ["C1", "C2", "C3", "C4", "C5", "C6", "C7"]
+            .iter()
+            .map(|id| check(id, CheckVerdict::Consistent))
+            .collect();
+        checks.push(check("C8", CheckVerdict::Informational));
+        checks
+    }
+
+    #[test]
+    fn every_check_is_consistent_means_consistent() {
+        let overall = overall_verdict(&all_consistent(), false);
+        assert_eq!(overall.overall, "CONSISTENT");
+        assert!(overall.failing_checks.is_empty());
+        assert!(overall.insufficient_checks.is_empty());
+    }
+
+    #[test]
+    fn a_stored_history_mismatch_in_c2_fails_the_run() {
+        // Regression: C2 (and C3) used to be excluded from the failing set,
+        // so a rewritten stored history could end as CONSISTENT.
+        let mut checks = all_consistent();
+        checks[1] = check("C2", CheckVerdict::ObservedDeviation);
+        let overall = overall_verdict(&checks, false);
+        assert_eq!(overall.overall, "OBSERVED_DEVIATION");
+        assert_eq!(overall.failing_checks, vec!["C2"]);
+
+        let mut checks = all_consistent();
+        checks[2] = check("C3", CheckVerdict::ObservedDeviation);
+        assert_eq!(overall_verdict(&checks, false).overall, "OBSERVED_DEVIATION");
+    }
+
+    #[test]
+    fn an_incomplete_window_is_not_a_pass() {
+        // Regression: INSUFFICIENT_WINDOW was never aggregated and fell
+        // through to CONSISTENT.
+        let mut checks = all_consistent();
+        checks[4] = check("C5", CheckVerdict::InsufficientWindow);
+        let overall = overall_verdict(&checks, false);
+        assert_eq!(overall.overall, "INSUFFICIENT_WINDOW");
+        assert_eq!(overall.insufficient_checks, vec!["C5"]);
+    }
+
+    #[test]
+    fn a_found_violation_outranks_an_incomplete_check() {
+        let mut checks = all_consistent();
+        checks[0] = check("C1", CheckVerdict::ObservedDeviation);
+        checks[4] = check("C5", CheckVerdict::InsufficientWindow);
+        let overall = overall_verdict(&checks, false);
+        assert_eq!(overall.overall, "OBSERVED_DEVIATION");
+        assert_eq!(overall.insufficient_checks, vec!["C5"]);
+    }
+
+    #[test]
+    fn observation_failures_outrank_violations() {
+        let mut checks = all_consistent();
+        checks[0] = check("C1", CheckVerdict::ObservedDeviation);
+        checks[6] = check("C7", CheckVerdict::SourceStale);
+        assert_eq!(overall_verdict(&checks, false).overall, "SOURCE_STALE");
+        checks[3] = check("C4", CheckVerdict::InputGap);
+        assert_eq!(overall_verdict(&checks, false).overall, "INPUT_GAP");
+        assert_eq!(overall_verdict(&all_consistent(), true).overall, "INPUT_GAP");
+    }
+
+    #[test]
+    fn informational_checks_never_decide_anything() {
+        let mut checks = all_consistent();
+        checks[7] = check("C8", CheckVerdict::Informational);
+        assert_eq!(overall_verdict(&checks, false).overall, "CONSISTENT");
+    }
 
     fn round(id: u64, answer: i128, updated_at: u64) -> Round {
         Round {

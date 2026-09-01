@@ -47,11 +47,27 @@ Crossfoot is developed by quellkern.com.
 Both targets classify a run with the same vocabulary:
 
 - `MODEL_MATCH` (svZCHF) / `CONSISTENT` (mTBILL): every compared value equal,
-  or every rule satisfied.
+  or every rule satisfied by every check that ran on enough data.
 - `OBSERVED_DEVIATION`: a nonzero residual or a rule violation.
+- `MODEL_INCONSISTENT` (svZCHF): the two independent model paths (integer
+  replay and ACTUS engine) disagree with each other. The tool does not trust
+  its own model for that window and makes no statement about the chain.
+- `INSUFFICIENT_WINDOW` (mTBILL): at least one check did not have enough
+  rounds or days in the window to run, and no check found a violation. Not
+  a pass.
 - `SOURCE_STALE`: an input could not be read at the pinned block although
   the source exists.
 - `INPUT_GAP`: a required series is unobtainable; this outranks the others.
+
+Precedence, highest first: `INPUT_GAP`, `SOURCE_STALE`, `MODEL_INCONSISTENT`,
+`OBSERVED_DEVIATION`, `INSUFFICIENT_WINDOW`, then the pass. The aggregation
+is a pure function in one place per target (`model::verdict::aggregate`,
+`model::mtbill::overall_verdict`) with regression tests for each rank.
+
+Evidence never carries an RPC credential: endpoint URLs are reduced to
+scheme, host and route before they enter a bundle, the cache metadata, or an
+error message (`rpc::redact_endpoint`); key-like path segments become
+`<redacted>` and query strings are dropped.
 
 ## Build and run
 
@@ -102,6 +118,15 @@ A bundle is a directory `bundles/<target>-<blocks>-<timestamp>/` holding:
 
 ## Provenance and license
 
+- Repository history. The code was developed in a private workspace on
+  2026-08-28 (seven commits: the svZCHF recompute, the mTBILL consistency
+  bundle, era-aware posting rules and attribution, a static evidence page,
+  and review notes) and extracted into this repository on 2026-09-01 as one
+  import commit containing the engine and the CLI only. The private history
+  also holds evidence bundles, caches, the static page and internal notes
+  that are not published. Work from this point on is committed here
+  incrementally. This pre-existing work is disclosed to ETHGlobal for the
+  ETHOnline 2026 Continuity track.
 - This repository is licensed under the MIT License (see `LICENSE`).
 - The ACTUS engine in `engine/` is a vendored copy; `engine/VENDORED.md`
   records its origin commit, the changes made to the copy, and the sha256 of

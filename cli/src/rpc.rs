@@ -19,6 +19,46 @@ pub const DEFAULT_LATEST_ENDPOINT: &str = "https://ethereum.publicnode.com";
 /// Blockscout's keyless etherscan compatible API. Used for log history only.
 pub const DEFAULT_LOG_HISTORY_ENDPOINT: &str = "https://eth.blockscout.com/api";
 
+/// The endpoint identity that is allowed into evidence and cache metadata.
+///
+/// RPC providers commonly carry the API key in the URL itself (a path
+/// segment, a query parameter, or userinfo). A bundle is meant to be shared,
+/// so the full URL never leaves process memory: userinfo, query and fragment
+/// are dropped, and any path segment that looks like a key (16 characters or
+/// more, or 8 or more with a digit in it) is replaced by `<redacted>`. What
+/// remains still identifies the provider and route, which is all a reader of
+/// the evidence needs.
+pub fn redact_endpoint(url: &str) -> String {
+    let (scheme, rest) = match url.split_once("://") {
+        Some((scheme, rest)) => (Some(scheme), rest),
+        None => (None, url),
+    };
+    let rest = rest.split(['?', '#']).next().unwrap_or("");
+    let (authority, path) = match rest.split_once('/') {
+        Some((authority, path)) => (authority, Some(path)),
+        None => (rest, None),
+    };
+    let host = authority.rsplit('@').next().unwrap_or(authority);
+    let mut out = String::new();
+    if let Some(scheme) = scheme {
+        out.push_str(scheme);
+        out.push_str("://");
+    }
+    out.push_str(host);
+    if let Some(path) = path {
+        for segment in path.split('/') {
+            out.push('/');
+            if segment.is_empty() {
+                continue;
+            }
+            let has_digit = segment.chars().any(|c| c.is_ascii_digit());
+            let key_like = segment.len() >= 16 || (segment.len() >= 8 && has_digit);
+            out.push_str(if key_like { "<redacted>" } else { segment });
+        }
+    }
+    out
+}
+
 /// Blockscout returns at most this many logs per request. It does not signal
 /// truncation: a capped response looks exactly like a complete one, and the
 /// `page` parameter is ignored on this instance (verified 2026-08-28, pages
@@ -322,12 +362,15 @@ impl Client {
         }
     }
 
-    pub fn endpoints(&self) -> &[String] {
-        &self.endpoints
+    /// The configured JSON-RPC endpoints, redacted for evidence. The full
+    /// URLs stay private to the client.
+    pub fn endpoints(&self) -> Vec<String> {
+        self.endpoints.iter().map(|url| redact_endpoint(url)).collect()
     }
 
-    pub fn log_endpoints(&self) -> &[String] {
-        &self.log_endpoints
+    /// The configured log history endpoints, redacted for evidence.
+    pub fn log_endpoints(&self) -> Vec<String> {
+        self.log_endpoints.iter().map(|url| redact_endpoint(url)).collect()
     }
 
     fn endpoints_for(&self, descriptor: &Descriptor) -> Vec<String> {
@@ -345,7 +388,7 @@ impl Client {
     fn observe(&mut self, endpoint: &str, descriptor: &Descriptor, attempt: u32, kind: &str, detail: String) {
         self.observations.push(Observation {
             utc: now_utc(),
-            endpoint: endpoint.to_string(),
+            endpoint: redact_endpoint(endpoint),
             method: descriptor.method.clone(),
             label: descriptor.label.clone(),
             attempt,
@@ -363,7 +406,9 @@ impl Client {
                 key,
                 body,
                 cache_hit: true,
-                endpoint: meta.endpoint,
+                // Older cache entries may carry the full URL; never let it
+                // through into a bundle.
+                endpoint: redact_endpoint(&meta.endpoint),
                 stored_utc: meta.stored_utc,
             });
         }
@@ -493,7 +538,7 @@ impl Client {
                             to: descriptor.to.clone(),
                             calldata: descriptor.calldata.clone(),
                             request: request_body.clone(),
-                            endpoint: endpoint.clone(),
+                            endpoint: redact_endpoint(endpoint),
                             stored_utc: now_utc(),
                         };
                         self.cache.put(&key, &body, &meta).map_err(|err| RpcError {
@@ -505,7 +550,7 @@ impl Client {
                             key,
                             body,
                             cache_hit: false,
-                            endpoint: endpoint.clone(),
+                            endpoint: meta.endpoint.clone(),
                             stored_utc: meta.stored_utc,
                         });
                     }
@@ -538,7 +583,7 @@ impl Client {
             .zip(last_detail.iter())
             .map(|(endpoint, detail)| {
                 let detail = if detail.is_empty() { "no error recorded" } else { detail };
-                format!("{endpoint} said: {detail}")
+                format!("{} said: {detail}", redact_endpoint(endpoint))
             })
             .collect();
         Err(RpcError {
@@ -754,6 +799,44 @@ pub fn http_get_descriptor(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn redaction_drops_keys_wherever_providers_put_them() {
+        // Path segment keys (Alchemy, Infura, QuickNode, Ankr shapes).
+        assert_eq!(
+            redact_endpoint("https://eth-mainnet.g.alchemy.com/v2/AbCdEf0123456789AbCdEf0123456789"),
+            "https://eth-mainnet.g.alchemy.com/v2/<redacted>"
+        );
+        assert_eq!(
+            redact_endpoint("https://mainnet.infura.io/v3/0123456789abcdef0123456789abcdef"),
+            "https://mainnet.infura.io/v3/<redacted>"
+        );
+        assert_eq!(
+            redact_endpoint("https://rpc.ankr.com/eth/0a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f9"),
+            "https://rpc.ankr.com/eth/<redacted>"
+        );
+        // Query string keys (dRPC shape) and fragments vanish entirely.
+        assert_eq!(
+            redact_endpoint("https://lb.drpc.org/ogrpc?network=ethereum&dkey=SECRET"),
+            "https://lb.drpc.org/ogrpc"
+        );
+        // Userinfo vanishes.
+        assert_eq!(
+            redact_endpoint("https://user:secret@rpc.example.org/mainnet"),
+            "https://rpc.example.org/mainnet"
+        );
+        // Short route segments survive, so the provider and route stay legible.
+        assert_eq!(redact_endpoint(DEFAULT_ARCHIVE_ENDPOINT), DEFAULT_ARCHIVE_ENDPOINT);
+        assert_eq!(redact_endpoint(DEFAULT_LATEST_ENDPOINT), DEFAULT_LATEST_ENDPOINT);
+        assert_eq!(redact_endpoint(DEFAULT_LOG_HISTORY_ENDPOINT), DEFAULT_LOG_HISTORY_ENDPOINT);
+        assert_eq!(redact_endpoint("https://x.example/api/v1/eth"), "https://x.example/api/v1/eth");
+    }
+
+    #[test]
+    fn redaction_is_idempotent() {
+        let once = redact_endpoint("https://mainnet.infura.io/v3/0123456789abcdef0123456789abcdef");
+        assert_eq!(redact_endpoint(&once), once);
+    }
 
     #[test]
     fn revert_bodies_are_deterministic_not_retryable() {
