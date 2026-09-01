@@ -651,6 +651,24 @@ mod tests {
         );
     }
 
+    /// The README claims exactly what the verifier proves, in the same
+    /// words.
+    #[test]
+    fn readme_claim_matches_the_scope_sentence() {
+        let readme = fs::read_to_string(
+            PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                .join("..")
+                .join("README.md"),
+        )
+        .unwrap();
+        // The README wraps lines; compare with whitespace collapsed.
+        let collapse = |text: &str| text.split_whitespace().collect::<Vec<&str>>().join(" ");
+        assert!(
+            collapse(&readme).contains(&collapse(SCOPE_SENTENCE)),
+            "the README does not carry the scope sentence verbatim"
+        );
+    }
+
     #[test]
     fn verify_refuses_an_older_manifest_format() {
         let dir = scratch("v1");

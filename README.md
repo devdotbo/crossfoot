@@ -4,12 +4,15 @@
 
 Crossfoot recomputes what a tokenized instrument should be worth from its
 contractual terms, using a deterministic ACTUS PAM engine, and compares the
-result against the value posted on-chain at pinned blocks. Every run writes a
-reproducible evidence bundle: every raw response is stored verbatim with
-its sha256 in a manifest, and a run can be replayed offline from the
-local cache. Bundles are not yet self-contained; a `crossfoot verify
-<bundle>` command that re-hashes and replays from the bundle alone is
-planned.
+result against the value posted on-chain at pinned blocks. Every run writes
+a self-contained evidence bundle: every raw response verbatim with its
+sha256 and cache key, the exact request, the endpoint that served it, and
+the identity of the code. `crossfoot verify <bundle>` re-hashes every file
+and recomputes `result.json` from the bundle's raw responses with the
+network disabled. A match proves that the stated result follows from the
+stated responses under the stated code. It does not prove that the
+responses are what the chain holds; for that, re-read the pinned blocks
+from an endpoint you trust, or run `verify --refetch`.
 
 It is read-only by construction. The binary issues only `eth_chainId`,
 `eth_call`, `eth_getCode`, `eth_getBlockByNumber`, `eth_getLogs` (plus
@@ -84,7 +87,9 @@ cargo test -p crossfoot -- --ignored   # live cross-checks, needs the network on
 
 crossfoot fetch svzchf --block <B1> [--baseline-block <B0>]
 crossfoot run svzchf --baseline-block <B0> --block <B1>
+crossfoot run svzchf --window demo             # the pinned pair 24570000 to 25853000
 crossfoot run mtbill --baseline-block <B0> --block <B1>
+crossfoot verify bundles/<bundle> [--require-same-code]
 crossfoot render --bundles bundles --out site
 crossfoot selectors "RateChanged(uint24)"
 ```
@@ -94,21 +99,41 @@ crossfoot selectors "RateChanged(uint24)"
 proves a replay made no network call. `--endpoint` and `--log-endpoint`
 override the default public endpoints.
 
+`verify` exits 0 when the bundle verifies, 2 when a file does not match its
+hash (or is missing or extra), 3 when the replayed `result.json` differs
+(the first differing JSON path is printed), 4 when the replay needed a read
+the bundle does not hold, 5 when the producer's code identity differs and
+`--require-same-code` was given, and 1 for an unreadable bundle. It
+constructs no network client. `--refetch` is not implemented yet.
+
 ## Evidence bundle format
 
 A bundle is a directory `bundles/<target>-<blocks>-<timestamp>/` holding:
 
 - `raw/NNN-<label>.json`: every response verbatim, byte for byte as the node
-  sent it, in read order.
-- `manifest.json`: one entry per raw file with its sha256, byte length, the
-  exact request (method, block, target, calldata), the cache key, whether
-  it was a cache hit, and the endpoint that originally produced it; plus the
-  findings recorded during the run and a target-specific summary.
+  sent it, in read order. A run bundle holds every read of the run,
+  including both pinned fetches of the svZCHF window.
+- `manifest.json` (`crossfoot-manifest-v2`): one entry per raw file with
+  its sha256, byte length, the exact request (wire, method, block, target,
+  calldata), the cache key and its exact preimage, whether it was a cache
+  hit, and the endpoint that originally produced it; the header carries the
+  chain id, the preimage version and the code identity (tool version, git
+  commit, dirty state, sha256 of the package list); plus the findings
+  recorded during the run and a target-specific summary.
 - `meta.json`: tool version, git commit and dirty state of the repository
   that produced the bundle, the resolved package set the binary was built
-  from, configured endpoints, and the RPC observations (retries, failovers).
-- `result.json` (run commands only): the verdict, the window, every compared
-  field with its residual, and the per-check detail.
+  from, configured endpoints, a fingerprint per endpoint that served a body
+  (redacted URL, chain id, client version), the run timings, and the RPC
+  observations (retries, failovers).
+- `result.json` (run commands only): the verdict, the target-neutral
+  `summary`, the window, every compared field with its residual, and the
+  per-check detail. It carries no timing, counter or endpoint field, so two
+  runs from the same responses write the same bytes.
+- `timelines/*.json` (midas only): one series per feed.
+- `SHA256SUMS`: `<sha256>  <path>` for every file above, sorted by path;
+  `sha256sum -c SHA256SUMS` checks it without this tool.
+- `bundle.sha256`: the sha256 of `SHA256SUMS`, the bundle root hash the
+  run prints and the pages show.
 
 ## Determinism
 
