@@ -219,7 +219,7 @@ Rendering twice gives byte-identical files.
 
 ```
 crossfoot consume --subgraph <query url> --feeds site/data/feeds.json
-crossfoot consume --replay cli/tests/fixtures/consume-fixture-v1/responses --feeds cli/tests/fixtures/consume-fixture-v1/feeds.json --now 1787911199
+crossfoot consume --replay cli/tests/fixtures/consume-fixture-v1 --feeds cli/tests/fixtures/consume-fixture-v1/feeds.json --midas-config cli/tests/fixtures/consume-fixture-v1/midas-mainnet.json --now 1788289368
 ```
 
 Runs the subgraph queries (or reads recorded responses with `--replay`),
