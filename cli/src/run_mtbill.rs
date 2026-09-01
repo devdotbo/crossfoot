@@ -40,6 +40,8 @@ const ATTRIBUTION_ROUNDS: [u64; 18] = [
 pub struct RunArgs {
     pub block: u64,
     pub baseline_block: u64,
+    /// The preset name when the window came from one, recorded in meta.json.
+    pub window_name: Option<String>,
 }
 
 pub struct RunOutcome {
@@ -483,6 +485,7 @@ pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<Ru
             },
             "baseline_block": args.baseline_block,
             "block": args.block,
+            "window": args.window_name.as_ref().map(|name| json!({ "name": name })),
             "endpoints_configured": client.endpoints(),
             "log_endpoints_configured": client.log_endpoints(),
             "network_calls_this_run": client.network_calls,

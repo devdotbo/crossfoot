@@ -365,6 +365,7 @@ fn t5_run_command_reports_model_match_at_both_blocks() {
             &run_svzchf::RunArgs {
                 baseline_block: baseline,
                 block,
+                window_name: None,
             },
             &verify_root(),
         )
@@ -401,6 +402,7 @@ fn t6_an_unobservable_baseline_is_source_stale() {
         &run_svzchf::RunArgs {
             baseline_block: BEFORE_THE_VAULT_EXISTED,
             block: HISTORICAL_BLOCK,
+            window_name: None,
         },
         &verify_root(),
     )
@@ -493,6 +495,7 @@ fn m2_run_is_byte_identical_from_cache() {
             &run_mtbill::RunArgs {
                 baseline_block: MTBILL_B0,
                 block: MTBILL_B1,
+                window_name: None,
             },
             &verify_root(),
         )

@@ -86,12 +86,17 @@ enum RunTarget {
 #[derive(Args)]
 struct RunOpts {
     /// Start of the pinned window. The model is seeded from chain state here.
-    #[arg(long)]
-    baseline_block: u64,
+    #[arg(long, conflicts_with = "window", requires = "block")]
+    baseline_block: Option<u64>,
 
     /// End of the pinned window. The model is compared against chain state here.
-    #[arg(long)]
-    block: u64,
+    #[arg(long, conflicts_with = "window", requires = "baseline_block")]
+    block: Option<u64>,
+
+    /// A named window preset instead of explicit blocks. "demo" for svzchf
+    /// is the pinned pair 24570000 to 25853000.
+    #[arg(long, conflicts_with_all = ["baseline_block", "block"])]
+    window: Option<String>,
 
     /// Root of the workspace. Cache and bundles live under it.
     #[arg(long, default_value = ".")]
@@ -186,6 +191,44 @@ struct FetchOpts {
     /// cheaper than backing off after a refusal.
     #[arg(long, default_value_t = 0)]
     rpc_delay_ms: u64,
+}
+
+/// A resolved run window: the two pinned blocks and the preset name when one
+/// was used, so meta.json can record it.
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct Window {
+    baseline_block: u64,
+    block: u64,
+    name: Option<String>,
+}
+
+/// The pinned presets, per target. The svzchf demo window is the pair the
+/// live tests assert (spec 01 R1).
+fn window_preset(target: &str, name: &str) -> Option<(u64, u64)> {
+    match (target, name) {
+        ("svzchf", "demo") => Some(run_svzchf::DEMO_WINDOW),
+        _ => None,
+    }
+}
+
+fn resolve_window(target: &str, opts: &RunOpts) -> Result<Window, String> {
+    match (&opts.window, opts.baseline_block, opts.block) {
+        (Some(name), _, _) => {
+            let (baseline_block, block) = window_preset(target, name)
+                .ok_or_else(|| format!("there is no window preset named {name} for {target}"))?;
+            Ok(Window {
+                baseline_block,
+                block,
+                name: Some(name.clone()),
+            })
+        }
+        (None, Some(baseline_block), Some(block)) => Ok(Window {
+            baseline_block,
+            block,
+            name: None,
+        }),
+        _ => Err("give either --window <name> or both --baseline-block and --block".to_string()),
+    }
 }
 
 fn main() -> ExitCode {
@@ -353,6 +396,7 @@ fn recompute_svzchf(opts: RunOpts) -> Result<(), String> {
         opts.log_endpoints.clone()
     };
 
+    let window = resolve_window("svzchf", &opts)?;
     let cache = Cache::new(verify_root.join("cache"));
     let mut client = Client::new(
         endpoints,
@@ -366,8 +410,9 @@ fn recompute_svzchf(opts: RunOpts) -> Result<(), String> {
     let outcome = run_svzchf::run(
         &mut client,
         &run_svzchf::RunArgs {
-            baseline_block: opts.baseline_block,
-            block: opts.block,
+            baseline_block: window.baseline_block,
+            block: window.block,
+            window_name: window.name.clone(),
         },
         &verify_root,
     )?;
@@ -403,6 +448,7 @@ fn check_mtbill(opts: RunOpts) -> Result<(), String> {
         opts.log_endpoints.clone()
     };
 
+    let window = resolve_window("mtbill", &opts)?;
     let cache = Cache::new(verify_root.join("cache"));
     let mut client = Client::new(
         endpoints,
@@ -416,8 +462,9 @@ fn check_mtbill(opts: RunOpts) -> Result<(), String> {
     let outcome = run_mtbill::run(
         &mut client,
         &run_mtbill::RunArgs {
-            baseline_block: opts.baseline_block,
-            block: opts.block,
+            baseline_block: window.baseline_block,
+            block: window.block,
+            window_name: window.name.clone(),
         },
         &verify_root,
     )?;
@@ -439,4 +486,61 @@ fn check_mtbill(opts: RunOpts) -> Result<(), String> {
     println!("cache hits         {}", outcome.cache_hits);
     println!("network calls      {}", outcome.network_calls);
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn run_opts(args: &[&str]) -> Result<RunOpts, clap::Error> {
+        let mut argv = vec!["crossfoot", "run", "svzchf"];
+        argv.extend_from_slice(args);
+        let cli = Cli::try_parse_from(argv)?;
+        match cli.command {
+            Command::Run {
+                target: RunTarget::Svzchf(opts),
+            } => Ok(opts),
+            _ => panic!("the arguments parse as run svzchf"),
+        }
+    }
+
+    /// Spec 01 R1: the preset is exactly the pinned pair the live tests use.
+    #[test]
+    fn window_preset_demo_expands_to_the_pinned_blocks() {
+        let opts = run_opts(&["--window", "demo"]).unwrap();
+        let window = resolve_window("svzchf", &opts).unwrap();
+        assert_eq!(
+            window,
+            Window {
+                baseline_block: 24_570_000,
+                block: 25_853_000,
+                name: Some("demo".to_string()),
+            }
+        );
+
+        let explicit = run_opts(&["--baseline-block", "24570000", "--block", "25853000"]).unwrap();
+        let window = resolve_window("svzchf", &explicit).unwrap();
+        assert_eq!(window.baseline_block, 24_570_000);
+        assert_eq!(window.block, 25_853_000);
+        assert_eq!(window.name, None);
+
+        // No preset of that name for the other target.
+        let err = resolve_window("mtbill", &opts).unwrap_err();
+        assert!(
+            err.contains("no window preset named demo for mtbill"),
+            "{err}"
+        );
+    }
+
+    #[test]
+    fn window_and_explicit_blocks_are_mutually_exclusive() {
+        assert!(run_opts(&["--window", "demo", "--block", "25853000"]).is_err());
+        assert!(run_opts(&["--window", "demo", "--baseline-block", "24570000"]).is_err());
+        // One explicit block without the other is not a window either.
+        assert!(run_opts(&["--block", "25853000"]).is_err());
+        assert!(run_opts(&["--baseline-block", "24570000"]).is_err());
+        // Nothing at all is a resolution error, not a parse error.
+        let none = run_opts(&[]).unwrap();
+        assert!(resolve_window("svzchf", &none).is_err());
+    }
 }

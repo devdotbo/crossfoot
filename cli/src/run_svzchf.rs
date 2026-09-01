@@ -83,9 +83,14 @@ pub fn decimal_read(reads: &Value, key: &str) -> Result<u128, String> {
     read_decimal(reads, key)
 }
 
+/// The demo window of spec 01 R1: the pinned pair the live tests assert.
+pub const DEMO_WINDOW: (u64, u64) = (24_570_000, 25_853_000);
+
 pub struct RunArgs {
     pub baseline_block: u64,
     pub block: u64,
+    /// The preset name when the window came from one, recorded in meta.json.
+    pub window_name: Option<String>,
 }
 
 pub struct RunOutcome {
@@ -575,6 +580,7 @@ pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<Ru
             "workspace_packages": crate::util::workspace_packages(),
             "baseline_block": args.baseline_block,
             "block": args.block,
+            "window": args.window_name.as_ref().map(|name| json!({ "name": name })),
             "endpoints_configured": client.endpoints(),
             "log_endpoints_configured": client.log_endpoints(),
             "network_calls_this_run": client.network_calls,
