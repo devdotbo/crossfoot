@@ -3,8 +3,11 @@
 Crossfoot recomputes what a tokenized instrument should be worth from its
 contractual terms, using a deterministic ACTUS PAM engine, and compares the
 result against the value posted on-chain at pinned blocks. Every run writes a
-reproducible evidence bundle that a third party can re-hash and replay
-without trusting the tool.
+reproducible evidence bundle: every raw response is stored verbatim with
+its sha256 in a manifest, and a run can be replayed offline from the
+local cache. Bundles are not yet self-contained; a `crossfoot verify
+<bundle>` command that re-hashes and replays from the bundle alone is
+planned.
 
 It is read-only by construction. The binary issues only `eth_chainId`,
 `eth_call`, `eth_getCode`, `eth_getBlockByNumber`, `eth_getLogs` (plus
