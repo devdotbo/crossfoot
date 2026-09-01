@@ -612,17 +612,30 @@ fn verdict_of(result: &Value) -> String {
 }
 
 /// The check class in plain words, per target.
+/// A posted-feed family run (midas or any family config) carries a
+/// family_summary; every other target is matched by name.
+fn is_family_run(result: &Value) -> bool {
+    result.get("family_summary").is_some()
+}
+
 fn check_class_words(result: &Value) -> &'static str {
+    if is_family_run(result) {
+        return "Posting-path replay. No NAV is recomputed (INPUT_GAP on every feed). Every posted round is attributed to the function that posted it, and the guard state in force at the previous block is read from an archive node. A post that took the documented path without the on-chain deviation check and moved more than the bound in force is reported; nothing here says a posted value was wrong.";
+    }
     match result.get("target").and_then(Value::as_str) {
         Some("svzchf") => "Full recomputation, zero tolerance. Every compared value is recomputed from public inputs and must match the chain to the wei.",
         Some("mtbill") => "Consistency bundle. The NAV itself is INPUT_GAP: the underlying portfolio is not observable, so it is not recomputed here. Everything below checks the issuer's own contractual and on-chain rules against itself.",
-        Some("midas") => "Posting-path replay. No Midas NAV is recomputed (INPUT_GAP on every feed). Every posted round is attributed to the function that posted it, and the guard state in force at the previous block is read from an archive node. A post that took the documented path without the on-chain deviation check and moved more than the bound in force is reported; nothing here says a posted value was wrong.",
         _ => "Unknown target.",
     }
 }
 
 /// The headline number for the index row.
 fn headline(result: &Value) -> String {
+    if is_family_run(result) {
+        return str_at(result, &["summary", "headline"])
+            .unwrap_or("")
+            .to_string();
+    }
     match result.get("target").and_then(Value::as_str) {
         Some("svzchf") => {
             let fields = result
@@ -648,9 +661,6 @@ fn headline(result: &Value) -> String {
                 None => "no comparison".to_string(),
             }
         }
-        Some("midas") => str_at(result, &["summary", "headline"])
-            .unwrap_or("")
-            .to_string(),
         Some("mtbill") => {
             let checks = result.get("checks").and_then(Value::as_array);
             match checks {
@@ -691,6 +701,10 @@ fn reproduce_command(result: &Value) -> String {
             format!("crossfoot run {target} --baseline-block {baseline} --block {block}")
         }
         (Some("midas"), None, Some(block)) => format!("crossfoot run midas --block {block}"),
+        (Some(_), None, Some(block)) if is_family_run(result) => format!(
+            "crossfoot run family --config {} --block {block}",
+            str_at(result, &["family", "feed_list"]).unwrap_or("<family config>")
+        ),
         _ => "unknown".to_string(),
     }
 }
@@ -1569,7 +1583,7 @@ fn feed_row(run: &Run, feed: Option<&Value>) -> Value {
         headline_text,
         timeline,
     ) = match (target, feed) {
-        ("midas", Some(feed)) => (
+        (_, Some(feed)) => (
             s(Some(feed), "address"),
             s(Some(feed), "product"),
             s(Some(feed), "key"),
@@ -1673,12 +1687,7 @@ fn write_data_files(runs: &[Run], out_dir: &Path) -> Result<Vec<PathBuf>, String
     let mut rows: Vec<Value> = Vec::new();
     let mut written = Vec::new();
     for run in runs {
-        let target = run
-            .result
-            .get("target")
-            .and_then(Value::as_str)
-            .unwrap_or("");
-        if target == "midas" {
+        if is_family_run(&run.result) {
             for feed in run
                 .result
                 .get("feeds")
@@ -1781,7 +1790,7 @@ fn run_page(run: &Run) -> String {
     html.push_str(&match target {
         "svzchf" => svzchf_body(run),
         "mtbill" => mtbill_body(run),
-        "midas" => midas_body(run),
+        _ if is_family_run(result) => midas_body(run),
         _ => String::new(),
     });
 

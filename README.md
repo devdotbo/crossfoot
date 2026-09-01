@@ -72,6 +72,14 @@ Crossfoot writes nothing to any chain.
   the bound in force at the previous block; the result carries a verdict
   per feed, the family summary with its survey line, and one timeline file
   per feed. `nav_recomputation: INPUT_GAP` on every feed.
+- `family`, the same replay for any posted-feed family described by a
+  config file (`crossfoot run family --config config/<family>-mainnet.json`).
+  The config carries the feed list, the explorer, and the mechanism: getter
+  signatures, the guard (or none), the round event signatures, the setter
+  table with path class and value argument, the bound events, the spacing
+  rule marker and the verified implementations. `run midas` is this command
+  with the Midas config as the default; the target name and the bundle
+  prefix come from the config.
 
 This README states no results for any target. Results live in bundles.
 
@@ -173,8 +181,9 @@ crossfoot run svzchf --baseline-block 24570000 --block 25853000
 crossfoot run svzchf --window demo --offline
 crossfoot run svzchf --window demo --from-bundle cli/tests/fixtures/svzchf-demo-24570000-25853000
 crossfoot run mtbill --baseline-block 25598000 --block 25850000
-crossfoot run midas --block 25884405 --feeds config/midas-mainnet.json
+crossfoot run midas --block 25884405 --config config/midas-mainnet.json
 crossfoot run midas --block 25884405 --feed mRE7 --offline
+crossfoot run family --block 25884405 --config config/<family>-mainnet.json
 ```
 
 Prints the verdict, the summary headline, the result and bundle paths, the
@@ -356,7 +365,8 @@ dropped.
   the checked-in bundles the offline tests replay.
 - `subgraph/`: the feed subgraph (posted side of the Midas feeds and the
   Frankencoin savings module), with its own README and `DEPLOYMENT.md`.
-- `config/`: the Midas feed list.
+- `config/`: one posted-feed family config per file (feed list, explorer,
+  mechanism); `midas-mainnet.json` is the Midas customFeed family.
 - `docs/specs/`: the specifications this code implements, numbered 00 to
   08, with an index in `docs/specs/README.md`.
 

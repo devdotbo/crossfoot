@@ -315,10 +315,21 @@ ordinary guarded round; deviation and bound are null where not read.
 ## CLI surface
 
 ```
-crossfoot run midas --block <B1> [--feeds config/midas-mainnet.json]
+crossfoot run midas --block <B1> [--config config/midas-mainnet.json]
                     [--feed mRE7] [--stale-after-days 30] [--recent-days 183]
                     [--trace-endpoint <url>] [--offline] [--verify-root .]
+crossfoot run family --block <B1> --config config/<family>-mainnet.json [same flags]
 ```
+
+`run family` is the generic form: the family config supplies the target
+name (`target`, default the family name up to its first dash), the
+mechanism and the feeds; `run midas` is the same command with the Midas
+config as its default (`--feeds` remains an alias of `--config`). The
+result carries `target` from the config, `summary.family` is
+`guarded-setter` when the mechanism has a guard and `posted-setter` when it
+has none, and `verify` and `render` recognise a family run by its
+`family_summary` and the mechanism in the manifest, not by the target
+name.
 
 `--trace-endpoint` is consulted only for R6 step (c) and is redacted like
 every other endpoint. Printed: the survey line, one row per feed

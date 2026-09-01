@@ -140,6 +140,10 @@ enum RunTarget {
     Mtbill(RunOpts),
     /// Midas customFeed family: posting-path replay of every feed in the list.
     Midas(MidasOpts),
+    /// Any posted-feed family from its config file: `--config
+    /// config/<family>-mainnet.json`. `run midas` is this with the Midas
+    /// config as the default.
+    Family(MidasOpts),
 }
 
 #[derive(Args)]
@@ -148,8 +152,12 @@ struct MidasOpts {
     #[arg(long)]
     block: u64,
 
-    /// Feed list, one entry per feed.
-    #[arg(long, default_value = "config/midas-mainnet.json")]
+    /// The family config: feed list, mechanism and explorer.
+    #[arg(
+        long = "config",
+        visible_alias = "feeds",
+        default_value = "config/midas-mainnet.json"
+    )]
     feeds: PathBuf,
 
     /// Restrict the run to one product (`mRE7`) or one entry (`mFONE.mFONEUnloop.customFeed`).
@@ -489,7 +497,7 @@ fn main() -> ExitCode {
             }
         },
         Command::Run {
-            target: RunTarget::Midas(opts),
+            target: RunTarget::Midas(opts) | RunTarget::Family(opts),
         } => match replay_midas(opts) {
             Ok(()) => ExitCode::SUCCESS,
             Err(message) => {
@@ -720,6 +728,7 @@ fn replay_midas(opts: MidasOpts) -> Result<(), String> {
         client.as_mut(),
         run_midas::RunArgs {
             block: opts.block,
+            target: list.target(),
             family: list.family.clone(),
             explorer: list.explorer.clone(),
             mechanism: list.mechanism.clone(),

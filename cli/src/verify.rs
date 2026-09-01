@@ -289,9 +289,13 @@ fn replay(
             replay_root,
         )
         .map(|outcome| outcome.result_path),
-        "midas" => {
-            // Spec 03 R7: the feed list comes from the bundle's manifest, not
-            // from the working tree's config file.
+        // A posted-feed family run (midas or any family config): the manifest
+        // summary carries the mechanism. Spec 03 R7: the feed list comes from
+        // the bundle's manifest, not from the working tree's config file.
+        _ if read_json(&dir.join("manifest.json"))
+            .ok()
+            .is_some_and(|m| m["summary"].get("mechanism").is_some_and(|x| !x.is_null())) =>
+        {
             let manifest = read_json(&dir.join("manifest.json")).map_err(|err| (OTHER, err))?;
             let summary = manifest.get("summary").cloned().unwrap_or(Value::Null);
             let feeds: Vec<crate::midas::FeedEntry> =
@@ -312,6 +316,7 @@ fn replay(
                 &mut source,
                 crate::run_midas::RunArgs {
                     block,
+                    target: summary["target"].as_str().unwrap_or(target).to_string(),
                     family: summary["family"]
                         .as_str()
                         .unwrap_or("midas-customfeed")

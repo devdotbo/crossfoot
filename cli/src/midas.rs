@@ -179,6 +179,18 @@ pub struct Mechanism {
     pub verified_implementations: Vec<String>,
 }
 
+impl FeedList {
+    pub fn target(&self) -> String {
+        self.target.clone().unwrap_or_else(|| {
+            self.family
+                .split('-')
+                .next()
+                .unwrap_or(&self.family)
+                .to_string()
+        })
+    }
+}
+
 impl Mechanism {
     /// The setter whose selector opens `input`, if any.
     pub fn setter(&self, selector: &str) -> Option<&SetterSpec> {
@@ -218,6 +230,10 @@ impl Mechanism {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FeedList {
     pub family: String,
+    /// The target name the run writes (`result.target`, bundle prefix,
+    /// summary.target). Defaults to the family name up to its first dash.
+    #[serde(default)]
+    pub target: Option<String>,
     pub chain_id: u64,
     /// Where a reader looks the addresses up; carried through to the result.
     #[serde(default)]

@@ -23,7 +23,9 @@ use crate::util::{now_utc, unix_to_utc};
 
 pub struct RunArgs<'a> {
     pub block: u64,
-    /// Family name, explorer descriptor and mechanism from the family config.
+    /// Target name (`result.target`, bundle prefix), family name, explorer
+    /// descriptor and mechanism from the family config.
+    pub target: String,
     pub family: String,
     pub explorer: Value,
     pub mechanism: Mechanism,
@@ -282,7 +284,12 @@ pub fn run(
     }
     let mut bundle = BundleWriter::create(
         &verify_root.join("bundles"),
-        &format!("midas-run-{}-{}", args.block, crate::util::now_stamp()),
+        &format!(
+            "{}-run-{}-{}",
+            args.target,
+            args.block,
+            crate::util::now_stamp()
+        ),
         source.chain_id(),
     )
     .map_err(|err| format!("could not create the run directory: {err}"))?;
@@ -460,8 +467,12 @@ pub fn run(
     });
 
     let summary = Summary {
-        target: "midas".to_string(),
-        family: "guarded-setter",
+        target: args.target.clone(),
+        family: if args.mechanism.guard.is_some() {
+            "guarded-setter"
+        } else {
+            "posted-setter"
+        },
         check_class: "posting-path replay",
         nav_recomputation: "INPUT_GAP",
         verdict: verdict.to_string(),
@@ -485,7 +496,7 @@ pub fn run(
 
     let result = json!({
         "format": "crossfoot-result-v1",
-        "target": "midas",
+        "target": args.target,
         "check_class": "posting-path replay",
         "nav_recomputation": "INPUT_GAP",
         "nav_recomputation_reason": "no product of this family publishes the portfolio that would recompute its NAV; every finding here is about the posting path, never about the value",
@@ -534,10 +545,11 @@ pub fn run(
 
     bundle
         .write_manifest(
-            "midas-run",
+            &format!("{}-run", args.target),
             json!({
                 "verdict": verdict,
                 "block": args.block,
+                "target": args.target,
                 "family": args.family,
                 "explorer": args.explorer,
                 "mechanism": args.mechanism,
@@ -553,7 +565,7 @@ pub fn run(
         "format": "crossfoot-meta-v1",
         "tool": "crossfoot",
         "tool_version": env!("CARGO_PKG_VERSION"),
-        "target": "midas-run",
+        "target": format!("{}-run", args.target),
         "code": crate::util::code_identity(),
         "repo_git": crate::util::git_provenance(verify_root),
         "workspace_packages": crate::util::workspace_packages(),
