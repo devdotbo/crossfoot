@@ -18,6 +18,8 @@ code; nothing in this directory changes the binary.
 | `04-subgraph.md` | Feed subgraph: 60 Midas customFeed sources plus svZCHF, one schema, path from calldata, bound at post, Studio deployment | 3 |
 | `05-consumer-agent.md` | `crossfoot consume`: provenance-gated ALLOW or REVIEW per feed from live subgraph data joined with Crossfoot results | 4 |
 | `06-arc-hook.md` | Conditional: `CrossfootAttestations` on Arc testnet, mainnet-ready config, Chainlink stretch, kill criterion | partner pick Arc |
+| `07-app-explorer.md` | The app (separate repository `crossfoot-app`): explorer routes, Convex ingestion contract for `site/data` and `decisions.json`, the 66-square field, the timeline chart, public read path | 4 (SaaS layer) |
+| `08-saas-billing-and-x402.md` | The app's SaaS layer: email-code accounts and workspaces, watchlists and alerts, Polar Monitoring subscription, risk-feed API with keys, x402 pay-per-query, kill order | 5, 7, 8 |
 
 ## Spec format
 
@@ -68,7 +70,10 @@ order:
 ## Timeline note
 
 The specs in this directory were written on 2026-09-01 to 2026-09-03, before
-the event (04 to 06 on 2026-09-01, on the `specs-graph` branch). Implementation commits start after kickoff. The pre-existing
+the event (04 to 06 on 2026-09-01, on the `specs-graph` branch; 07 and 08
+on 2026-09-01, on the `specs-app` branch, and copied into the separate
+`crossfoot-app` repository when it is scaffolded on kickoff day).
+Implementation commits start after kickoff. The pre-existing
 baseline the specs build on is the repository state at commit `98424c0`
 (engine, CLI, svZCHF full recomputation, mTBILL consistency checks, hardened
 verdict aggregation, redacted evidence). The README's provenance section

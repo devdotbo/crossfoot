@@ -50,6 +50,9 @@ subgraphs index on-chain data only), `wiki/midas-feed-family.md`.
  the Frankencoin module; ERC-8330 vocabulary on the posted side; no Crossfoot
  output on chain. consumer (05): crossfoot consume, decisions/<stamp>/.
  Arc hook (06, conditional): CrossfootAttestations on Arc, anchors.json.
+ app (07, 08, separate repository crossfoot-app): scripts/ingest.ts posts
+ site/data, the result files and decisions/<stamp>/ into Convex; explorer,
+ alerts, Polar billing and the x402 risk-feed API read those tables.
 ```
 
 Reading the diagram:
@@ -79,6 +82,14 @@ Reading the diagram:
    built, anchors the hash of that record (06).
 6. `verify` closes the loop for a third party: hashes, replay without the
    network, exit code.
+7. Results are ingested into Convex for the app (`07-app-explorer.md` R1 to
+   R5): `scripts/ingest.ts` builds one payload from `site/data/feeds.json`,
+   the timeline files, the `result.json` files reached through
+   `result_path`, and `decisions/<stamp>/`, and posts it to the app's
+   ingestion action with a shared secret. The app joins and displays; it
+   derives no verdict. The static JSON files and the bundles remain the
+   reproducible artifact: every row the app shows names the bundle root
+   hash it came from, and `verify` on that bundle is the check.
 
 Renderer requirements (engine side, small):
 
@@ -105,7 +116,9 @@ anyway), then the verify command proper (commits 14 to 16), never the Midas
 replay, the Midas side of the subgraph or the consumer beat; the Frankencoin
 side of the subgraph falls back to RateChange and VaultFlow without derived
 rounds (04 kill criterion). The bundle-backed source (commit 7) stays
-because the Midas fixture depends on it.
+because the Midas fixture depends on it. The app rows 18d and 18e follow
+the kill order of `08-saas-billing-and-x402.md`: 18e goes with the x402
+step, 18d stays as long as the explorer does.
 
 | # | Title | Contains |
 |---|---|---|
@@ -135,6 +148,8 @@ because the Midas fixture depends on it.
 | 18a | Add crossfoot consume with the freshness gate and decision table | 05 R1 to R8, R15; `cli/src/consume.rs`; `decision_table_every_row`, `stale_head_routes_every_feed_to_review` |
 | 18b | Write decision records with provenance and offline replay | 05 R9 to R13; `decisions/<stamp>/`, `--replay`; `consume_twice_from_replay_is_byte_identical` |
 | 18c | Add the consume fixture and the demo beat test | 05 R11, R14; responses recorded from Studio at block 25,884,405; `demo_beat_svzchf_allow_mre7_review` |
+| 18d | Add scripts/ingest.ts, the app ingestion payload from site/data and decisions | 07 R1 to R5 (payload side), 07 formats; Bun script; offline test `ingest_payload_from_the_fixtures_matches_the_expected_json` over the 01, 02 and 05 fixtures; the app-side tests live in `crossfoot-app` |
+| 18e | Add scripts/pay-query.ts, the x402 buyer for the risk-feed API (conditional on 08 step 4) | 08 R24; pays one query on Base Sepolia or uses `--api-key`; live test `x1_pay_query_on_base_sepolia` (ignored) |
 | 19 | Draw the mRE7 timeline on the Midas run page | A3 |
 | 19a | Add the Arc attestation contract and scripts (conditional) | 06 R1 to R5; `contracts/arc/`; forge tests |
 | 19b | Deploy CrossfootAttestations to Arc testnet and anchor the demo decisions (conditional) | 06 R6, R7; `contracts/arc/DEPLOYMENT.md`, broadcast file, `anchors.json` |
@@ -161,10 +176,12 @@ tests run before commits 5, 14, 18c and 20.
 
 ## Out of scope
 
-- The landing page and the app frontend (TanStack, discussed separately).
-  What the frontend reads is fixed by A1, 05 R9 and 06 R5: `feeds.json`,
-  the timeline files, `decisions.json`, `anchors.json`, and the subgraph
-  queries of 04 R16.
+- The landing page (static, crossfoot.tech) and the app itself, which
+  lives in the separate `crossfoot-app` repository and is specified in
+  `07-app-explorer.md` and `08-saas-billing-and-x402.md`. What the app
+  reads is fixed by A1, 05 R9 and 06 R5: `feeds.json`, the timeline
+  files, the `result.json` files, `decisions.json`, `anchors.json`, and
+  the `_meta` query of 04 R16.
 
 ## Open questions
 
