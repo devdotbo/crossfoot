@@ -121,6 +121,32 @@ A sentence with the word "recomputed" is conditional on
 `nav_recomputation: FULL`. For any other value the sentence says what was
 checked instead.
 
+## Install
+
+Prebuilt binaries for macOS (Apple silicon) and Linux (x86_64, static musl)
+are attached to each tagged release on the
+[releases page](https://github.com/devdotbo/crossfoot/releases) together
+with a `SHA256SUMS` file:
+
+```
+tar -xzf crossfoot-<tag>-<target>.tar.gz
+sha256sum -c SHA256SUMS
+./crossfoot-<tag>-<target>/crossfoot --version
+```
+
+From source, with a Rust toolchain:
+
+```
+cargo install --path cli          # installs `crossfoot` into ~/.cargo/bin
+cargo build --release             # or: target/release/crossfoot
+```
+
+The demo, end to end from the checked-in fixtures and without the network:
+
+```
+bash scripts/demo.sh
+```
+
 ## Commands
 
 Build once, then use the binary:
@@ -142,12 +168,16 @@ to scheme, host and route before it reaches any file.
 crossfoot run svzchf --window demo
 crossfoot run svzchf --baseline-block 24570000 --block 25853000
 crossfoot run svzchf --window demo --offline
+crossfoot run svzchf --window demo --from-bundle cli/tests/fixtures/svzchf-demo-24570000-25853000
 crossfoot run mtbill --baseline-block 25598000 --block 25850000
 ```
 
 Prints the verdict, the summary headline, the result and bundle paths, the
 root hash, and the cache and network counts. Exit 0 on any verdict, 1 when
-the run could not complete.
+the run could not complete. `--from-bundle` serves every read from an
+existing bundle's raw responses, so a checked-in fixture reproduces its run
+on a machine without a cache; a read the bundle does not hold fails the
+run.
 
 ### verify
 
