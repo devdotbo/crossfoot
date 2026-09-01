@@ -98,7 +98,10 @@ else
 fi
 
 say "3. render: static pages over the bundles, no script, no fetch at view time"
-"$crossfoot" render --bundles "$work/bundles" --out "$work/site" | head -n 4
+# Captured to a file first: a pipe into head would close early on a long
+# listing and turn the writer's broken pipe into a failure.
+"$crossfoot" render --bundles "$work/bundles" --out "$work/site" > "$work/render.out"
+head -n 4 "$work/render.out"
 
 say "4. consume --replay: ALLOW or REVIEW per feed from the recorded subgraph responses"
 consume_fixture="cli/tests/fixtures/consume-fixture-v1"
@@ -108,8 +111,8 @@ consume_fixture="cli/tests/fixtures/consume-fixture-v1"
   --midas-config "$consume_fixture/midas-mainnet.json" \
   --queries subgraph/queries \
   --out "$work/decisions" \
-  --now 1788289368 \
-  | tee "$work/consume.out" | grep -iE "svzchf|mRE7\.|^decisions|^head|^decided" | head -n 12
+  --now 1788289368 > "$work/consume.out"
+grep -iE "svzchf|mRE7\.|^decisions|^head|^decided" "$work/consume.out" | head -n 12
 
 say "5. verify: every bundle written above, re-hashed and recomputed without the network"
 for bundle in "${bundles[@]}"; do
@@ -120,7 +123,9 @@ done
 say "6. pack and verify: the bundle as one downloadable archive, verified from the archive alone"
 "$crossfoot" bundle pack "$svzchf_bundle" --out "$work/$(basename "$svzchf_bundle").tar.gz" \
   | tee "$work/pack.out"
-archive="$(sed -n 's/^archive  *//p' "$work/pack.out")"
+# The path line is "archive" followed by a run of spaces; the sha256 line
+# starts with "archive sha256" and must not match.
+archive="$(sed -n 's/^archive   *//p' "$work/pack.out")"
 "$crossfoot" verify "$archive" | grep -E "^(archive|archive sha256|root hash|replay|status) "
 
 say "Done. Everything is under $work"
