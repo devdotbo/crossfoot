@@ -73,7 +73,9 @@ function sourceName(f: FeedRow): string {
 function context(entries: [string, string][]): string[] {
   const lines = ["    context:"];
   for (const [k, v] of entries) {
-    lines.push(`      ${k}:`, "        type: String", `        data: ${v}`);
+    // Quoted: an all-hex value such as an address would otherwise parse as a
+    // YAML integer and graph-node rejects it ("expected a string").
+    lines.push(`      ${k}:`, "        type: String", `        data: '${v}'`);
   }
   return lines;
 }

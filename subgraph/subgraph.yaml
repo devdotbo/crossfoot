@@ -18,13 +18,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mTBILL
+        data: 'mTBILL'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -64,13 +64,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mBASIS
+        data: 'mBASIS'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -110,13 +110,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mBTC
+        data: 'mBTC'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -156,13 +156,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mEDGE
+        data: 'mEDGE'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -202,13 +202,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mMEV
+        data: 'mMEV'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -248,13 +248,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mRE7
+        data: 'mRE7'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -294,13 +294,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mSL
+        data: 'mSL'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -340,13 +340,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mFONE
+        data: 'mFONE'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -386,13 +386,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mFONE
+        data: 'mFONE'
       registryKey:
         type: String
-        data: mFONEUnloop.customFeed
+        data: 'mFONEUnloop.customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -432,13 +432,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mHYPER
+        data: 'mHYPER'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -478,13 +478,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mAPOLLO
+        data: 'mAPOLLO'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -524,13 +524,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mLIQUIDITY
+        data: 'mLIQUIDITY'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -570,13 +570,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: hypeETH
+        data: 'hypeETH'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -616,13 +616,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: hypeBTC
+        data: 'hypeBTC'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -662,13 +662,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: hypeUSD
+        data: 'hypeUSD'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -708,13 +708,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: tUSDe
+        data: 'tUSDe'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -754,13 +754,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: tETH
+        data: 'tETH'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -800,13 +800,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: tBTC
+        data: 'tBTC'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -846,13 +846,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mevBTC
+        data: 'mevBTC'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -892,13 +892,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mFARM
+        data: 'mFARM'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -938,13 +938,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: msyrupUSD
+        data: 'msyrupUSD'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -984,13 +984,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: msyrupUSDp
+        data: 'msyrupUSDp'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -1030,13 +1030,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: zeroGUSDV
+        data: 'zeroGUSDV'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -1076,13 +1076,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: zeroGETHV
+        data: 'zeroGETHV'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -1122,13 +1122,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: zeroGBTCV
+        data: 'zeroGBTCV'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -1168,13 +1168,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: JIV
+        data: 'JIV'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -1214,13 +1214,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mRE7BTC
+        data: 'mRE7BTC'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -1260,13 +1260,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: acremBTC1
+        data: 'acremBTC1'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -1306,13 +1306,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mWildUSD
+        data: 'mWildUSD'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -1352,13 +1352,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mEVUSD
+        data: 'mEVUSD'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -1398,13 +1398,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mEVETH
+        data: 'mEVETH'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -1444,13 +1444,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mHyperETH
+        data: 'mHyperETH'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -1490,13 +1490,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mHyperBTC
+        data: 'mHyperBTC'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -1536,13 +1536,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mPortofino
+        data: 'mPortofino'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -1582,13 +1582,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mKRalpha
+        data: 'mKRalpha'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -1628,13 +1628,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mROX
+        data: 'mROX'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -1674,13 +1674,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mTU
+        data: 'mTU'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -1720,13 +1720,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mM1USD
+        data: 'mM1USD'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -1766,13 +1766,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mGLOBAL
+        data: 'mGLOBAL'
       registryKey:
         type: String
-        data: customFeedGrowth
+        data: 'customFeedGrowth'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -1812,13 +1812,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mGLOBAL
+        data: 'mGLOBAL'
       registryKey:
         type: String
-        data: mGLOBALDialectic.customFeed
+        data: 'mGLOBALDialectic.customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -1858,13 +1858,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: bondUSD
+        data: 'bondUSD'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -1904,13 +1904,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: bondETH
+        data: 'bondETH'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -1950,13 +1950,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: bondBTC
+        data: 'bondBTC'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -1996,13 +1996,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: stockMarketTRBasisTrade
+        data: 'stockMarketTRBasisTrade'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -2042,13 +2042,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: carryTradeUSDTRYLeverage
+        data: 'carryTradeUSDTRYLeverage'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -2088,13 +2088,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mWIN
+        data: 'mWIN'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -2134,13 +2134,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mWIN
+        data: 'mWIN'
       registryKey:
         type: String
-        data: mWINDialectic.customFeed
+        data: 'mWINDialectic.customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -2180,13 +2180,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: qHVNUSD
+        data: 'qHVNUSD'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -2226,13 +2226,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: sGold
+        data: 'sGold'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -2272,13 +2272,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: turtlePST
+        data: 'turtlePST'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -2318,13 +2318,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mGLO
+        data: 'mGLO'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -2364,13 +2364,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mGLO
+        data: 'mGLO'
       registryKey:
         type: String
-        data: mGLO3F.customFeed
+        data: 'mGLO3F.customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -2410,13 +2410,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mM1BTC
+        data: 'mM1BTC'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -2456,13 +2456,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mGLOeuro
+        data: 'mGLOeuro'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -2502,13 +2502,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mALPHA
+        data: 'mALPHA'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -2548,13 +2548,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: Re7YIELD
+        data: 'Re7YIELD'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -2594,13 +2594,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: Re7BTC
+        data: 'Re7BTC'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -2640,13 +2640,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mArb
+        data: 'mArb'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -2686,13 +2686,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mArbETH
+        data: 'mArbETH'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -2732,13 +2732,13 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Midas
+        data: 'Midas'
       product:
         type: String
-        data: mArbBTC
+        data: 'mArbBTC'
       registryKey:
         type: String
-        data: customFeed
+        data: 'customFeed'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -2778,19 +2778,19 @@ dataSources:
     context:
       issuer:
         type: String
-        data: Frankencoin
+        data: 'Frankencoin'
       product:
         type: String
-        data: svZCHF
+        data: 'svZCHF'
       registryKey:
         type: String
-        data: savings
+        data: 'savings'
       vault:
         type: String
-        data: 0xE5F130253fF137f9917C0107659A4c5262abf6b0
+        data: '0xE5F130253fF137f9917C0107659A4c5262abf6b0'
       vaultDeployBlock:
         type: String
-        data: 24118272
+        data: '24118272'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
