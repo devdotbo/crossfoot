@@ -89,7 +89,7 @@ crossfoot fetch svzchf --block <B1> [--baseline-block <B0>]
 crossfoot run svzchf --baseline-block <B0> --block <B1>
 crossfoot run svzchf --window demo             # the pinned pair 24570000 to 25853000
 crossfoot run mtbill --baseline-block <B0> --block <B1>
-crossfoot verify bundles/<bundle> [--require-same-code]
+crossfoot verify bundles/<bundle> [--require-same-code] [--refetch <n|all>] [--endpoint <url>]
 crossfoot render --bundles bundles --out site
 crossfoot selectors "RateChanged(uint24)"
 ```
@@ -103,8 +103,11 @@ override the default public endpoints.
 hash (or is missing or extra), 3 when the replayed `result.json` differs
 (the first differing JSON path is printed), 4 when the replay needed a read
 the bundle does not hold, 5 when the producer's code identity differs and
-`--require-same-code` was given, and 1 for an unreadable bundle. It
-constructs no network client. `--refetch` is not implemented yet.
+`--require-same-code` was given, 6 when `--refetch <n|all>` re-read a
+sampled JSON-RPC entry from an endpoint at its pinned block and got a
+different result, and 1 for an unreadable bundle or a failed refetch. Without
+`--refetch` it constructs no network client; with it, `--endpoint` names the
+endpoints to re-read from (the defaults otherwise).
 
 ## Evidence bundle format
 

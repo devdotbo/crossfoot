@@ -33,6 +33,40 @@ pub const HASH_MISMATCH: u8 = 2;
 pub const REPLAY_MISMATCH: u8 = 3;
 pub const BUNDLE_INCOMPLETE: u8 = 4;
 pub const CODE_MISMATCH: u8 = 5;
+pub const REFETCH_MISMATCH: u8 = 6;
+
+/// How many JSON-RPC entries `--refetch` re-reads from the network.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Sample {
+    All,
+    Count(usize),
+}
+
+impl std::str::FromStr for Sample {
+    type Err = String;
+    fn from_str(text: &str) -> Result<Self, String> {
+        if text == "all" {
+            return Ok(Sample::All);
+        }
+        match text.parse::<usize>() {
+            Ok(n) if n > 0 => Ok(Sample::Count(n)),
+            _ => Err(format!(
+                "--refetch takes a positive count or \"all\", not {text:?}"
+            )),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct Options {
+    /// Exit 5 when the producer's code identity differs.
+    pub require_same_code: bool,
+    /// Re-read a sample of JSON-RPC entries from the network (spec 03 R13).
+    /// Without it verify opens no socket.
+    pub refetch: Option<Sample>,
+    /// Endpoints for the refetch; the defaults when empty.
+    pub endpoints: Vec<String>,
+}
 
 pub struct Report {
     pub exit_code: u8,
@@ -275,7 +309,153 @@ fn replay(
     }
 }
 
-pub fn verify(dir: &Path, require_same_code: bool) -> Report {
+/// The JSON-RPC entries a refetch samples: evenly spread over the manifest
+/// in read order, so a small sample still touches both pinned blocks.
+/// Blockscout and other HTTP GET bodies are excluded (their formatting is
+/// not guaranteed stable).
+pub fn sample_entries(entries: &[Value], sample: Sample) -> Vec<Value> {
+    let json_rpc: Vec<&Value> = entries
+        .iter()
+        .filter(|e| e.get("wire").and_then(Value::as_str) == Some("json_rpc"))
+        .collect();
+    let picks: Vec<usize> = match sample {
+        Sample::All => (0..json_rpc.len()).collect(),
+        Sample::Count(n) => {
+            let n = n.min(json_rpc.len());
+            let mut picks: Vec<usize> = (0..n).map(|i| i * json_rpc.len() / n).collect();
+            picks.dedup();
+            picks
+        }
+    };
+    picks.into_iter().map(|i| json_rpc[i].clone()).collect()
+}
+
+/// A manifest entry turned back into the read it records, so the same
+/// request can be sent again.
+fn descriptor_of(entry: &Value) -> Result<crate::rpc::Descriptor, String> {
+    let text = |key: &str| -> Result<String, String> {
+        entry
+            .get(key)
+            .and_then(Value::as_str)
+            .map(str::to_string)
+            .ok_or_else(|| format!("a manifest entry has no {key}: {entry}"))
+    };
+    Ok(crate::rpc::Descriptor {
+        label: text("label")?,
+        wire: crate::rpc::Wire::JsonRpc,
+        method: text("method")?,
+        block: text("block")?,
+        to: text("to")?,
+        calldata: text("calldata")?,
+        params: entry
+            .get("request")
+            .and_then(|r| r.get("params"))
+            .cloned()
+            .unwrap_or(Value::Array(vec![])),
+    })
+}
+
+/// Spec 03 R13: re-reads each sampled entry through `fetch` and compares
+/// the parsed `result` with the bundle's. The comparison is on the JSON
+/// value, not the bytes, because two nodes format one answer differently.
+/// Returns the number of entries that agreed, or the exit code and detail
+/// of the first that did not.
+pub fn refetch_compare(
+    dir: &Path,
+    sampled: &[Value],
+    mut fetch: impl FnMut(&crate::rpc::Descriptor) -> Result<String, String>,
+) -> Result<usize, (u8, String)> {
+    let mut agreed = 0usize;
+    for entry in sampled {
+        let descriptor = descriptor_of(entry).map_err(|err| (OTHER, err))?;
+        let file = entry.get("file").and_then(Value::as_str).unwrap_or("?");
+        let stored: Value = read_json(&dir.join(file)).map_err(|err| (OTHER, err))?;
+        let refetched_body = fetch(&descriptor).map_err(|err| {
+            (
+                OTHER,
+                format!("refetch of {} failed: {err}", descriptor.label),
+            )
+        })?;
+        let refetched: Value = serde_json::from_str(&refetched_body).map_err(|err| {
+            (
+                OTHER,
+                format!("refetch of {} is not JSON: {err}", descriptor.label),
+            )
+        })?;
+        let stored_result = stored.get("result").cloned().unwrap_or(Value::Null);
+        let refetched_result = refetched.get("result").cloned().unwrap_or(Value::Null);
+        if stored_result != refetched_result {
+            let short = |v: &Value| {
+                let text = v.to_string();
+                if text.len() > 120 {
+                    format!("{}...", &text[..120])
+                } else {
+                    text
+                }
+            };
+            return Err((
+                REFETCH_MISMATCH,
+                format!(
+                    "{} ({} at {}): bundle {} but the endpoint now says {}",
+                    descriptor.label,
+                    descriptor.method,
+                    descriptor.block,
+                    short(&stored_result),
+                    short(&refetched_result)
+                ),
+            ));
+        }
+        agreed += 1;
+    }
+    Ok(agreed)
+}
+
+/// The network step, after everything offline passed. A fresh empty cache
+/// in the temporary root makes every sampled read a real network read.
+fn refetch(
+    dir: &Path,
+    manifest: &Value,
+    sample: Sample,
+    endpoints: &[String],
+    scratch: &Path,
+) -> Result<(usize, usize), (u8, String)> {
+    let entries = manifest
+        .get("entries")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
+    let sampled = sample_entries(&entries, sample);
+    let chain_id = manifest
+        .get("chain_id")
+        .and_then(Value::as_u64)
+        .unwrap_or(1);
+    let endpoints = if endpoints.is_empty() {
+        vec![
+            crate::rpc::DEFAULT_ARCHIVE_ENDPOINT.to_string(),
+            crate::rpc::DEFAULT_LATEST_ENDPOINT.to_string(),
+        ]
+    } else {
+        endpoints.to_vec()
+    };
+    let mut client = crate::rpc::Client::new(
+        endpoints,
+        vec![],
+        crate::cache::Cache::new(scratch.join("refetch-cache")),
+        chain_id,
+        false,
+        0,
+    );
+    let agreed = refetch_compare(dir, &sampled, |descriptor| {
+        client
+            .fetch(descriptor.clone())
+            .map(|fetched| fetched.body)
+            .map_err(|err| err.message)
+    })?;
+    Ok((agreed, sampled.len()))
+}
+
+pub fn verify(dir: &Path, options: &Options) -> Report {
+    let require_same_code = options.require_same_code;
     let mut report = Report::new();
     report.line("bundle", dir.display());
 
@@ -401,8 +581,26 @@ pub fn verify(dir: &Path, require_same_code: bool) -> Report {
         Err((BUNDLE_INCOMPLETE, detail)) => Err((BUNDLE_INCOMPLETE, "BUNDLE_INCOMPLETE", detail)),
         Err((_, detail)) => Err((OTHER, "REPLAY_FAILED", detail)),
     };
+    // (h) the optional refetch, after everything offline passed.
+    let refetched = match (&outcome, options.refetch) {
+        (Ok(()), Some(sample)) => Some(refetch(
+            dir,
+            &manifest,
+            sample,
+            &options.endpoints,
+            &replay_root,
+        )),
+        _ => None,
+    };
     let _ = fs::remove_dir_all(&replay_root);
-    report.line("network", "none");
+    match &refetched {
+        None => report.line("network", "none"),
+        Some(Ok((agreed, sampled))) => report.line(
+            "network",
+            format!("refetched {agreed} of {sampled} sampled JSON-RPC entries, all agree"),
+        ),
+        Some(Err(_)) => report.line("network", "refetch"),
+    }
 
     if !same_code {
         report.line(
@@ -413,6 +611,14 @@ pub fn verify(dir: &Path, require_same_code: bool) -> Report {
     match outcome {
         Ok(()) => {
             report.line("replay", "result.json reproduced byte for byte");
+            if let Some(Err((code, detail))) = refetched {
+                let status = if code == REFETCH_MISMATCH {
+                    "REFETCH_MISMATCH"
+                } else {
+                    "REFETCH_FAILED"
+                };
+                return report.fail(code, status, detail);
+            }
             if require_same_code && !same_code {
                 return report.fail(
                     CODE_MISMATCH,
@@ -436,6 +642,7 @@ mod tests {
     use super::*;
     use crate::bundle::seal;
     use serde_json::json;
+    use std::str::FromStr;
 
     /// The svZCHF demo window bundle, produced by `crossfoot run svzchf
     /// --window demo` and checked in (spec 01 R2, spec 03 fixtures).
@@ -473,7 +680,7 @@ mod tests {
 
     #[test]
     fn verify_passes_on_an_untouched_bundle() {
-        let report = verify(&fixture(), false);
+        let report = verify(&fixture(), &Options::default());
         assert_eq!(report.exit_code, VERIFIED, "{}", print(&report));
         assert_eq!(report.status, "VERIFIED");
         let text = print(&report);
@@ -501,7 +708,7 @@ mod tests {
         let at = bytes.len() - 5;
         bytes[at] = if bytes[at] == b'0' { b'1' } else { b'0' };
         fs::write(&file, bytes).unwrap();
-        let report = verify(&dir, false);
+        let report = verify(&dir, &Options::default());
         assert_eq!(report.exit_code, HASH_MISMATCH, "{}", print(&report));
         assert!(print(&report).contains("raw/003-vault-asset.json: sha256 differs"));
     }
@@ -510,13 +717,13 @@ mod tests {
     fn verify_detects_a_missing_raw_file() {
         let dir = scratch("missing");
         fs::remove_file(dir.join("raw").join("004-vault-savings.json")).unwrap();
-        let report = verify(&dir, false);
+        let report = verify(&dir, &Options::default());
         assert_eq!(report.exit_code, HASH_MISMATCH, "{}", print(&report));
         assert!(print(&report).contains("raw/004-vault-savings.json"));
         // An extra file is a change as well.
         let dir = scratch("extra");
         fs::write(dir.join("raw").join("999-extra.json"), "{}").unwrap();
-        let report = verify(&dir, false);
+        let report = verify(&dir, &Options::default());
         assert_eq!(report.exit_code, HASH_MISMATCH, "{}", print(&report));
         assert!(print(&report).contains("raw/999-extra.json: present but not in the manifest"));
     }
@@ -532,7 +739,7 @@ mod tests {
         text.push('\n');
         fs::write(dir.join("result.json"), text).unwrap();
         seal(&dir).unwrap();
-        let report = verify(&dir, false);
+        let report = verify(&dir, &Options::default());
         assert_eq!(report.exit_code, REPLAY_MISMATCH, "{}", print(&report));
         let text = print(&report);
         assert!(
@@ -577,7 +784,7 @@ mod tests {
         .unwrap();
         fs::remove_file(dir.join("raw").join("028-module-savings-vault.json")).unwrap();
         seal(&dir).unwrap();
-        let report = verify(&dir, false);
+        let report = verify(&dir, &Options::default());
         assert_eq!(report.exit_code, BUNDLE_INCOMPLETE, "{}", print(&report));
         let text = print(&report);
         assert!(text.contains("module.savings(vault)"), "{text}");
@@ -597,12 +804,18 @@ mod tests {
         )
         .unwrap();
         seal(&dir).unwrap();
-        let report = verify(&dir, false);
+        let report = verify(&dir, &Options::default());
         assert_eq!(report.exit_code, VERIFIED, "{}", print(&report));
         assert!(
             print(&report).contains("warning         the bundle was produced by different code")
         );
-        let report = verify(&dir, true);
+        let report = verify(
+            &dir,
+            &Options {
+                require_same_code: true,
+                ..Options::default()
+            },
+        );
         assert_eq!(report.exit_code, CODE_MISMATCH, "{}", print(&report));
         assert_eq!(report.status, "CODE_MISMATCH");
     }
@@ -612,14 +825,14 @@ mod tests {
     /// the report says so on its own line.
     #[test]
     fn verify_makes_no_network_call() {
-        let report = verify(&fixture(), false);
+        let report = verify(&fixture(), &Options::default());
         assert_eq!(report.exit_code, VERIFIED, "{}", print(&report));
         assert!(print(&report).contains("network         none"));
     }
 
     #[test]
     fn verify_report_carries_the_scope_sentence() {
-        let report = verify(&fixture(), false);
+        let report = verify(&fixture(), &Options::default());
         let text = print(&report);
         assert!(text.contains(SCOPE_SENTENCE), "{text}");
         for key in [
@@ -643,12 +856,104 @@ mod tests {
     /// not from anything in the working tree or on the command line.
     #[test]
     fn replay_takes_window_and_feeds_from_the_bundle_not_the_tree() {
-        let report = verify(&fixture(), false);
+        let report = verify(&fixture(), &Options::default());
         assert!(
             print(&report).contains("target          svzchf, window 24570000 to 25853000"),
             "{}",
             print(&report)
         );
+    }
+
+    /// Spec 03 R13, offline: the sample is spread over the JSON-RPC entries,
+    /// a re-read that agrees as a JSON value passes whatever its bytes, and
+    /// a re-read that disagrees is REFETCH_MISMATCH naming the read.
+    #[test]
+    fn refetch_reports_a_mismatch_between_bundle_and_endpoint() {
+        let manifest: Value = read_json(&fixture().join("manifest.json")).unwrap();
+        let entries = manifest["entries"].as_array().unwrap().clone();
+        let json_rpc = entries.iter().filter(|e| e["wire"] == "json_rpc").count();
+        assert_eq!(
+            json_rpc, 26,
+            "the fixture holds 26 JSON-RPC reads and 6 Blockscout reads"
+        );
+        let all = sample_entries(&entries, Sample::All);
+        assert_eq!(all.len(), 26);
+        let three = sample_entries(&entries, Sample::Count(3));
+        assert_eq!(three.len(), 3);
+        // Spread: one from the B1 fetch (entries 1 to 16), one across the
+        // middle, one from the B0 fetch.
+        assert_eq!(three[0]["index"], 1);
+        assert!(three[2]["index"].as_u64().unwrap() > 16);
+        assert!(three.iter().all(|e| e["wire"] == "json_rpc"));
+        let many = sample_entries(&entries, Sample::Count(1000));
+        assert_eq!(
+            many.len(),
+            26,
+            "a count above the population is the population"
+        );
+
+        // A mock endpoint that answers from the bundle's own bodies but
+        // reformats them: agreement is on the JSON value.
+        let reformat = |descriptor: &crate::rpc::Descriptor| -> Result<String, String> {
+            let entry = entries
+                .iter()
+                .find(|e| {
+                    e["label"] == descriptor.label.as_str()
+                        && e["block"] == descriptor.block.as_str()
+                })
+                .unwrap();
+            let body = read_json(&fixture().join(entry["file"].as_str().unwrap())).unwrap();
+            Ok(serde_json::to_string_pretty(
+                &json!({"jsonrpc": "2.0", "id": 7, "result": body["result"]}),
+            )
+            .unwrap())
+        };
+        assert_eq!(refetch_compare(&fixture(), &all, reformat).unwrap(), 26);
+
+        // The same endpoint, lying about one pinned read.
+        let lying = |descriptor: &crate::rpc::Descriptor| -> Result<String, String> {
+            if descriptor.label == "vault.price()" && descriptor.block == "0x18a7c48" {
+                return Ok(r#"{"jsonrpc":"2.0","id":1,"result":"0x00"}"#.to_string());
+            }
+            reformat(descriptor)
+        };
+        let (code, detail) = refetch_compare(&fixture(), &all, lying).unwrap_err();
+        assert_eq!(code, REFETCH_MISMATCH);
+        assert!(
+            detail.starts_with("vault.price() (eth_call at 0x18a7c48): bundle"),
+            "{detail}"
+        );
+        assert!(
+            detail.contains("the endpoint now says \"0x00\""),
+            "{detail}"
+        );
+
+        // A network failure is exit 1, not a mismatch.
+        let down = |_: &crate::rpc::Descriptor| -> Result<String, String> { Err("refused".into()) };
+        let (code, detail) = refetch_compare(&fixture(), &three, down).unwrap_err();
+        assert_eq!(code, OTHER);
+        assert!(
+            detail.contains("refetch of eth_chainId failed: refused"),
+            "{detail}"
+        );
+
+        // The verify entry point does not refetch when the offline steps
+        // failed, so a tampered bundle stays exit 2 whatever the flag.
+        let dir = scratch("refetch-tampered");
+        fs::remove_file(dir.join("raw").join("004-vault-savings.json")).unwrap();
+        let report = verify(
+            &dir,
+            &Options {
+                refetch: Some(Sample::Count(1)),
+                endpoints: vec!["http://127.0.0.1:9".to_string()],
+                ..Options::default()
+            },
+        );
+        assert_eq!(report.exit_code, HASH_MISMATCH, "{}", print(&report));
+        assert!(Sample::from_str("all").is_ok());
+        assert_eq!(Sample::from_str("3"), Ok(Sample::Count(3)));
+        assert!(Sample::from_str("0").is_err());
+        assert!(Sample::from_str("some").is_err());
     }
 
     /// The README claims exactly what the verifier proves, in the same
@@ -679,7 +984,7 @@ mod tests {
             serde_json::to_string_pretty(&manifest).unwrap() + "\n",
         )
         .unwrap();
-        let report = verify(&dir, false);
+        let report = verify(&dir, &Options::default());
         assert_eq!(report.exit_code, OTHER, "{}", print(&report));
         assert!(print(&report).contains("crossfoot-manifest-v1"));
     }

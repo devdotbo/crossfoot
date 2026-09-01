@@ -82,6 +82,18 @@ enum Command {
         /// it a code difference is printed as a warning.
         #[arg(long)]
         require_same_code: bool,
+
+        /// Re-read this many JSON-RPC entries ("all" for every one) from
+        /// the endpoints at their pinned blocks and compare the results
+        /// with the bundle's; a difference is exit 6. Only with this flag
+        /// does verify touch the network.
+        #[arg(long)]
+        refetch: Option<verify::Sample>,
+
+        /// JSON-RPC endpoints for --refetch, tried in order. The defaults
+        /// when not given.
+        #[arg(long = "endpoint", requires = "refetch")]
+        endpoints: Vec<String>,
     },
     /// Print keccak256 of each signature, as a full 32 byte hash (the event
     /// topic0) and as the leading 4 bytes (the function selector). With no
@@ -284,8 +296,17 @@ fn main() -> ExitCode {
         Command::Verify {
             bundle,
             require_same_code,
+            refetch,
+            endpoints,
         } => {
-            let report = verify::verify(&bundle, require_same_code);
+            let report = verify::verify(
+                &bundle,
+                &verify::Options {
+                    require_same_code,
+                    refetch,
+                    endpoints,
+                },
+            );
             for line in &report.lines {
                 println!("{line}");
             }

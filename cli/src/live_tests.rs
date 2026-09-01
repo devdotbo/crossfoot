@@ -578,6 +578,31 @@ fn t9_two_runs_from_cache_write_identical_result_json() {
     println!("result.json sha256 {first}");
 }
 
+/// Spec 03 R13: a refetched sample of the fixture's pinned reads agrees
+/// with the bundle. Needs the network every time: the refetch uses a fresh
+/// empty cache by design.
+#[test]
+#[ignore = "needs the network every time; see the module comment"]
+fn t10_refetch_sample_agrees_with_the_bundle() {
+    let fixture = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("tests")
+        .join("fixtures")
+        .join("svzchf-demo-24570000-25853000");
+    let report = crate::verify::verify(
+        &fixture,
+        &crate::verify::Options {
+            refetch: Some(crate::verify::Sample::Count(4)),
+            ..Default::default()
+        },
+    );
+    let text = report.lines.join("\n");
+    assert_eq!(report.exit_code, crate::verify::VERIFIED, "{text}");
+    assert!(
+        text.contains("refetched 4 of 4 sampled JSON-RPC entries, all agree"),
+        "{text}"
+    );
+}
+
 // ---------------------------------------------------------------------------
 // mTBILL integration tests
 //
