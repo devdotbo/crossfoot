@@ -236,7 +236,10 @@ crossfoot consume --replay cli/tests/fixtures/consume-<id> --feeds cli/tests/fix
 - Explaining decisions in prose beyond `reason_text`; a language model, if
   one is ever added, reads records and never writes `decision`.
 - Paying per query (x402); the gateway key path is enough.
-- Alerts, scheduling, dashboards. The frontend reads `decisions.json`.
+- Alerts, scheduling, dashboards: out of scope for the agent binary, in
+  scope for the app, which ingests `decisions.json` and generates alerts
+  from the ingested records (`07-app-explorer.md` R2,
+  `08-saas-billing-and-x402.md` R6 to R9).
 
 ## Open questions
 

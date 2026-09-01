@@ -110,15 +110,22 @@ Small commits, one concern each, in this order. Titles are the commit
 subjects. Each body cites the spec and requirement ids. Lettered rows were
 inserted by specs 04 to 06 without renumbering the engine commits; the
 subgraph rows sit early because the Studio sync time is unknown and the
-Midas side must be syncing before the engine work ends. Kill order from the
-build plan: cut item 5 first, then the Arc rows (19a to 19c, conditional
-anyway), then the verify command proper (commits 14 to 16), never the Midas
-replay, the Midas side of the subgraph or the consumer beat; the Frankencoin
-side of the subgraph falls back to RateChange and VaultFlow without derived
-rounds (04 kill criterion). The bundle-backed source (commit 7) stays
-because the Midas fixture depends on it. The app rows 18d and 18e follow
-the kill order of `08-saas-billing-and-x402.md`: 18e goes with the x402
-step, 18d stays as long as the explorer does.
+Midas side must be syncing before the engine work ends. Kill order: the
+ten-item list of the research repository's `wiki/crossfoot-build-plan.md`
+(the source of truth; this is a copy): 1 svZCHF control and Midas family
+replay, 2 subgraph, 3 consumer agent, 4 explorer app with Convex ingestion
+(07), 5 accounts, watchlists and alerts (08), 6 Arc hook (06), 7 Polar
+Monitoring subscription (08), 8 x402 path (08), 9 Chainlink read on Arc
+(06 R3), 10 Arbitrum One subgraph publish (04 R15). Later items are cut
+first. The verify command (commits 14 to 16) is unranked and is cut
+between 5 and 6. Cut criterion at the midpoint, 2026-09-09 04:00 UTC: if
+item N is not demoable, items above N freeze and everything from N
+downward moves to the roadmap. Never cut: the Midas replay, the Midas side
+of the subgraph, the consumer beat; the Frankencoin side of the subgraph
+falls back to RateChange and VaultFlow without derived rounds (04 kill
+criterion). The bundle-backed source (commit 7) stays because the Midas
+fixture depends on it. Commit rows map to items: 18d to item 4, 18e to
+item 8, 19a to 19c to item 6, 21a to item 10.
 
 | # | Title | Contains |
 |---|---|---|
