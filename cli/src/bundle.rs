@@ -202,6 +202,89 @@ impl BundleWriter {
     }
 }
 
+impl BundleWriter {
+    /// Writes one timeline file, `timelines/<name>.json`, for targets that
+    /// carry a per-feed series next to the result (spec 02 R18). Listed in
+    /// SHA256SUMS like every other file. The midas target is its caller.
+    #[allow(dead_code)]
+    pub fn write_timeline(&self, name: &str, value: &Value) -> Result<PathBuf, String> {
+        let dir = self.dir.join("timelines");
+        fs::create_dir_all(&dir)
+            .map_err(|err| format!("could not create {}: {err}", dir.display()))?;
+        let path = dir.join(format!("{}.json", slug(name)));
+        write_json(&path, value)
+            .map_err(|err| format!("could not write {}: {err}", path.display()))?;
+        Ok(path)
+    }
+
+    /// Writes SHA256SUMS over every file the bundle holds and bundle.sha256,
+    /// the hash of that list, which is the bundle's root hash (spec 03 R5).
+    /// Call last: a file written after this is not covered.
+    pub fn seal(&self) -> Result<String, String> {
+        seal(&self.dir)
+    }
+}
+
+/// The files SHA256SUMS covers, as paths relative to the bundle, sorted.
+/// Everything under raw/ and timelines/, plus the three top-level JSON
+/// files that exist. SHA256SUMS and bundle.sha256 themselves are not listed.
+pub fn listed_files(dir: &Path) -> Result<Vec<String>, String> {
+    let mut files: Vec<String> = Vec::new();
+    for sub in ["raw", "timelines"] {
+        let path = dir.join(sub);
+        if !path.is_dir() {
+            continue;
+        }
+        for entry in fs::read_dir(&path)
+            .map_err(|err| format!("could not read {}: {err}", path.display()))?
+        {
+            let entry = entry.map_err(|err| format!("could not read {}: {err}", path.display()))?;
+            if entry.path().is_file() {
+                files.push(format!("{sub}/{}", entry.file_name().to_string_lossy()));
+            }
+        }
+    }
+    for name in ["manifest.json", "meta.json", "result.json"] {
+        if dir.join(name).is_file() {
+            files.push(name.to_string());
+        }
+    }
+    files.sort();
+    Ok(files)
+}
+
+/// The SHA256SUMS text for a bundle directory: `<sha256>  <path>` per file,
+/// sorted by path, LF line ends, in the format `sha256sum -c` reads.
+pub fn sha256sums_text(dir: &Path) -> Result<String, String> {
+    let mut text = String::new();
+    for file in listed_files(dir)? {
+        let bytes =
+            fs::read(dir.join(&file)).map_err(|err| format!("could not read {file}: {err}"))?;
+        text.push_str(&sha256_hex(&bytes));
+        text.push_str("  ");
+        text.push_str(&file);
+        text.push('\n');
+    }
+    Ok(text)
+}
+
+/// The root hash is the sha256 of the SHA256SUMS bytes.
+pub fn root_hash_of(sums: &str) -> String {
+    sha256_hex(sums.as_bytes())
+}
+
+/// Writes SHA256SUMS and bundle.sha256 for a bundle directory and returns
+/// the root hash.
+pub fn seal(dir: &Path) -> Result<String, String> {
+    let sums = sha256sums_text(dir)?;
+    fs::write(dir.join("SHA256SUMS"), sums.as_bytes())
+        .map_err(|err| format!("could not write SHA256SUMS: {err}"))?;
+    let root = root_hash_of(&sums);
+    fs::write(dir.join("bundle.sha256"), format!("{root}\n").as_bytes())
+        .map_err(|err| format!("could not write bundle.sha256: {err}"))?;
+    Ok(root)
+}
+
 /// Keys that describe the run rather than the result. Chain timestamps such
 /// as `timestamp_utc` or `last_post_utc` are properties of the inputs and
 /// stay allowed; only the tool's own clock, counters and endpoints are not.
@@ -344,6 +427,91 @@ mod tests {
         }
         assert_eq!(entries[0]["wire"], "json_rpc");
         assert_eq!(entries[2]["wire"], "http_get");
+    }
+
+    /// Spec 03 R5: the list is sorted, covers every file, and a stock
+    /// checksum tool accepts it.
+    #[test]
+    fn sha256sums_is_sorted_complete_and_checkable_by_sha256sum() {
+        let root = std::env::temp_dir().join("crossfoot-sha256sums");
+        let _ = fs::remove_dir_all(&root);
+        let mut writer = BundleWriter::create(&root, "midas-run-1-2-stamp", 1).unwrap();
+        // Two raw bodies, out of alphabetical order by label, a timeline,
+        // and the three JSON files.
+        for (label, body) in [
+            ("zeta read", r#"{"jsonrpc":"2.0","id":1,"result":"0x2"}"#),
+            ("alpha read", r#"{"jsonrpc":"2.0","id":1,"result":"0x1"}"#),
+        ] {
+            let descriptor = call_descriptor(label, "0xAbC", "0xa035b1fe", "0x2");
+            writer
+                .record(&fetched(1, descriptor, body), None, None)
+                .unwrap();
+        }
+        writer
+            .write_timeline("mRE7.customFeed", &json!({"rows": []}))
+            .unwrap();
+        writer.write_result(&json!({"target": "midas"})).unwrap();
+        writer.write_manifest("midas-run", json!({})).unwrap();
+        writer
+            .write_meta(json!({"format": "crossfoot-meta-v1"}))
+            .unwrap();
+        let root_hash = writer.seal().unwrap();
+
+        let sums = fs::read_to_string(writer.dir().join("SHA256SUMS")).unwrap();
+        let lines: Vec<&str> = sums.lines().collect();
+        let paths: Vec<&str> = lines.iter().map(|l| &l[66..]).collect();
+        assert_eq!(
+            paths,
+            vec![
+                "manifest.json",
+                "meta.json",
+                "raw/001-zeta-read.json",
+                "raw/002-alpha-read.json",
+                "result.json",
+                "timelines/mre7-customfeed.json",
+            ]
+        );
+        for line in &lines {
+            assert_eq!(&line[64..66], "  ", "two spaces as sha256sum prints");
+            let path = &line[66..];
+            let bytes = fs::read(writer.dir().join(path)).unwrap();
+            assert_eq!(&line[..64], sha256_hex(&bytes));
+        }
+        assert!(sums.ends_with('\n') && !sums.contains('\r'));
+        assert_eq!(
+            fs::read_to_string(writer.dir().join("bundle.sha256")).unwrap(),
+            format!("{root_hash}\n")
+        );
+        assert_eq!(root_hash, sha256_hex(sums.as_bytes()));
+
+        // The stock tool agrees, where one is installed.
+        let checker = [
+            ("sha256sum", vec!["-c", "SHA256SUMS"]),
+            ("shasum", vec!["-a", "256", "-c", "SHA256SUMS"]),
+        ]
+        .into_iter()
+        .find_map(|(tool, args)| {
+            std::process::Command::new(tool)
+                .args(&args)
+                .current_dir(writer.dir())
+                .output()
+                .ok()
+                .map(|output| (tool, output))
+        });
+        match checker {
+            Some((tool, output)) => {
+                let stdout = String::from_utf8_lossy(&output.stdout);
+                assert!(
+                    output.status.success(),
+                    "{tool} -c failed: {stdout} {}",
+                    String::from_utf8_lossy(&output.stderr)
+                );
+                assert_eq!(stdout.matches(": OK").count(), 6, "{stdout}");
+            }
+            None => {
+                eprintln!("no sha256sum or shasum on this machine; the shell check was skipped")
+            }
+        }
     }
 
     /// Two writers asking for one name in the same second get two

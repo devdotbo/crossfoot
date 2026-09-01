@@ -20,6 +20,9 @@ struct Run {
     result: Value,
     manifest: Option<Value>,
     result_sha256: String,
+    /// The bundle root hash from bundle.sha256, the evidence hash a reader
+    /// cites and `crossfoot verify` recomputes. Absent on an unsealed bundle.
+    root_hash: Option<String>,
 }
 
 pub struct RenderOutcome {
@@ -720,6 +723,10 @@ fn provenance(run: &Run) -> String {
 
     let mut rows: Vec<(String, String)> = vec![
         ("bundle path".into(), format!("bundles/{}", run.name)),
+        (
+            "bundle root hash".into(),
+            run.root_hash.clone().unwrap_or("not sealed".into()),
+        ),
         ("result.json sha256".into(), run.result_sha256.clone()),
         (
             "raw responses in this bundle".into(),
@@ -812,7 +819,7 @@ fn svzchf_body(run: &Run) -> String {
     html.push_str("<h2>Comparison</h2>\n");
     html.push_str("<p class=\"note\">Modeled is recomputed from the log-derived rate path and the account's own flow history. Observed is read from the chain at the pinned block. Tolerance is zero.</p>\n");
     html.push_str(
-        "<table>\n<tr><th>field</th><th>modeled</th><th>observed</th><th>residual</th></tr>\n",
+        "<table>\n<tr><th>field</th><th>modeled</th><th>observed</th><th>residual</th><th>equal</th></tr>\n",
     );
     if let Some(fields) = result
         .get("comparison")
@@ -838,14 +845,15 @@ fn svzchf_body(run: &Run) -> String {
                 }
             };
             html.push_str(&format!(
-                "<tr><td>{}</td><td class=\"num\">{}{}</td><td class=\"num\">{}{}</td><td class=\"num{}\">{}</td></tr>\n",
+                "<tr><td>{}</td><td class=\"num\">{}{}</td><td class=\"num\">{}{}</td><td class=\"num{}\">{}</td><td class=\"mono\">{}</td></tr>\n",
                 escape(name),
                 escape(modeled),
                 readable(modeled),
                 escape(observed),
                 readable(observed),
                 if equal { "" } else { " flag" },
-                escape(field.get("residual").and_then(Value::as_str).unwrap_or(""))
+                escape(field.get("residual").and_then(Value::as_str).unwrap_or("")),
+                equal
             ));
         }
     }
@@ -1052,6 +1060,10 @@ fn run_page(run: &Run) -> String {
         escape(&verdict)
     ));
     html.push_str(&format!(
+        "<p class=\"mono\">bundle root hash {}</p>\n",
+        escape(run.root_hash.as_deref().unwrap_or("not sealed"))
+    ));
+    html.push_str(&format!(
         "<p class=\"lede\"><strong>Check class.</strong> {}</p>\n",
         escape(check_class_words(result))
     ));
@@ -1196,6 +1208,10 @@ pub fn render(bundles_dir: &Path, out_dir: &Path) -> Result<RenderOutcome, Strin
         runs.push(Run {
             manifest: read_json(&dir.join("manifest.json")),
             result_sha256: crate::cache::sha256_hex(&raw),
+            root_hash: fs::read_to_string(dir.join("bundle.sha256"))
+                .ok()
+                .map(|text| text.trim().to_string())
+                .filter(|hash| hash.len() == 64),
             dir,
             name,
             result,
@@ -1365,8 +1381,13 @@ mod tests {
         );
         write_json_file(
             &svzchf.join("manifest.json"),
-            &json!({ "format": "crossfoot-manifest-v1", "entry_count": 32, "entries": [] }),
+            &json!({ "format": "crossfoot-manifest-v2", "entry_count": 32, "entries": [] }),
         );
+        fs::write(
+            svzchf.join("bundle.sha256"),
+            "5d1a2fb0cc4bd0e3c0d5f3c2a1b3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1\n",
+        )
+        .unwrap();
 
         // mTBILL: a consistency bundle with three rounds, the first a
         // placeholder, the second labelled as the launch re-base.
@@ -1591,6 +1612,21 @@ mod tests {
         assert!(svzchf.contains("raw responses in this bundle"));
         assert!(svzchf.contains("<dd>32</dd>"));
         assert!(!svzchf.contains("referenced bundles"));
+        // Spec 01 R9: the residual table columns, and the root hash next to
+        // the verdict.
+        assert!(svzchf.contains(
+            "<tr><th>field</th><th>modeled</th><th>observed</th><th>residual</th><th>equal</th></tr>"
+        ));
+        assert!(svzchf.contains("<td class=\"mono\">true</td>"));
+        let verdict_at = svzchf.find("verdict: MODEL_MATCH").unwrap();
+        let hash_at = svzchf
+            .find(
+                "bundle root hash 5d1a2fb0cc4bd0e3c0d5f3c2a1b3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1",
+            )
+            .unwrap();
+        assert!(hash_at > verdict_at && hash_at - verdict_at < 200);
+        // A bundle without bundle.sha256 says so rather than showing nothing.
+        assert!(mtbill.contains("bundle root hash not sealed"));
     }
 
     #[test]

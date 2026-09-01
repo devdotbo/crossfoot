@@ -365,6 +365,7 @@ fn run_svzchf(opts: FetchOpts) -> Result<(), String> {
     let outcome = svzchf::run(&mut client, &args, &verify_root)?;
 
     println!("bundle          {}", outcome.bundle_dir.display());
+    println!("root hash       {}", outcome.root_hash);
     println!("raw responses   {}", outcome.entry_count);
     println!("cache hits      {}", outcome.cache_hits);
     println!("network calls   {}", outcome.network_calls);
@@ -422,6 +423,7 @@ fn recompute_svzchf(opts: RunOpts) -> Result<(), String> {
     println!("summary         {}", outcome.summary.headline);
     println!("result          {}", outcome.result_path.display());
     println!("bundle          {}", outcome.bundle_dir.display());
+    println!("root hash       {}", outcome.root_hash);
     println!("cache hits      {}", outcome.cache_hits);
     println!("network calls   {}", outcome.network_calls);
     Ok(())
@@ -484,6 +486,7 @@ fn check_mtbill(opts: RunOpts) -> Result<(), String> {
     println!("summary            {}", outcome.summary.headline);
     println!("result             {}", outcome.result_path.display());
     println!("bundle             {}", outcome.bundle_dir.display());
+    println!("root hash          {}", outcome.root_hash);
     println!("cache hits         {}", outcome.cache_hits);
     println!("network calls      {}", outcome.network_calls);
     Ok(())

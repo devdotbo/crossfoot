@@ -46,6 +46,7 @@ pub struct RunArgs {
 
 pub struct RunOutcome {
     pub bundle_dir: std::path::PathBuf,
+    pub root_hash: String,
     pub result_path: std::path::PathBuf,
     pub overall: &'static str,
     pub summary: crate::summary::Summary,
@@ -492,9 +493,11 @@ pub fn run(
         .write_meta(meta)
         .map_err(|err| format!("could not write the run meta: {err}"))?;
 
+    let root_hash = bundle.seal()?;
     let (network_calls, cache_hits) = client.counters();
     Ok(RunOutcome {
         bundle_dir: bundle.dir().to_path_buf(),
+        root_hash,
         result_path,
         overall,
         summary: summary_block,

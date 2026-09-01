@@ -145,6 +145,7 @@ pub struct FetchArgs {
 /// What `crossfoot fetch svzchf` reports after writing its own bundle.
 pub struct Outcome {
     pub bundle_dir: std::path::PathBuf,
+    pub root_hash: String,
     pub network_calls: usize,
     pub cache_hits: usize,
     pub entry_count: usize,
@@ -764,9 +765,11 @@ pub fn run(
         .write_meta(meta)
         .map_err(|err| format!("could not write meta.json: {err}"))?;
 
+    let root_hash = bundle.seal()?;
     let (network_calls, cache_hits) = client.counters();
     Ok(Outcome {
         bundle_dir: bundle.dir().to_path_buf(),
+        root_hash,
         network_calls,
         cache_hits,
         entry_count: bundle.entries().len(),
