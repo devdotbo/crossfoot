@@ -332,9 +332,47 @@ the family; `--rpc-delay-ms` applies.
 | R18 | `timeline_rows_are_in_round_order_and_carry_findings` (offline, fixture) |
 
 The fixture bundle is produced once during the event by
-`crossfoot run midas --block 25884405` and committed (expected under 8 MB).
-If the event-time run differs from the memo counts, the difference is
-investigated and recorded in the spec, not patched in.
+`crossfoot run midas --block 25884405` and committed. It holds 1,812 verbatim
+responses (14 MB as a directory), so it is committed as
+`cli/tests/fixtures/midas-25884405.tar.gz` (1.7 MB) and extracted once per
+build into `target/fixtures/midas-25884405/` by the test helper
+`fixtures::midas_bundle()`; `verify` and `sha256sum -c` run on the
+extracted directory. If the event-time run differs from the memo counts,
+the difference is investigated and recorded here, not patched in.
+
+Event-time run notes (2026-09-01, B1 = 25,884,405, every R19 count
+reproduced). Four points where the run had to go beyond the memos:
+
+- The mGLOBAL growth feed (`customFeedGrowth`) does not emit
+  `AnswerUpdated(int256,uint256,uint256)`. Its five rounds are
+  `AnswerUpdated(int256,uint256,uint256,int80)` (topic0 `0xe012d696...`),
+  the same three indexed parameters plus one data word. The run sweeps
+  that topic whenever the standard series is short of `latestRound()` and
+  records `round_events[]` per feed. Without it the feed reads as five
+  rounds missing (`round_ids` gap); with it the five posts (4 safe3, 1
+  raw3) attribute normally.
+- Six Safe-routed rounds are same-block pairs posted by one Safe
+  transaction through `multiSend(bytes)` (`0x8d80ff0a`, delegatecall to
+  `0x9641d764...`): mTBILL rounds 42 and 43, mBTC rounds 2 and 3, 4 and 5.
+  R6 steps (a) and (b) reach the multiSend calldata but not the feed call;
+  the run decodes the packed batch and assigns the k-th call to the feed to
+  the k-th round of that transaction (`batch_index` on the finding). All
+  six are checked-path (`safe`) posts. No trace endpoint is needed.
+- The survey's "first successful post" is the first external post; the
+  replay's first post is round 1 of the AnswerUpdated series. On mRE7 that
+  makes round 3 (the first external post, 2025-04-18, 0.995 percent against
+  the Safe-routed round 2) a seventh checked post in 2025, within the 2.0
+  percent bound then in force; on mBTC the Safe-routed round 8 is a fourth
+  within-bound `UNGUARDED_POST` next to the survey's three external ones.
+  `UNGUARDED_POST` therefore counts 61 (57 initialization posts plus these
+  four); bypass counts are unchanged.
+- Timeline files are named by the shared bundle writer, which slugs the
+  name to lowercase: `timelines/mre7-customfeed.json` for
+  `mRE7.customFeed`. Each feed's `timeline_file` in `result.json` carries
+  the exact path.
+- `survey_line` counts the 66 feeds the run read (60 replayed plus the six
+  derived wrappers it listed), as in the R17 example; `feeds_replayed` in
+  `family_summary` stays 60.
 
 ## Out of scope
 
