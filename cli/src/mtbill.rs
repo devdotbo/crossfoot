@@ -1244,7 +1244,7 @@ fn decode_safe_inner_call(input: &str) -> Option<(String, String, Option<String>
     if data.len() < 8 {
         return None;
     }
-    let selector = format!("0x{}", &data[..8].to_lowercase());
+    let selector = format!("0x{}", data[..8].to_lowercase());
     let argument = data.get(8..72).and_then(|hex| {
         let bytes = hex_decode(hex)?;
         let mut word = [0u8; 32];
