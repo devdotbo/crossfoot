@@ -124,7 +124,23 @@ sync from 20,578,232 is a matter of tens of minutes on this setup.
 Findings from the deploy: an unquoted all-hex context value is parsed as a
 YAML number and rejected ("expected a string"), fixed in the generator;
 kubo's add endpoint hung once and needed a container restart.
-Entity checks against the research archive are recorded below when done.
+Entity checks against the research archive (2026-09-02, store head
+22,023,801 at the time of the mTBILL check):
+
+- mTBILL 20,578,232 to 20,900,000: 11 rounds, every one `attributedBy:
+  CALL` with `caller` = the role-holding Safe 0x8e45e6bb (the outer
+  transaction targets a Safe, so the event alone gave UNKNOWN); paths SAFE
+  or UNCHECKED, none UNKNOWN; `overBoundCount` 5 and `uncheckedCount` 5,
+  the over-bound unchecked rounds being exactly 2, 3, 5, 7 and 10 of the
+  hidden-rounds memo with the memo's answers, previous answers and blocks;
+  round 3 deviation 9910825753 (the scale reset); `bound` 5000000 from
+  Initialized(1), `description` mTBILL/USD and `decimals` 8 from the
+  try_ calls; the deployment Upgrade has `withInitializer: true`; the
+  version 1 BoundChange has `changed: false`; one PostTx per round, all
+  consumed. 20 of 20 checks pass, so the call handler join works on real
+  traces.
+- mRE7 round 36 and the Frankencoin module: pending the store reaching
+  those ranges (recorded here when done).
 
 ## Publish (stretch, R15)
 
