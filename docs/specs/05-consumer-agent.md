@@ -163,7 +163,7 @@ Records and determinism:
 
 ```json
 {"format": "crossfoot-decisions-v1",
- "header": {"decided": 61, "allow": 1, "review": 60, "unindexed": [], "wrappers": ["0x494F...", "..."]},
+ "header": {"decided": 61, "allow": "<n>", "review": "<61 minus n>", "unindexed": [], "wrappers": ["0x494F...", "..."]},
  "decisions": [{
   "feed": {"address": "0x0a2a51f2f206447de3e3a80fcf92240244722395", "product": "mRE7", "issuer": "Midas", "family": "POSTED"},
   "decision": "REVIEW", "reason": "ADMIN_GUARD_BYPASSED", "reasons": ["ADMIN_GUARD_BYPASSED"],
