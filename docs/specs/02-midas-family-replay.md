@@ -56,14 +56,13 @@ TransparentUpgradeableProxy instances, 6 are fixed wrapper contracts.
 Derived from: `cli/src/mtbill.rs`, `cli/src/run_mtbill.rs`,
 `cli/src/model/mtbill.rs`, `cli/src/rpc.rs`. Research repository:
 `wiki/midas-feed-family.md`, `raw/midas-customfeed-replay-2026-09-01.md`
-(the survey), `raw/midas-customfeed-survey-2026-09-01.md` (the 66 rows),
-`raw/midas-contracts-addresses-2026-09-01.md` (the registry),
-`raw/teammate-memos/2026-09-01-midas-bound-history.md` (every bound change,
-`Initialized` closure argument, implementation counts),
-`raw/teammate-memos/2026-09-01-midas-hidden-rounds.md` (the 215 Safe-routed
-rounds, their 28 bypasses, the same-block rounds, the absence of the spacing
-rule in the original implementations), `wiki/crossfoot-build-plan.md` (item
-2), `wiki/crossfoot-review-triage.md` (rows 5, 11, C6).
+(the survey), `raw/midas-customfeed-survey-2026-09-01.md`,
+`raw/midas-contracts-addresses-2026-09-01.md`,
+`raw/teammate-memos/2026-09-01-midas-bound-history.md` (bound changes,
+`Initialized` closure, implementation counts),
+`raw/teammate-memos/2026-09-01-midas-hidden-rounds.md` (Safe-routed rounds,
+same-block rounds, spacing rule absent in the original implementations),
+`wiki/crossfoot-build-plan.md`, `wiki/crossfoot-review-triage.md`.
 
 ## Behaviour
 
@@ -74,14 +73,13 @@ Feed list and reads:
   reads every entry; `--feed <product>[.<key>]` restricts to one. No feed
   address is hard-coded in the adapter.
 - R2. For every feed the run reads the eight getters at B1. A feed whose
-  `maxAnswerDeviation()` reverts is classified `kind: "derived"` (the six
-  Dv/Rv wrappers), listed in the result with its `latestRoundData` and
-  excluded from the replay. A feed with no code at B1 is `INPUT_GAP`.
-- R3. The round series comes from `AnswerUpdated` logs over [0, B1] and is
-  cross-checked against `latestRound()` at B1: the number of distinct round
-  ids must equal `latestRound`. A Blockscout response at the 1,000 row cap
-  is narrowed by halving the block window (the `sweep_blockscout_all`
-  convention), never trusted.
+  `maxAnswerDeviation()` reverts is `kind: "derived"` (the six Dv/Rv
+  wrappers), listed with its `latestRoundData` and excluded from the replay.
+  A feed with no code at B1 is `INPUT_GAP`.
+- R3. The round series comes from `AnswerUpdated` logs over [0, B1]; the
+  number of distinct round ids must equal `latestRound()` at B1. A
+  Blockscout response at the 1,000 row cap is narrowed by halving the block
+  window (the `sweep_blockscout_all` convention), never trusted.
 
 Transaction history:
 
@@ -208,14 +206,13 @@ Verdicts and summaries:
 
 - R16. Per feed: `nav_recomputation: "INPUT_GAP"` always; `posting_path` is
   `ADMIN_GUARD_BYPASSED` when at least one `GUARD_BYPASS` exists, else
-  `GUARDED` (or `UNATTRIBUTED` when R6 left rounds unresolved and no bypass
-  was found); `liveness` per R14; `verdict` uses the shared vocabulary:
+  `GUARDED`, or `UNATTRIBUTED` when R6 left rounds unresolved and no bypass
+  was found; `liveness` per R14; `verdict` in the shared vocabulary:
   `INPUT_GAP` for R2 failures, `OBSERVED_DEVIATION` when bypassed,
-  `INSUFFICIENT_WINDOW` when `UNATTRIBUTED`, `SOURCE_STALE` when the
-  liveness is not `LIVE` and no bypass exists, else `CONSISTENT`.
-  `consumer_action` is `REVIEW` unless the verdict is `CONSISTENT`, then
-  `ALLOW`. `REFUSE` is never emitted: the finding does not prove the posted
-  value wrong.
+  `INSUFFICIENT_WINDOW` when `UNATTRIBUTED`, `SOURCE_STALE` when liveness
+  is not `LIVE` and no bypass exists, else `CONSISTENT`. `consumer_action`
+  is `ALLOW` on `CONSISTENT`, otherwise `REVIEW`; `REFUSE` is never emitted
+  because the finding does not prove the posted value wrong.
 - R17. The family summary counts feeds configured, replayed, derived and
   unreadable; successful posts by path, split into external and Safe-routed;
   failed setters; feeds with at least one bypass; bypass posts as
@@ -288,20 +285,14 @@ Finding kinds: `GUARD_BYPASS`, `UNGUARDED_POST`, `GUARD_INCONSISTENT`,
 `BOUND_CHANGED`, `BOUND_HISTORY_INCONSISTENT`, `FAILED_SETTER`,
 `ATTRIBUTION_GAP`.
 
-Timeline file `timelines/<product>-<key>.json`:
-
-```json
-{"feed": "mRE7.customFeed", "address": "0x0a2a...", "decimals": 8,
- "bound_samples": [{"block": 25037958, "bound": "36000000"}],
- "rounds": [{"round_id": 36, "block": 25037959, "timestamp_unix": 1778094180,
-   "answer": "106438116", "path": "raw", "transaction_hash": "0x7579...",
-   "deviation_in_force": "222466613", "bound_in_force": "36000000",
-   "finding": "GUARD_BYPASS"}]}
-```
-
-`path` is one of `safe`, `safe3`, `raw`, `raw3`, `unattributed`; `finding`
-is null for an ordinary guarded round. Deviation and bound are null on
-rounds where they were not read.
+Timeline file `timelines/<product>-<key>.json`: `{"feed": "mRE7.customFeed",
+"address": "0x0a2a...", "decimals": 8, "bound_samples": [{"block": 25037958,
+"bound": "36000000"}], "rounds": [{"round_id": 36, "block": 25037959,
+"timestamp_unix": 1778094180, "answer": "106438116", "path": "raw",
+"transaction_hash": "0x7579...", "deviation_in_force": "222466613",
+"bound_in_force": "36000000", "finding": "GUARD_BYPASS"}]}`. `path` is one
+of `safe`, `safe3`, `raw`, `raw3`, `unattributed`; `finding` is null on an
+ordinary guarded round; deviation and bound are null where not read.
 
 ## CLI surface
 
