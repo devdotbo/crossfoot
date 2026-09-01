@@ -16,6 +16,7 @@ mod render;
 mod rpc;
 mod run_mtbill;
 mod run_svzchf;
+mod summary;
 mod svzchf;
 mod util;
 
@@ -372,6 +373,7 @@ fn recompute_svzchf(opts: RunOpts) -> Result<(), String> {
     )?;
 
     println!("verdict         {}", outcome.verdict.as_str());
+    println!("summary         {}", outcome.summary.headline);
     println!("result          {}", outcome.result_path.display());
     println!("bundle          {}", outcome.bundle_dir.display());
     println!("cache hits      {}", outcome.cache_hits);
@@ -431,6 +433,7 @@ fn check_mtbill(opts: RunOpts) -> Result<(), String> {
             check.summary
         );
     }
+    println!("summary            {}", outcome.summary.headline);
     println!("result             {}", outcome.result_path.display());
     println!("bundle             {}", outcome.bundle_dir.display());
     println!("cache hits         {}", outcome.cache_hits);

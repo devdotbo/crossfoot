@@ -46,6 +46,7 @@ pub struct RunOutcome {
     pub bundle_dir: std::path::PathBuf,
     pub result_path: std::path::PathBuf,
     pub overall: &'static str,
+    pub summary: crate::summary::Summary,
     pub checks: Vec<CheckResult>,
     pub network_calls: usize,
     pub cache_hits: usize,
@@ -339,10 +340,23 @@ pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<Ru
     let input_gap_checks = summary.input_gap_checks.clone();
     let insufficient = summary.insufficient_checks.clone();
 
+    let summary_block = crate::summary::mtbill(
+        overall,
+        &all,
+        latest_answer,
+        inputs.feed_decimals,
+        crate::summary::Window {
+            baseline_block: args.baseline_block,
+            block: args.block,
+        },
+        bundle.findings().len(),
+    );
+
     let result = json!({
         "format": "crossfoot-result-v1",
         "target": "mtbill",
         "check_class": "consistency",
+        "summary": summary_block,
         // Always present. Not a failure of the bundle: the honest statement
         // that the underlying portfolio is not observable, so no amount of
         // on-chain data recomputes this NAV.
@@ -481,6 +495,7 @@ pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<Ru
         bundle_dir: bundle.dir().to_path_buf(),
         result_path,
         overall,
+        summary: summary_block,
         checks: all,
         network_calls: client.network_calls,
         cache_hits: client.cache_hits,

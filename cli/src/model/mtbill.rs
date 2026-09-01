@@ -166,6 +166,14 @@ impl CheckResult {
         self.violations = violations;
         self
     }
+
+    /// A check with a verdict and a violation count and nothing else, for
+    /// tests of code that only reads those.
+    #[cfg(test)]
+    pub fn synthetic(id: &'static str, verdict: CheckVerdict, violations: usize) -> Self {
+        Self::new(id, "synthetic", verdict, String::new())
+            .with_violations(vec![Value::Null; violations])
+    }
 }
 
 /// The overall consistency verdict of a run, with the check ids behind it.

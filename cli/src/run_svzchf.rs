@@ -91,6 +91,7 @@ pub struct RunArgs {
 pub struct RunOutcome {
     pub bundle_dir: std::path::PathBuf,
     pub verdict: Verdict,
+    pub summary: crate::summary::Summary,
     pub result_path: std::path::PathBuf,
     pub network_calls: usize,
     pub cache_hits: usize,
@@ -496,11 +497,22 @@ pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<Ru
         }
     }
 
+    let summary = crate::summary::svzchf(
+        verdict,
+        &comparison,
+        crate::summary::Window {
+            baseline_block: args.baseline_block,
+            block: args.block,
+        },
+        bundle.findings().len(),
+    );
+
     let result = json!({
         "format": "crossfoot-result-v1",
         "target": "svzchf",
         "check_class": "full recomputation",
         "verdict": verdict.as_str(),
+        "summary": summary,
         "tolerance": "zero, to the wei",
         "window": {
             "baseline_block": args.baseline_block,
@@ -573,6 +585,7 @@ pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<Ru
     Ok(RunOutcome {
         bundle_dir: bundle.dir().to_path_buf(),
         verdict,
+        summary,
         result_path,
         network_calls: client.network_calls,
         cache_hits: client.cache_hits,
