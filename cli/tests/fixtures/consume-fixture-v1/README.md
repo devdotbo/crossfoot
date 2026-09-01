@@ -10,6 +10,8 @@ at block 25,884,405 once the subgraph is live (see the last section).
 
 ## Files
 
+- `responses/Head.json`: the `_meta` of the head at run time, identical to
+  the FeedStatus `_meta` because the fixture was pinned at the head.
 - `responses/FeedStatus.json`: 61 feeds (60 bounded Midas custom feeds, one
   svZCHF DERIVED feed). Per Midas feed: address, product, registry key,
   bound, min and max answer, latest answer, latest round id and its post
@@ -68,7 +70,8 @@ sentence, 6 wrappers, 0 unindexed.
 1. Run the demo command of spec 05 against the Studio endpoint with
    `--block 25884405 --now <head timestamp>` and copy
    `decisions/<stamp>/responses/` into `cli/tests/fixtures/consume-<Qm...>/responses/`
-   (the `Head.json` probe is not written when `--block` is given).
+   (`Head.json` records the live head of that moment; the other three are
+   pinned to 25,884,405).
 2. Copy the `feeds.json` rendered from the fixture bundles of specs 01 and
    02 next to it, and `config/midas-mainnet.json` as `midas-mainnet.json`.
 3. Run the consumer from the new directory and commit its `decisions.json`

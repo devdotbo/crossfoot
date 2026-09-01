@@ -25,7 +25,7 @@ use crate::abi::hex_encode;
 use crate::cache::sha256_hex;
 use crate::model::decision::{
     decide, BoundChangeRow, CrossfootEvidence, CrossfootRow, Decision, Family, FeedInputs, Head,
-    LatestRound, Policy, RateChangeRow, SubgraphEvidence, SubgraphFeed, TimelineEvidence,
+    LatestRound, Pinned, Policy, RateChangeRow, SubgraphEvidence, SubgraphFeed, TimelineEvidence,
     UncheckedRound, UnknownRound,
 };
 use crate::rpc::redact_endpoint;
@@ -35,12 +35,9 @@ pub const FORMAT: &str = "crossfoot-decisions-v1";
 pub const ENV_SUBGRAPH_URL: &str = "CROSSFOOT_SUBGRAPH_URL";
 pub const ENV_SUBGRAPH_KEY: &str = "CROSSFOOT_SUBGRAPH_KEY";
 
-/// The head probe run before the three queries when `--block` is absent, so
-/// that every query of one run is pinned to the same block. Recorded as
-/// `responses/Head.json` and listed in `provenance.queries` like the others.
-pub const HEAD_QUERY: &str = "query Head { _meta { block { number } } }";
-
-pub const QUERY_NAMES: [&str; 3] = ["FeedStatus", "WindowFindings", "FeedTimeline"];
+/// The four query files, in run order. `Head` gives the live head that the
+/// other three are pinned to unless `--block` is given (05 corrections C1).
+pub const QUERY_NAMES: [&str; 4] = ["Head", "FeedStatus", "WindowFindings", "FeedTimeline"];
 
 #[derive(Args, Debug, Clone)]
 pub struct ConsumeOpts {
@@ -112,6 +109,8 @@ pub struct RunOutcome {
     pub deployment: String,
     pub block: u64,
     pub block_timestamp: i64,
+    pub head_number: u64,
+    pub head_timestamp: i64,
     pub rows: Vec<(String, Decision, Option<String>)>,
     pub header: Header,
     /// The typed records as written, for callers that anchor or test them
@@ -157,7 +156,10 @@ pub struct SubgraphProvenance {
     pub source: &'static str,
     pub deployment: String,
     pub deployment_digest: Option<String>,
+    /// The block every query except Head was pinned to.
     pub block: BlockRef,
+    /// The live indexed head at run time, from the Head query.
+    pub head: BlockRef,
     pub has_indexing_errors: bool,
 }
 
@@ -422,17 +424,25 @@ fn meta_deployment(data: &Value) -> Option<String> {
     data.get("_meta").and_then(|m| str_field(m, "deployment"))
 }
 
-fn parse_head(data: &Value) -> Result<Head, String> {
+fn meta_block_hash(data: &Value) -> Option<String> {
+    data.get("_meta")
+        .and_then(|m| m.get("block"))
+        .and_then(|b| str_field(b, "hash"))
+}
+
+/// `_meta` with deployment, number, timestamp and the error flag, as the
+/// Head and FeedStatus queries select it.
+fn parse_meta(name: &str, data: &Value) -> Result<Head, String> {
     let meta = data
         .get("_meta")
-        .ok_or_else(|| "FeedStatus: _meta is missing".to_string())?;
+        .ok_or_else(|| format!("{name}: _meta is missing"))?;
     let block = meta
         .get("block")
-        .ok_or_else(|| "FeedStatus: _meta.block is missing".to_string())?;
+        .ok_or_else(|| format!("{name}: _meta.block is missing"))?;
     Ok(Head {
-        deployment: require_str("FeedStatus", meta, "deployment")?,
-        number: require_int("FeedStatus", block, "number")? as u64,
-        timestamp: require_int("FeedStatus", block, "timestamp")?,
+        deployment: require_str(name, meta, "deployment")?,
+        number: require_int(name, block, "number")? as u64,
+        timestamp: require_int(name, block, "timestamp")?,
         has_indexing_errors: meta
             .get("hasIndexingErrors")
             .and_then(Value::as_bool)
@@ -787,38 +797,32 @@ pub fn run_with_key(opts: &ConsumeOpts, key: Option<String>) -> Result<RunOutcom
 
     let mut executed: Vec<Executed> = Vec::new();
 
-    // The pinned block: given, probed, or (on replay) taken from the record.
-    let block = match opts.block {
-        Some(block) => block,
-        None => match &source {
-            Source::Network { .. } => {
-                let head = source.execute("Head", None, HEAD_QUERY, &json!({}))?;
-                let number = meta_block_number("Head", &response_data("Head", &head.body)?)?;
-                executed.push(head);
-                number
-            }
-            Source::Replay(dir) => {
-                let head_file = dir.join("responses").join("Head.json");
-                if head_file.exists() {
-                    let head = source.execute("Head", None, HEAD_QUERY, &json!({}))?;
-                    let number = meta_block_number("Head", &response_data("Head", &head.body)?)?;
-                    executed.push(head);
-                    number
-                } else {
-                    let status_file = dir.join("responses").join("FeedStatus.json");
-                    let body = fs::read_to_string(&status_file).map_err(|err| {
-                        format!(
-                            "replay response {} is not readable: {err}",
-                            status_file.display()
-                        )
-                    })?;
-                    meta_block_number("FeedStatus", &response_data("FeedStatus", &body)?)?
-                }
-            }
-        },
+    // Head first, on every run: the live indexed head and the error flag.
+    let head_exec = source.execute("Head", None, &queries["Head"], &json!({}))?;
+    let head_data = response_data("Head", &head_exec.body)?;
+    let head = parse_meta("Head", &head_data)?;
+    let head_hash = meta_block_hash(&head_data);
+    executed.push(head_exec);
+
+    // The pinned block: given, else the head; on replay without --block the
+    // block the recorded FeedStatus was pinned to, so a directory recorded
+    // with --block replays without repeating the number.
+    let block = match (opts.block, &source) {
+        (Some(block), _) => block,
+        (None, Source::Network { .. }) => head.number,
+        (None, Source::Replay(dir)) => {
+            let status_file = dir.join("responses").join("FeedStatus.json");
+            let body = fs::read_to_string(&status_file).map_err(|err| {
+                format!(
+                    "replay response {} is not readable: {err}",
+                    status_file.display()
+                )
+            })?;
+            meta_block_number("FeedStatus", &response_data("FeedStatus", &body)?)?
+        }
     };
 
-    // FeedStatus.
+    // FeedStatus at the pinned block.
     let status = source.execute(
         "FeedStatus",
         None,
@@ -826,13 +830,23 @@ pub fn run_with_key(opts: &ConsumeOpts, key: Option<String>) -> Result<RunOutcom
         &json!({"block": block}),
     )?;
     let status_data = response_data("FeedStatus", &status.body)?;
-    let head = parse_head(&status_data)?;
-    if head.number != block {
+    let status_meta = parse_meta("FeedStatus", &status_data)?;
+    if status_meta.number != block {
         return Err(format!(
             "FeedStatus: response is at block {} but the run is pinned to {block}",
-            head.number
+            status_meta.number
         ));
     }
+    if status_meta.deployment != head.deployment {
+        return Err(format!(
+            "FeedStatus: response comes from deployment {}, Head from {}",
+            status_meta.deployment, head.deployment
+        ));
+    }
+    let pinned = Pinned {
+        number: status_meta.number,
+        timestamp: status_meta.timestamp,
+    };
     let feeds = parse_feeds(&status_data)?;
     executed.push(status);
 
@@ -856,7 +870,7 @@ pub fn run_with_key(opts: &ConsumeOpts, key: Option<String>) -> Result<RunOutcom
         }),
     )?;
     let window_data = response_data("WindowFindings", &window.body)?;
-    check_meta("WindowFindings", &window_data, &head)?;
+    check_meta("WindowFindings", &window_data, &head.deployment, block)?;
     let findings = parse_window(&window_data)?;
     executed.push(window);
 
@@ -879,7 +893,7 @@ pub fn run_with_key(opts: &ConsumeOpts, key: Option<String>) -> Result<RunOutcom
             &json!({"block": block, "feed": address}),
         )?;
         let timeline_data = response_data("FeedTimeline", &timeline.body)?;
-        check_meta("FeedTimeline", &timeline_data, &head)?;
+        check_meta("FeedTimeline", &timeline_data, &head.deployment, block)?;
         if let Some((feed_address, evidence)) = parse_timeline(&timeline_data)? {
             timelines.insert(feed_address, evidence);
         }
@@ -894,11 +908,13 @@ pub fn run_with_key(opts: &ConsumeOpts, key: Option<String>) -> Result<RunOutcom
             deployment: head.deployment.clone(),
             deployment_digest: deployment_digest(&head.deployment),
             block: BlockRef {
+                number: pinned.number,
+                hash: meta_block_hash(&status_data),
+                timestamp: pinned.timestamp,
+            },
+            head: BlockRef {
                 number: head.number,
-                hash: status_data
-                    .get("_meta")
-                    .and_then(|m| m.get("block"))
-                    .and_then(|b| str_field(b, "hash")),
+                hash: head_hash,
                 timestamp: head.timestamp,
             },
             has_indexing_errors: head.has_indexing_errors,
@@ -924,6 +940,7 @@ pub fn run_with_key(opts: &ConsumeOpts, key: Option<String>) -> Result<RunOutcom
         let row = joined.get(&feed.address);
         let inputs = FeedInputs {
             head: &head,
+            pinned,
             now,
             policy: &policy,
             feed,
@@ -1031,8 +1048,10 @@ pub fn run_with_key(opts: &ConsumeOpts, key: Option<String>) -> Result<RunOutcom
         decisions_path,
         decisions_sha256,
         deployment: head.deployment,
-        block: head.number,
-        block_timestamp: head.timestamp,
+        block: pinned.number,
+        block_timestamp: pinned.timestamp,
+        head_number: head.number,
+        head_timestamp: head.timestamp,
         rows: rows_out,
         header,
         records,
@@ -1041,22 +1060,25 @@ pub fn run_with_key(opts: &ConsumeOpts, key: Option<String>) -> Result<RunOutcom
 
 /// Every response of a run must come from the same deployment at the same
 /// block, or the record's provenance would be a lie.
-fn check_meta(name: &str, data: &Value, head: &Head) -> Result<(), String> {
+fn check_meta(
+    name: &str,
+    data: &Value,
+    expected_deployment: &str,
+    block: u64,
+) -> Result<(), String> {
     if data.get("_meta").is_none() {
         return Ok(());
     }
     let number = meta_block_number(name, data)?;
-    if number != head.number {
+    if number != block {
         return Err(format!(
-            "{name}: response is at block {number}, FeedStatus was at {}",
-            head.number
+            "{name}: response is at block {number}, the run is pinned to {block}"
         ));
     }
     if let Some(deployment) = meta_deployment(data) {
-        if deployment != head.deployment {
+        if deployment != expected_deployment {
             return Err(format!(
-                "{name}: response comes from deployment {deployment}, FeedStatus from {}",
-                head.deployment
+                "{name}: response comes from deployment {deployment}, Head from {expected_deployment}"
             ));
         }
     }
@@ -1065,6 +1087,11 @@ fn check_meta(name: &str, data: &Value, head: &Head) -> Result<(), String> {
 
 pub fn print_outcome(outcome: &RunOutcome) {
     println!("deployment  {}", outcome.deployment);
+    println!(
+        "head  {} ({})",
+        outcome.head_number,
+        unix_to_utc(outcome.head_timestamp).unwrap_or_else(|| "invalid timestamp".into())
+    );
     println!(
         "block  {} ({})",
         outcome.block,
@@ -1166,6 +1193,7 @@ mod tests {
             let dir = temp(tag);
             fs::create_dir_all(dir.join("responses")).unwrap();
             let s = Synthetic { dir };
+            s.write("Head.json", &json!({"data": {"_meta": meta()}}));
             s.write("FeedStatus.json", &default_feed_status());
             s.write("WindowFindings.json", &empty_window());
             s.write("FeedTimeline-mre7.json", &json!({"data": {"_meta": {"deployment": FIXTURE_DEPLOYMENT, "block": {"number": FIXTURE_BLOCK}}, "feed": null}}));
@@ -1287,12 +1315,16 @@ mod tests {
             .iter()
             .map(|q| q["name"].as_str().unwrap())
             .collect();
-        assert_eq!(names, vec!["FeedStatus", "WindowFindings", "FeedTimeline"]);
-        assert_eq!(queries[2]["argument"], "mRE7");
         assert_eq!(
-            queries[2]["response_file"],
+            names,
+            vec!["Head", "FeedStatus", "WindowFindings", "FeedTimeline"]
+        );
+        assert_eq!(queries[3]["argument"], "mRE7");
+        assert_eq!(
+            queries[3]["response_file"],
             "responses/FeedTimeline-mre7.json"
         );
+        assert_eq!(queries[0]["variables_sha256"], sha256_hex(b"{}"));
 
         let query_dir = repo_root().join("subgraph/queries");
         for query in queries {
@@ -1305,19 +1337,19 @@ mod tests {
             "block": FIXTURE_BLOCK, "since": since.to_string(), "resultBlock": "25853000"
         }));
         assert_eq!(
-            queries[1]["variables_sha256"],
+            queries[2]["variables_sha256"],
             sha256_hex(expected_window.as_bytes())
         );
         assert_eq!(
-            queries[0]["variables_sha256"],
+            queries[1]["variables_sha256"],
             sha256_hex(canonical_json(&json!({"block": FIXTURE_BLOCK})).as_bytes())
         );
         assert_eq!(
-            queries[2]["variables_sha256"],
+            queries[3]["variables_sha256"],
             sha256_hex(canonical_json(&json!({"block": FIXTURE_BLOCK, "feed": MRE7})).as_bytes())
         );
         let recorded = fs::read(outcome.out_dir.join("responses/WindowFindings.json")).unwrap();
-        assert_eq!(queries[1]["response_sha256"], sha256_hex(&recorded));
+        assert_eq!(queries[2]["response_sha256"], sha256_hex(&recorded));
         assert_eq!(
             recorded,
             fs::read(fixture_dir().join("responses/WindowFindings.json")).unwrap(),
@@ -1407,9 +1439,9 @@ mod tests {
     #[test]
     fn indexing_errors_route_every_feed_to_review() {
         let s = Synthetic::new("indexing-errors");
-        let mut status = default_feed_status();
-        status["data"]["_meta"]["hasIndexingErrors"] = json!(true);
-        s.write("FeedStatus.json", &status);
+        let mut head = meta();
+        head["hasIndexingErrors"] = json!(true);
+        s.write("Head.json", &json!({"data": {"_meta": head}}));
         let outcome = run_with_key(&s.opts(), None).unwrap();
         assert_eq!(outcome.header.review, 2);
         assert!(outcome
@@ -1515,6 +1547,7 @@ mod tests {
             }
             for key in [
                 "endpoint",
+                "head",
                 "source",
                 "deployment",
                 "deployment_digest",
@@ -1652,7 +1685,7 @@ mod tests {
         let queries = expected["decisions"][0]["provenance"]["queries"]
             .as_array()
             .unwrap();
-        assert_eq!(queries.len(), 3);
+        assert_eq!(queries.len(), 4);
         for query in queries {
             let name = query["name"].as_str().unwrap();
             let file =

@@ -1,6 +1,6 @@
 # One feed's full round and bound history, pinned to one block. Run once per
 # `--timeline` product by `crossfoot consume` (spec 05 R1, R2).
-query FeedTimeline($block: Int, $feed: Bytes!) {
+query FeedTimeline($block: Int!, $feed: Bytes!) {
   _meta(block: { number: $block }) {
     deployment
     block { number }

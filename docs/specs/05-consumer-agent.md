@@ -280,3 +280,62 @@ Applied after the external review of the whole project on 2026-09-02
   latest state, the freshness gate and the posting path, never on a
   mock. The Arc anchor mentioned in R9 and in the Out of scope pointer to
   `06-arc-hook.md` is deferred with that spec.
+
+## Implementation notes (event build)
+
+Settled while building commits 18a to 18c; they refine the requirements
+above without changing a decision word.
+
+- Query files (corrections C1, 04 C3). The four files under
+  `subgraph/queries/` are `Head` (no variables) and the three of R1, which
+  declare `$block: Int!` and pass `block: {number: $block}` on every root
+  field, `_meta` included, so that the file bytes can be hashed verbatim
+  (R2) and still be pinned. `_meta { deployment block { number } }` is
+  selected in all of them; the agent rejects a run whose responses disagree
+  on deployment or block. FeedStatus also selects `registryKey` and
+  `latestRound.updatedAt` and orders by `id`; WindowFindings orders by
+  `block` and caps `boundChanges` and `rateChanges` at 100.
+- Run sequence. `Head` runs first on every run, live or replay, and is
+  recorded as `responses/Head.json` and listed first in
+  `provenance.queries`. The pinned block is `--block` when given, else the
+  Head number; on replay without `--block` it is the block the recorded
+  FeedStatus carries, so a directory recorded with `--block` replays
+  without repeating it. Rows 1 and 2 read `hasIndexingErrors` and the
+  timestamp from `Head`; feed freshness (R5) and result age (R5) read the
+  pinned block's timestamp and number from the FeedStatus `_meta`. The
+  record carries both under `provenance.subgraph`: `block` (pinned) and
+  `head` (live), each with number, hash and timestamp, so the gate can be
+  re-checked from the record alone.
+- Variables. `block` is a JSON number; `since` and `resultBlock` are
+  decimal strings (BigInt); `feed` is the lowercase address.
+  `variables_sha256` hashes the compact JSON with keys in sorted order.
+  `$resultBlock` is the lowest `block` among the DERIVED rows, or the
+  pinned block when no DERIVED feed has a row.
+- Response files. `responses/<Query>.json` and
+  `responses/FeedTimeline-<slug>.json` where the slug is the `--timeline`
+  argument lowercased (`mre7`). `decisions.sha256` is one `sha256sum` line.
+- Record hash. `record_sha256` is the sha256 of the record serialised
+  compactly in the key order of `decisions.json` with the `record_sha256`
+  key absent. `deployment_digest` is null when the deployment ID is not a
+  base58 sha256 multihash.
+- reason_text templates beyond R7, all deterministic:
+  `INDEXING_ERRORS: subgraph <id> reports indexing errors at block <n>`;
+  `SUBGRAPH_STALE: indexed head block <n> at <ts> is <lag> seconds behind now <now>, limit <max> seconds`;
+  `NO_CROSSFOOT_RESULT: no feeds.json row for <address>`;
+  `PATH_NOT_ATTRIBUTABLE: <k> rounds in the window not attributable to a setter, first round <id> in tx <hash>; bundle <root>`;
+  row 5 without a subgraph round:
+  `ADMIN_GUARD_BYPASSED: Crossfoot posting_path ADMIN_GUARD_BYPASSED at block <n>, no unchecked round over the bound in the window; bundle <root>`;
+  `BOUND_CHANGED: bound <old> to <new> percent, min/max <omin>/<omax> to <nmin>/<nmax> at block <n>; tx <hash>; bundle <root>`;
+  `STALE: last post at <ts> is <age> seconds before the indexed head at <ts>, limit <days> days; bundle <root>`;
+  `RESULT_STALE: Crossfoot result at block <rb> is <k> blocks behind the indexed head <n>, limit <max> blocks; bundle <root>`;
+  `RATE_CHANGED_AFTER_WINDOW: rate changed to <ppm> ppm at block <n> after the result block <rb>; tx <hash>; bundle <root>`;
+  every verdict or liveness word taken from the row uses the row 11
+  template. Where no row exists the suffix is `; no Crossfoot result`.
+- Fixture. Until the subgraph is deployed the fixture is
+  `cli/tests/fixtures/consume-fixture-v1/` with hand-built responses; its
+  README states which numbers are from the research memos and how to swap
+  in `consume-<deployment-id>/`.
+- Header counts are JSON numbers. Wrappers come from the entries with
+  `kind: "derived"` of `--midas-config` (default
+  `config/midas-mainnet.json`); a
+  missing file gives no wrappers.

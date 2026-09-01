@@ -1,7 +1,7 @@
 # Latest posted state per feed across both families, pinned to one block.
 # Used verbatim by `crossfoot consume` (spec 05 R1, R2); the file bytes are
 # hashed into every decision record, so edit only with the spec.
-query FeedStatus($block: Int) {
+query FeedStatus($block: Int!) {
   _meta(block: { number: $block }) {
     deployment
     block { number hash timestamp }

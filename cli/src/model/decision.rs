@@ -39,13 +39,22 @@ pub struct Policy {
     pub max_result_age_days: u64,
 }
 
-/// `_meta` of the FeedStatus response.
+/// `_meta` of the Head query: the live indexed head (05 corrections C1).
 #[derive(Debug, Clone)]
 pub struct Head {
     pub deployment: String,
     pub number: u64,
     pub timestamp: i64,
     pub has_indexing_errors: bool,
+}
+
+/// The block every other query of the run is pinned to (`_meta` of
+/// FeedStatus at `$block`). Equal to the head on a live run without
+/// `--block`; older when the run is pinned or replayed.
+#[derive(Debug, Clone, Copy)]
+pub struct Pinned {
+    pub number: u64,
+    pub timestamp: i64,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -182,6 +191,7 @@ impl CrossfootEvidence {
 /// Everything the table reads for one feed.
 pub struct FeedInputs<'a> {
     pub head: &'a Head,
+    pub pinned: Pinned,
     pub now: i64,
     pub policy: &'a Policy,
     pub feed: &'a SubgraphFeed,
@@ -335,9 +345,10 @@ pub fn decide(inputs: &FeedInputs) -> Outcome {
         texts.push(text);
     };
 
+    let pinned = inputs.pinned;
     let head_lag = inputs.now - head.timestamp;
-    let feed_age = feed.latest_updated_at.map(|t| head.timestamp - t);
-    let result_age = row.map(|r| head.number as i64 - r.block as i64);
+    let feed_age = feed.latest_updated_at.map(|t| pinned.timestamp - t);
+    let result_age = row.map(|r| pinned.number as i64 - r.block as i64);
 
     // Row 1.
     if head.has_indexing_errors {
@@ -476,10 +487,10 @@ pub fn decide(inputs: &FeedInputs) -> Outcome {
             } else if !fresh {
                 let text = match feed.latest_updated_at {
                     Some(last) => format!(
-                        "STALE: last post at {} is {} seconds before the indexed head at {}, limit {} days{}",
+                        "STALE: last post at {} is {} seconds before the pinned block at {}, limit {} days{}",
                         last,
-                        head.timestamp - last,
-                        head.timestamp,
+                        pinned.timestamp - last,
+                        pinned.timestamp,
                         policy.stale_after_days,
                         bundle_suffix(row)
                     ),
@@ -522,8 +533,8 @@ pub fn decide(inputs: &FeedInputs) -> Outcome {
                         &mut texts,
                         "RESULT_STALE".into(),
                         format!(
-                            "RESULT_STALE: Crossfoot result at block {} is {} blocks behind the indexed head {}, limit {} blocks; bundle {}",
-                            r.block, age, head.number, max_age, r.bundle_root
+                            "RESULT_STALE: Crossfoot result at block {} is {} blocks behind the pinned block {}, limit {} blocks; bundle {}",
+                            r.block, age, pinned.number, max_age, r.bundle_root
                         ),
                     );
                 }
@@ -709,6 +720,10 @@ mod tests {
     ) -> FeedInputs<'a> {
         FeedInputs {
             head,
+            pinned: Pinned {
+                number: head.number,
+                timestamp: head.timestamp,
+            },
             now: head.timestamp + 10,
             policy,
             feed,

@@ -2,7 +2,7 @@
 # (over the bound or not), rounds whose setter could not be attributed,
 # bound changes, and rate changes after the DERIVED result block.
 # Used verbatim by `crossfoot consume` (spec 05 R1, R2).
-query WindowFindings($block: Int, $since: BigInt!, $resultBlock: BigInt!) {
+query WindowFindings($block: Int!, $since: BigInt!, $resultBlock: BigInt!) {
   _meta(block: { number: $block }) {
     deployment
     block { number }

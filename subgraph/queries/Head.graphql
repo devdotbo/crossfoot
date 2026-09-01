@@ -1,0 +1,10 @@
+# The live indexed head. Run first on every live run; the agent pins the
+# three other queries to its block number unless --block is given (spec 04
+# corrections C3, spec 05 corrections C1). Hashed verbatim like the others.
+query Head {
+  _meta {
+    deployment
+    hasIndexingErrors
+    block { number hash timestamp }
+  }
+}
