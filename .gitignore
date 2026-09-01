@@ -1,0 +1,14 @@
+# Build output.
+target/
+
+# Evidence bundles and the content-addressed RPC cache: reproducible from the
+# network, never committed.
+bundles/
+cache/
+
+# Rendered pages, regenerated from the bundles by `crossfoot render`.
+site/
+
+.env
+*.DS_Store
+.DS_Store

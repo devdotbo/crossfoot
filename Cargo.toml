@@ -1,0 +1,9 @@
+[workspace]
+resolver = "2"
+members = ["engine", "cli"]
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+# Not yet published to crates.io.
+publish = false
