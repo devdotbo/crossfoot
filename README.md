@@ -1,5 +1,7 @@
 # Crossfoot
 
+[![CI](https://github.com/devdotbo/crossfoot/actions/workflows/ci.yml/badge.svg)](https://github.com/devdotbo/crossfoot/actions/workflows/ci.yml)
+
 Crossfoot recomputes what a tokenized instrument should be worth from its
 contractual terms, using a deterministic ACTUS PAM engine, and compares the
 result against the value posted on-chain at pinned blocks. Every run writes a
