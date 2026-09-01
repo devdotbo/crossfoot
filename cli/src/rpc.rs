@@ -266,7 +266,10 @@ fn classify(body: &str) -> (Classification, String) {
             if status == "1" {
                 return (Classification::Success, String::new());
             }
-            if message.contains("no logs found") || message.contains("no records found") {
+            if message.contains("no logs found")
+                || message.contains("no records found")
+                || message.contains("no transactions found")
+            {
                 return (Classification::Success, String::new());
             }
             let detail = format!("Blockscout status {status}: {message}");
@@ -961,6 +964,66 @@ pub fn http_get_descriptor(
         to: resource.to_string(),
         calldata: rendered,
         params: json!([]),
+    }
+}
+
+/// Blockscout external transaction list of one address. The cache key slots
+/// follow the log convention: `block` holds the inclusive range, `to` the
+/// address, and the constant `txlist` in the calldata slot keeps the key
+/// distinct from every log request over the same range.
+pub fn blockscout_txlist_descriptor(
+    label: &str,
+    address: &str,
+    from_block: u64,
+    to_block: u64,
+) -> Descriptor {
+    let query = vec![
+        ("module".to_string(), "account".to_string()),
+        ("action".to_string(), "txlist".to_string()),
+        ("address".to_string(), address.to_string()),
+        ("startblock".to_string(), from_block.to_string()),
+        ("endblock".to_string(), to_block.to_string()),
+        ("sort".to_string(), "asc".to_string()),
+    ];
+    Descriptor {
+        label: label.to_string(),
+        wire: Wire::HttpGet {
+            query: query.clone(),
+            json: true,
+            base: None,
+        },
+        method: "blockscout_txlist".to_string(),
+        block: format!("0x{from_block:x}..0x{to_block:x}"),
+        to: address.to_string(),
+        calldata: "txlist".to_string(),
+        params: json!(query),
+    }
+}
+
+/// trace_transaction (Parity style) for one mined transaction. Not block
+/// pinned, like eth_getTransactionByHash.
+pub fn trace_transaction_descriptor(label: &str, hash: &str) -> Descriptor {
+    Descriptor {
+        label: label.to_string(),
+        wire: Wire::JsonRpc,
+        method: "trace_transaction".to_string(),
+        block: "mined".to_string(),
+        to: hash.to_string(),
+        calldata: String::new(),
+        params: json!([hash]),
+    }
+}
+
+/// debug_traceTransaction with the callTracer, the Geth style fallback.
+pub fn debug_trace_descriptor(label: &str, hash: &str) -> Descriptor {
+    Descriptor {
+        label: label.to_string(),
+        wire: Wire::JsonRpc,
+        method: "debug_traceTransaction".to_string(),
+        block: "mined".to_string(),
+        to: hash.to_string(),
+        calldata: "tracer=callTracer".to_string(),
+        params: json!([hash, { "tracer": "callTracer" }]),
     }
 }
 
