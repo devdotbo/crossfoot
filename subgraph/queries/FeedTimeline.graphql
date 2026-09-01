@@ -1,0 +1,40 @@
+# One feed's full round and bound history, pinned to one block. Run once per
+# `--timeline` product by `crossfoot consume` (spec 05 R1, R2).
+query FeedTimeline($block: Int, $feed: Bytes!) {
+  _meta(block: { number: $block }) {
+    deployment
+    block { number }
+  }
+  feed(id: $feed, block: { number: $block }) {
+    id
+    product
+    description
+    bound
+    roundCount
+    uncheckedCount
+    overBoundCount
+    boundChanges(orderBy: block, first: 100) {
+      block
+      initializerVersion
+      oldBound
+      newBound
+      changed
+      caller
+      tx
+    }
+    rounds(orderBy: roundId, first: 1000) {
+      roundId
+      answer
+      updatedAt
+      path
+      selector
+      first
+      deviationFromPrevious
+      boundAtPost
+      overBound
+      secondsSincePrevious
+      tx
+      block
+    }
+  }
+}

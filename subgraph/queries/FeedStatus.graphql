@@ -1,0 +1,27 @@
+# Latest posted state per feed across both families, pinned to one block.
+# Used verbatim by `crossfoot consume` (spec 05 R1, R2); the file bytes are
+# hashed into every decision record, so edit only with the spec.
+query FeedStatus($block: Int) {
+  _meta(block: { number: $block }) {
+    deployment
+    block { number hash timestamp }
+    hasIndexingErrors
+  }
+  feeds(first: 100, orderBy: id, block: { number: $block }) {
+    id
+    family
+    issuer
+    product
+    registryKey
+    decimals
+    bound
+    minAnswer
+    maxAnswer
+    latestAnswer
+    latestUpdatedAt
+    roundCount
+    uncheckedCount
+    overBoundCount
+    latestRound { roundId path overBound updatedAt }
+  }
+}

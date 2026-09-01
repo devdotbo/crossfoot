@@ -1,0 +1,68 @@
+# Everything the decision table needs inside the window: unchecked posts
+# (over the bound or not), rounds whose setter could not be attributed,
+# bound changes, and rate changes after the DERIVED result block.
+# Used verbatim by `crossfoot consume` (spec 05 R1, R2).
+query WindowFindings($block: Int, $since: BigInt!, $resultBlock: BigInt!) {
+  _meta(block: { number: $block }) {
+    deployment
+    block { number }
+  }
+  overBound: rounds(
+    block: { number: $block }
+    where: { path: UNCHECKED, first: false, blockTimestamp_gte: $since }
+    first: 100
+    orderBy: block
+  ) {
+    feed { id product }
+    roundId
+    answer
+    previousAnswer
+    deviationFromPrevious
+    boundAtPost
+    overBound
+    selector
+    poster
+    tx
+    block
+    blockTimestamp
+  }
+  unknown: rounds(
+    block: { number: $block }
+    where: { path: UNKNOWN, blockTimestamp_gte: $since }
+    first: 1000
+    orderBy: block
+  ) {
+    feed { id }
+    roundId
+    tx
+    block
+  }
+  boundChanges(
+    block: { number: $block }
+    where: { changed: true, blockTimestamp_gte: $since }
+    first: 100
+    orderBy: block
+  ) {
+    feed { id }
+    oldBound
+    newBound
+    oldMinAnswer
+    newMinAnswer
+    oldMaxAnswer
+    newMaxAnswer
+    block
+    tx
+    caller
+  }
+  rateChanges(
+    block: { number: $block }
+    where: { block_gt: $resultBlock }
+    first: 100
+    orderBy: block
+  ) {
+    feed { id }
+    ratePPM
+    block
+    tx
+  }
+}
