@@ -65,15 +65,24 @@ impl BundleWriter {
     /// otherwise write into one directory and overwrite each other. A numeric
     /// suffix keeps every run's evidence separate.
     pub fn create(bundles_root: &Path, name: &str) -> io::Result<Self> {
+        fs::create_dir_all(bundles_root)?;
+        // Claiming the directory is the check: create_dir fails when it
+        // exists, so two runs racing for one name cannot both win it.
         let mut dir = bundles_root.join(name);
         let mut attempt = 2;
-        while dir.exists() {
-            dir = bundles_root.join(format!("{name}-{attempt}"));
-            attempt += 1;
-            if attempt > 1000 {
-                return Err(io::Error::other(format!(
-                    "could not find a free bundle directory name for {name}"
-                )));
+        loop {
+            match fs::create_dir(&dir) {
+                Ok(()) => break,
+                Err(err) if err.kind() == io::ErrorKind::AlreadyExists => {
+                    dir = bundles_root.join(format!("{name}-{attempt}"));
+                    attempt += 1;
+                    if attempt > 1000 {
+                        return Err(io::Error::other(format!(
+                            "could not find a free bundle directory name for {name}"
+                        )));
+                    }
+                }
+                Err(err) => return Err(err),
             }
         }
         let raw_dir = dir.join("raw");
@@ -158,6 +167,74 @@ impl BundleWriter {
     pub fn write_meta(&self, meta: Value) -> io::Result<()> {
         write_json(&self.dir.join("meta.json"), &meta)
     }
+
+    /// Writes result.json. The result has to be a pure function of the raw
+    /// bodies and the code (spec 01 R8, spec 03 R4), so a result that carries
+    /// a run-time field is refused here rather than written: wall-clock
+    /// timings, cache and network counters, endpoint names and references to
+    /// other bundles belong in meta.json.
+    pub fn write_result(&self, result: &Value) -> Result<PathBuf, String> {
+        if let Some(path) = impure_result_field(result) {
+            return Err(format!(
+                "result.json must not carry the run-time field {path}; it belongs in meta.json"
+            ));
+        }
+        let path = self.dir.join("result.json");
+        write_json(&path, result).map_err(|err| format!("could not write result.json: {err}"))?;
+        Ok(path)
+    }
+}
+
+/// Keys that describe the run rather than the result. Chain timestamps such
+/// as `timestamp_utc` or `last_post_utc` are properties of the inputs and
+/// stay allowed; only the tool's own clock, counters and endpoints are not.
+const IMPURE_RESULT_KEYS: [&str; 15] = [
+    "run_started_utc",
+    "run_finished_utc",
+    "fetch_started_utc",
+    "fetch_finished_utc",
+    "first_stored_utc",
+    "stored_utc",
+    "endpoint",
+    "endpoints_configured",
+    "log_endpoints_configured",
+    "endpoint_fingerprints",
+    "cache_hits_this_run",
+    "network_calls_this_run",
+    "rpc_observations",
+    "b0_bundle",
+    "b1_bundle",
+];
+
+/// The JSON path of the first run-time field in a result, or None when the
+/// result is pure. Walks every object and array.
+pub fn impure_result_field(value: &Value) -> Option<String> {
+    fn walk(value: &Value, path: &str) -> Option<String> {
+        match value {
+            Value::Object(map) => {
+                for (key, child) in map {
+                    let here = if path.is_empty() {
+                        key.clone()
+                    } else {
+                        format!("{path}.{key}")
+                    };
+                    if IMPURE_RESULT_KEYS.contains(&key.as_str()) {
+                        return Some(here);
+                    }
+                    if let Some(found) = walk(child, &here) {
+                        return Some(found);
+                    }
+                }
+                None
+            }
+            Value::Array(items) => items
+                .iter()
+                .enumerate()
+                .find_map(|(index, item)| walk(item, &format!("{path}[{index}]"))),
+            _ => None,
+        }
+    }
+    walk(value, "")
 }
 
 fn write_json(path: &Path, value: &Value) -> io::Result<()> {
@@ -165,4 +242,83 @@ fn write_json(path: &Path, value: &Value) -> io::Result<()> {
         .map_err(|err| io::Error::new(io::ErrorKind::InvalidData, err))?;
     text.push('\n');
     fs::write(path, text.as_bytes())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    /// Two writers asking for one name in the same second get two
+    /// directories, whichever order the file system answers in.
+    #[test]
+    fn two_bundles_never_share_a_directory() {
+        let root = std::env::temp_dir().join("crossfoot-bundle-names");
+        let _ = fs::remove_dir_all(&root);
+        let handles: Vec<_> = (0..8)
+            .map(|_| {
+                let root = root.clone();
+                std::thread::spawn(move || {
+                    BundleWriter::create(&root, "run-1-2-stamp")
+                        .unwrap()
+                        .dir()
+                        .to_path_buf()
+                })
+            })
+            .collect();
+        let mut dirs: Vec<PathBuf> = handles.into_iter().map(|h| h.join().unwrap()).collect();
+        dirs.sort();
+        dirs.dedup();
+        assert_eq!(dirs.len(), 8, "every writer got a directory of its own");
+    }
+
+    /// Spec 01 R8, spec 03 R4: a schema walk over result-shaped values. The
+    /// same walk guards every real result at write time.
+    #[test]
+    fn result_json_has_no_timing_or_endpoint_fields() {
+        // Result-shaped values for the three targets, carrying the chain
+        // timestamps that are allowed.
+        let svzchf = json!({
+            "format": "crossfoot-result-v1", "target": "svzchf", "verdict": "MODEL_MATCH",
+            "summary": {"target": "svzchf", "window": {"baseline_block": 1, "block": 2}},
+            "window": {"baseline_block": 1, "baseline_timestamp_unix": 10, "block": 2, "block_timestamp_unix": 20},
+            "inputs": {"rate_segments": [{"start": 5, "rate_ppm": 30000}]},
+            "replay_steps": [{"block": 1, "timestamp": 11, "action": "save"}],
+        });
+        let mtbill = json!({
+            "format": "crossfoot-result-v1", "target": "mtbill", "consistency": "CONSISTENT",
+            "benchmark": {"source": "home.treasury.gov", "pinning": "timestamp pinned"},
+            "posting_eras": [{"from_utc": "2024-08-21T00:00:00Z"}],
+        });
+        let midas = json!({
+            "format": "crossfoot-result-v1", "target": "midas",
+            "feeds": [{"product": "mRE7", "last_post_utc": "2026-05-06T19:03:00Z", "findings": [{"timestamp_unix": 1}]}],
+        });
+        for result in [&svzchf, &mtbill, &midas] {
+            assert_eq!(impure_result_field(result), None, "{result}");
+        }
+
+        // Every run-time key is caught wherever it sits, with its path.
+        for key in IMPURE_RESULT_KEYS {
+            let top = json!({ key: 1 });
+            assert_eq!(impure_result_field(&top).as_deref(), Some(key));
+            let nested = json!({ "inputs": { "detail": [ { key: "x" } ] } });
+            assert_eq!(
+                impure_result_field(&nested),
+                Some(format!("inputs.detail[0].{key}"))
+            );
+        }
+
+        // And the writer refuses such a result instead of writing it.
+        let dir = std::env::temp_dir().join("crossfoot-bundle-purity");
+        let _ = fs::remove_dir_all(&dir);
+        let writer = BundleWriter::create(&dir, "run").unwrap();
+        let err = writer
+            .write_result(&json!({ "verdict": "MODEL_MATCH", "run_started_utc": "now" }))
+            .unwrap_err();
+        assert!(err.contains("run_started_utc"), "{err}");
+        assert!(!writer.dir().join("result.json").exists());
+        let path = writer.write_result(&svzchf).unwrap();
+        assert!(path.exists());
+    }
 }

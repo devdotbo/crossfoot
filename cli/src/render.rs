@@ -766,8 +766,10 @@ fn provenance(run: &Run) -> String {
             ("contract sources".into(), format!("{repo} at {commit}")),
         );
     }
-    if let Some(started) = result.get("run_started_utc").and_then(Value::as_str) {
-        rows.insert(2, ("run started (UTC)".into(), started.to_string()));
+    // Timings are a property of the run, not of the result, so they live in
+    // meta.json (spec 01 R8).
+    if let Some(started) = get_meta("run_started_utc") {
+        rows.insert(2, ("run started (UTC)".into(), started));
     }
 
     let mut html = String::from("<h2>Provenance</h2>\n<dl class=\"kv\">\n");
@@ -1359,7 +1361,6 @@ mod tests {
                 ],
                 "stale_reads": [],
                 "input_gaps": [],
-                "run_started_utc": "2026-01-01T00:00:00.000Z",
             }),
         );
         write_json_file(
@@ -1463,7 +1464,6 @@ mod tests {
                 "contract_sources": { "repo": "https://example.invalid/contracts", "commit": "0000000" },
                 "input_gaps": [],
                 "stale_reads": [],
-                "run_started_utc": "2026-01-01T00:00:00.000Z",
             }),
         );
 

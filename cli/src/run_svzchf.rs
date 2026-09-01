@@ -536,16 +536,9 @@ pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<Ru
         "stale_reads": stale_reads.iter().map(|f| json!({"kind": f.kind, "label": f.label, "detail": f.detail})).collect::<Vec<Value>>(),
         "input_gaps": input_gaps.iter().map(|f| json!({"kind": f.kind, "label": f.label, "detail": f.detail})).collect::<Vec<Value>>(),
         "replay_steps": replayed.steps,
-        "run_started_utc": started,
-        "run_finished_utc": now_utc(),
     });
 
-    let result_path = bundle.dir().join("result.json");
-    let mut text = serde_json::to_string_pretty(&result)
-        .map_err(|err| format!("could not serialise the result: {err}"))?;
-    text.push('\n');
-    std::fs::write(&result_path, text.as_bytes())
-        .map_err(|err| format!("could not write result.json: {err}"))?;
+    let result_path = bundle.write_result(&result)?;
 
     bundle
         .write_manifest(
@@ -567,6 +560,8 @@ pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<Ru
             "baseline_block": args.baseline_block,
             "block": args.block,
             "window": args.window_name.as_ref().map(|name| json!({ "name": name })),
+            "run_started_utc": started,
+            "run_finished_utc": now_utc(),
             "endpoints_configured": client.endpoints(),
             "log_endpoints_configured": client.log_endpoints(),
             "network_calls_this_run": client.network_calls,

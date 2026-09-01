@@ -420,6 +420,163 @@ fn t6_an_unobservable_baseline_is_source_stale() {
     );
 }
 
+/// Spec 01 R2: the demo window reproduces the pinned observations. The
+/// values are asserted from the result's observed side, never from the
+/// modeled side, so the test says what the chain held, not what the model
+/// produced.
+#[test]
+#[ignore = "needs the network on a first run; see the module comment"]
+fn t7_demo_window_result_carries_the_pinned_observations() {
+    let (baseline_block, block) = run_svzchf::DEMO_WINDOW;
+    assert_eq!((baseline_block, block), (HISTORICAL_BLOCK, B1));
+    let mut client = client();
+    let outcome = run_svzchf::run(
+        &mut client,
+        &run_svzchf::RunArgs {
+            baseline_block,
+            block,
+            window_name: Some("demo".to_string()),
+        },
+        &verify_root(),
+    )
+    .unwrap();
+    assert_eq!(outcome.verdict, Verdict::ModelMatch);
+    assert_eq!(outcome.summary.headline, "5 of 5 fields exact, residual 0");
+
+    let result: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(&outcome.result_path).unwrap()).unwrap();
+    let observed = |field: &str| -> String {
+        result["comparison"]["fields"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|f| f["field"] == field)
+            .unwrap_or_else(|| panic!("{field} is compared"))["observed"]
+            .as_str()
+            .unwrap()
+            .to_string()
+    };
+    assert_eq!(observed("vault.price()"), "1021764268673581424");
+    assert_eq!(observed("account.saved"), "81761995488279584010351");
+    assert_eq!(observed("account.ticks"), "1346800022157");
+    assert_eq!(observed("vault.totalAssets()"), "81769497488003849675143");
+    // totalSupply is an input to the price, not a compared field; it is read
+    // from the B1 fetch summary the manifest carries.
+    let manifest: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string(outcome.bundle_dir.join("manifest.json")).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(
+        manifest["summary"]["fetches"]["b1"]["reads"]["vault.totalSupply()"],
+        "80027751992300676663517"
+    );
+    assert_eq!(result["summary"]["posted"]["value"], "1021764268673581424");
+    assert_eq!(result["summary"]["consumer_action"], "ALLOW");
+    let meta: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string(outcome.bundle_dir.join("meta.json")).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(meta["window"]["name"], "demo");
+}
+
+/// Spec 01 R7, spec 03 R1: the run bundle holds every raw read of both
+/// pinned fetches and references no other bundle.
+#[test]
+#[ignore = "needs the network on a first run; see the module comment"]
+fn t8_run_bundle_holds_every_raw_read_of_both_fetches() {
+    let (baseline_block, block) = run_svzchf::DEMO_WINDOW;
+    let mut run_client = client();
+    let outcome = run_svzchf::run(
+        &mut run_client,
+        &run_svzchf::RunArgs {
+            baseline_block,
+            block,
+            window_name: None,
+        },
+        &verify_root(),
+    )
+    .unwrap();
+
+    // The two fetch plans on their own, into scratch bundles.
+    let plan = |block: u64| -> usize {
+        let mut plan_client = client();
+        let mut bundle = crate::bundle::BundleWriter::create(
+            &scratch_root(),
+            &format!("svzchf-plan-{block}-{}", crate::util::now_stamp()),
+        )
+        .unwrap();
+        crate::svzchf::fetch(
+            &mut plan_client,
+            &mut bundle,
+            &crate::svzchf::FetchArgs {
+                block,
+                baseline_block: None,
+                log_source: crate::svzchf::LogSource::Blockscout,
+                full_log_history: false,
+                max_log_chunks: None,
+                log_chunk: 10_000,
+            },
+        )
+        .unwrap();
+        bundle.entries().len()
+    };
+    let expected = plan(block) + plan(baseline_block);
+
+    let manifest: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string(outcome.bundle_dir.join("manifest.json")).unwrap(),
+    )
+    .unwrap();
+    let entries = manifest["entries"].as_array().unwrap();
+    assert_eq!(
+        entries.len(),
+        expected,
+        "one entry per read of both fetches"
+    );
+    assert_eq!(manifest["entry_count"], expected);
+    for entry in entries {
+        let file = entry["file"].as_str().unwrap();
+        assert!(
+            outcome.bundle_dir.join(file).is_file(),
+            "{file} is under the run bundle"
+        );
+    }
+    let result: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(&outcome.result_path).unwrap()).unwrap();
+    assert!(result["inputs"].get("b1_bundle").is_none());
+    assert!(result["inputs"].get("b0_bundle").is_none());
+    assert_eq!(
+        crate::bundle::impure_result_field(&result),
+        None,
+        "the result carries no run-time field"
+    );
+}
+
+/// Spec 01 R8, spec 03 R4: result.json is a pure function of the inputs,
+/// so two runs from the same cache write the same bytes.
+#[test]
+#[ignore = "needs the network on a first run; see the module comment"]
+fn t9_two_runs_from_cache_write_identical_result_json() {
+    let (baseline_block, block) = run_svzchf::DEMO_WINDOW;
+    let run = || {
+        let mut client = client();
+        let outcome = run_svzchf::run(
+            &mut client,
+            &run_svzchf::RunArgs {
+                baseline_block,
+                block,
+                window_name: Some("demo".to_string()),
+            },
+            &verify_root(),
+        )
+        .unwrap();
+        crate::cache::sha256_hex(&std::fs::read(&outcome.result_path).unwrap())
+    };
+    let first = run();
+    let second = run();
+    assert_eq!(first, second, "result.json differs between two runs");
+    println!("result.json sha256 {first}");
+}
+
 // ---------------------------------------------------------------------------
 // mTBILL integration tests
 //
