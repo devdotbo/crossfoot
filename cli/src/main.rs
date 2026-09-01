@@ -10,8 +10,12 @@ mod bundle;
 mod cache;
 mod consume;
 #[cfg(test)]
+mod fixtures;
+#[cfg(test)]
 mod live_tests;
 mod midas;
+#[cfg(test)]
+mod midas_fixture_tests;
 mod model;
 mod mtbill;
 mod render;
