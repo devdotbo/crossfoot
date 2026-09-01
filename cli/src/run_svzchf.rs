@@ -51,15 +51,7 @@ pub fn load_inputs(
         },
         verify_root,
     )?;
-    let manifest: Value = serde_json::from_str(
-        &std::fs::read_to_string(fetched.bundle_dir.join("manifest.json"))
-            .map_err(|err| format!("could not read the manifest: {err}"))?,
-    )
-    .map_err(|err| format!("the manifest is not JSON: {err}"))?;
-    let summary = manifest
-        .get("summary")
-        .ok_or("the manifest has no summary")?
-        .clone();
+    let summary = fetched.summary;
     Ok(ModelInputs {
         clock: clock_from_rate_history(summary.get("rate_history").ok_or("no rate history")?)?,
         flows: fetched.flow_events,
@@ -287,49 +279,7 @@ pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<Ru
         ));
     }
 
-    // Both pinned fetches go into one bundle, so the run is self contained.
     let started = now_utc();
-    let fetch_b1 = svzchf::run(
-        client,
-        &svzchf::FetchArgs {
-            block: args.block,
-            baseline_block: None,
-            log_source: svzchf::LogSource::Blockscout,
-            full_log_history: false,
-            max_log_chunks: None,
-            log_chunk: 10_000,
-        },
-        verify_root,
-    )?;
-    let fetch_b0 = svzchf::run(
-        client,
-        &svzchf::FetchArgs {
-            block: args.baseline_block,
-            baseline_block: None,
-            log_source: svzchf::LogSource::Blockscout,
-            full_log_history: false,
-            max_log_chunks: None,
-            log_chunk: 10_000,
-        },
-        verify_root,
-    )?;
-
-    let m1: Value = serde_json::from_str(
-        &std::fs::read_to_string(fetch_b1.bundle_dir.join("manifest.json"))
-            .map_err(|err| format!("could not read the B1 manifest: {err}"))?,
-    )
-    .map_err(|err| format!("the B1 manifest is not JSON: {err}"))?;
-    let m0: Value = serde_json::from_str(
-        &std::fs::read_to_string(fetch_b0.bundle_dir.join("manifest.json"))
-            .map_err(|err| format!("could not read the B0 manifest: {err}"))?,
-    )
-    .map_err(|err| format!("the B0 manifest is not JSON: {err}"))?;
-
-    let s1 = m1.get("summary").ok_or("the B1 manifest has no summary")?;
-    let s0 = m0.get("summary").ok_or("the B0 manifest has no summary")?;
-    let reads1 = s1.get("reads").ok_or("the B1 manifest has no reads")?;
-    let reads0 = s0.get("reads").ok_or("the B0 manifest has no reads")?;
-
     let mut bundle = BundleWriter::create(
         &verify_root.join("bundles"),
         &format!(
@@ -341,18 +291,50 @@ pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<Ru
     )
     .map_err(|err| format!("could not create the run directory: {err}"))?;
 
+    // Both pinned fetches are recorded into this one bundle, so the run is
+    // self contained: every raw response the verdict rests on is under raw/.
+    let fetch_b1 = svzchf::fetch(
+        client,
+        &mut bundle,
+        &svzchf::FetchArgs {
+            block: args.block,
+            baseline_block: None,
+            log_source: svzchf::LogSource::Blockscout,
+            full_log_history: false,
+            max_log_chunks: None,
+            log_chunk: 10_000,
+        },
+    )?;
+    let fetch_b0 = svzchf::fetch(
+        client,
+        &mut bundle,
+        &svzchf::FetchArgs {
+            block: args.baseline_block,
+            baseline_block: None,
+            log_source: svzchf::LogSource::Blockscout,
+            full_log_history: false,
+            max_log_chunks: None,
+            log_chunk: 10_000,
+        },
+    )?;
+
+    let s1 = &fetch_b1.summary;
+    let s0 = &fetch_b0.summary;
+    let reads1 = s1.get("reads").ok_or("the B1 fetch has no reads")?;
+    let reads0 = s0.get("reads").ok_or("the B0 fetch has no reads")?;
+
     let ts1 = s1
         .get("block_timestamp_unix")
         .and_then(Value::as_u64)
-        .ok_or("the B1 manifest has no block timestamp")?;
+        .ok_or("the B1 fetch has no block timestamp")?;
     let ts0 = s0
         .get("block_timestamp_unix")
         .and_then(Value::as_u64)
-        .ok_or("the B0 manifest has no block timestamp")?;
+        .ok_or("the B0 fetch has no block timestamp")?;
 
     let clock = clock_from_rate_history(
         s1.get("rate_history")
-            .ok_or("the B1 manifest has no rate history")?,
+            .ok_or("the B1 fetch has no rate history")?,
     )?;
 
     // The deployed uint40 evaluation bound.
@@ -526,8 +508,6 @@ pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<Ru
             "block_timestamp_unix": ts1,
         },
         "inputs": {
-            "b1_bundle": fetch_b1.bundle_dir.file_name().and_then(|n| n.to_str()),
-            "b0_bundle": fetch_b0.bundle_dir.file_name().and_then(|n| n.to_str()),
             "rate_segments": clock.segments(),
             "uint40_segment_bound_violations": uint40_violations.len(),
             "recognition_events_in_window": events.len(),
@@ -568,7 +548,13 @@ pub fn run(client: &mut Client, args: &RunArgs, verify_root: &Path) -> Result<Ru
         .map_err(|err| format!("could not write result.json: {err}"))?;
 
     bundle
-        .write_manifest("svzchf-run", json!({ "verdict": verdict.as_str() }))
+        .write_manifest(
+            "svzchf-run",
+            json!({
+                "verdict": verdict.as_str(),
+                "fetches": { "b1": s1, "b0": s0 },
+            }),
+        )
         .map_err(|err| format!("could not write the run manifest: {err}"))?;
     bundle
         .write_meta(json!({

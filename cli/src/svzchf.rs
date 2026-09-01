@@ -141,6 +141,7 @@ pub struct FetchArgs {
     pub log_chunk: u64,
 }
 
+/// What `crossfoot fetch svzchf` reports after writing its own bundle.
 pub struct Outcome {
     pub bundle_dir: std::path::PathBuf,
     pub network_calls: usize,
@@ -148,6 +149,21 @@ pub struct Outcome {
     pub entry_count: usize,
     pub findings: Vec<crate::bundle::Finding>,
     pub flow_events: Vec<FlowEvent>,
+    /// The manifest summary of the fetch: reads, rate history, flow series.
+    pub summary: Value,
+}
+
+/// One pinned fetch recorded into a caller's bundle. The run command records
+/// both of its fetches into one bundle this way, so the run is self
+/// contained (spec 01 R7, spec 03 R1).
+pub struct Fetch {
+    /// The manifest summary of the fetch: reads, rate history, flow series.
+    pub summary: Value,
+    pub chain_id: u64,
+    pub block_timestamp: Option<u64>,
+    pub flow_events: Vec<FlowEvent>,
+    /// The findings this fetch added to the bundle.
+    pub findings: Vec<crate::bundle::Finding>,
 }
 
 /// One eth_call: fetch, decode, record. A revert or empty return data is a
@@ -701,12 +717,67 @@ fn sweep_blockscout_all(
     }))
 }
 
+/// The fetch command: one pinned fetch in a bundle of its own.
 pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<Outcome, String> {
     let started = now_utc();
-    let block_hex_value = block_hex(args.block);
     let bundle_name = format!("svzchf-{}-{}", args.block, now_stamp());
     let mut bundle = BundleWriter::create(&verify_root.join("bundles"), &bundle_name)
         .map_err(|err| format!("could not create the bundle directory: {err}"))?;
+
+    let fetched = fetch(client, &mut bundle, args)?;
+    let finished = now_utc();
+
+    bundle
+        .write_manifest("svzchf", fetched.summary.clone())
+        .map_err(|err| format!("could not write manifest.json: {err}"))?;
+
+    let meta = json!({
+        "format": "crossfoot-meta-v1",
+        "tool": "crossfoot",
+        "tool_version": env!("CARGO_PKG_VERSION"),
+        "target": "svzchf",
+        "repo_git": git_provenance(verify_root),
+        "workspace_packages": workspace_packages(),
+        "chain_id": fetched.chain_id,
+        "chain_id_source": "eth_chainId",
+        "block": args.block,
+        "block_hex": block_hex(args.block),
+        "block_timestamp_unix": fetched.block_timestamp,
+        "baseline_block": args.baseline_block,
+        "endpoints_configured": client.endpoints(),
+        "log_endpoints_configured": client.log_endpoints(),
+        "cache_root": client.cache().root().display().to_string(),
+        "fetch_started_utc": started,
+        "fetch_finished_utc": finished,
+        "network_calls_this_run": client.network_calls,
+        "cache_hits_this_run": client.cache_hits,
+        "rpc_observations": client.observations,
+    });
+    bundle
+        .write_meta(meta)
+        .map_err(|err| format!("could not write meta.json: {err}"))?;
+
+    Ok(Outcome {
+        bundle_dir: bundle.dir().to_path_buf(),
+        network_calls: client.network_calls,
+        cache_hits: client.cache_hits,
+        entry_count: bundle.entries().len(),
+        findings: bundle.findings().to_vec(),
+        flow_events: fetched.flow_events,
+        summary: fetched.summary,
+    })
+}
+
+/// The fetch plan, recorded into the caller's bundle. Every read is an
+/// eth_call at an explicit block number; the caller decides which bundle the
+/// evidence lands in.
+pub fn fetch(
+    client: &mut Client,
+    bundle: &mut BundleWriter,
+    args: &FetchArgs,
+) -> Result<Fetch, String> {
+    let findings_before = bundle.findings().len();
+    let block_hex_value = block_hex(args.block);
 
     // 1. Chain identity. A bundle that does not know which chain it read is
     //    worthless, so a mismatch stops the run.
@@ -755,7 +826,7 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
     // 3. Vault reads at the pinned block.
     let asset = read_call(
         client,
-        &mut bundle,
+        bundle,
         "vault.asset()",
         VAULT,
         &encode_no_args("asset()"),
@@ -764,7 +835,7 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
     )?;
     let savings = read_call(
         client,
-        &mut bundle,
+        bundle,
         "vault.savings()",
         VAULT,
         &encode_no_args("savings()"),
@@ -773,7 +844,7 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
     )?;
     let total_supply = read_call(
         client,
-        &mut bundle,
+        bundle,
         "vault.totalSupply()",
         VAULT,
         &encode_no_args("totalSupply()"),
@@ -782,7 +853,7 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
     )?;
     let total_assets = read_call(
         client,
-        &mut bundle,
+        bundle,
         "vault.totalAssets()",
         VAULT,
         &encode_no_args("totalAssets()"),
@@ -791,7 +862,7 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
     )?;
     let convert_to_assets = read_call(
         client,
-        &mut bundle,
+        bundle,
         "vault.convertToAssets(1e18)",
         VAULT,
         &encode_uint256("convertToAssets(uint256)", ONE_ETHER),
@@ -814,7 +885,7 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
     // 4. Module reads at the pinned block.
     let current_rate = read_call(
         client,
-        &mut bundle,
+        bundle,
         "module.currentRatePPM()",
         MODULE,
         &encode_no_args("currentRatePPM()"),
@@ -823,7 +894,7 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
     )?;
     let current_ticks = read_call(
         client,
-        &mut bundle,
+        bundle,
         "module.currentTicks()",
         MODULE,
         &encode_no_args("currentTicks()"),
@@ -832,7 +903,7 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
     )?;
     let interest_delay = read_call(
         client,
-        &mut bundle,
+        bundle,
         "module.INTEREST_DELAY()",
         MODULE,
         &encode_no_args("INTEREST_DELAY()"),
@@ -845,7 +916,7 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
     // are captured in the same pinned bundle rather than in a second pass.
     let price = read_call(
         client,
-        &mut bundle,
+        bundle,
         "vault.price()",
         VAULT,
         &encode_no_args("price()"),
@@ -854,7 +925,7 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
     )?;
     let account = read_call(
         client,
-        &mut bundle,
+        bundle,
         "module.savings(vault)",
         MODULE,
         &encode_address("savings(address)", VAULT)?,
@@ -867,7 +938,7 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
     let ticks_at_block = match block_timestamp {
         Some(timestamp) => read_call(
             client,
-            &mut bundle,
+            bundle,
             &format!("module.ticks({timestamp})"),
             MODULE,
             &encode_uint256("ticks(uint256)", timestamp as u128),
@@ -924,7 +995,7 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
             .map_err(|e| e.to_string())?;
         let baseline_rate = read_call(
             client,
-            &mut bundle,
+            bundle,
             "baseline vault.convertToAssets(1e18)",
             VAULT,
             &encode_uint256("convertToAssets(uint256)", ONE_ETHER),
@@ -956,12 +1027,11 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
     } else if args.log_source == LogSource::Blockscout {
         // One filtered request covers the whole rate path, which is the only
         // part of the event history the recompute needs.
-        rate_history = fetch_rate_history(client, &mut bundle, MODULE, args.block)?;
-        let (events, flow_summary) =
-            fetch_vault_flows(client, &mut bundle, MODULE, VAULT, args.block)?;
+        rate_history = fetch_rate_history(client, bundle, MODULE, args.block)?;
+        let (events, flow_summary) = fetch_vault_flows(client, bundle, MODULE, VAULT, args.block)?;
         flow_events = events;
         flows = flow_summary;
-        interest_claimed = fetch_interest_claimed(client, &mut bundle, VAULT, args.block)?;
+        interest_claimed = fetch_interest_claimed(client, bundle, VAULT, args.block)?;
         // The vault emits one InterestClaimed per deposit or withdrawal it
         // routes, while the module emits InterestCollected only when the
         // accrued amount was nonzero, so the two counts are related but not
@@ -983,13 +1053,13 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
         }
         if args.full_log_history {
             let from = args.baseline_block.unwrap_or(0);
-            log_summary = sweep_blockscout_all(client, &mut bundle, MODULE, from, args.block)?;
+            log_summary = sweep_blockscout_all(client, bundle, MODULE, from, args.block)?;
         }
     } else {
         let from = match args.baseline_block {
             Some(baseline) => baseline,
             None => {
-                let found = find_deployment_block(client, &mut bundle, MODULE, args.block)?;
+                let found = find_deployment_block(client, bundle, MODULE, args.block)?;
                 deployment_block = found;
                 match found {
                     Some(block) => block,
@@ -1000,7 +1070,7 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
         if from <= args.block {
             log_summary = sweep_logs(
                 client,
-                &mut bundle,
+                bundle,
                 MODULE,
                 from,
                 args.block,
@@ -1009,8 +1079,6 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
             )?;
         }
     }
-
-    let finished = now_utc();
 
     let summary = json!({
         "vault": VAULT,
@@ -1056,43 +1124,12 @@ pub fn run(client: &mut Client, args: &FetchArgs, verify_root: &Path) -> Result<
         "logs": log_summary,
     });
 
-    bundle
-        .write_manifest("svzchf", summary.clone())
-        .map_err(|err| format!("could not write manifest.json: {err}"))?;
-
-    let meta = json!({
-        "format": "crossfoot-meta-v1",
-        "tool": "crossfoot",
-        "tool_version": env!("CARGO_PKG_VERSION"),
-        "target": "svzchf",
-        "repo_git": git_provenance(verify_root),
-        "workspace_packages": workspace_packages(),
-        "chain_id": chain_id,
-        "chain_id_source": "eth_chainId",
-        "block": args.block,
-        "block_hex": block_hex_value,
-        "block_timestamp_unix": block_timestamp,
-        "baseline_block": args.baseline_block,
-        "endpoints_configured": client.endpoints(),
-        "log_endpoints_configured": client.log_endpoints(),
-        "cache_root": client.cache().root().display().to_string(),
-        "fetch_started_utc": started,
-        "fetch_finished_utc": finished,
-        "network_calls_this_run": client.network_calls,
-        "cache_hits_this_run": client.cache_hits,
-        "rpc_observations": client.observations,
-    });
-    bundle
-        .write_meta(meta)
-        .map_err(|err| format!("could not write meta.json: {err}"))?;
-
-    Ok(Outcome {
-        bundle_dir: bundle.dir().to_path_buf(),
-        network_calls: client.network_calls,
-        cache_hits: client.cache_hits,
-        entry_count: bundle.entries().len(),
-        findings: bundle.findings().to_vec(),
+    Ok(Fetch {
+        summary,
+        chain_id,
+        block_timestamp,
         flow_events,
+        findings: bundle.findings()[findings_before..].to_vec(),
     })
 }
 

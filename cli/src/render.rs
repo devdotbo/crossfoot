@@ -718,29 +718,6 @@ fn provenance(run: &Run) -> String {
         }
     };
 
-    // The two run commands structure their bundles differently. The mTBILL
-    // run records its own fetches, so its manifest carries every raw
-    // response. The svZCHF run reads two pinned fetch bundles and references
-    // them, so its own manifest is legitimately empty and the raw evidence
-    // sits in the referenced bundles. Showing only the run bundle's count
-    // would read as "no raw evidence", so both are shown.
-    let referenced: Vec<(String, Option<u64>)> = ["b0_bundle", "b1_bundle"]
-        .iter()
-        .filter_map(|key| {
-            let name = str_at(result, &["inputs", key])?.to_string();
-            // A referenced bundle that is not sitting next to this one is
-            // reported as absent rather than dropped: the page must never
-            // quietly lose a pointer to where the raw evidence is.
-            let count = run
-                .dir
-                .parent()
-                .and_then(|parent| read_json(&parent.join(&name).join("manifest.json")))
-                .and_then(|manifest| manifest.get("entry_count")?.as_u64());
-            Some((name, count))
-        })
-        .collect();
-    let referenced_total: u64 = referenced.iter().filter_map(|(_, count)| *count).sum();
-
     let mut rows: Vec<(String, String)> = vec![
         ("bundle path".into(), format!("bundles/{}", run.name)),
         ("result.json sha256".into(), run.result_sha256.clone()),
@@ -781,26 +758,6 @@ fn provenance(run: &Run) -> String {
         ),
         ("reproduce with".into(), reproduce_command(result)),
     ];
-
-    if !referenced.is_empty() {
-        rows.insert(
-            3,
-            (
-                "raw responses in referenced bundles".into(),
-                format!(
-                    "{referenced_total} across {}",
-                    referenced
-                        .iter()
-                        .map(|(name, count)| match count {
-                            Some(count) => format!("{name} ({count})"),
-                            None => format!("{name} (not present alongside this bundle)"),
-                        })
-                        .collect::<Vec<String>>()
-                        .join(", ")
-                ),
-            ),
-        );
-    }
 
     if let Some(commit) = str_at(result, &["contract_sources", "commit"]) {
         let repo = str_at(result, &["contract_sources", "repo"]).unwrap_or("");
@@ -1372,8 +1329,6 @@ mod tests {
                     "block_timestamp_unix": 1_700_864_000u64,
                 },
                 "inputs": {
-                    "b1_bundle": "svzchf-200-20260101T000000Z",
-                    "b0_bundle": "svzchf-100-20260101T000000Z",
                     "rate_segments": [
                         { "start": 1_690_000_000u64, "rate_ppm": 30_000 },
                         { "start": 1_700_400_000u64, "rate_ppm": 40_000 },
@@ -1409,7 +1364,7 @@ mod tests {
         );
         write_json_file(
             &svzchf.join("manifest.json"),
-            &json!({ "format": "crossfoot-manifest-v1", "entry_count": 0, "entries": [] }),
+            &json!({ "format": "crossfoot-manifest-v1", "entry_count": 32, "entries": [] }),
         );
 
         // mTBILL: a consistency bundle with three rounds, the first a
@@ -1631,10 +1586,11 @@ mod tests {
         let svzchf =
             fs::read_to_string(out.join("svzchf-run-100-200-20260101t000000z.html")).unwrap();
         assert!(svzchf.contains("Full recomputation, zero tolerance"));
-        // The run bundle references fetch bundles for its raw evidence; the
-        // page must point at them even when they are not present alongside.
-        assert!(svzchf.contains("raw responses in referenced bundles"));
-        assert!(svzchf.contains("not present alongside this bundle"));
+        // The run bundle is self contained: its own raw count is the whole
+        // evidence, and nothing points at a bundle elsewhere.
+        assert!(svzchf.contains("raw responses in this bundle"));
+        assert!(svzchf.contains("<dd>32</dd>"));
+        assert!(!svzchf.contains("referenced bundles"));
     }
 
     #[test]
