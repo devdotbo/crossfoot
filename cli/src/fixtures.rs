@@ -19,17 +19,23 @@ fn workspace_root() -> PathBuf {
 /// The extracted Midas family bundle, `bundles/midas-run-25884405` in the
 /// archive, extracted to `target/fixtures/midas-25884405/`.
 pub fn midas_bundle() -> PathBuf {
+    bundle("midas-25884405")
+}
+
+/// Any checked-in family archive `cli/tests/fixtures/<name>.tar.gz`,
+/// extracted once per process to `target/fixtures/<name>/`.
+pub fn bundle(name: &str) -> PathBuf {
     // One extraction per process; other test threads wait for it.
     static LOCK: Mutex<()> = Mutex::new(());
     let _guard = LOCK.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
-    let archive = workspace_root().join("cli/tests/fixtures/midas-25884405.tar.gz");
+    let archive = workspace_root().join(format!("cli/tests/fixtures/{name}.tar.gz"));
     let target = workspace_root().join("target/fixtures");
-    let dir = target.join("midas-25884405");
+    let dir = target.join(name);
     if dir.join("result.json").is_file() {
         return dir;
     }
     std::fs::create_dir_all(&target).expect("target/fixtures");
-    let scratch = target.join(format!("midas-25884405.extract-{}", std::process::id()));
+    let scratch = target.join(format!("{name}.extract-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&scratch);
     std::fs::create_dir_all(&scratch).expect("scratch directory");
     let status = Command::new("tar")

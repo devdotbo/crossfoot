@@ -1,0 +1,79 @@
+{
+  "family": "backed-oracle-v2",
+  "target": "backed",
+  "chain_id": 1,
+  "explorer": {
+    "name": "eth.blockscout.com",
+    "api": "https://eth.blockscout.com/api",
+    "address_url": "https://eth.blockscout.com/address/",
+    "transaction_url": "https://eth.blockscout.com/tx/"
+  },
+  "mechanism": {
+    "description": "BackedOracle v2 (Backed Finance): AggregatorV2V3 with 8 decimals behind TransparentUpgradeableProxy instances administered by a timelock. updateAnswer(int192 newAnswer, uint32 newTimestamp) under UPDATER_ROLE clamps the stored answer to the latest answer plus or minus 10 percent instead of reverting (class A-clamp); the timestamp must not be in the future, at most 5 minutes old and newer than the last one, and posts within one hour of the previous one revert. The v1 contracts (bHIGH, bIB01, bIBTA) use the supplied timestamp as the round id and are not in this list.",
+    "source": {
+      "repo": "https://github.com/backed-fi/backed-token-contract",
+      "path": "BackedOracle.sol (implementation 0xb239bd2216D1c8476f601e0d9b5FfAD556C59Cc4)",
+      "note": "source read by the research teammate on 2026-09-02 (raw/backed-oracles-rpc-2026-09-02.md, raw/backed-github-backedoracle-source-2026-09-02.md); no implementation was verified by this adapter"
+    },
+    "reads": {
+      "description": "description()",
+      "decimals": "decimals()",
+      "latest_round": "latestRound()",
+      "latest_round_data": "latestRoundData()",
+      "last_timestamp": "lastTimestamp()"
+    },
+    "guard": {
+      "kind": "clamp",
+      "band_percent": 10
+    },
+    "round_events": [
+      "AnswerUpdated(int256,uint256,uint256)"
+    ],
+    "setters": [
+      {
+        "signature": "updateAnswer(int192,uint32)",
+        "path": "safe",
+        "value_arg": 0
+      }
+    ],
+    "relays": [],
+    "other_calls": [],
+    "bound_events": {
+      "upgraded": "Upgraded(address)",
+      "initialized": "Initialized(uint8)",
+      "initialized_min_version": 2
+    },
+    "spacing_rule": null,
+    "verified_implementations": []
+  },
+  "feeds": [
+    {
+      "product": "bNVDA",
+      "key": "oracle",
+      "address": "0x1D3be4d05Eba2aA6c4eEdE85a74f491C31766E64",
+      "decimals": 8,
+      "kind": "bounded"
+    },
+    {
+      "product": "ERNA",
+      "key": "oracle",
+      "address": "0x2674Cc47786740432b895a70D92CFDfB1d5BF798",
+      "decimals": 8,
+      "kind": "bounded"
+    },
+    {
+      "product": "ERNX",
+      "key": "oracle",
+      "address": "0x475855DAe09af1e3f2d380d766b9E630926ad3CE",
+      "decimals": 8,
+      "kind": "bounded"
+    },
+    {
+      "product": "bC3M",
+      "key": "oracle",
+      "address": "0x83Ec02059F686E747392A22ddfED7833bA0d7cE3",
+      "decimals": 8,
+      "kind": "bounded"
+    }
+  ]
+}

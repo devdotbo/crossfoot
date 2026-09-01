@@ -10,6 +10,8 @@ mod bundle;
 mod cache;
 mod consume;
 #[cfg(test)]
+mod family_fixture_tests;
+#[cfg(test)]
 mod fixtures;
 #[cfg(test)]
 mod live_tests;

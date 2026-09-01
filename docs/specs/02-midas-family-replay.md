@@ -276,8 +276,44 @@ raw3, "value_arg"}], "other_calls": [...], "bound_events": {"upgraded",
 "feeds": [{"product": "mRE7", "key": "customFeed", "address":
 "0x0a2a...2395", "decimals": 8, "kind": "bounded"}, ...]}`. Selectors and
 topics are keccak-derived from the signatures at run time; the manifest
-summary embeds `family`, `explorer`, `mechanism` and `feeds_configured`,
-so a replay (`verify`) needs nothing from the working tree.
+summary embeds `target`, `family`, `explorer`, `mechanism` and
+`feeds_configured`, so a replay (`verify`) needs nothing from the working
+tree.
+
+Further config fields, added for the families beyond Midas
+(`config/hashnote-mainnet.json`, `config/backed-mainnet.json`):
+
+- `target`: the name `result.target` and the bundle prefix carry
+  (default: the family name up to its first dash).
+- `guard.kind`: `max_deviation` (Midas: the getter is read at block minus
+  one and a post over it reverts) or `clamp` with `band_percent` (Backed
+  v2: the stored answer is truncated to the previous answer plus or minus
+  the band, a constant in the code). Under a clamp no state is read: the
+  series carries the evidence. A stored answer exactly on the band that
+  equals the posted value is `GUARD_AT_BOUND` (the poster submitted an
+  already-clamped figure); a posted value that differs from the stored
+  answer is `GUARD_CLAMPED` (the contract truncated it); a move beyond the
+  band is `GUARD_INCONSISTENT` with `rule: "clamp_band"`. A zero previous
+  answer (launch placeholder) gives the clamp no reference and is skipped.
+- `guard: null`: a family without an on-chain check. Readable feeds are
+  `kind: "unguarded"`; every post after the first is an `UNGUARDED_POST`
+  with `classification: "no_guard"`; `summary.family` is `posted-setter`.
+- `relays[]`: `{address, selector, calls_word}`. A round whose transaction
+  went to a relay with that selector is attributed from the relay's
+  `bytes[]` argument at head word `calls_word`: the k-th setter call in the
+  array posted the k-th round of the transaction (`batch_index`), the
+  `safe_chain` is sender, relay, feed. Hashnote's PriceReporterProxy uses
+  two selectors with the array at words 5 and 6.
+- The Chainlink shape of `AnswerUpdated` leaves `updatedAt` non-indexed;
+  the decoder takes the timestamp from the data word when the fourth topic
+  is absent. `latestRound()` falls back to the round id of
+  `latestRoundData()` when the getter is missing.
+- `survey_line` per guard kind: the Midas sentence for `max_deviation`;
+  "N feeds replayed, K posts exactly on the clamp band on M feeds, C
+  truncated on chain, F failed posts" for `clamp`; "N feeds replayed, R
+  rounds posted without an on-chain check, F failed posts, L live" for no
+  guard. `family_summary` carries `guard_kind`, `at_bound_posts`,
+  `clamped_posts` and `feeds_at_bound`.
 
 `result.json` (target `midas`): `format`, `target`, `summary` (per
 `01-svzchf-control.md` R3, `family: "guarded-setter"`, `posted` holds the
@@ -358,6 +394,7 @@ the family; `--rpc-delay-ms` applies.
 | R15 | `bypass_classification` (offline, fixture: mWIN, mTBILL round 3, mBASIS round 4 as scale resets; mROX, qHVNUSD from placeholder) |
 | R16 | `feed_verdict_precedence` (offline, synthetic, every branch) |
 | R17, R19 | `family_replay_reproduces_the_survey_counts_offline` (offline, checked-in bundle under `cli/tests/fixtures/midas-25884405/`, replayed through the bundle-backed source of `03-bundle-verify.md` R6) |
+| families | `hashnote_usyc_replays_through_the_reporter_relay`, `backed_v2_reports_the_at_bound_rounds` (offline, `cli/tests/fixtures/hashnote-25885541.tar.gz` and `backed-25885541.tar.gz` at block 25,885,541; the research page's facts: 503 USYC rounds by one key through the reporter, no guard, live; bNVDA rounds 37, 213 and 282 exactly on the 10 percent band, 0 truncated, ERNA, ERNX and bC3M stale since 2026-04-23) |
 | R18 | `timeline_rows_are_in_round_order_and_carry_findings` (offline, fixture) |
 
 The fixture bundle is produced once during the event by

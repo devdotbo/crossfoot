@@ -1,0 +1,68 @@
+{
+  "family": "hashnote-usyc",
+  "target": "hashnote",
+  "chain_id": 1,
+  "explorer": {
+    "name": "eth.blockscout.com",
+    "api": "https://eth.blockscout.com/api",
+    "address_url": "https://eth.blockscout.com/address/",
+    "transaction_url": "https://eth.blockscout.com/tx/"
+  },
+  "mechanism": {
+    "description": "GenericNextPriceAggregator (Hashnote, now Circle): a Chainlink-shaped AggregatorV3 feed for USYC with 18 decimals. The feed accepts a new answer and timestamp from its immutable reporter contract only; the reporter is called by one externally owned account. No deviation bound, no min or max, no spacing rule exists on the posting path (class B, posted without guard). The 8-decimal sibling feed 0x4c48bcb2 derives its answer on chain from reported balances (BalanceReported, no AnswerUpdated) and is not in this list.",
+    "source": {
+      "repo": "verified on Etherscan",
+      "path": "GenericNextPriceAggregator (implementation 0x6deaa761bc131ac5f1d562ee71819e846ef11624), PriceReporterProxy 0x9fde717a",
+      "note": "source read by the research teammate on 2026-09-02 (raw/hashnote-usyc-oracle-rpc-2026-09-02.md); no implementation was verified by this adapter"
+    },
+    "reads": {
+      "description": "description()",
+      "decimals": "decimals()",
+      "latest_round": "latestRound()",
+      "latest_round_data": "latestRoundData()",
+      "last_timestamp": "lastTimestamp()"
+    },
+    "guard": null,
+    "round_events": [
+      "AnswerUpdated(int256,uint256,uint256)"
+    ],
+    "setters": [
+      {
+        "signature": "setNextPrice(uint256)",
+        "path": "raw",
+        "value_arg": 0
+      }
+    ],
+    "relays": [
+      {
+        "address": "0x9fde717a21c5b272b8956d3aa0c3551e1ffd23d7",
+        "selector": "0xec46d0f6",
+        "calls_word": 5,
+        "note": "PriceReporterProxy report call used 2024-08 to 2026-07: bytes[] of feed calls at head word 5"
+      },
+      {
+        "address": "0x9fde717a21c5b272b8956d3aa0c3551e1ffd23d7",
+        "selector": "0x217fd7c3",
+        "calls_word": 6,
+        "note": "PriceReporterProxy report call used since 2026-07: bytes[] of feed calls at head word 6"
+      }
+    ],
+    "other_calls": [],
+    "bound_events": {
+      "upgraded": "Upgraded(address)",
+      "initialized": "Initialized(uint8)",
+      "initialized_min_version": 2
+    },
+    "spacing_rule": null,
+    "verified_implementations": []
+  },
+  "feeds": [
+    {
+      "product": "USYC",
+      "key": "aggregator18",
+      "address": "0x74f2199AEb743f68f05943e5715A33EaF2b61f53",
+      "decimals": 18,
+      "kind": "bounded"
+    }
+  ]
+}

@@ -79,7 +79,13 @@ Crossfoot writes nothing to any chain.
   table with path class and value argument, the bound events, the spacing
   rule marker and the verified implementations. `run midas` is this command
   with the Midas config as the default; the target name and the bundle
-  prefix come from the config.
+  prefix come from the config. Family configs in `config/`: `midas`
+  (66 feeds, deviation guard), `hashnote` (USYC 18-decimal feed, no guard,
+  posted through a reporter relay), `backed` (four BackedOracle v2 feeds,
+  a 10 percent clamp instead of a revert). The guard kind decides the
+  finding vocabulary: `GUARD_BYPASS` and `UNGUARDED_POST` under a
+  deviation guard, `GUARD_AT_BOUND` and `GUARD_CLAMPED` under a clamp,
+  `UNGUARDED_POST` with `classification: no_guard` without a guard.
 
 This README states no results for any target. Results live in bundles.
 
@@ -183,7 +189,8 @@ crossfoot run svzchf --window demo --from-bundle cli/tests/fixtures/svzchf-demo-
 crossfoot run mtbill --baseline-block 25598000 --block 25850000
 crossfoot run midas --block 25884405 --config config/midas-mainnet.json
 crossfoot run midas --block 25884405 --feed mRE7 --offline
-crossfoot run family --block 25884405 --config config/<family>-mainnet.json
+crossfoot run family --block 25885541 --config config/hashnote-mainnet.json
+crossfoot run family --block 25885541 --config config/backed-mainnet.json
 ```
 
 Prints the verdict, the summary headline, the result and bundle paths, the
