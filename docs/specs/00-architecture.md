@@ -3,16 +3,17 @@
 ## Goal
 
 One page that shows how data moves through Crossfoot during the event build
-and lists the commits, in order, that implement specs 01 to 03. The
+and lists the commits, in order, that implement specs 01 to 06. The
 architecture follows the narrowed build plan: standardized Graph feed data,
 then Crossfoot recomputation or replay, then a consumer decision. Verdicts
 stay off chain; there is no verdict registry.
 
 ## Non-goals
 
-- The subgraph schema and handlers and the consumer agent are specified
-  elsewhere (build plan items 3 and 4). This page fixes only what the engine
-  side hands them and in which files.
+- The subgraph schema and handlers (`04-subgraph.md`), the consumer agent
+  (`05-consumer-agent.md`) and the conditional Arc hook (`06-arc-hook.md`)
+  are specified in their own pages. This page fixes what the engine side
+  hands them, in which files, and where their commits sit in the plan.
 - No paid verdict path (item 5) unless a sponsor confirms eligibility.
 
 ## Inputs and sources
@@ -44,9 +45,11 @@ subgraphs index on-chain data only), `wiki/midas-feed-family.md`.
                                         crossfoot verify <bundle>
                                         (BundleSource, no network)
 
- subgraph (item 3): indexes AnswerUpdated, Upgraded, RoleGranted on the Midas
- feeds and RateChanged, Saved, Withdrawn, InterestCollected on the Frankencoin
- module; ERC-8330 vocabulary on the posted side; no Crossfoot output on chain.
+ subgraph (04): indexes AnswerUpdated, Initialized, Upgraded on the 60 Midas
+ feeds and RateChanged, RateProposed, Saved, Withdrawn, InterestCollected on
+ the Frankencoin module; ERC-8330 vocabulary on the posted side; no Crossfoot
+ output on chain. consumer (05): crossfoot consume, decisions/<stamp>/.
+ Arc hook (06, conditional): CrossfootAttestations on Arc, anchors.json.
 ```
 
 Reading the diagram:
@@ -64,13 +67,16 @@ Reading the diagram:
    the result (`01-svzchf-control.md` R3).
 4. The renderer is a pure function of the bundles. It writes the static
    pages and, new in the event build, `site/data/feeds.json` (one row per
-   feed and per svZCHF window: address, family, verdict, posting_path,
-   liveness, consumer_action, bundle root hash, result path) and
+   feed and per svZCHF window: address, target, product, family, verdict,
+   posting_path, liveness, consumer_action, nav_recomputation, headline,
+   bundle root hash, result path, window block) and
    `site/data/timelines/<feed>.json` (copied from the bundle).
 5. The subgraph indexes on-chain events only. The consumer agent joins the
    subgraph's latest posted state per feed with `site/data/feeds.json` by
    feed address, off chain, and acts: ALLOW for the control, REVIEW for a
-   feed with a guard bypass, citing the bundle root hash it read.
+   feed with a guard bypass, citing the bundle root hash it read and the
+   subgraph deployment ID and block it queried (05 R9). The Arc hook, if
+   built, anchors the hash of that record (06).
 6. `verify` closes the loop for a third party: hashes, replay without the
    network, exit code.
 
@@ -90,14 +96,25 @@ Renderer requirements (engine side, small):
 ## Commit plan for the event
 
 Small commits, one concern each, in this order. Titles are the commit
-subjects. Each body cites the spec and requirement ids. Kill order from the
-build plan: cut item 5 first, then the verify command proper (commits 14 to
-16), never the Midas replay or the consumer beat; the bundle-backed source
-(commit 7) stays because the Midas fixture depends on it.
+subjects. Each body cites the spec and requirement ids. Lettered rows were
+inserted by specs 04 to 06 without renumbering the engine commits; the
+subgraph rows sit early because the Studio sync time is unknown and the
+Midas side must be syncing before the engine work ends. Kill order from the
+build plan: cut item 5 first, then the Arc rows (19a to 19c, conditional
+anyway), then the verify command proper (commits 14 to 16), never the Midas
+replay, the Midas side of the subgraph or the consumer beat; the Frankencoin
+side of the subgraph falls back to RateChange and VaultFlow without derived
+rounds (04 kill criterion). The bundle-backed source (commit 7) stays
+because the Midas fixture depends on it.
 
 | # | Title | Contains |
 |---|---|---|
 | 1 | Add engine specs for the event build | `docs/specs/*` merged from the `specs` branch (written before kickoff, stated in the README of the directory) |
+| 1a | Add the subgraph scaffold, feeds table and manifest generator | 04 R1 to R4; `subgraph/feeds.json`, `scripts/gen-manifest.ts`, both ABIs, generated `subgraph.yaml`; Rust tests `subgraph_feeds_match_the_midas_config`, `manifest_has_sixty_one_sources` |
+| 1b | Add the schema and the Midas mappings | 04 R5 to R10; `schema.graphql`, `src/midas.ts`, `src/shared.ts`; matchstick `path_and_deviation` |
+| 1c | Deploy the Midas side to Studio and record the deployment | 04 R14; `subgraph/DEPLOYMENT.md` with deployment ID and query URL |
+| 1d | Add the Frankencoin mappings and derived rounds | 04 R11 to R13; `src/frankencoin.ts`; redeploy, new row in `DEPLOYMENT.md` |
+| 1e | Add the subgraph fixture counts and query-level checks | 04 R16 to R18; `subgraph/queries/*.graphql`, `tests/expected-counts.json`; live tests `g1` to `g5` |
 | 2 | Add a target-neutral summary block to result.json | 01 R3 to R6 for svZCHF and mTBILL; offline test `summary_block_is_target_neutral` |
 | 3 | Add the demo window preset for svZCHF | 01 R1; clap `--window demo`, mutual exclusion; tests |
 | 4 | Write the svZCHF run as one self-contained bundle | 01 R7, 03 R1; `svzchf::run` takes the caller's `BundleWriter`; result loses `inputs.*_bundle` |
@@ -114,13 +131,24 @@ build plan: cut item 5 first, then the verify command proper (commits 14 to
 | 15 | Write SHA256SUMS and the bundle root hash | 03 R5; `sha256sum -c` shell test |
 | 16 | Add crossfoot verify | 03 R8 to R12; the six exit-code tests on the fixtures |
 | 17 | Scope the README replay claim to the verifier | 03 README wording; `readme_claim_matches_the_scope_sentence` |
-| 18 | Export feeds.json and timelines from render | A1, A2; deterministic output test |
+| 18 | Export feeds.json and timelines from render | A1, A2; deterministic output test; rows carry target, product and window block for 05 R1 |
+| 18a | Add crossfoot consume with the freshness gate and decision table | 05 R1 to R8, R15; `cli/src/consume.rs`; `decision_table_every_row`, `stale_head_routes_every_feed_to_review` |
+| 18b | Write decision records with provenance and offline replay | 05 R9 to R13; `decisions/<stamp>/`, `--replay`; `consume_twice_from_replay_is_byte_identical` |
+| 18c | Add the consume fixture and the demo beat test | 05 R11, R14; responses recorded from Studio at block 25,884,405; `demo_beat_svzchf_allow_mre7_review` |
 | 19 | Draw the mRE7 timeline on the Midas run page | A3 |
+| 19a | Add the Arc attestation contract and scripts (conditional) | 06 R1 to R5; `contracts/arc/`; forge tests |
+| 19b | Deploy CrossfootAttestations to Arc testnet and anchor the demo decisions (conditional) | 06 R6, R7; `contracts/arc/DEPLOYMENT.md`, broadcast file, `anchors.json` |
+| 19c | Add the architecture diagram (conditional) | 06 R10; `docs/architecture.svg` |
 | 20 | Add verify --refetch (stretch) | 03 R13; live test `t10` |
 | 21 | Add the svZCHF demo bundle as a fixture | 01 R2 offline replay through verify; only if size allows (03 Q3) |
+| 21a | Publish the subgraph to Arbitrum One (stretch) | 04 R15; gateway row in `subgraph/DEPLOYMENT.md`; only with the final schema and gas on hand |
+
+The Arc mainnet redeploy (06 R8) happens between 2026-09-16 and 2026-09-30,
+after submission, and is not an event commit.
 
 Each commit passes `cargo fmt --check`, `cargo clippy`, and the offline
-suite `cargo test`; live tests run before commits 5, 14 and 20.
+suite `cargo test`; subgraph commits also pass `bunx graph build`; live
+tests run before commits 5, 14, 18c and 20.
 
 ## Verification
 
@@ -133,14 +161,15 @@ suite `cargo test`; live tests run before commits 5, 14 and 20.
 
 ## Out of scope
 
-- The subgraph manifest, schema and deployment; the consumer agent's
-  prompt and runtime; the landing page. Each has its own owner and spec.
+- The landing page and the app frontend (TanStack, discussed separately).
+  What the frontend reads is fixed by A1, 05 R9 and 06 R5: `feeds.json`,
+  the timeline files, `decisions.json`, `anchors.json`, and the subgraph
+  queries of 04 R16.
 
 ## Open questions
 
-- Q1. Where the consumer agent reads Crossfoot output from at demo time:
-  `site/data/feeds.json` served statically (default) or the bundle
-  directory directly. The file shape is the same either way.
+- Q1. Settled by 05 R1: the consumer agent reads `site/data/feeds.json`;
+  the bundle directory is reached through `result_path` only.
 - Q2. Whether the subgraph should carry a `bundleRoot` field per feed that
   the agent could fill from Crossfoot. Default no: verdicts and hashes stay
   off chain (review C5); revisit only if a track requires it.

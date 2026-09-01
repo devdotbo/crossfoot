@@ -15,6 +15,9 @@ code; nothing in this directory changes the binary.
 | `01-svzchf-control.md` | svZCHF as the exact control in the demo | 1 |
 | `02-midas-family-replay.md` | Midas customFeed family target: posting-path replay, guard bypass detection, timelines | 2 |
 | `03-bundle-verify.md` | Self-contained evidence bundles and `crossfoot verify` | bundle and verify |
+| `04-subgraph.md` | Feed subgraph: 60 Midas customFeed sources plus svZCHF, one schema, path from calldata, bound at post, Studio deployment | 3 |
+| `05-consumer-agent.md` | `crossfoot consume`: provenance-gated ALLOW or REVIEW per feed from live subgraph data joined with Crossfoot results | 4 |
+| `06-arc-hook.md` | Conditional: `CrossfootAttestations` on Arc testnet, mainnet-ready config, Chainlink stretch, kill criterion | partner pick Arc |
 
 ## Spec format
 
@@ -65,7 +68,7 @@ order:
 ## Timeline note
 
 The specs in this directory were written on 2026-09-01 to 2026-09-03, before
-the event. Implementation commits start after kickoff. The pre-existing
+the event (04 to 06 on 2026-09-01, on the `specs-graph` branch). Implementation commits start after kickoff. The pre-existing
 baseline the specs build on is the repository state at commit `98424c0`
 (engine, CLI, svZCHF full recomputation, mTBILL consistency checks, hardened
 verdict aggregation, redacted evidence). The README's provenance section
