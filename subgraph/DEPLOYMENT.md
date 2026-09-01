@@ -9,7 +9,7 @@ Target: Subgraph Studio (04-subgraph.md D4, R14). Publishing to the network
 |---|---|
 | `bun install`, `bun run gen`, `graph codegen`, `graph build` | pass (2026-09-02, graph-cli 0.97.1, darwin-arm64) |
 | `graph test` (matchstick 0.6.0, `binary-macos-12-m1`) | 31 tests pass (shared, midas, openeden, ondo, superstate, frankencoin) |
-| Studio deploy | attempted 2026-09-02 with the key from `.env` (`graph_deploy_key`): rejected by api.studio.thegraph.com with "Deploy key not found" (build hash QmP4Uxtpo9Wzs1ZgKWXr8msGgVdNq4eUoKvjpwHR5iAJTZ uploaded fine); waiting for a re-copied Deploy Key |
+| Studio deploy | v0.0.1 deployed 2026-09-02 (deployment ID Qmdzkdfsezd9m11omAppiDikkLgCJX2wX2dWpELf4ejDbJ, see the versions table); the first key supplied was rejected with "Deploy key not found" and turned out to be an API key |
 | Local graph-node (docker, dRPC with traces) | bounded manifest deployed; graph-node accepts the call handlers and finds one event plus one call trigger per Safe-routed round; entity checks below |
 | Network publish | not done |
 
@@ -49,7 +49,11 @@ query and record the first head at which `_meta.block.number` reached it.
 
 | Version | Deployment ID | Query URL | Date | First head >= 25,884,405 |
 |---|---|---|---|---|
-| none yet | | | | |
+| v0.0.1 (64 sources: 60 Midas, OpenEden, Ondo, Superstate, Frankencoin) | Qmdzkdfsezd9m11omAppiDikkLgCJX2wX2dWpELf4ejDbJ | https://api.studio.thegraph.com/query/115545/crossfoot/v0.0.1 (also `.../crossfoot/version/latest`) | 2026-09-02 | pending; `_meta.block.number` 17,124,712 and `hasIndexingErrors: false` right after the deploy (the earliest start block is Ondo's 17,124,713) |
+
+The Studio development URL answers without an API key (rate-limited, 3,000
+queries per day). The gateway form with the API key from `.env`
+(`graph_api_key`) only exists after a network publish (R15), not yet.
 
 ## Trigger ordering and the call handler join (verified)
 
