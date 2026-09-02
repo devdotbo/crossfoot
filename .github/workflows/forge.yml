@@ -1,0 +1,38 @@
+name: Forge
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "contracts/guard/**"
+      - ".github/workflows/forge.yml"
+  pull_request:
+    paths:
+      - "contracts/guard/**"
+      - ".github/workflows/forge.yml"
+
+concurrency:
+  group: forge-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: forge test (contracts/guard)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: contracts/guard
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - run: forge --version
+      - run: forge build
+      - run: forge test -vv
+      # The committed snapshot is the gas record cited in docs/specs/10-guard-wrapper.md.
+      - run: forge snapshot --check
