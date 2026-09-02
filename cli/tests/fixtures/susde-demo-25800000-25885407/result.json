@@ -1,0 +1,132 @@
+{
+  "check_class": "full recomputation",
+  "comparison": {
+    "check_class": "full recomputation",
+    "fields": [
+      {
+        "equal": true,
+        "field": "vault.getUnvestedAmount()",
+        "modeled": "28384861561507936507936",
+        "observed": "28384861561507936507936",
+        "residual": "0"
+      },
+      {
+        "equal": true,
+        "field": "vault.totalAssets()",
+        "modeled": "1359753651665742891001164581",
+        "observed": "1359753651665742891001164581",
+        "residual": "0"
+      },
+      {
+        "equal": true,
+        "field": "vault.convertToAssets(1e18)",
+        "modeled": "1246071134064908232",
+        "observed": "1246071134064908232",
+        "residual": "0"
+      }
+    ],
+    "tolerance": "zero, to the wei"
+  },
+  "format": "crossfoot-result-v1",
+  "input_gaps": [],
+  "inputs": {
+    "asset": "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3",
+    "distributor": "0xf2fa332bD83149c66b09B45670bCe64746C6b439",
+    "distributor_operator": "0xe3880b792f6f0f8795cbaacd92e7ca78f5d3646e",
+    "formula": [
+      "unvested = (VESTING_PERIOD - (block timestamp - lastDistributionTimestamp)) * vestingAmount / VESTING_PERIOD, or 0 after a full period",
+      "totalAssets = USDe.balanceOf(vault) - unvested",
+      "convertToAssets(1e18) = 1e18 * (totalAssets + 1) / (totalSupply + 1)"
+    ],
+    "state_b0": {
+      "block": 25800000,
+      "block_timestamp_unix": 1787273051,
+      "observed": {
+        "vault.convertToAssets(1e18)": "1244317367391812551",
+        "vault.getUnvestedAmount()": "9560046069444444444444",
+        "vault.totalAssets()": "1343921722695453445620962354"
+      },
+      "usde.balanceOf(vault)": "1343931282741522890065406798",
+      "vault.lastDistributionTimestamp()": 1787249267,
+      "vault.totalSupply()": "1080047388161445891940438069",
+      "vault.vestingAmount()": "54890216666666666666667"
+    },
+    "state_b1": {
+      "block": 25885407,
+      "block_timestamp_unix": 1788301511,
+      "observed": {
+        "vault.convertToAssets(1e18)": "1246071134064908232",
+        "vault.getUnvestedAmount()": "28384861561507936507936",
+        "vault.totalAssets()": "1359753651665742891001164581"
+      },
+      "usde.balanceOf(vault)": "1359782036527304398937672517",
+      "vault.lastDistributionTimestamp()": 1788286943,
+      "vault.totalSupply()": "1091232767129418873862615533",
+      "vault.vestingAmount()": "57439854761904761904762"
+    },
+    "vault": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+    "vesting_period_seconds": 28800
+  },
+  "modeled": {
+    "seconds_since_last_distribution": 14568,
+    "vault.convertToAssets(1e18)": "1246071134064908232",
+    "vault.getUnvestedAmount()": "28384861561507936507936",
+    "vault.totalAssets()": "1359753651665742891001164581"
+  },
+  "posting": {
+    "admin_vesting_resets_in_window": 0,
+    "amount_total": "1911473681428571428571421",
+    "by_path": {
+      "operator_via_distributor": 36
+    },
+    "note": "the amount of each reward is a REWARDER_ROLE holder's choice; the vesting lock is the on-chain guard on timing, not on size",
+    "posts_in_window": 36
+  },
+  "series_replay": {
+    "consistent": true,
+    "expected_last_distribution_timestamp": 1788286943,
+    "expected_vesting_amount": "57439854761904761904762",
+    "guard_violations": [],
+    "observed_last_distribution_timestamp": 1788286943,
+    "observed_vesting_amount": "57439854761904761904762",
+    "posts_applied": 36
+  },
+  "stale_reads": [],
+  "summary": {
+    "check_class": "full recomputation",
+    "consumer_action": "ALLOW",
+    "family": "recomputable-accrual",
+    "fields_compared": 3,
+    "fields_exact": 3,
+    "findings_count": 0,
+    "headline": "3 of 3 fields exact, residual 0",
+    "largest_residual": null,
+    "nav_recomputation": "FULL",
+    "posted": {
+      "decimals": 18,
+      "field": "vault.convertToAssets(1e18)",
+      "value": "1246071134064908232"
+    },
+    "recomputed": {
+      "decimals": 18,
+      "field": "vault.convertToAssets(1e18)",
+      "value": "1246071134064908232"
+    },
+    "target": "susde",
+    "verdict": "MODEL_MATCH",
+    "window": {
+      "baseline_block": 25800000,
+      "block": 25885407
+    }
+  },
+  "target": "susde",
+  "timeline_file": "timelines/susde.json",
+  "tolerance": "zero, to the wei",
+  "verdict": "MODEL_MATCH",
+  "window": {
+    "baseline_block": 25800000,
+    "baseline_timestamp_unix": 1787273051,
+    "block": 25885407,
+    "block_timestamp_unix": 1788301511
+  }
+}

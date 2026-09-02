@@ -1,0 +1,1685 @@
+{
+  "bundle": "susde-run-25800000-25885407-20260902T000324Z",
+  "cache_hits": 58,
+  "cache_misses": 0,
+  "cache_preimage_version": "crossfoot-cache-v1",
+  "chain_id": 1,
+  "code": {
+    "git_commit": "3153e37ea8ce3f5e2fdd1a2836eeaf2e2a9e38e7",
+    "git_dirty": true,
+    "packages_sha256": "b25a6ad2e8a61678356d5f06ea5d25bec63186d297a4dfa2c5e88b324fb5af97",
+    "tool_version": "0.1.0"
+  },
+  "entries": [
+    {
+      "block": "n/a",
+      "byte_len": 39,
+      "cache": "hit",
+      "cache_key": "f850f3b048c9bd6a1d50075e4c7e5ee5f560f7831e396be9ebdce06fb0e5eca5",
+      "calldata": "",
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/001-eth-chainid.json",
+      "first_stored_utc": "2026-09-01T13:20:58.737Z",
+      "index": 1,
+      "label": "eth_chainId",
+      "method": "eth_chainId",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_chainId\nblock=n/a\nto=\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_chainId",
+        "params": []
+      },
+      "sha256": "79226432df73e05966f20e4d291fb5048bfef1138d7078f8feab534126df1aa5",
+      "to": "",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afadf",
+      "byte_len": 30166,
+      "cache": "hit",
+      "cache_key": "b37e807f83821162ff00c9fb8bce23bc0e9cab3a173d47454564caae6c635eb2",
+      "calldata": "full_transactions=false",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/002-block-header-25885407.json",
+      "first_stored_utc": "2026-09-02T00:02:31.854Z",
+      "index": 2,
+      "label": "block header @ 25885407",
+      "method": "eth_getBlockByNumber",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getBlockByNumber\nblock=0x18afadf\nto=\ncalldata=full_transactions=false\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getBlockByNumber",
+        "params": [
+          "0x18afadf",
+          false
+        ]
+      },
+      "sha256": "1ef3e9f579c2fa913efbe7e5b1d3d083238a0728605b0cbac811a81cdc311880",
+      "to": "",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afadf",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "155b071cc38fb81ac6cde5a8bac642cfdc2890389f42257505899e0e317424b3",
+      "calldata": "0x38d52e0f",
+      "decoded": {
+        "address": "0x4c9edd5852cd905f086c759e8383e09bff1e68b3",
+        "decimal": "437426098194082895061803372304124391670360729779",
+        "hex": "0x0000000000000000000000004c9edd5852cd905f086c759e8383e09bff1e68b3",
+        "shape": "word"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/003-vault-asset-25885407.json",
+      "first_stored_utc": "2026-09-02T00:02:31.908Z",
+      "index": 3,
+      "label": "vault.asset() @ 25885407",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afadf\nto=0x9d39a5de30e57443bff2a8307a4256c8797a3497\ncalldata=0x38d52e0f\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x38d52e0f",
+            "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+          },
+          "0x18afadf"
+        ]
+      },
+      "sha256": "0535dadab3833ed8985ea572789a8cdf59ad584fbe144a47c21d77692217ceb9",
+      "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afadf",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "5305c1334c20db81adb46b1861cdbbb300e0a7569b0b3860de8af17bd36389ed",
+      "calldata": "0x18160ddd",
+      "decoded": {
+        "decimal": "1091232767129418873862615533",
+        "hex": "0x00000000000000000000000000000000000000000386a586d72802111c6bf1ed",
+        "shape": "word"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/004-vault-totalsupply-25885407.json",
+      "first_stored_utc": "2026-09-02T00:02:31.956Z",
+      "index": 4,
+      "label": "vault.totalSupply() @ 25885407",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afadf\nto=0x9d39a5de30e57443bff2a8307a4256c8797a3497\ncalldata=0x18160ddd\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x18160ddd",
+            "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+          },
+          "0x18afadf"
+        ]
+      },
+      "sha256": "30e87cff2806330b98bf83bc02e90a3263dc18c46c6e3f0a94abd44cf8450c7d",
+      "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afadf",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "683c1b11f23f37157fe40fd5d7803e9310c5fc7eebbb4884c86d0998a251615e",
+      "calldata": "0x70a082310000000000000000000000009d39a5de30e57443bff2a8307a4256c8797a3497",
+      "decoded": {
+        "decimal": "1359782036527304398937672517",
+        "hex": "0x00000000000000000000000000000000000000000464c90be7cdc1b9e0fe4b45",
+        "shape": "word"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/005-usde-balanceof-vault-25885407.json",
+      "first_stored_utc": "2026-09-02T00:02:32.006Z",
+      "index": 5,
+      "label": "usde.balanceOf(vault) @ 25885407",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afadf\nto=0x4c9edd5852cd905f086c759e8383e09bff1e68b3\ncalldata=0x70a082310000000000000000000000009d39a5de30e57443bff2a8307a4256c8797a3497\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x70a082310000000000000000000000009d39a5de30e57443bff2a8307a4256c8797a3497",
+            "to": "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3"
+          },
+          "0x18afadf"
+        ]
+      },
+      "sha256": "7114694f77307d0f7bef1f41e95ccca676889a4c46916c5bbff2d72889aa8225",
+      "to": "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afadf",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "3bf5956c4eece671f04eb2c73143131a9145627b11d553742974a670508df0e6",
+      "calldata": "0x00728f76",
+      "decoded": {
+        "decimal": "57439854761904761904762",
+        "hex": "0x000000000000000000000000000000000000000000000c29d21db88f12fa9e7a",
+        "shape": "word"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/006-vault-vestingamount-25885407.json",
+      "first_stored_utc": "2026-09-02T00:02:32.054Z",
+      "index": 6,
+      "label": "vault.vestingAmount() @ 25885407",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afadf\nto=0x9d39a5de30e57443bff2a8307a4256c8797a3497\ncalldata=0x00728f76\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x00728f76",
+            "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+          },
+          "0x18afadf"
+        ]
+      },
+      "sha256": "9463067a621ebf57b6fcf262597855147d90e38ac51e283397864f4a9cd68213",
+      "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afadf",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "e823ffc2ac860168dc04f3359dfa63c354097a2083452b3246ee4e2def195397",
+      "calldata": "0x20950933",
+      "decoded": {
+        "decimal": "1788286943",
+        "hex": "0x000000000000000000000000000000000000000000000000000000006a9717df",
+        "shape": "word"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/007-vault-lastdistributiontimestamp-25885407.json",
+      "first_stored_utc": "2026-09-02T00:02:32.109Z",
+      "index": 7,
+      "label": "vault.lastDistributionTimestamp() @ 25885407",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afadf\nto=0x9d39a5de30e57443bff2a8307a4256c8797a3497\ncalldata=0x20950933\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x20950933",
+            "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+          },
+          "0x18afadf"
+        ]
+      },
+      "sha256": "dc0ef36ed7242b2b4b69a9d40d1525c342be3eaa21771fbda40f9d542dd53e47",
+      "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afadf",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "2e6f1b4c25378769986b7d640d65bac0dc9bcc53cce22ddf8ef0111d5d8a2f2b",
+      "calldata": "0xe7c2a608",
+      "decoded": {
+        "decimal": "28384861561507936507936",
+        "hex": "0x000000000000000000000000000000000000000000000602bf15f0bfe0349820",
+        "shape": "word"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/008-vault-getunvestedamount-25885407.json",
+      "first_stored_utc": "2026-09-02T00:02:32.166Z",
+      "index": 8,
+      "label": "vault.getUnvestedAmount() @ 25885407",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afadf\nto=0x9d39a5de30e57443bff2a8307a4256c8797a3497\ncalldata=0xe7c2a608\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0xe7c2a608",
+            "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+          },
+          "0x18afadf"
+        ]
+      },
+      "sha256": "ef35246c061ab81b92915c4aef9315e006acf9b9435519052e661dbbfebaed2f",
+      "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afadf",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "e7bc3fd2539865f7236c7ba73567e846fa41b559f02c73ed1298c27d375e9c56",
+      "calldata": "0x01e1d114",
+      "decoded": {
+        "decimal": "1359753651665742891001164581",
+        "hex": "0x00000000000000000000000000000000000000000464c30928b7d0fa00c9b325",
+        "shape": "word"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/009-vault-totalassets-25885407.json",
+      "first_stored_utc": "2026-09-02T00:02:32.212Z",
+      "index": 9,
+      "label": "vault.totalAssets() @ 25885407",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afadf\nto=0x9d39a5de30e57443bff2a8307a4256c8797a3497\ncalldata=0x01e1d114\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x01e1d114",
+            "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+          },
+          "0x18afadf"
+        ]
+      },
+      "sha256": "acee60419d776435e528ede85f98586284f75f9a029f875bef164f32c67b2628",
+      "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afadf",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "8295f1b7b695ce8263dc4d0dbc068a710d8c8dc37e33ae12b0786efc75297bb4",
+      "calldata": "0x07a2d13a0000000000000000000000000000000000000000000000000de0b6b3a7640000",
+      "decoded": {
+        "decimal": "1246071134064908232",
+        "hex": "0x000000000000000000000000000000000000000000000000114aef182ece97c8",
+        "shape": "word"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/010-vault-converttoassets-1e18-25885407.json",
+      "first_stored_utc": "2026-09-02T00:02:32.318Z",
+      "index": 10,
+      "label": "vault.convertToAssets(1e18) @ 25885407",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afadf\nto=0x9d39a5de30e57443bff2a8307a4256c8797a3497\ncalldata=0x07a2d13a0000000000000000000000000000000000000000000000000de0b6b3a7640000\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x07a2d13a0000000000000000000000000000000000000000000000000de0b6b3a7640000",
+            "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+          },
+          "0x18afadf"
+        ]
+      },
+      "sha256": "5bda53ced87a34cc818eecf05cd7082894b672305ae04ee67b42ccc6aa15a72b",
+      "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x189ad40",
+      "byte_len": 27729,
+      "cache": "hit",
+      "cache_key": "495a97fd95b80002742716d2d263f3f97ca69119aa77e236b39189a4fbc7660f",
+      "calldata": "full_transactions=false",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/011-block-header-25800000.json",
+      "first_stored_utc": "2026-09-02T00:02:32.390Z",
+      "index": 11,
+      "label": "block header @ 25800000",
+      "method": "eth_getBlockByNumber",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getBlockByNumber\nblock=0x189ad40\nto=\ncalldata=full_transactions=false\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getBlockByNumber",
+        "params": [
+          "0x189ad40",
+          false
+        ]
+      },
+      "sha256": "c0ca664006a561e12f6d8b446f86a2ae912ea1573188701e506c9eee0b9c5290",
+      "to": "",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x189ad40",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "3a21227832fa04804cd62f4706b7514a4af16c888efcc77a656cba870d684a59",
+      "calldata": "0x38d52e0f",
+      "decoded": {
+        "address": "0x4c9edd5852cd905f086c759e8383e09bff1e68b3",
+        "decimal": "437426098194082895061803372304124391670360729779",
+        "hex": "0x0000000000000000000000004c9edd5852cd905f086c759e8383e09bff1e68b3",
+        "shape": "word"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/012-vault-asset-25800000.json",
+      "first_stored_utc": "2026-09-02T00:02:32.447Z",
+      "index": 12,
+      "label": "vault.asset() @ 25800000",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x189ad40\nto=0x9d39a5de30e57443bff2a8307a4256c8797a3497\ncalldata=0x38d52e0f\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x38d52e0f",
+            "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+          },
+          "0x189ad40"
+        ]
+      },
+      "sha256": "0535dadab3833ed8985ea572789a8cdf59ad584fbe144a47c21d77692217ceb9",
+      "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x189ad40",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "3d72a893e0354c010be7d10ca0c07d9dfc142a849fe18f59120b0f68f2cbebf4",
+      "calldata": "0x18160ddd",
+      "decoded": {
+        "decimal": "1080047388161445891940438069",
+        "hex": "0x0000000000000000000000000000000000000000037d64ee3b49ec4bba7e5035",
+        "shape": "word"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/013-vault-totalsupply-25800000.json",
+      "first_stored_utc": "2026-09-02T00:02:32.501Z",
+      "index": 13,
+      "label": "vault.totalSupply() @ 25800000",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x189ad40\nto=0x9d39a5de30e57443bff2a8307a4256c8797a3497\ncalldata=0x18160ddd\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x18160ddd",
+            "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+          },
+          "0x189ad40"
+        ]
+      },
+      "sha256": "08420a31a74299b51e24c01cfd1f7723e52302b2b9f86ad6f96ac9e6004f98ba",
+      "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x189ad40",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "c3ae38bea00f786da9bd3db861ac8554368b223f248bbbf1b3a5a584bf074ed5",
+      "calldata": "0x70a082310000000000000000000000009d39a5de30e57443bff2a8307a4256c8797a3497",
+      "decoded": {
+        "decimal": "1343931282741522890065406798",
+        "hex": "0x00000000000000000000000000000000000000000457ac84d22bb6426a336b4e",
+        "shape": "word"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/014-usde-balanceof-vault-25800000.json",
+      "first_stored_utc": "2026-09-02T00:02:32.552Z",
+      "index": 14,
+      "label": "usde.balanceOf(vault) @ 25800000",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x189ad40\nto=0x4c9edd5852cd905f086c759e8383e09bff1e68b3\ncalldata=0x70a082310000000000000000000000009d39a5de30e57443bff2a8307a4256c8797a3497\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x70a082310000000000000000000000009d39a5de30e57443bff2a8307a4256c8797a3497",
+            "to": "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3"
+          },
+          "0x189ad40"
+        ]
+      },
+      "sha256": "061e6b8ce444a38c59a16c6c312fac2bb43178c6a95fabfcfdd1d0a51e63dfbc",
+      "to": "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x189ad40",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "86eaec4dfe4a876815fb1b20b9b0fe0763cb428686901492dc815ffd6367340a",
+      "calldata": "0x00728f76",
+      "decoded": {
+        "decimal": "54890216666666666666667",
+        "hex": "0x000000000000000000000000000000000000000000000b9f9ac795805cbdaaab",
+        "shape": "word"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/015-vault-vestingamount-25800000.json",
+      "first_stored_utc": "2026-09-02T00:02:32.601Z",
+      "index": 15,
+      "label": "vault.vestingAmount() @ 25800000",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x189ad40\nto=0x9d39a5de30e57443bff2a8307a4256c8797a3497\ncalldata=0x00728f76\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x00728f76",
+            "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+          },
+          "0x189ad40"
+        ]
+      },
+      "sha256": "0a8f049b485705dc3b5b2f66065e2a12ee8470479c17154c79b7cec511807e00",
+      "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x189ad40",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "f6c133a816fae2dcfabe0fac10390f4a95cbcb873a2fd14d21c6ae1fa9369919",
+      "calldata": "0x20950933",
+      "decoded": {
+        "decimal": "1787249267",
+        "hex": "0x000000000000000000000000000000000000000000000000000000006a874273",
+        "shape": "word"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/016-vault-lastdistributiontimestamp-25800000.json",
+      "first_stored_utc": "2026-09-02T00:02:32.651Z",
+      "index": 16,
+      "label": "vault.lastDistributionTimestamp() @ 25800000",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x189ad40\nto=0x9d39a5de30e57443bff2a8307a4256c8797a3497\ncalldata=0x20950933\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x20950933",
+            "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+          },
+          "0x189ad40"
+        ]
+      },
+      "sha256": "8c6c832d53b84036190dcc6ae4531125b3ae782d9c0a95251bfed988c8409567",
+      "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x189ad40",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "8ed39a689ce16aed29b8a223bf68f65be645b0d1170d8213a7abb4830d4eb0d8",
+      "calldata": "0xe7c2a608",
+      "decoded": {
+        "decimal": "9560046069444444444444",
+        "hex": "0x000000000000000000000000000000000000000000000206404a70dd657c571c",
+        "shape": "word"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/017-vault-getunvestedamount-25800000.json",
+      "first_stored_utc": "2026-09-02T00:02:32.701Z",
+      "index": 17,
+      "label": "vault.getUnvestedAmount() @ 25800000",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x189ad40\nto=0x9d39a5de30e57443bff2a8307a4256c8797a3497\ncalldata=0xe7c2a608\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0xe7c2a608",
+            "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+          },
+          "0x189ad40"
+        ]
+      },
+      "sha256": "b6b39f49f1960791d291dd0e4c5525e5317b67421e7f55c1d56ea2a4830e86fd",
+      "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x189ad40",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "e5661a9986e154272f3e898b66c20261aebc6bd0cca9d8c1d627a920c577ebdb",
+      "calldata": "0x01e1d114",
+      "decoded": {
+        "decimal": "1343921722695453445620962354",
+        "hex": "0x00000000000000000000000000000000000000000457aa7e91e1456504b71432",
+        "shape": "word"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/018-vault-totalassets-25800000.json",
+      "first_stored_utc": "2026-09-02T00:02:32.841Z",
+      "index": 18,
+      "label": "vault.totalAssets() @ 25800000",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x189ad40\nto=0x9d39a5de30e57443bff2a8307a4256c8797a3497\ncalldata=0x01e1d114\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x01e1d114",
+            "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+          },
+          "0x189ad40"
+        ]
+      },
+      "sha256": "ada6cb78c62a3f6c6926cc8d8f9fa4b66d2ef0ced92dd3e37e0f3b61fb879253",
+      "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x189ad40",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "aa24831ae3c18d0c5c7d2af8aeecd84b4359c5ab566c62a82a5bfd74c379e473",
+      "calldata": "0x07a2d13a0000000000000000000000000000000000000000000000000de0b6b3a7640000",
+      "decoded": {
+        "decimal": "1244317367391812551",
+        "hex": "0x0000000000000000000000000000000000000000000000001144b40d8f3cfbc7",
+        "shape": "word"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/019-vault-converttoassets-1e18-25800000.json",
+      "first_stored_utc": "2026-09-02T00:02:32.911Z",
+      "index": 19,
+      "label": "vault.convertToAssets(1e18) @ 25800000",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x189ad40\nto=0x9d39a5de30e57443bff2a8307a4256c8797a3497\ncalldata=0x07a2d13a0000000000000000000000000000000000000000000000000de0b6b3a7640000\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x07a2d13a0000000000000000000000000000000000000000000000000de0b6b3a7640000",
+            "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+          },
+          "0x189ad40"
+        ]
+      },
+      "sha256": "6e89da6647701cbbeaf9a6896e8a50a2a71fd427b896485f103ed6db270ea7cb",
+      "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afadf",
+      "byte_len": 102,
+      "cache": "hit",
+      "cache_key": "dc2df4025963cee39f0667fda61ab6fa569120df98d8baec92c133c6cad040e3",
+      "calldata": "0x570ca735",
+      "decoded": {
+        "address": "0xe3880b792f6f0f8795cbaacd92e7ca78f5d3646e",
+        "decimal": "1298974805796373759275933600969663999349135467630",
+        "hex": "0x000000000000000000000000e3880b792f6f0f8795cbaacd92e7ca78f5d3646e",
+        "shape": "word"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/020-distributor-operator-25885407.json",
+      "first_stored_utc": "2026-09-02T00:02:32.968Z",
+      "index": 20,
+      "label": "distributor.operator() @ 25885407",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afadf\nto=0xf2fa332bd83149c66b09b45670bce64746c6b439\ncalldata=0x570ca735\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x570ca735",
+            "to": "0xf2fa332bD83149c66b09B45670bCe64746C6b439"
+          },
+          "0x18afadf"
+        ]
+      },
+      "sha256": "4fd3ebe1e82fadaea4a7b2a345dafd13391950676a237aadf9ee68a20a3fb0a2",
+      "to": "0xf2fa332bD83149c66b09B45670bCe64746C6b439",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x189ad41..0x18afadf",
+      "byte_len": 16365,
+      "cache": "hit",
+      "cache_key": "8f53cdfb81cdb858f3dd568adadb3325ea06675300e0a7f9c6560fef4719a182",
+      "calldata": "topic0=0xbb28dd7cd6be6f61828ea9158a04c5182c716a946a6d2f31f4864edb87471aa6,topic1=none,topic2=none",
+      "decoded": {
+        "byte_len": 36,
+        "hex": "rewards_received_logs=36",
+        "shape": "other"
+      },
+      "endpoint": "https://eth.blockscout.com/api",
+      "file": "raw/021-rewardsreceived-in-the-window-blockscout.json",
+      "first_stored_utc": "2026-09-02T00:02:33.206Z",
+      "index": 21,
+      "label": "RewardsReceived in the window, blockscout",
+      "method": "blockscout_getLogs",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=blockscout_getLogs\nblock=0x189ad41..0x18afadf\nto=0x9d39a5de30e57443bff2a8307a4256c8797a3497\ncalldata=topic0=0xbb28dd7cd6be6f61828ea9158a04c5182c716a946a6d2f31f4864edb87471aa6,topic1=none,topic2=none\n",
+      "request": {
+        "api": "blockscout_getLogs",
+        "http_method": "GET",
+        "query": [
+          [
+            "module",
+            "logs"
+          ],
+          [
+            "action",
+            "getLogs"
+          ],
+          [
+            "address",
+            "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+          ],
+          [
+            "fromBlock",
+            "25800001"
+          ],
+          [
+            "toBlock",
+            "25885407"
+          ],
+          [
+            "topic0",
+            "0xbb28dd7cd6be6f61828ea9158a04c5182c716a946a6d2f31f4864edb87471aa6"
+          ]
+        ]
+      },
+      "sha256": "06a6bbe55783aa482c28cddcc9908efb48d134578cdcbd7064a6fb829ac183cb",
+      "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+      "wire": "http_get"
+    },
+    {
+      "block": "mined",
+      "byte_len": 716,
+      "cache": "hit",
+      "cache_key": "6240e5af8557b99baf088913fd2294977bf67d93a12a381b935c136bfcc67425",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/022-reward-transaction-0x878b227681ae761fb82d872dfd40259725728c03ca901178f8158c37d7b4ccc6.json",
+      "first_stored_utc": "2026-09-02T00:02:33.261Z",
+      "index": 22,
+      "label": "reward transaction 0x878b227681ae761fb82d872dfd40259725728c03ca901178f8158c37d7b4ccc6",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x878b227681ae761fb82d872dfd40259725728c03ca901178f8158c37d7b4ccc6\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x878b227681ae761fb82d872dfd40259725728c03ca901178f8158c37d7b4ccc6"
+        ]
+      },
+      "sha256": "614e8b2d6649165d86dbc71690d86403b3f049efa5f91a3329034aa5cfa7ca1e",
+      "to": "0x878b227681ae761fb82d872dfd40259725728c03ca901178f8158c37d7b4ccc6",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 717,
+      "cache": "hit",
+      "cache_key": "a48e49a430da4077b6b02351327f24a67725dc56868ad84523ebcdf406debb05",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/023-reward-transaction-0x5ec0693e91e783c4ea6980168ba7308af52a25bec2f28c1b86b976811231b42e.json",
+      "first_stored_utc": "2026-09-02T00:02:33.370Z",
+      "index": 23,
+      "label": "reward transaction 0x5ec0693e91e783c4ea6980168ba7308af52a25bec2f28c1b86b976811231b42e",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x5ec0693e91e783c4ea6980168ba7308af52a25bec2f28c1b86b976811231b42e\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x5ec0693e91e783c4ea6980168ba7308af52a25bec2f28c1b86b976811231b42e"
+        ]
+      },
+      "sha256": "7944b962e6c652244ccca08ef2d9ee2cddc37d8dc671658a1db1d0a58cbde33b",
+      "to": "0x5ec0693e91e783c4ea6980168ba7308af52a25bec2f28c1b86b976811231b42e",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 716,
+      "cache": "hit",
+      "cache_key": "fef6c827481bb906635472ced1878a58480b752c0456f5143a5cfa95913a9340",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/024-reward-transaction-0x87d926592e93d75436cce1d976d30d203ca4d2c32ee1130d0f9d9be8cecd37f5.json",
+      "first_stored_utc": "2026-09-02T00:02:33.426Z",
+      "index": 24,
+      "label": "reward transaction 0x87d926592e93d75436cce1d976d30d203ca4d2c32ee1130d0f9d9be8cecd37f5",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x87d926592e93d75436cce1d976d30d203ca4d2c32ee1130d0f9d9be8cecd37f5\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x87d926592e93d75436cce1d976d30d203ca4d2c32ee1130d0f9d9be8cecd37f5"
+        ]
+      },
+      "sha256": "3147b380fac1e237f3a68ba9cbe8647dd975c59ef93e55f75df45cfc2bf1d576",
+      "to": "0x87d926592e93d75436cce1d976d30d203ca4d2c32ee1130d0f9d9be8cecd37f5",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 716,
+      "cache": "hit",
+      "cache_key": "6127e424b6d3cdc63b480db7ede2f33721d00604d4aa2b09b0899aed41730244",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/025-reward-transaction-0x890afe89b0200556bc61b9d0fc584d918a1f30e2e3cb6a28a749c7603e681df4.json",
+      "first_stored_utc": "2026-09-02T00:02:33.481Z",
+      "index": 25,
+      "label": "reward transaction 0x890afe89b0200556bc61b9d0fc584d918a1f30e2e3cb6a28a749c7603e681df4",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x890afe89b0200556bc61b9d0fc584d918a1f30e2e3cb6a28a749c7603e681df4\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x890afe89b0200556bc61b9d0fc584d918a1f30e2e3cb6a28a749c7603e681df4"
+        ]
+      },
+      "sha256": "c7ea8379d1eab46e502d9afddf0171aa0a93147840ef9832b426e6f5ae91a797",
+      "to": "0x890afe89b0200556bc61b9d0fc584d918a1f30e2e3cb6a28a749c7603e681df4",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 716,
+      "cache": "hit",
+      "cache_key": "81478d0bba996e146ce0634e71cf187e04059ffb7cace8d99cd71a1cb8c82fb2",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/026-reward-transaction-0x666d8a1298d6862189f83c6edf6954495d40c1d9417fa55bc32fc8d375aca0b2.json",
+      "first_stored_utc": "2026-09-02T00:02:33.530Z",
+      "index": 26,
+      "label": "reward transaction 0x666d8a1298d6862189f83c6edf6954495d40c1d9417fa55bc32fc8d375aca0b2",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x666d8a1298d6862189f83c6edf6954495d40c1d9417fa55bc32fc8d375aca0b2\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x666d8a1298d6862189f83c6edf6954495d40c1d9417fa55bc32fc8d375aca0b2"
+        ]
+      },
+      "sha256": "0bfdece8c59513bc513f542e4a551f756b976b58eaa800da25934cf0c210eee3",
+      "to": "0x666d8a1298d6862189f83c6edf6954495d40c1d9417fa55bc32fc8d375aca0b2",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 716,
+      "cache": "hit",
+      "cache_key": "8f9a966de9e9b94c2236b19b6dab0b55e99ec5a0e9c49e83ed4f1dfbac33e643",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/027-reward-transaction-0xe387a6863c6beeea4b481002b331c1e7018a5620696c818d429203d2f07d4a39.json",
+      "first_stored_utc": "2026-09-02T00:02:33.580Z",
+      "index": 27,
+      "label": "reward transaction 0xe387a6863c6beeea4b481002b331c1e7018a5620696c818d429203d2f07d4a39",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0xe387a6863c6beeea4b481002b331c1e7018a5620696c818d429203d2f07d4a39\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0xe387a6863c6beeea4b481002b331c1e7018a5620696c818d429203d2f07d4a39"
+        ]
+      },
+      "sha256": "5d7c8db6967be5d17acefef607d05a0aa2499eb346c7b786bf6d8321d3fd06a7",
+      "to": "0xe387a6863c6beeea4b481002b331c1e7018a5620696c818d429203d2f07d4a39",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 686,
+      "cache": "hit",
+      "cache_key": "f19a2f3fb8d7c87c145d360b27b32b4268b37b94186b3eb942f1a6ebaaa4ced9",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/028-reward-transaction-0x4394223e7336c9b67e03fee652b04fa45008c20fd5458d74d467a3fe0597ebdd.json",
+      "first_stored_utc": "2026-09-02T00:02:33.632Z",
+      "index": 28,
+      "label": "reward transaction 0x4394223e7336c9b67e03fee652b04fa45008c20fd5458d74d467a3fe0597ebdd",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x4394223e7336c9b67e03fee652b04fa45008c20fd5458d74d467a3fe0597ebdd\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x4394223e7336c9b67e03fee652b04fa45008c20fd5458d74d467a3fe0597ebdd"
+        ]
+      },
+      "sha256": "84cadcc817e4edf61e4d08630e5c2927495612a3bc3fa1a96cb9b5858356b16f",
+      "to": "0x4394223e7336c9b67e03fee652b04fa45008c20fd5458d74d467a3fe0597ebdd",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 716,
+      "cache": "hit",
+      "cache_key": "07dc1f0e2e25533c27dfa15c3a09f44649e27564b4811a76e35b1f5a3de7d05b",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/029-reward-transaction-0x42e692ebd0e3cfbc84045a9ac6413c247b2f59ee8cc1e87dff4806d14d80e387.json",
+      "first_stored_utc": "2026-09-02T00:02:33.684Z",
+      "index": 29,
+      "label": "reward transaction 0x42e692ebd0e3cfbc84045a9ac6413c247b2f59ee8cc1e87dff4806d14d80e387",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x42e692ebd0e3cfbc84045a9ac6413c247b2f59ee8cc1e87dff4806d14d80e387\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x42e692ebd0e3cfbc84045a9ac6413c247b2f59ee8cc1e87dff4806d14d80e387"
+        ]
+      },
+      "sha256": "2420ec2a6a72357f42cbc7234176e1e747b9bc7667a7a645021fa3d2ee3b44e9",
+      "to": "0x42e692ebd0e3cfbc84045a9ac6413c247b2f59ee8cc1e87dff4806d14d80e387",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 716,
+      "cache": "hit",
+      "cache_key": "b6208363224f07ad965c58de71a9adc9cbd3911ad57c9e0df838dfda2a1e3b0b",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/030-reward-transaction-0xbe6e4e806a299ef1b75e03e2017600807a1dd4b92f3a091434f18741add10418.json",
+      "first_stored_utc": "2026-09-02T00:02:33.739Z",
+      "index": 30,
+      "label": "reward transaction 0xbe6e4e806a299ef1b75e03e2017600807a1dd4b92f3a091434f18741add10418",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0xbe6e4e806a299ef1b75e03e2017600807a1dd4b92f3a091434f18741add10418\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0xbe6e4e806a299ef1b75e03e2017600807a1dd4b92f3a091434f18741add10418"
+        ]
+      },
+      "sha256": "5fc455ae144bf928b3d30e300b2a06a69a245f6fa1e82ab6aa9b0daed8676466",
+      "to": "0xbe6e4e806a299ef1b75e03e2017600807a1dd4b92f3a091434f18741add10418",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 715,
+      "cache": "hit",
+      "cache_key": "e9a2ee862b3c263b3204146b16fdb7b8bd7a7422efd8f96b248c5c4ebbbde31f",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/031-reward-transaction-0x3a46d22bab0a5a529e12858c9430e6026fca953b9a02846a09d1ff096291e145.json",
+      "first_stored_utc": "2026-09-02T00:02:33.795Z",
+      "index": 31,
+      "label": "reward transaction 0x3a46d22bab0a5a529e12858c9430e6026fca953b9a02846a09d1ff096291e145",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x3a46d22bab0a5a529e12858c9430e6026fca953b9a02846a09d1ff096291e145\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x3a46d22bab0a5a529e12858c9430e6026fca953b9a02846a09d1ff096291e145"
+        ]
+      },
+      "sha256": "d45fd55e2c7935c2cb2543122a306498525b4c18d97cb7cc9c79d34f04c042f4",
+      "to": "0x3a46d22bab0a5a529e12858c9430e6026fca953b9a02846a09d1ff096291e145",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 716,
+      "cache": "hit",
+      "cache_key": "0ef507c31837b7e1b0862a098ad6f6c3dab3f14d0149d24115321dc5884a582e",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/032-reward-transaction-0x7e85fec59e0f3ab79084c02fb5377d0ea79bffa1e4ea0f73a88a1ca55baaadbe.json",
+      "first_stored_utc": "2026-09-02T00:02:33.936Z",
+      "index": 32,
+      "label": "reward transaction 0x7e85fec59e0f3ab79084c02fb5377d0ea79bffa1e4ea0f73a88a1ca55baaadbe",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x7e85fec59e0f3ab79084c02fb5377d0ea79bffa1e4ea0f73a88a1ca55baaadbe\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x7e85fec59e0f3ab79084c02fb5377d0ea79bffa1e4ea0f73a88a1ca55baaadbe"
+        ]
+      },
+      "sha256": "e160469e96b4a994e44a94e98e4548f9b1e74d784a3a39df42633d415b010f16",
+      "to": "0x7e85fec59e0f3ab79084c02fb5377d0ea79bffa1e4ea0f73a88a1ca55baaadbe",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 718,
+      "cache": "hit",
+      "cache_key": "a2f9b3611291c6a56a8c7ad9ab303f72f4f9f16ed1057faba914aa3795c6b4d0",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/033-reward-transaction-0xe119a15f1ca1c169d85747bbb6b3fe5961afd003451b07697888e0c399e0454d.json",
+      "first_stored_utc": "2026-09-02T00:02:33.993Z",
+      "index": 33,
+      "label": "reward transaction 0xe119a15f1ca1c169d85747bbb6b3fe5961afd003451b07697888e0c399e0454d",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0xe119a15f1ca1c169d85747bbb6b3fe5961afd003451b07697888e0c399e0454d\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0xe119a15f1ca1c169d85747bbb6b3fe5961afd003451b07697888e0c399e0454d"
+        ]
+      },
+      "sha256": "a4df02a04f2fdd5b9c7ae4d20c315571fb2c29392aea2bbaf31afe4ab2d737e8",
+      "to": "0xe119a15f1ca1c169d85747bbb6b3fe5961afd003451b07697888e0c399e0454d",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 716,
+      "cache": "hit",
+      "cache_key": "bbb170f958750b18e4babf4f5a7716d816cbd741da654bd82572d06af3162015",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/034-reward-transaction-0x61238faba494561b86cd9e492810fce2b25cc3f4b27cf34ef6c115f3d01210e5.json",
+      "first_stored_utc": "2026-09-02T00:02:34.046Z",
+      "index": 34,
+      "label": "reward transaction 0x61238faba494561b86cd9e492810fce2b25cc3f4b27cf34ef6c115f3d01210e5",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x61238faba494561b86cd9e492810fce2b25cc3f4b27cf34ef6c115f3d01210e5\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x61238faba494561b86cd9e492810fce2b25cc3f4b27cf34ef6c115f3d01210e5"
+        ]
+      },
+      "sha256": "d85ca1a73cf5af693099e469de516948a783b6f28b2b27f624a354a150bb3366",
+      "to": "0x61238faba494561b86cd9e492810fce2b25cc3f4b27cf34ef6c115f3d01210e5",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 715,
+      "cache": "hit",
+      "cache_key": "6457bca05933991a954b74ecbb7efa0148941e8a013282506a8913b314ab6203",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/035-reward-transaction-0x79cb6bb6e115a5957701d139ab46057c0f7052ec3f4794819512f983bd2edcbc.json",
+      "first_stored_utc": "2026-09-02T00:02:34.097Z",
+      "index": 35,
+      "label": "reward transaction 0x79cb6bb6e115a5957701d139ab46057c0f7052ec3f4794819512f983bd2edcbc",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x79cb6bb6e115a5957701d139ab46057c0f7052ec3f4794819512f983bd2edcbc\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x79cb6bb6e115a5957701d139ab46057c0f7052ec3f4794819512f983bd2edcbc"
+        ]
+      },
+      "sha256": "6db14782b16857ad2fd0be4addfcdaa10c24c06f1c0eb07945f1189a6432c78b",
+      "to": "0x79cb6bb6e115a5957701d139ab46057c0f7052ec3f4794819512f983bd2edcbc",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 716,
+      "cache": "hit",
+      "cache_key": "5c70919dca5cdb3eb1965a39c1d9741eb68e16631ec9cc7e119a6a0202ce8eb0",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/036-reward-transaction-0x7dee10005a727049eb32e34cb5b96f5a07af87aa9b2b64531b7149d5db8fce5b.json",
+      "first_stored_utc": "2026-09-02T00:02:34.148Z",
+      "index": 36,
+      "label": "reward transaction 0x7dee10005a727049eb32e34cb5b96f5a07af87aa9b2b64531b7149d5db8fce5b",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x7dee10005a727049eb32e34cb5b96f5a07af87aa9b2b64531b7149d5db8fce5b\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x7dee10005a727049eb32e34cb5b96f5a07af87aa9b2b64531b7149d5db8fce5b"
+        ]
+      },
+      "sha256": "562c3a7284121189eacb4d346edebee692c4f08d07a204fdd1aed7f038b28791",
+      "to": "0x7dee10005a727049eb32e34cb5b96f5a07af87aa9b2b64531b7149d5db8fce5b",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 717,
+      "cache": "hit",
+      "cache_key": "98d50ed7d14f372ce34e16363cab0b14b3301f8c6bc547b61d2ecd3500559833",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/037-reward-transaction-0xfa514eed053924d537789892da4c8fa0c62a8dd09f9ffb013bcf680e5425c224.json",
+      "first_stored_utc": "2026-09-02T00:02:34.200Z",
+      "index": 37,
+      "label": "reward transaction 0xfa514eed053924d537789892da4c8fa0c62a8dd09f9ffb013bcf680e5425c224",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0xfa514eed053924d537789892da4c8fa0c62a8dd09f9ffb013bcf680e5425c224\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0xfa514eed053924d537789892da4c8fa0c62a8dd09f9ffb013bcf680e5425c224"
+        ]
+      },
+      "sha256": "0ff2e690770883f04c2fe3a4facdc8d8054e60055e394b6464ba8f867dacaa65",
+      "to": "0xfa514eed053924d537789892da4c8fa0c62a8dd09f9ffb013bcf680e5425c224",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 716,
+      "cache": "hit",
+      "cache_key": "8fec2f7071e2a319ea0c580ddc58c88ed2bd3faf2e20373762e009c5959e90af",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/038-reward-transaction-0x979618638550f56f2b5c8987eb2c68e503165cf1a42f5ba55cd8cfdc1ddb2978.json",
+      "first_stored_utc": "2026-09-02T00:02:34.252Z",
+      "index": 38,
+      "label": "reward transaction 0x979618638550f56f2b5c8987eb2c68e503165cf1a42f5ba55cd8cfdc1ddb2978",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x979618638550f56f2b5c8987eb2c68e503165cf1a42f5ba55cd8cfdc1ddb2978\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x979618638550f56f2b5c8987eb2c68e503165cf1a42f5ba55cd8cfdc1ddb2978"
+        ]
+      },
+      "sha256": "33853a935f68b8ecd2db3fbae9d074d5df1d8317b0685ec41407039d9b0dddb7",
+      "to": "0x979618638550f56f2b5c8987eb2c68e503165cf1a42f5ba55cd8cfdc1ddb2978",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 716,
+      "cache": "hit",
+      "cache_key": "894b9c78c74fb0f6dcaf766728065be3995c41e926bedd3ba05222eb67c6766c",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/039-reward-transaction-0xfd66bdac37de6b67366f01fb01e2e6d6fd5de79eb4416cf4815426ba0200f082.json",
+      "first_stored_utc": "2026-09-02T00:02:34.298Z",
+      "index": 39,
+      "label": "reward transaction 0xfd66bdac37de6b67366f01fb01e2e6d6fd5de79eb4416cf4815426ba0200f082",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0xfd66bdac37de6b67366f01fb01e2e6d6fd5de79eb4416cf4815426ba0200f082\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0xfd66bdac37de6b67366f01fb01e2e6d6fd5de79eb4416cf4815426ba0200f082"
+        ]
+      },
+      "sha256": "67839cfe1278641d36d87592a3ae46bbdfd8bf61ee1a0e30014b1113fa7496d1",
+      "to": "0xfd66bdac37de6b67366f01fb01e2e6d6fd5de79eb4416cf4815426ba0200f082",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 717,
+      "cache": "hit",
+      "cache_key": "dbbb82b4e917c5301ffe696dd7ae7e0fc5626779fa9112bb0b1edf799e3f85d2",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/040-reward-transaction-0xd64639682c52b4b146cd433fa6a86796fe141a0b795901c2eef1e508cf902b8e.json",
+      "first_stored_utc": "2026-09-02T00:02:34.413Z",
+      "index": 40,
+      "label": "reward transaction 0xd64639682c52b4b146cd433fa6a86796fe141a0b795901c2eef1e508cf902b8e",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0xd64639682c52b4b146cd433fa6a86796fe141a0b795901c2eef1e508cf902b8e\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0xd64639682c52b4b146cd433fa6a86796fe141a0b795901c2eef1e508cf902b8e"
+        ]
+      },
+      "sha256": "2c3c9423be2afbb3aadb2884a4980856ce56775fedb2444eb3396e933b8ba232",
+      "to": "0xd64639682c52b4b146cd433fa6a86796fe141a0b795901c2eef1e508cf902b8e",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 717,
+      "cache": "hit",
+      "cache_key": "09cfeeffc7c553e9b4e9d23bdb4aa7e483d486a0c39898a43814afa3374fc577",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/041-reward-transaction-0x52b86fc4fc43ca328cbffc4064fcab1a8fe95a3d3921b771355e393b029cfc81.json",
+      "first_stored_utc": "2026-09-02T00:02:34.481Z",
+      "index": 41,
+      "label": "reward transaction 0x52b86fc4fc43ca328cbffc4064fcab1a8fe95a3d3921b771355e393b029cfc81",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x52b86fc4fc43ca328cbffc4064fcab1a8fe95a3d3921b771355e393b029cfc81\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x52b86fc4fc43ca328cbffc4064fcab1a8fe95a3d3921b771355e393b029cfc81"
+        ]
+      },
+      "sha256": "a0282c9f444ffa382c24c9e7275b7c27de93c395f5284176af5a1e994868ce23",
+      "to": "0x52b86fc4fc43ca328cbffc4064fcab1a8fe95a3d3921b771355e393b029cfc81",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 718,
+      "cache": "hit",
+      "cache_key": "afcce2cda3257755b5cb39c21f4befc98b374164da677a09ea57e2c750e2b468",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/042-reward-transaction-0x8e3654e4ea96127b70bbac35f28dc253aa8a00040bf58e30404edba9ffeb31bb.json",
+      "first_stored_utc": "2026-09-02T00:02:34.551Z",
+      "index": 42,
+      "label": "reward transaction 0x8e3654e4ea96127b70bbac35f28dc253aa8a00040bf58e30404edba9ffeb31bb",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x8e3654e4ea96127b70bbac35f28dc253aa8a00040bf58e30404edba9ffeb31bb\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x8e3654e4ea96127b70bbac35f28dc253aa8a00040bf58e30404edba9ffeb31bb"
+        ]
+      },
+      "sha256": "b1ad91dcfb8b19f65710651479b8ca52b5e88e17cf12049ecd3dd0688621c05b",
+      "to": "0x8e3654e4ea96127b70bbac35f28dc253aa8a00040bf58e30404edba9ffeb31bb",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 717,
+      "cache": "hit",
+      "cache_key": "5730ef3c049e4752016fbafdd68a0b0c552f51dc5e020c2a2204ceb800843569",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/043-reward-transaction-0xfb086d759349fa224426d06902c068e3a5b1b6732a8dcdd9dea54ab6c05804c7.json",
+      "first_stored_utc": "2026-09-02T00:02:34.639Z",
+      "index": 43,
+      "label": "reward transaction 0xfb086d759349fa224426d06902c068e3a5b1b6732a8dcdd9dea54ab6c05804c7",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0xfb086d759349fa224426d06902c068e3a5b1b6732a8dcdd9dea54ab6c05804c7\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0xfb086d759349fa224426d06902c068e3a5b1b6732a8dcdd9dea54ab6c05804c7"
+        ]
+      },
+      "sha256": "136bc6b1ba7d1a42c4a58c254fb134a2b737a437e97611b4bdf59a6d83c0d498",
+      "to": "0xfb086d759349fa224426d06902c068e3a5b1b6732a8dcdd9dea54ab6c05804c7",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 717,
+      "cache": "hit",
+      "cache_key": "b5f579dbcb109972eec87b146c649147e8c2268769ad2a1e4ecc57fa446be552",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/044-reward-transaction-0xe66140e1d6326d8b8c521625f2d2968dcdb243a83931329b6b388325b4a1055d.json",
+      "first_stored_utc": "2026-09-02T00:02:34.745Z",
+      "index": 44,
+      "label": "reward transaction 0xe66140e1d6326d8b8c521625f2d2968dcdb243a83931329b6b388325b4a1055d",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0xe66140e1d6326d8b8c521625f2d2968dcdb243a83931329b6b388325b4a1055d\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0xe66140e1d6326d8b8c521625f2d2968dcdb243a83931329b6b388325b4a1055d"
+        ]
+      },
+      "sha256": "a64db48ed3374ba5c07043dd2e80d48277c616e49381350864b480687e6882d4",
+      "to": "0xe66140e1d6326d8b8c521625f2d2968dcdb243a83931329b6b388325b4a1055d",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 687,
+      "cache": "hit",
+      "cache_key": "1b31dff5b303d965238026a680123fd66b2ced84b9816a659de465d988bc8914",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/045-reward-transaction-0xdb1146311a091f1690fb5eaf7367b19ccc01fbe136f3456a0c23d1aecad7eb32.json",
+      "first_stored_utc": "2026-09-02T00:02:34.941Z",
+      "index": 45,
+      "label": "reward transaction 0xdb1146311a091f1690fb5eaf7367b19ccc01fbe136f3456a0c23d1aecad7eb32",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0xdb1146311a091f1690fb5eaf7367b19ccc01fbe136f3456a0c23d1aecad7eb32\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0xdb1146311a091f1690fb5eaf7367b19ccc01fbe136f3456a0c23d1aecad7eb32"
+        ]
+      },
+      "sha256": "1778cc32f5ce64b44ab3f8872bd3e2727e80035157af8c9c06764d87746fa529",
+      "to": "0xdb1146311a091f1690fb5eaf7367b19ccc01fbe136f3456a0c23d1aecad7eb32",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 716,
+      "cache": "hit",
+      "cache_key": "114cb789fd820fe66ff362bca41a8a2716cf0f01585bd558d9013fdb838ed392",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/046-reward-transaction-0x3a8f82424876b3557289f6c069f9df3ccbd9846415f47eb73d3795710fd60bb6.json",
+      "first_stored_utc": "2026-09-02T00:02:35.008Z",
+      "index": 46,
+      "label": "reward transaction 0x3a8f82424876b3557289f6c069f9df3ccbd9846415f47eb73d3795710fd60bb6",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x3a8f82424876b3557289f6c069f9df3ccbd9846415f47eb73d3795710fd60bb6\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x3a8f82424876b3557289f6c069f9df3ccbd9846415f47eb73d3795710fd60bb6"
+        ]
+      },
+      "sha256": "f9f0264a9df2ba996f03e8f7ed551bfb1ebdb93e9b517fd056b5201500284e12",
+      "to": "0x3a8f82424876b3557289f6c069f9df3ccbd9846415f47eb73d3795710fd60bb6",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 716,
+      "cache": "hit",
+      "cache_key": "1e0f2b23106e679b0a2a9b15096ed122bd26de21a007c1b9854620e5a74425d1",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/047-reward-transaction-0xeb6aff740b4e52c19b270e056f4579393fa6854520ac5d263d8b00e677e0fad2.json",
+      "first_stored_utc": "2026-09-02T00:02:35.083Z",
+      "index": 47,
+      "label": "reward transaction 0xeb6aff740b4e52c19b270e056f4579393fa6854520ac5d263d8b00e677e0fad2",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0xeb6aff740b4e52c19b270e056f4579393fa6854520ac5d263d8b00e677e0fad2\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0xeb6aff740b4e52c19b270e056f4579393fa6854520ac5d263d8b00e677e0fad2"
+        ]
+      },
+      "sha256": "6f408cc9c46de93719bd26a4569d37e65ceb9cd7115064365c770025234f7ae0",
+      "to": "0xeb6aff740b4e52c19b270e056f4579393fa6854520ac5d263d8b00e677e0fad2",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 716,
+      "cache": "hit",
+      "cache_key": "c7b33d888d071cf90d8598ad32b426970d7ba78838cad9dc24ccc82e67697a83",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/048-reward-transaction-0xbfb3933a3e895266afaf6dcfcc01bcae3f2b024ea77c0134b60563a3377a3dd2.json",
+      "first_stored_utc": "2026-09-02T00:02:35.164Z",
+      "index": 48,
+      "label": "reward transaction 0xbfb3933a3e895266afaf6dcfcc01bcae3f2b024ea77c0134b60563a3377a3dd2",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0xbfb3933a3e895266afaf6dcfcc01bcae3f2b024ea77c0134b60563a3377a3dd2\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0xbfb3933a3e895266afaf6dcfcc01bcae3f2b024ea77c0134b60563a3377a3dd2"
+        ]
+      },
+      "sha256": "b60fdd338199afc3cf7a3c09bf26a5f587a3570452ecb7479465fcfac6b7d232",
+      "to": "0xbfb3933a3e895266afaf6dcfcc01bcae3f2b024ea77c0134b60563a3377a3dd2",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 686,
+      "cache": "hit",
+      "cache_key": "1711c84f54e566cc3c49f9015892b48242f439d7a5863dcdfb8c370054245d47",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/049-reward-transaction-0x059e11962325f2a2daf84d25bee5794fbae8323af0d2e6f0d90e208ea5ea0ff7.json",
+      "first_stored_utc": "2026-09-02T00:02:35.258Z",
+      "index": 49,
+      "label": "reward transaction 0x059e11962325f2a2daf84d25bee5794fbae8323af0d2e6f0d90e208ea5ea0ff7",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x059e11962325f2a2daf84d25bee5794fbae8323af0d2e6f0d90e208ea5ea0ff7\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x059e11962325f2a2daf84d25bee5794fbae8323af0d2e6f0d90e208ea5ea0ff7"
+        ]
+      },
+      "sha256": "6ec03bda4955f820f97890f81facf80024320ca383da53b6e8d75e7b226e2038",
+      "to": "0x059e11962325f2a2daf84d25bee5794fbae8323af0d2e6f0d90e208ea5ea0ff7",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 716,
+      "cache": "hit",
+      "cache_key": "a989b97b82829feb7853b779da23ed680676fe5204d17f8c6d472033c6a263d1",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/050-reward-transaction-0x46b43126a87da08a28e4045d29280702c269395fe2abd5edb5c7eb4c4ec249fe.json",
+      "first_stored_utc": "2026-09-02T00:02:35.663Z",
+      "index": 50,
+      "label": "reward transaction 0x46b43126a87da08a28e4045d29280702c269395fe2abd5edb5c7eb4c4ec249fe",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x46b43126a87da08a28e4045d29280702c269395fe2abd5edb5c7eb4c4ec249fe\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x46b43126a87da08a28e4045d29280702c269395fe2abd5edb5c7eb4c4ec249fe"
+        ]
+      },
+      "sha256": "76f0d6e3a647e51e6d236029fe9f9ba7347bb465764352509388cb650068bc19",
+      "to": "0x46b43126a87da08a28e4045d29280702c269395fe2abd5edb5c7eb4c4ec249fe",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 716,
+      "cache": "hit",
+      "cache_key": "d8d3a42e8c33d752a8da85e4fa023b1e8459d26fa52a4574bde28f5fd5e90373",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/051-reward-transaction-0x799159562e2d83eaed1358c8bf21c348b01d039bc00530be41ba336ec1134df7.json",
+      "first_stored_utc": "2026-09-02T00:02:35.751Z",
+      "index": 51,
+      "label": "reward transaction 0x799159562e2d83eaed1358c8bf21c348b01d039bc00530be41ba336ec1134df7",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x799159562e2d83eaed1358c8bf21c348b01d039bc00530be41ba336ec1134df7\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x799159562e2d83eaed1358c8bf21c348b01d039bc00530be41ba336ec1134df7"
+        ]
+      },
+      "sha256": "7648e401ad80faca00577a37a7cab1f37d65b603957c342615bdf90e9596e3fa",
+      "to": "0x799159562e2d83eaed1358c8bf21c348b01d039bc00530be41ba336ec1134df7",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 686,
+      "cache": "hit",
+      "cache_key": "ea2cc041338aa57ea497334644377251beb90a9944cda031084269c677af8f20",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/052-reward-transaction-0xcbad8d2589038bae6fc0c86f5d8013b4c884e46d412dab8d46f466d46b51c832.json",
+      "first_stored_utc": "2026-09-02T00:02:35.845Z",
+      "index": 52,
+      "label": "reward transaction 0xcbad8d2589038bae6fc0c86f5d8013b4c884e46d412dab8d46f466d46b51c832",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0xcbad8d2589038bae6fc0c86f5d8013b4c884e46d412dab8d46f466d46b51c832\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0xcbad8d2589038bae6fc0c86f5d8013b4c884e46d412dab8d46f466d46b51c832"
+        ]
+      },
+      "sha256": "68e8741eb965cfdcfc3e138baace8be62aa1e7f4d3dde703dc0fa3f41384db36",
+      "to": "0xcbad8d2589038bae6fc0c86f5d8013b4c884e46d412dab8d46f466d46b51c832",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 686,
+      "cache": "hit",
+      "cache_key": "61ecc2b4ec10f6c2c7d02cc2841bf893543c6b74ee7053d6d2781d6fb2c8d3ed",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/053-reward-transaction-0x345f82696f9d6621a7bf89136ee05fa854628b0a78c78a5148cc3adb6d0a799b.json",
+      "first_stored_utc": "2026-09-02T00:02:35.985Z",
+      "index": 53,
+      "label": "reward transaction 0x345f82696f9d6621a7bf89136ee05fa854628b0a78c78a5148cc3adb6d0a799b",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x345f82696f9d6621a7bf89136ee05fa854628b0a78c78a5148cc3adb6d0a799b\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x345f82696f9d6621a7bf89136ee05fa854628b0a78c78a5148cc3adb6d0a799b"
+        ]
+      },
+      "sha256": "ef7e1110dc54dd6a0e358def9755b80837e2b92c4803379f23d01442d640138e",
+      "to": "0x345f82696f9d6621a7bf89136ee05fa854628b0a78c78a5148cc3adb6d0a799b",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 717,
+      "cache": "hit",
+      "cache_key": "774526cac658cc6534049f488f9a3c29df5fcfcb53b04210987ddf27cddab3c0",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/054-reward-transaction-0x10bc646004c050569d48d2035e0f2323d104cdc5bc920493d3d55219543ddc51.json",
+      "first_stored_utc": "2026-09-02T00:02:36.052Z",
+      "index": 54,
+      "label": "reward transaction 0x10bc646004c050569d48d2035e0f2323d104cdc5bc920493d3d55219543ddc51",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x10bc646004c050569d48d2035e0f2323d104cdc5bc920493d3d55219543ddc51\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x10bc646004c050569d48d2035e0f2323d104cdc5bc920493d3d55219543ddc51"
+        ]
+      },
+      "sha256": "c71f7f78bda2918030cdeb19fdeac8fedaa6e09f15ade0b127eb83c50be3d9cd",
+      "to": "0x10bc646004c050569d48d2035e0f2323d104cdc5bc920493d3d55219543ddc51",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 716,
+      "cache": "hit",
+      "cache_key": "08977a668733290711df64a084089d7f17f799400898bea687175f5a635ea4bc",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/055-reward-transaction-0x3a3e61393f55c3480f4dbab73564c7632be0109e61ca1d94f40e35d6eaf712da.json",
+      "first_stored_utc": "2026-09-02T00:02:36.121Z",
+      "index": 55,
+      "label": "reward transaction 0x3a3e61393f55c3480f4dbab73564c7632be0109e61ca1d94f40e35d6eaf712da",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x3a3e61393f55c3480f4dbab73564c7632be0109e61ca1d94f40e35d6eaf712da\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x3a3e61393f55c3480f4dbab73564c7632be0109e61ca1d94f40e35d6eaf712da"
+        ]
+      },
+      "sha256": "853b01ad653c988f6b4c63d4a672028546415ecfa88db2d9dc53b7e001fa5b84",
+      "to": "0x3a3e61393f55c3480f4dbab73564c7632be0109e61ca1d94f40e35d6eaf712da",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 717,
+      "cache": "hit",
+      "cache_key": "d8fd7e51b7f4295ccc2e51bc61b27fbc26f9fb5cee3533c75d16144c75f2b7ae",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/056-reward-transaction-0x5a1ee607a734e32bc6e00494e88aa4e4f92c4437ac1b58e500f95026109f2cdc.json",
+      "first_stored_utc": "2026-09-02T00:02:36.195Z",
+      "index": 56,
+      "label": "reward transaction 0x5a1ee607a734e32bc6e00494e88aa4e4f92c4437ac1b58e500f95026109f2cdc",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x5a1ee607a734e32bc6e00494e88aa4e4f92c4437ac1b58e500f95026109f2cdc\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x5a1ee607a734e32bc6e00494e88aa4e4f92c4437ac1b58e500f95026109f2cdc"
+        ]
+      },
+      "sha256": "278a4227c13155f4dff957839898fda0bb38559fff985fd1b2b451a37a660d0c",
+      "to": "0x5a1ee607a734e32bc6e00494e88aa4e4f92c4437ac1b58e500f95026109f2cdc",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 716,
+      "cache": "hit",
+      "cache_key": "5885faf46bda7049dc7655dae077393c579806fcd507a1f6db19622afac9fdce",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/057-reward-transaction-0xa0f55bffe8bac071723767830193cce1ba60fa7bb82ecfc824698c55f7c19e87.json",
+      "first_stored_utc": "2026-09-02T00:02:36.289Z",
+      "index": 57,
+      "label": "reward transaction 0xa0f55bffe8bac071723767830193cce1ba60fa7bb82ecfc824698c55f7c19e87",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0xa0f55bffe8bac071723767830193cce1ba60fa7bb82ecfc824698c55f7c19e87\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0xa0f55bffe8bac071723767830193cce1ba60fa7bb82ecfc824698c55f7c19e87"
+        ]
+      },
+      "sha256": "a780bc77d568e895989eb7f6723563e1ad32a5f0e59523017d9f2fc9b07d8914",
+      "to": "0xa0f55bffe8bac071723767830193cce1ba60fa7bb82ecfc824698c55f7c19e87",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x189ad41..0x18afadf",
+      "byte_len": 52,
+      "cache": "hit",
+      "cache_key": "b06535a409cec63aff0c66c161234716152a7093049a0e1d320d21ec8e6e10a5",
+      "calldata": "topic0=0xb8ef21f2b52f8ca740012254a6b10f17d2fd6e589f97ebf401fde0e8b9218937,topic1=none,topic2=none",
+      "decoded": {
+        "byte_len": 0,
+        "hex": "locked_amount_redistributed_logs=0",
+        "shape": "other"
+      },
+      "endpoint": "https://eth.blockscout.com/api",
+      "file": "raw/058-lockedamountredistributed-in-the-window-blockscout.json",
+      "first_stored_utc": "2026-09-02T00:02:36.350Z",
+      "index": 58,
+      "label": "LockedAmountRedistributed in the window, blockscout",
+      "method": "blockscout_getLogs",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=blockscout_getLogs\nblock=0x189ad41..0x18afadf\nto=0x9d39a5de30e57443bff2a8307a4256c8797a3497\ncalldata=topic0=0xb8ef21f2b52f8ca740012254a6b10f17d2fd6e589f97ebf401fde0e8b9218937,topic1=none,topic2=none\n",
+      "request": {
+        "api": "blockscout_getLogs",
+        "http_method": "GET",
+        "query": [
+          [
+            "module",
+            "logs"
+          ],
+          [
+            "action",
+            "getLogs"
+          ],
+          [
+            "address",
+            "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+          ],
+          [
+            "fromBlock",
+            "25800001"
+          ],
+          [
+            "toBlock",
+            "25885407"
+          ],
+          [
+            "topic0",
+            "0xb8ef21f2b52f8ca740012254a6b10f17d2fd6e589f97ebf401fde0e8b9218937"
+          ]
+        ]
+      },
+      "sha256": "1531ed0377c1e4056d99e9eccb0f7f2e65e72763593de740e3c1103cae3d691d",
+      "to": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+      "wire": "http_get"
+    }
+  ],
+  "entry_count": 58,
+  "findings": [],
+  "format": "crossfoot-manifest-v2",
+  "summary": {
+    "baseline_block": 25800000,
+    "block": 25885407,
+    "posts_in_window": 36,
+    "verdict": "MODEL_MATCH"
+  },
+  "target": "susde-run"
+}
