@@ -14,3 +14,9 @@ fs_permissions = []
 [fmt]
 line_length = 100
 tab_width = 4
+
+# Mainnet fork tests (test/Fork*.t.sol) run only with CROSSFOOT_FORK_URL set and need an
+# EVM that executes the live feed's bytecode:
+#   FOUNDRY_PROFILE=fork forge test --match-contract Fork -vv
+[profile.fork]
+evm_version = "cancun"

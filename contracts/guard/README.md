@@ -33,12 +33,20 @@ Tests replay recorded series through the guard:
 - `test/Venus.t.sol`: an answer on the aggregator's floor is refused as
   at-bound; an aggregator that stops updating is refused as stale.
 - `test/Governance.t.sol`, `test/Attestations.t.sol`, `test/Gas.t.sol`.
+- `test/ForkMorpho.t.sol`: mainnet fork. The live mRE7 customFeed wrapped
+  at round 2, the guard's bound following the feed's own bound through the
+  timelock, rounds 3 to 38 replayed at their pinned blocks through
+  `src/adapters/MorphoOracleAdapter.sol` (Morpho Blue `IOracle.price()`)
+  and `src/adapters/AaveAggregatorAdapter.sol` (`latestAnswer()`); round
+  36 freezes both reads. Needs `CROSSFOOT_FORK_URL` (archive) and the
+  `fork` profile; skipped otherwise.
 
 ```
 forge build
 forge test
 forge test --match-contract GasTest -vvvv | grep GasMeasured
 forge snapshot --check
+CROSSFOOT_FORK_URL=<archive endpoint> FOUNDRY_PROFILE=fork forge test --match-contract Fork -vv
 ```
 
 No submodules: `test/Base.sol` carries the cheatcode interface the tests

@@ -239,6 +239,32 @@ Paused 12.
   Guardian levers: `_setBorrowPaused`, `_setMintPaused` (pause guardian),
   `_setMarketBorrowCaps` (borrow cap guardian).
 
+## Integration example on a mainnet fork (`test/ForkMorpho.t.sol`)
+
+`src/adapters/MorphoOracleAdapter.sol` is Morpho Blue's `IOracle.price()`
+over a guard, the shape of `MorphoChainlinkOracleV2` with one base feed:
+`price = answer * 10^(36 + loanDecimals - collateralDecimals - feedDecimals)`,
+a non-positive answer reverts, no timestamp is read.
+`src/adapters/AaveAggregatorAdapter.sol` is the `latestAnswer()` read of
+`AaveOracle`, rescaled to 8 decimals. The fork test wraps the live mRE7
+customFeed (`0x0a2a...2395`, `config/midas-mainnet.json`) at block
+22,083,676 (round 2, answer 1e8) with a guard whose bound is read from the
+feed's own `maxAnswerDeviation()`, then rolls the fork to the block of every
+round from 3 to 38 and to the bound-change block 23,520,494, following the
+feed's bound through the guard's timelock (2.0 percent, then 0.36 percent
+proposed at the change block and applied at round 10, twenty days later).
+Result: rounds 3 to 35 accepted, the Morpho price and the Aave answer follow
+every accepted round; at block 25,037,959 round 36 is rejected on
+`Deviation` at 222,466,613 against 36,000,000, the same row as the replay
+(02 R19), the guard halts, `price()` and `latestAnswer()` revert with
+`GuardRejected(Halted)` from that block on (rounds 37 and 38 included), and
+a consumer in `LastAccepted` mode receives round 35 (108859885) with
+`answeredInRound` 35 under `roundId` 36. Requirements: `CROSSFOOT_FORK_URL`
+(an archive endpoint; the tests skip themselves without it) and the `fork`
+profile (`evm_version = cancun`, because the live implementation's bytecode
+needs an EVM the `paris` default does not execute). The CI workflow runs the
+fork tests only when the repository holds that secret.
+
 ## Gas (forge, cold storage, `test/Gas.t.sol`, figures at this commit)
 
 | operation | gas |
@@ -248,6 +274,7 @@ Paused 12.
 | `latestRoundData` warm, halted, last-accepted mode | 5,510 |
 | `sync` cold, accept | 47,463 |
 | `sync` cold, reject and halt | 49,813 |
+| `MorphoOracleAdapter.price()` cold over the live mRE7 proxy, deviation bound only (mainnet fork, block 25,037,958) | 23,189 |
 | runtime size: guard 12,414 bytes, registry 1,473 bytes | |
 
 The cold read is dominated by cold storage: policy (three slots), status,
@@ -335,6 +362,7 @@ the path without the on-chain check").
 cd contracts/guard && forge build && forge test
 forge test --match-contract GasTest -vvvv | grep GasMeasured
 forge snapshot --check
+CROSSFOOT_FORK_URL=<archive endpoint> FOUNDRY_PROFILE=fork forge test --match-contract Fork -vv
 ```
 
 ## Verification
@@ -357,6 +385,7 @@ forge snapshot --check
 | R15 | `test_guardian_pauses_and_only_the_owner_resumes`, `test_resume_with_rebase_accepts_the_current_round`, `test_the_first_post_after_the_restart_needs_the_owner_to_rebase` |
 | R16 | `test_policy_changes_wait_for_the_timelock`, `test_role_changes_wait_for_the_timelock_and_cancel_clears_them`, `test_bad_policies_are_refused` |
 | gas | `GasTest` (five measured operations, bounded), `.gas-snapshot` |
+| integration | `test_fork_mre7_rounds_replay_and_round_36_freezes_the_morpho_price`, `test_fork_round_36_measured_equals_the_replay_row` (mainnet fork, `FOUNDRY_PROFILE=fork`, skipped without `CROSSFOOT_FORK_URL`) |
 
 ## Out of scope
 

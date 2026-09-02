@@ -18,6 +18,16 @@ interface Vm {
     function expectRevert(bytes4) external;
     function expectRevert(bytes calldata) external;
     function recordLogs() external;
+    function createSelectFork(string calldata urlOrAlias, uint256 blockNumber)
+        external
+        returns (uint256);
+    function rollFork(uint256 blockNumber) external;
+    function makePersistent(address account) external;
+    function envOr(string calldata name, string calldata defaultValue)
+        external
+        view
+        returns (string memory);
+    function skip(bool skipTest) external;
     function getRecordedLogs() external returns (Log[] memory);
 }
 
