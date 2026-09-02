@@ -1,0 +1,2816 @@
+{
+  "bundle": "usdy-run-23264565-25885411-20260902T003608Z",
+  "cache_hits": 2,
+  "cache_misses": 59,
+  "cache_preimage_version": "crossfoot-cache-v1",
+  "chain_id": 1,
+  "code": {
+    "git_commit": "fb35f774f6f53d3a6e5fecf8a4d7b13d7c1ec5d0",
+    "git_dirty": true,
+    "packages_sha256": "b25a6ad2e8a61678356d5f06ea5d25bec63186d297a4dfa2c5e88b324fb5af97",
+    "tool_version": "0.1.0"
+  },
+  "entries": [
+    {
+      "block": "n/a",
+      "byte_len": 39,
+      "cache": "hit",
+      "cache_key": "f850f3b048c9bd6a1d50075e4c7e5ee5f560f7831e396be9ebdce06fb0e5eca5",
+      "calldata": "",
+      "endpoint": "https://eth.drpc.org",
+      "file": "raw/001-eth-chainid.json",
+      "first_stored_utc": "2026-09-01T13:20:58.737Z",
+      "index": 1,
+      "label": "eth_chainId",
+      "method": "eth_chainId",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_chainId\nblock=n/a\nto=\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_chainId",
+        "params": []
+      },
+      "sha256": "79226432df73e05966f20e4d291fb5048bfef1138d7078f8feab534126df1aa5",
+      "to": "",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 8492,
+      "cache": "miss",
+      "cache_key": "386ac1f2c97fe0e3b25f7fcb7e928f4c17e55af7184a0a8746049455b5ca4152",
+      "calldata": "full_transactions=false",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/002-block-header-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:09.063Z",
+      "index": 2,
+      "label": "block header @ 25885411",
+      "method": "eth_getBlockByNumber",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getBlockByNumber\nblock=0x18afae3\nto=\ncalldata=full_transactions=false\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getBlockByNumber",
+        "params": [
+          "0x18afae3",
+          false
+        ]
+      },
+      "sha256": "40a45b1a1b2494ccb2086f9880423fb141f8b8e4233897e672a1ca3ff1d8a6a2",
+      "to": "",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x162fd35",
+      "byte_len": 40984,
+      "cache": "hit",
+      "cache_key": "dfdf11ff0a449c44641e5af00e6dee4c51fd649c47d77346990d57f50ddc6f82",
+      "calldata": "full_transactions=false",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/003-block-header-23264565.json",
+      "first_stored_utc": "2026-09-02T00:13:28.789Z",
+      "index": 3,
+      "label": "block header @ 23264565",
+      "method": "eth_getBlockByNumber",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getBlockByNumber\nblock=0x162fd35\nto=\ncalldata=full_transactions=false\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getBlockByNumber",
+        "params": [
+          "0x162fd35",
+          false
+        ]
+      },
+      "sha256": "d3dc7e75523064a0092813a6e6bbc9bf4c7e13edf11e72e09b19701170515998",
+      "to": "",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 102,
+      "cache": "miss",
+      "cache_key": "0d8a6fe05ba8e9e059272cca30c9a3b18ffb42c7fc05ed7c51ce9f7012f879d6",
+      "calldata": "0x98d5fdca",
+      "decoded": {
+        "decimal": "1144746000000000000",
+        "hex": "0x0000000000000000000000000000000000000000000000000fe2f46c000ca000",
+        "shape": "word"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/004-oracle-getprice-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:09.112Z",
+      "index": 4,
+      "label": "oracle.getPrice() @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x98d5fdca\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x98d5fdca",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "1941a0c963af50f27a638906007930fea42b0f5280d6e2ee144bfd46284161f7",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 102,
+      "cache": "miss",
+      "cache_key": "2d53a0921929d436a56bee308c965b661399cac385a67faff0775b68e50d7a80",
+      "calldata": "0x5c975abb",
+      "decoded": {
+        "decimal": "0",
+        "hex": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "shape": "word"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/005-oracle-paused-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:09.162Z",
+      "index": 5,
+      "label": "oracle.paused() @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5c975abb\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5c975abb",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "03eeba832ea35e4ad5f8f6f5ee499c42ca9440322d561dfea607806e95cb508f",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x162fd35",
+      "byte_len": 102,
+      "cache": "miss",
+      "cache_key": "f35776e8695c0bea52808cdb1ea8e4da30ca03036ee877b85e12f65eab81bc8a",
+      "calldata": "0x98d5fdca",
+      "decoded": {
+        "decimal": "1103925820000000000",
+        "hex": "0x0000000000000000000000000000000000000000000000000f51eeaf377b5800",
+        "shape": "word"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/006-oracle-getprice-23264565.json",
+      "first_stored_utc": "2026-09-02T00:36:09.276Z",
+      "index": 6,
+      "label": "oracle.getPrice() @ 23264565",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x162fd35\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x98d5fdca\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x98d5fdca",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x162fd35"
+        ]
+      },
+      "sha256": "028b3ee0b5530ae1f02e765861badc086267040411884972d41587a4c7fbc218",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x162fd35",
+      "byte_len": 102,
+      "cache": "miss",
+      "cache_key": "b748380a6da11e70370a937b5e14c6fbd6a994adc3254cac858bdec73ebd073b",
+      "calldata": "0x5c975abb",
+      "decoded": {
+        "decimal": "0",
+        "hex": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "shape": "word"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/007-oracle-paused-23264565.json",
+      "first_stored_utc": "2026-09-02T00:36:09.321Z",
+      "index": 7,
+      "label": "oracle.paused() @ 23264565",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x162fd35\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5c975abb\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5c975abb",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x162fd35"
+        ]
+      },
+      "sha256": "03eeba832ea35e4ad5f8f6f5ee499c42ca9440322d561dfea607806e95cb508f",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x0..0x18afae3",
+      "byte_len": 26338,
+      "cache": "miss",
+      "cache_key": "cbd3fbc6fa2d07cb4c00529ed73156ad1e63aa245b0a125d8c4af914a3b298ab",
+      "calldata": "topic0=0xa1a823e20687dfa63aaad1f0b3054ae6c4ee99ce18c3295bf3a96decd1ef682d,topic1=none,topic2=none",
+      "decoded": {
+        "byte_len": 37,
+        "hex": "logs=37",
+        "shape": "other"
+      },
+      "endpoint": "https://eth.blockscout.com/api",
+      "file": "raw/008-rangeset-events-all-blockscout.json",
+      "first_stored_utc": "2026-09-02T00:36:09.498Z",
+      "index": 8,
+      "label": "RangeSet events, all, blockscout",
+      "method": "blockscout_getLogs",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=blockscout_getLogs\nblock=0x0..0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=topic0=0xa1a823e20687dfa63aaad1f0b3054ae6c4ee99ce18c3295bf3a96decd1ef682d,topic1=none,topic2=none\n",
+      "request": {
+        "api": "blockscout_getLogs",
+        "http_method": "GET",
+        "query": [
+          [
+            "module",
+            "logs"
+          ],
+          [
+            "action",
+            "getLogs"
+          ],
+          [
+            "address",
+            "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          ],
+          [
+            "fromBlock",
+            "0"
+          ],
+          [
+            "toBlock",
+            "25885411"
+          ],
+          [
+            "topic0",
+            "0xa1a823e20687dfa63aaad1f0b3054ae6c4ee99ce18c3295bf3a96decd1ef682d"
+          ]
+        ]
+      },
+      "sha256": "c302f50e728186e226e9f837a8912a78d5880ccbbcf0b6b718a2a6dba7189a19",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "http_get"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "3a063043dc77a153290d11d6ef02702e259fd79287a2122d91b737de608cdda6",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000000",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1690848000",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000064c84b00",
+            "name": "start"
+          },
+          {
+            "decimal": "1693526400",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000064f12980",
+            "name": "end"
+          },
+          {
+            "decimal": "1000133680000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b4a8b6e7d153e32c00000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "999866337867953811",
+            "hex": "0x0000000000000000000000000000000000000000000000000de03d23037d7693",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x0000000000000000000000000000000000000000000000000000000064c84b000000000000000000000000000000000000000000000000000000000064f129800000000000000000000000000000000000000000033b4a8b6e7d153e32c000000000000000000000000000000000000000000000000000000de03d23037d7693",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/009-oracle-ranges-0-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:09.548Z",
+      "index": 9,
+      "label": "oracle.ranges(0) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000000\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000000",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "c601311d24521f5af910ac1db676fae9e0f053bb4aca7e8d74bff747b9410cf6",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "0879fe3dba7c0429f882d9a174890244724e0b0bce22577b3cd977bc9c0b70a2",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000001",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1693526400",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000064f12980",
+            "name": "start"
+          },
+          {
+            "decimal": "1696118400",
+            "hex": "0x000000000000000000000000000000000000000000000000000000006518b680",
+            "name": "end"
+          },
+          {
+            "decimal": "1000133680000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b4a8b6e7d153e32c00000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1004018180000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000deefd3716ef2800",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x0000000000000000000000000000000000000000000000000000000064f12980000000000000000000000000000000000000000000000000000000006518b6800000000000000000000000000000000000000000033b4a8b6e7d153e32c000000000000000000000000000000000000000000000000000000deefd3716ef2800",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/010-oracle-ranges-1-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:09.600Z",
+      "index": 10,
+      "label": "oracle.ranges(1) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000001\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000001",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "560706b1ab404db3fe14cbf70d77c28cc963efc25fa43b678a4efd2d337050fe",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "ffdf066d7daaf3ba5b609b4c1dbb8d870244ae81ae2b34d1b08f37503204cccd",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000002",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1696118400",
+            "hex": "0x000000000000000000000000000000000000000000000000000000006518b680",
+            "name": "start"
+          },
+          {
+            "decimal": "1698796800",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000065419500",
+            "name": "end"
+          },
+          {
+            "decimal": "1000136290000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b4b18eb83c8decc480000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1008052510000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000dfd526abd7dac00",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x000000000000000000000000000000000000000000000000000000006518b68000000000000000000000000000000000000000000000000000000000654195000000000000000000000000000000000000000000033b4b18eb83c8decc4800000000000000000000000000000000000000000000000000000dfd526abd7dac00",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/011-oracle-ranges-2-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:09.665Z",
+      "index": 11,
+      "label": "oracle.ranges(2) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000002\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000002",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "57e820abf84ec50072dd8d8b66a2c8f8ad423d98767aceeb5dfb0e46f41569ea",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "078189a19addc64dcf652cf3cafddd4bb6b178c04b20396c3b371a574e1898c3",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000003",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1698796800",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000065419500",
+            "name": "start"
+          },
+          {
+            "decimal": "1701388800",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000065692200",
+            "name": "end"
+          },
+          {
+            "decimal": "1000136290000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b4b18eb83c8decc480000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1012320240000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000e0c7be510236000",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x000000000000000000000000000000000000000000000000000000006541950000000000000000000000000000000000000000000000000000000000656922000000000000000000000000000000000000000000033b4b18eb83c8decc4800000000000000000000000000000000000000000000000000000e0c7be510236000",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/012-oracle-ranges-3-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:09.797Z",
+      "index": 12,
+      "label": "oracle.ranges(3) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000003\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000003",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "749b6f284a4f0a9b139f4e4817280f4091cfece705224d4d0e8477ea41eeb692",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "726439de58e6f952f332d0eacacd7050b9c179b5c10afd0632d968216ecd91ac",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000004",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1701388800",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000065692200",
+            "name": "start"
+          },
+          {
+            "decimal": "1704067200",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000065920080",
+            "name": "end"
+          },
+          {
+            "decimal": "1000138890000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b4ba5ddc3597adbe80000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1016467500000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000e1b37ce473ab800",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x000000000000000000000000000000000000000000000000000000006569220000000000000000000000000000000000000000000000000000000000659200800000000000000000000000000000000000000000033b4ba5ddc3597adbe800000000000000000000000000000000000000000000000000000e1b37ce473ab800",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/013-oracle-ranges-4-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:09.846Z",
+      "index": 13,
+      "label": "oracle.ranges(4) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000004\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000004",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "d638737fb60bba810e4a3cc53a2aa27c482096a6f5e99612ffe5d752f2aa1f5c",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "136628961d52b8b6edfc236f30d1cbadb0686e50b4c5d325c362f4eaad6562fe",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000005",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1704067200",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000065920080",
+            "name": "start"
+          },
+          {
+            "decimal": "1706745600",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000065badf00",
+            "name": "end"
+          },
+          {
+            "decimal": "1000136290000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b4b18eb83c8decc480000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1020853120000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000e2acc8101730000",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x00000000000000000000000000000000000000000000000000000000659200800000000000000000000000000000000000000000000000000000000065badf000000000000000000000000000000000000000000033b4b18eb83c8decc4800000000000000000000000000000000000000000000000000000e2acc8101730000",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/014-oracle-ranges-5-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:10.094Z",
+      "index": 14,
+      "label": "oracle.ranges(5) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000005\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000005",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "bc91cee1a663314b5e7b3d8e7a852465d2a81b81829af5266589353b4d08d24f",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "4cda0ee5c8e47aaebdeb0a12570c3cd3e94cf92151d57e3d5ead9ec6c4270866",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000006",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1706745600",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000065badf00",
+            "name": "start"
+          },
+          {
+            "decimal": "1709251200",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000065e11a80",
+            "name": "end"
+          },
+          {
+            "decimal": "1000136290000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b4b18eb83c8decc480000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1025175040000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000e3a27446bcc0000",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x0000000000000000000000000000000000000000000000000000000065badf000000000000000000000000000000000000000000000000000000000065e11a800000000000000000000000000000000000000000033b4b18eb83c8decc4800000000000000000000000000000000000000000000000000000e3a27446bcc0000",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/015-oracle-ranges-6-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:10.483Z",
+      "index": 15,
+      "label": "oracle.ranges(6) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000006\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000006",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "bf4832488247ecd9d5c8861f50918c843ee893a2c98075a50853f9c90c496b42",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "5e0b7d2556b75ee173b00b54752e11545000284a4d98d2741a9f3752fe9ae227",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000007",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1709251200",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000065e11a80",
+            "name": "start"
+          },
+          {
+            "decimal": "1711929600",
+            "hex": "0x000000000000000000000000000000000000000000000000000000006609f900",
+            "name": "end"
+          },
+          {
+            "decimal": "1000136290000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b4b18eb83c8decc480000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1029234690000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000e48937f57f59400",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x0000000000000000000000000000000000000000000000000000000065e11a80000000000000000000000000000000000000000000000000000000006609f9000000000000000000000000000000000000000000033b4b18eb83c8decc4800000000000000000000000000000000000000000000000000000e48937f57f59400",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/016-oracle-ranges-7-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:10.888Z",
+      "index": 16,
+      "label": "oracle.ranges(7) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000007\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000007",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "f5460df3adff67537544aa9b835a6b669a933cdba753cb1bd1c0cc5d6f0cedee",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "6a1039e56d3bd3743c97e20e0bb68140cc9ba72f9b911665ae1576fd8693263d",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000008",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1711929600",
+            "hex": "0x000000000000000000000000000000000000000000000000000000006609f900",
+            "name": "start"
+          },
+          {
+            "decimal": "1714521600",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000066318600",
+            "name": "end"
+          },
+          {
+            "decimal": "1000138890000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b4ba5ddc3597adbe80000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1033592100000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000e580e89eb266800",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x000000000000000000000000000000000000000000000000000000006609f90000000000000000000000000000000000000000000000000000000000663186000000000000000000000000000000000000000000033b4ba5ddc3597adbe800000000000000000000000000000000000000000000000000000e580e89eb266800",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/017-oracle-ranges-8-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:10.935Z",
+      "index": 17,
+      "label": "oracle.ranges(8) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000008\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000008",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "fd1ee718b12ba73eeb455fb8f58dc7a17f23a6eab45dbe00b30da1745eb4be62",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "2380a7f44ad6002d0bcbc1789e3989ab89eb054cc1e2a98110f30fcca964c7b6",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000009",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1714521600",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000066318600",
+            "name": "start"
+          },
+          {
+            "decimal": "1717200000",
+            "hex": "0x00000000000000000000000000000000000000000000000000000000665a6480",
+            "name": "end"
+          },
+          {
+            "decimal": "1000138890000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b4ba5ddc3597adbe80000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1037907450000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000e676353a2fb4400",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x000000000000000000000000000000000000000000000000000000006631860000000000000000000000000000000000000000000000000000000000665a64800000000000000000000000000000000000000000033b4ba5ddc3597adbe800000000000000000000000000000000000000000000000000000e676353a2fb4400",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/018-oracle-ranges-9-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:10.982Z",
+      "index": 18,
+      "label": "oracle.ranges(9) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000009\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000009",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "ffa5d24de707c6912e86ba786cc08d0c33ba830bffbd88ff5abaeb79ec147938",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "d8b9067f72b6141b7027c857dc591d2f9c859b4527837a76ec8f2c3b033f3911",
+      "calldata": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000000a",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1717200000",
+            "hex": "0x00000000000000000000000000000000000000000000000000000000665a6480",
+            "name": "start"
+          },
+          {
+            "decimal": "1719792000",
+            "hex": "0x000000000000000000000000000000000000000000000000000000006681f180",
+            "name": "end"
+          },
+          {
+            "decimal": "1000141498300000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b4c334332701d3f460000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1042385580000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000e774c2986e3b800",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x00000000000000000000000000000000000000000000000000000000665a6480000000000000000000000000000000000000000000000000000000006681f1800000000000000000000000000000000000000000033b4c334332701d3f4600000000000000000000000000000000000000000000000000000e774c2986e3b800",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/019-oracle-ranges-10-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:11.027Z",
+      "index": 19,
+      "label": "oracle.ranges(10) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa000000000000000000000000000000000000000000000000000000000000000a\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000000a",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "1d1c8e864f019d2d54e522514a815b1299873dba79f174a5cc23fe558d1c114b",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "a37cb77e8bfbe56cf4e0ac99291375a40892ea0ddc11f68eef4edce9ada4c232",
+      "calldata": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000000b",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1719792000",
+            "hex": "0x000000000000000000000000000000000000000000000000000000006681f180",
+            "name": "start"
+          },
+          {
+            "decimal": "1722470400",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000066aad000",
+            "name": "end"
+          },
+          {
+            "decimal": "1000141500000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b4c335aca0d1b75700000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1046819540000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000e870cd349a34800",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x000000000000000000000000000000000000000000000000000000006681f1800000000000000000000000000000000000000000000000000000000066aad0000000000000000000000000000000000000000000033b4c335aca0d1b757000000000000000000000000000000000000000000000000000000e870cd349a34800",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/020-oracle-ranges-11-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:11.073Z",
+      "index": 20,
+      "label": "oracle.ranges(11) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa000000000000000000000000000000000000000000000000000000000000000b\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000000b",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "68f9ce1639aff7f9e4a274ba26f4280ded7c52111b9a715b413750b79f1fa353",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "782a64ac399bce3035a41cd6528b36e8ef1724ca00bbe2de2354ae3a739e4b67",
+      "calldata": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000000c",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1722470400",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000066aad000",
+            "name": "start"
+          },
+          {
+            "decimal": "1725148800",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000066d3ae80",
+            "name": "end"
+          },
+          {
+            "decimal": "1000142800000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b4c79d3e9d5697d400000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1051421170000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000e9765fbc32cf400",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x0000000000000000000000000000000000000000000000000000000066aad0000000000000000000000000000000000000000000000000000000000066d3ae800000000000000000000000000000000000000000033b4c79d3e9d5697d4000000000000000000000000000000000000000000000000000000e9765fbc32cf400",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/021-oracle-ranges-12-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:11.135Z",
+      "index": 21,
+      "label": "oracle.ranges(12) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa000000000000000000000000000000000000000000000000000000000000000c\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000000c",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "68072b9c3cf70b0e34db50a159b00c54d4d6d17305eac4fa648cd1a24bcbc11e",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "7788a73f306e696cafcb75dd11ae90df2e888f9804c30a945e6de9837a08d8f7",
+      "calldata": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000000d",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1725148800",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000066d3ae80",
+            "name": "start"
+          },
+          {
+            "decimal": "1727740800",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000066fb3b80",
+            "name": "end"
+          },
+          {
+            "decimal": "1000142800000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b4c79d3e9d5697d400000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1056085580000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000ea7f83d584ff800",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x0000000000000000000000000000000000000000000000000000000066d3ae800000000000000000000000000000000000000000000000000000000066fb3b800000000000000000000000000000000000000000033b4c79d3e9d5697d4000000000000000000000000000000000000000000000000000000ea7f83d584ff800",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/022-oracle-ranges-13-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:11.187Z",
+      "index": 22,
+      "label": "oracle.ranges(13) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa000000000000000000000000000000000000000000000000000000000000000d\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000000d",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "da6073cfb8df83b89ff99f35b327752ec4fad199eb3291fd87baf54b82971c65",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "e78890c6ba8a5811082d47efbf5b5b35d21071bcf1b2bdf89dc227a6b2f761c3",
+      "calldata": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000000e",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1727740800",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000066fb3b80",
+            "name": "start"
+          },
+          {
+            "decimal": "1730419200",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000067241a00",
+            "name": "end"
+          },
+          {
+            "decimal": "1000134990000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b4ad272640090c4780000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1060619230000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000eb81391fe192c00",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x0000000000000000000000000000000000000000000000000000000066fb3b800000000000000000000000000000000000000000000000000000000067241a000000000000000000000000000000000000000000033b4ad272640090c47800000000000000000000000000000000000000000000000000000eb81391fe192c00",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/023-oracle-ranges-14-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:11.240Z",
+      "index": 23,
+      "label": "oracle.ranges(14) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa000000000000000000000000000000000000000000000000000000000000000e\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000000e",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "e88ecade05c7ed11229955e4627ed8fa46c506f1db79556ecdc2a920a2607330",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "8fdf3735ed7fafaa08739d767b122c8e70e17b18ab62e6cb9c3490fc4f71633a",
+      "calldata": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000000f",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1730419200",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000067241a00",
+            "name": "start"
+          },
+          {
+            "decimal": "1733011200",
+            "hex": "0x00000000000000000000000000000000000000000000000000000000674ba700",
+            "name": "end"
+          },
+          {
+            "decimal": "1000131070000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b49fdf176619d99380000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1065066590000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000ec7e06baf162c00",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x0000000000000000000000000000000000000000000000000000000067241a0000000000000000000000000000000000000000000000000000000000674ba7000000000000000000000000000000000000000000033b49fdf176619d993800000000000000000000000000000000000000000000000000000ec7e06baf162c00",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/024-oracle-ranges-15-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:11.371Z",
+      "index": 24,
+      "label": "oracle.ranges(15) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa000000000000000000000000000000000000000000000000000000000000000f\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000000f",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "4c62ffb90735dda397771ea56d1c126b6b1c4962ef043dd77807710e954ca2a2",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "264c1d317cdc11d31681cec04f77667d8adac4140739aaefbb039316c066c21c",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000010",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1733011200",
+            "hex": "0x00000000000000000000000000000000000000000000000000000000674ba700",
+            "name": "start"
+          },
+          {
+            "decimal": "1735689600",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000067748580",
+            "name": "end"
+          },
+          {
+            "decimal": "1000124530000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b489b68baec054a880000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1069262510000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000ed6c89670314c00",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x00000000000000000000000000000000000000000000000000000000674ba70000000000000000000000000000000000000000000000000000000000677485800000000000000000000000000000000000000000033b489b68baec054a8800000000000000000000000000000000000000000000000000000ed6c89670314c00",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/025-oracle-ranges-16-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:11.422Z",
+      "index": 25,
+      "label": "oracle.ranges(16) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000010\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000010",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "77d819b0e2837c3003f6a537c88d56a537e099aed95bfdbb32ca681819758034",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "4ff8754ba63a6644217e4823d1bc781916a06d17e7714466d0b92804a2e7d035",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000011",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1735689600",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000067748580",
+            "name": "start"
+          },
+          {
+            "decimal": "1738368000",
+            "hex": "0x00000000000000000000000000000000000000000000000000000000679d6400",
+            "name": "end"
+          },
+          {
+            "decimal": "1000116670000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b46f151516815e0380000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1073398040000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000ee579d48cccf000",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x000000000000000000000000000000000000000000000000000000006774858000000000000000000000000000000000000000000000000000000000679d64000000000000000000000000000000000000000000033b46f151516815e03800000000000000000000000000000000000000000000000000000ee579d48cccf000",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/026-oracle-ranges-17-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:11.474Z",
+      "index": 26,
+      "label": "oracle.ranges(17) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000011\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000011",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "6faa30cccc18bf26e21eef050abacc108a2aae800b83d0ea1c171685b009df2f",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "2a91a4e628a540a5586228fa1eb89575840b38964126def60dd919b70c1f9c3d",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000012",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1738368000",
+            "hex": "0x00000000000000000000000000000000000000000000000000000000679d6400",
+            "name": "start"
+          },
+          {
+            "decimal": "1740787200",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000067c24e00",
+            "name": "end"
+          },
+          {
+            "decimal": "1000116670000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b46f151516815e0380000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1077287080000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000ef34ae43c849000",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x00000000000000000000000000000000000000000000000000000000679d64000000000000000000000000000000000000000000000000000000000067c24e000000000000000000000000000000000000000000033b46f151516815e03800000000000000000000000000000000000000000000000000000ef34ae43c849000",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/027-oracle-ranges-18-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:11.528Z",
+      "index": 27,
+      "label": "oracle.ranges(18) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000012\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000012",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "3a4f8b884d8b89bb21744af393015346fd41ea75f0eb7d9a4ddcb024ee35adfb",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "3752f0fd293b4f592e241c746f766450962812062cfea46289430bac6120a5d0",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000013",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1740787200",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000067c24e00",
+            "name": "start"
+          },
+          {
+            "decimal": "1743465600",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000067eb2c80",
+            "name": "end"
+          },
+          {
+            "decimal": "1000116670000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b46f151516815e0380000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1080811870000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000effd0ab5c602c00",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x0000000000000000000000000000000000000000000000000000000067c24e000000000000000000000000000000000000000000000000000000000067eb2c800000000000000000000000000000000000000000033b46f151516815e03800000000000000000000000000000000000000000000000000000effd0ab5c602c00",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/028-oracle-ranges-19-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:11.579Z",
+      "index": 28,
+      "label": "oracle.ranges(19) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000013\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000013",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "9a70aca858ee19b08db7c92d431c3c0bd626423dbd02edd8749817895a7367a9",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "7d4bb01cabaef21c3a5c46495de2f4bc7abfd523e8a4cd1b7bc662756b8e482e",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000014",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1743465600",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000067eb2c80",
+            "name": "start"
+          },
+          {
+            "decimal": "1746057600",
+            "hex": "0x000000000000000000000000000000000000000000000000000000006812b980",
+            "name": "end"
+          },
+          {
+            "decimal": "1000114040000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b4662bebc6e6c32e00000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1084727770000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000f0dba28e0da0400",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x0000000000000000000000000000000000000000000000000000000067eb2c80000000000000000000000000000000000000000000000000000000006812b9800000000000000000000000000000000000000000033b4662bebc6e6c32e000000000000000000000000000000000000000000000000000000f0dba28e0da0400",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/029-oracle-ranges-20-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:11.622Z",
+      "index": 29,
+      "label": "oracle.ranges(20) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000014\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000014",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "7c361f274c9bbc341c0fcbbf14978073a88a4bb34ebc2e40c11e7b3f79a547cd",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "40ad1565863932b19212cd42e5c387debe69c0b4c37a96ee920e077ad5d0c5b8",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000015",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1746057600",
+            "hex": "0x000000000000000000000000000000000000000000000000000000006812b980",
+            "name": "start"
+          },
+          {
+            "decimal": "1748736000",
+            "hex": "0x00000000000000000000000000000000000000000000000000000000683b9800",
+            "name": "end"
+          },
+          {
+            "decimal": "1000114040000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b4662bebc6e6c32e00000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1088444980000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000f1aeef146750800",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x000000000000000000000000000000000000000000000000000000006812b98000000000000000000000000000000000000000000000000000000000683b98000000000000000000000000000000000000000000033b4662bebc6e6c32e000000000000000000000000000000000000000000000000000000f1aeef146750800",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/030-oracle-ranges-21-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:11.667Z",
+      "index": 30,
+      "label": "oracle.ranges(21) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000015\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000015",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "a76a3a5937699ab4460fc41065e6d955661e1372733b4124d04af856015e9031",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "7bd1458e74eceb088b4aaf235cefe99c64cdf1411788b9724b694f6debca02ed",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000016",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1748736000",
+            "hex": "0x00000000000000000000000000000000000000000000000000000000683b9800",
+            "name": "start"
+          },
+          {
+            "decimal": "1751328000",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000068632500",
+            "name": "end"
+          },
+          {
+            "decimal": "1000115090000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b469baa69cb48c3080000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1092299480000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000f28a096fdbe7000",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x00000000000000000000000000000000000000000000000000000000683b980000000000000000000000000000000000000000000000000000000000686325000000000000000000000000000000000000000000033b469baa69cb48c30800000000000000000000000000000000000000000000000000000f28a096fdbe7000",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/031-oracle-ranges-22-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:11.721Z",
+      "index": 31,
+      "label": "oracle.ranges(22) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000016\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000016",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "9cafcdd775320cfc2ad5754e315cd2caddf8758b8fba980814583e3f66e3dd76",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "7e404d79f447ed986747a3965694be97034726e0fc6e8e38408a27939a24cc7d",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000017",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1751328000",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000068632500",
+            "name": "start"
+          },
+          {
+            "decimal": "1754006400",
+            "hex": "0x00000000000000000000000000000000000000000000000000000000688c0380",
+            "name": "end"
+          },
+          {
+            "decimal": "1000115090000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b469baa69cb48c3080000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1096077160000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000f360c5ea8381000",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x000000000000000000000000000000000000000000000000000000006863250000000000000000000000000000000000000000000000000000000000688c03800000000000000000000000000000000000000000033b469baa69cb48c30800000000000000000000000000000000000000000000000000000f360c5ea8381000",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/032-oracle-ranges-23-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:11.767Z",
+      "index": 32,
+      "label": "oracle.ranges(23) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000017\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000017",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "ff28467bc8c9fda47c3117e94895a5c6a31eee6538c982ca27693e01d807d7d8",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "9278fad1a6fa973cbb251c5bf5b468d2386f2e1b620056d0e2a3d7c7e8cd9865",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000018",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1754006400",
+            "hex": "0x00000000000000000000000000000000000000000000000000000000688c0380",
+            "name": "start"
+          },
+          {
+            "decimal": "1756684800",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000068b4e200",
+            "name": "end"
+          },
+          {
+            "decimal": "1000115090000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b469baa69cb48c3080000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1099994490000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000f43f7291f564400",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x00000000000000000000000000000000000000000000000000000000688c03800000000000000000000000000000000000000000000000000000000068b4e2000000000000000000000000000000000000000000033b469baa69cb48c30800000000000000000000000000000000000000000000000000000f43f7291f564400",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/033-oracle-ranges-24-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:11.897Z",
+      "index": 33,
+      "label": "oracle.ranges(24) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000018\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000018",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "4e0301d0e9aa2bb59b955eb4a008bfdb0c3158841fe419641afca0884a341ddf",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "96fe91e50ac6d6e28dbda28c9f3faf89fc4e2064c5e11a08264ea16433cd8425",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000019",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1756684800",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000068b4e200",
+            "name": "start"
+          },
+          {
+            "decimal": "1759276800",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000068dc6f00",
+            "name": "end"
+          },
+          {
+            "decimal": "1000112720000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b461b300e601517400000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1103925820000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000f51eeaf377b5800",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x0000000000000000000000000000000000000000000000000000000068b4e2000000000000000000000000000000000000000000000000000000000068dc6f000000000000000000000000000000000000000000033b461b300e6015174000000000000000000000000000000000000000000000000000000f51eeaf377b5800",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/034-oracle-ranges-25-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:11.949Z",
+      "index": 34,
+      "label": "oracle.ranges(25) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000019\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000019",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "1ba75e083e6374dc89b09606dbcc593f11823723db7efd6e8b2bd92e232c7e6c",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "b40bfdf919a5c7ed9f0b6a2a8d382192eb2f597792c4b0939c3375a6e06c6f98",
+      "calldata": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000001a",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1759276800",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000068dc6f00",
+            "name": "start"
+          },
+          {
+            "decimal": "1761955200",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000069054d80",
+            "name": "end"
+          },
+          {
+            "decimal": "1000107460000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b44fe0ae46cc1bc900000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1107664960000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000f5f376996f28000",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x0000000000000000000000000000000000000000000000000000000068dc6f000000000000000000000000000000000000000000000000000000000069054d800000000000000000000000000000000000000000033b44fe0ae46cc1bc9000000000000000000000000000000000000000000000000000000f5f376996f28000",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/035-oracle-ranges-26-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:11.992Z",
+      "index": 35,
+      "label": "oracle.ranges(26) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa000000000000000000000000000000000000000000000000000000000000001a\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000001a",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "2cb8b29fbf391b8261e18b3a7617ebcbfb38d7d6ed7b17d38f8fd214ed464f38",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "f175620f6b40d6f27e5c601eecd3a5c3d4000eaa63409fb213b3063d82209a0c",
+      "calldata": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000001b",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1761955200",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000069054d80",
+            "name": "start"
+          },
+          {
+            "decimal": "1764547200",
+            "hex": "0x00000000000000000000000000000000000000000000000000000000692cda80",
+            "name": "end"
+          },
+          {
+            "decimal": "1000100870000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b4398cc454812bc580000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1111360830000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000f6c58c9616eec00",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x0000000000000000000000000000000000000000000000000000000069054d8000000000000000000000000000000000000000000000000000000000692cda800000000000000000000000000000000000000000033b4398cc454812bc5800000000000000000000000000000000000000000000000000000f6c58c9616eec00",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/036-oracle-ranges-27-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:12.044Z",
+      "index": 36,
+      "label": "oracle.ranges(27) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa000000000000000000000000000000000000000000000000000000000000001b\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000001b",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "f7ae3e8416c4a22b72aebc873b1a18727eb0d9d6174b767ac054b65292ac4972",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "c8434aac296b1027ea7844316ec3bdcfd2b26ed39d871286bff2e2d3a4c9b829",
+      "calldata": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000001c",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1764547200",
+            "hex": "0x00000000000000000000000000000000000000000000000000000000692cda80",
+            "name": "start"
+          },
+          {
+            "decimal": "1767225600",
+            "hex": "0x000000000000000000000000000000000000000000000000000000006955b900",
+            "name": "end"
+          },
+          {
+            "decimal": "1000100870000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b4398cc454812bc580000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1114728840000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000f784ff951155000",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x00000000000000000000000000000000000000000000000000000000692cda80000000000000000000000000000000000000000000000000000000006955b9000000000000000000000000000000000000000000033b4398cc454812bc5800000000000000000000000000000000000000000000000000000f784ff951155000",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/037-oracle-ranges-28-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:12.087Z",
+      "index": 37,
+      "label": "oracle.ranges(28) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa000000000000000000000000000000000000000000000000000000000000001c\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000001c",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "70480e5d23bd6f6eb37b9fff85a266642a57fe0628773409cceb9c9cb9ae79bc",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "b000a6cbceb2e5170a6de00961dc876313de56017b7aea2683db3f6e082749b6",
+      "calldata": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000001d",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1767225600",
+            "hex": "0x000000000000000000000000000000000000000000000000000000006955b900",
+            "name": "start"
+          },
+          {
+            "decimal": "1769904000",
+            "hex": "0x00000000000000000000000000000000000000000000000000000000697e9780",
+            "name": "end"
+          },
+          {
+            "decimal": "1000099550000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b43513d9739bba0b80000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1118219840000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000f84b70517fe8000",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x000000000000000000000000000000000000000000000000000000006955b90000000000000000000000000000000000000000000000000000000000697e97800000000000000000000000000000000000000000033b43513d9739bba0b800000000000000000000000000000000000000000000000000000f84b70517fe8000",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/038-oracle-ranges-29-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:12.147Z",
+      "index": 38,
+      "label": "oracle.ranges(29) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa000000000000000000000000000000000000000000000000000000000000001d\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000001d",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "45e30e372ac4f4d0bbd0ecda4c69e6e7d4a449589e117353014a861d093a3865",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "fbbcd0cd9208f31ba0784e9bde7125db4693d7226ff1ac20036d7c7f29ad2b8d",
+      "calldata": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000001e",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1769904000",
+            "hex": "0x00000000000000000000000000000000000000000000000000000000697e9780",
+            "name": "start"
+          },
+          {
+            "decimal": "1772323200",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000069a38180",
+            "name": "end"
+          },
+          {
+            "decimal": "1000095580000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b427a06c5ebb1c3f00000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1121675880000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000f90fe451c861000",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x00000000000000000000000000000000000000000000000000000000697e97800000000000000000000000000000000000000000000000000000000069a381800000000000000000000000000000000000000000033b427a06c5ebb1c3f000000000000000000000000000000000000000000000000000000f90fe451c861000",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/039-oracle-ranges-30-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:12.192Z",
+      "index": 39,
+      "label": "oracle.ranges(30) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa000000000000000000000000000000000000000000000000000000000000001e\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000001e",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "b64f8c1c214abfe6fc4a7e438a381edc5ddb51c28976657c895e8c407d8402f8",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "995c51ca2366c24f08d71a38469c39b14be48af7bf03eb1d5bb768d97237eb48",
+      "calldata": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000001f",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1772323200",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000069a38180",
+            "name": "start"
+          },
+          {
+            "decimal": "1775001600",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000069cc6000",
+            "name": "end"
+          },
+          {
+            "decimal": "1000095580000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b427a06c5ebb1c3f00000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1124681630000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000f9babfbd18eac00",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x0000000000000000000000000000000000000000000000000000000069a381800000000000000000000000000000000000000000000000000000000069cc60000000000000000000000000000000000000000000033b427a06c5ebb1c3f000000000000000000000000000000000000000000000000000000f9babfbd18eac00",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/040-oracle-ranges-31-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:12.242Z",
+      "index": 40,
+      "label": "oracle.ranges(31) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa000000000000000000000000000000000000000000000000000000000000001f\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa000000000000000000000000000000000000000000000000000000000000001f",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "066f60d08aef30cb6067fbbb7deb83365b7e0a46b503ac976f7566bc2e85f1f3",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "b9714a80af47ffc6fa2c23b7b272632afa49aaf213bdaaf6856a455f809f6ccb",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000020",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1775001600",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000069cc6000",
+            "name": "start"
+          },
+          {
+            "decimal": "1777593600",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000069f3ed00",
+            "name": "end"
+          },
+          {
+            "decimal": "1000095580000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b427a06c5ebb1c3f00000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1128018820000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000fa78723ea0e2800",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x0000000000000000000000000000000000000000000000000000000069cc60000000000000000000000000000000000000000000000000000000000069f3ed000000000000000000000000000000000000000000033b427a06c5ebb1c3f000000000000000000000000000000000000000000000000000000fa78723ea0e2800",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/041-oracle-ranges-32-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:12.290Z",
+      "index": 41,
+      "label": "oracle.ranges(32) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000020\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000020",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "12d3767f8901601e40ed005a4d70fd5c4aa208e03d2879c084020b3c17a20820",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "202921c05b201042a17edf584e0f85998fbe476dd1846e01dd53877a8e9e0e4c",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000021",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1777593600",
+            "hex": "0x0000000000000000000000000000000000000000000000000000000069f3ed00",
+            "name": "start"
+          },
+          {
+            "decimal": "1780272000",
+            "hex": "0x000000000000000000000000000000000000000000000000000000006a1ccb80",
+            "name": "end"
+          },
+          {
+            "decimal": "1000095580000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b427a06c5ebb1c3f00000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1131257790000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000fb308f76257ec00",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x0000000000000000000000000000000000000000000000000000000069f3ed00000000000000000000000000000000000000000000000000000000006a1ccb800000000000000000000000000000000000000000033b427a06c5ebb1c3f000000000000000000000000000000000000000000000000000000fb308f76257ec00",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/042-oracle-ranges-33-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:12.421Z",
+      "index": 42,
+      "label": "oracle.ranges(33) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000021\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000021",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "5c12926b20ca4b1b7c8d0de9c3e701dcd746dd09d21be2c296abeb2cd5946e4d",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "538458424cde1732ad8ca243e15becaf7338c9f1dc023134725552f0103d3f58",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000022",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1780272000",
+            "hex": "0x000000000000000000000000000000000000000000000000000000006a1ccb80",
+            "name": "start"
+          },
+          {
+            "decimal": "1782864000",
+            "hex": "0x000000000000000000000000000000000000000000000000000000006a445880",
+            "name": "end"
+          },
+          {
+            "decimal": "1000095580000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b427a06c5ebb1c3f00000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1134614490000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000fbef5de01760400",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x000000000000000000000000000000000000000000000000000000006a1ccb80000000000000000000000000000000000000000000000000000000006a4458800000000000000000000000000000000000000000033b427a06c5ebb1c3f000000000000000000000000000000000000000000000000000000fbef5de01760400",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/043-oracle-ranges-34-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:12.472Z",
+      "index": 43,
+      "label": "oracle.ranges(34) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000022\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000022",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "f95e13e7c6ee7ff83507a11596d3507dcc9518c3b6ef327054d79ddf859a3d54",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "8516ef9b963cc2b93325b919d5a03acafb60fe0157f17b5c7a065740b48feffd",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000023",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1782864000",
+            "hex": "0x000000000000000000000000000000000000000000000000000000006a445880",
+            "name": "start"
+          },
+          {
+            "decimal": "1785542400",
+            "hex": "0x000000000000000000000000000000000000000000000000000000006a6d3700",
+            "name": "end"
+          },
+          {
+            "decimal": "1000095580000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b427a06c5ebb1c3f00000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1137872400000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000fca88eb49b8a000",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x000000000000000000000000000000000000000000000000000000006a445880000000000000000000000000000000000000000000000000000000006a6d37000000000000000000000000000000000000000000033b427a06c5ebb1c3f000000000000000000000000000000000000000000000000000000fca88eb49b8a000",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/044-oracle-ranges-35-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:12.515Z",
+      "index": 44,
+      "label": "oracle.ranges(35) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000023\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000023",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "a665a6f68bb8e68dfdc97b19476e7a4b12f66abbc9b36e3e723b94b6918a1cf5",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "4aa4a04a9f31c2cd9ebec041358d36eef8bdb7ac19b94cfbe328f1f906747507",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000024",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1785542400",
+            "hex": "0x000000000000000000000000000000000000000000000000000000006a6d3700",
+            "name": "start"
+          },
+          {
+            "decimal": "1788220800",
+            "hex": "0x000000000000000000000000000000000000000000000000000000006a961580",
+            "name": "end"
+          },
+          {
+            "decimal": "1000095580000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b427a06c5ebb1c3f00000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1141248730000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000fd687ac60040400",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x000000000000000000000000000000000000000000000000000000006a6d3700000000000000000000000000000000000000000000000000000000006a9615800000000000000000000000000000000000000000033b427a06c5ebb1c3f000000000000000000000000000000000000000000000000000000fd687ac60040400",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/045-oracle-ranges-36-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:12.566Z",
+      "index": 45,
+      "label": "oracle.ranges(36) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000024\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000024",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "bdf5219637d6524dab2c791cda323fee4de2581daa9c95714a7cb033ee0b666e",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 294,
+      "cache": "miss",
+      "cache_key": "fceca50901fd582f1f5e910dc58403d0a5426db52b3a8e84e83190f1c162767e",
+      "calldata": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000025",
+      "decoded": {
+        "fields": [
+          {
+            "decimal": "1788220800",
+            "hex": "0x000000000000000000000000000000000000000000000000000000006a961580",
+            "name": "start"
+          },
+          {
+            "decimal": "1790812800",
+            "hex": "0x000000000000000000000000000000000000000000000000000000006abda280",
+            "name": "end"
+          },
+          {
+            "decimal": "1000096900000000000000000000",
+            "hex": "0x0000000000000000000000000000000000000000033b42c19573fa08df900000",
+            "name": "dailyInterestRate"
+          },
+          {
+            "decimal": "1144635080000000000",
+            "hex": "0x0000000000000000000000000000000000000000000000000fe28f8a6cd9d000",
+            "name": "prevRangeClosePrice"
+          }
+        ],
+        "hex": "0x000000000000000000000000000000000000000000000000000000006a961580000000000000000000000000000000000000000000000000000000006abda2800000000000000000000000000000000000000000033b42c19573fa08df9000000000000000000000000000000000000000000000000000000fe28f8a6cd9d000",
+        "shape": "fields"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/046-oracle-ranges-37-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:12.617Z",
+      "index": 46,
+      "label": "oracle.ranges(37) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000025\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x5fdecdfa0000000000000000000000000000000000000000000000000000000000000025",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "9c2ca649eae464883abbb36d29d50a4d26ba87e2a3d7412d922e57b96faeab0b",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x162fd36..0x18afae3",
+      "byte_len": 52,
+      "cache": "miss",
+      "cache_key": "fea32cda03d520c4b9eb4533074a4d96bd2b47168c037ca5fccf189ac40afbf0",
+      "calldata": "topic0=0x1d4ab332f121243dc2230aa9d0a537bde65d8f9f7fd7516fe17b9a8b7ca738d1,topic1=none,topic2=none",
+      "decoded": {
+        "byte_len": 0,
+        "hex": "logs=0",
+        "shape": "other"
+      },
+      "endpoint": "https://eth.blockscout.com/api",
+      "file": "raw/047-rangeoverriden-events-in-the-window-blockscout.json",
+      "first_stored_utc": "2026-09-02T00:36:12.678Z",
+      "index": 47,
+      "label": "RangeOverriden events in the window, blockscout",
+      "method": "blockscout_getLogs",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=blockscout_getLogs\nblock=0x162fd36..0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=topic0=0x1d4ab332f121243dc2230aa9d0a537bde65d8f9f7fd7516fe17b9a8b7ca738d1,topic1=none,topic2=none\n",
+      "request": {
+        "api": "blockscout_getLogs",
+        "http_method": "GET",
+        "query": [
+          [
+            "module",
+            "logs"
+          ],
+          [
+            "action",
+            "getLogs"
+          ],
+          [
+            "address",
+            "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          ],
+          [
+            "fromBlock",
+            "23264566"
+          ],
+          [
+            "toBlock",
+            "25885411"
+          ],
+          [
+            "topic0",
+            "0x1d4ab332f121243dc2230aa9d0a537bde65d8f9f7fd7516fe17b9a8b7ca738d1"
+          ]
+        ]
+      },
+      "sha256": "1531ed0377c1e4056d99e9eccb0f7f2e65e72763593de740e3c1103cae3d691d",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "http_get"
+    },
+    {
+      "block": "0x162fd36..0x18afae3",
+      "byte_len": 52,
+      "cache": "miss",
+      "cache_key": "4a74ae418dec549abb862d01ec36f1c176124c1c9a1abc9616849170a639ff7b",
+      "calldata": "topic0=0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258,topic1=none,topic2=none",
+      "decoded": {
+        "byte_len": 0,
+        "hex": "logs=0",
+        "shape": "other"
+      },
+      "endpoint": "https://eth.blockscout.com/api",
+      "file": "raw/048-paused-events-in-the-window-blockscout.json",
+      "first_stored_utc": "2026-09-02T00:36:12.747Z",
+      "index": 48,
+      "label": "Paused events in the window, blockscout",
+      "method": "blockscout_getLogs",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=blockscout_getLogs\nblock=0x162fd36..0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=topic0=0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258,topic1=none,topic2=none\n",
+      "request": {
+        "api": "blockscout_getLogs",
+        "http_method": "GET",
+        "query": [
+          [
+            "module",
+            "logs"
+          ],
+          [
+            "action",
+            "getLogs"
+          ],
+          [
+            "address",
+            "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          ],
+          [
+            "fromBlock",
+            "23264566"
+          ],
+          [
+            "toBlock",
+            "25885411"
+          ],
+          [
+            "topic0",
+            "0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258"
+          ]
+        ]
+      },
+      "sha256": "1531ed0377c1e4056d99e9eccb0f7f2e65e72763593de740e3c1103cae3d691d",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "http_get"
+    },
+    {
+      "block": "mined",
+      "byte_len": 2284,
+      "cache": "miss",
+      "cache_key": "ea4a6047ae7f9f3220912a91d61f86d8b7b640f08eb83f34e57255c81067a25e",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/049-range-set-transaction-0x9fd63682a7205c58fc7e94d91822a7b6085c8c5a66da27c1ebf4dc5a154e533b.json",
+      "first_stored_utc": "2026-09-02T00:36:12.802Z",
+      "index": 49,
+      "label": "range set transaction 0x9fd63682a7205c58fc7e94d91822a7b6085c8c5a66da27c1ebf4dc5a154e533b",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x9fd63682a7205c58fc7e94d91822a7b6085c8c5a66da27c1ebf4dc5a154e533b\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x9fd63682a7205c58fc7e94d91822a7b6085c8c5a66da27c1ebf4dc5a154e533b"
+        ]
+      },
+      "sha256": "1cef42bf35557671e7cd1f44140a69429d6344d7370b1b3a4d743125059e209d",
+      "to": "0x9fd63682a7205c58fc7e94d91822a7b6085c8c5a66da27c1ebf4dc5a154e533b",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "0x18afae3",
+      "byte_len": 102,
+      "cache": "miss",
+      "cache_key": "bbb677eb2d84feb811693a3868cb679113fbb930000a08d19dfc13576d3fffe6",
+      "calldata": "0x91d1485461c92169ef077349011ff0b1383c894d86c5f0b41d986366b58a6cf31e93beda00000000000000000000000019c114b7c6ff86482cebfc6ae3cef894e6793db8",
+      "decoded": {
+        "decimal": "1",
+        "hex": "0x0000000000000000000000000000000000000000000000000000000000000001",
+        "shape": "word"
+      },
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/050-oracle-hasrole-setter-role-0x19c114b7c6ff86482cebfc6ae3cef894e6793db8-25885411.json",
+      "first_stored_utc": "2026-09-02T00:36:12.943Z",
+      "index": 50,
+      "label": "oracle.hasRole(SETTER_ROLE, 0x19c114b7c6ff86482cebfc6ae3cef894e6793db8) @ 25885411",
+      "method": "eth_call",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_call\nblock=0x18afae3\nto=0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0\ncalldata=0x91d1485461c92169ef077349011ff0b1383c894d86c5f0b41d986366b58a6cf31e93beda00000000000000000000000019c114b7c6ff86482cebfc6ae3cef894e6793db8\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_call",
+        "params": [
+          {
+            "data": "0x91d1485461c92169ef077349011ff0b1383c894d86c5f0b41d986366b58a6cf31e93beda00000000000000000000000019c114b7c6ff86482cebfc6ae3cef894e6793db8",
+            "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0"
+          },
+          "0x18afae3"
+        ]
+      },
+      "sha256": "7aa1bce2c8c36922fcde6455a25909c4f0a41e02346ade0168f6df57c9a26849",
+      "to": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 2284,
+      "cache": "miss",
+      "cache_key": "6f5305de346c60a5a8ae9f554b6d4c27368f2d8790130749eeea651aa79c2959",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/051-range-set-transaction-0xef2d80a7e4435b1de955dfb9025101bca2cbed81b9291c4155e2dd1182a537c4.json",
+      "first_stored_utc": "2026-09-02T00:36:12.997Z",
+      "index": 51,
+      "label": "range set transaction 0xef2d80a7e4435b1de955dfb9025101bca2cbed81b9291c4155e2dd1182a537c4",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0xef2d80a7e4435b1de955dfb9025101bca2cbed81b9291c4155e2dd1182a537c4\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0xef2d80a7e4435b1de955dfb9025101bca2cbed81b9291c4155e2dd1182a537c4"
+        ]
+      },
+      "sha256": "f6c05fc858ef8b73eb55283ab5683570cf5e0ffb4e7f941c9335f7f6dd5c8445",
+      "to": "0xef2d80a7e4435b1de955dfb9025101bca2cbed81b9291c4155e2dd1182a537c4",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 2253,
+      "cache": "miss",
+      "cache_key": "e6b4aef56cc74c610cda86c23c9f3a28c5f7cb6a590b876f9c675031f898d524",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/052-range-set-transaction-0x96c595c59fb23c705a634c83c9aaae9b6f8c1f2e5dd632f201b90b0054363da1.json",
+      "first_stored_utc": "2026-09-02T00:36:13.056Z",
+      "index": 52,
+      "label": "range set transaction 0x96c595c59fb23c705a634c83c9aaae9b6f8c1f2e5dd632f201b90b0054363da1",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x96c595c59fb23c705a634c83c9aaae9b6f8c1f2e5dd632f201b90b0054363da1\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x96c595c59fb23c705a634c83c9aaae9b6f8c1f2e5dd632f201b90b0054363da1"
+        ]
+      },
+      "sha256": "32d8cde2eb9396b4a038b506d426e806be7f3e7ca033f30727a6f7aa35d5f313",
+      "to": "0x96c595c59fb23c705a634c83c9aaae9b6f8c1f2e5dd632f201b90b0054363da1",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 2251,
+      "cache": "miss",
+      "cache_key": "fcb70993b9a6e8ecce7a09337b7c6ac895bb72ac67fbc1fcd62efff22e20f10b",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/053-range-set-transaction-0x5dac4de9ba228655ff38c78a3a1ff443a37985b0c894c97d7dd3c1b07da19d82.json",
+      "first_stored_utc": "2026-09-02T00:36:13.113Z",
+      "index": 53,
+      "label": "range set transaction 0x5dac4de9ba228655ff38c78a3a1ff443a37985b0c894c97d7dd3c1b07da19d82",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x5dac4de9ba228655ff38c78a3a1ff443a37985b0c894c97d7dd3c1b07da19d82\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x5dac4de9ba228655ff38c78a3a1ff443a37985b0c894c97d7dd3c1b07da19d82"
+        ]
+      },
+      "sha256": "bb13ac849a28dad7b219f363098a68f5416ee0e02dc28f19b4d1b5d6471f15ff",
+      "to": "0x5dac4de9ba228655ff38c78a3a1ff443a37985b0c894c97d7dd3c1b07da19d82",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 2279,
+      "cache": "miss",
+      "cache_key": "392ec7426d84c48383720960b173426a28b7ecef70afa591b13606eef6275cd9",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/054-range-set-transaction-0x8a1f5b2646ef5063c3f061c5558c503ad8b2366a6713de1e5057f92efacc7362.json",
+      "first_stored_utc": "2026-09-02T00:36:13.168Z",
+      "index": 54,
+      "label": "range set transaction 0x8a1f5b2646ef5063c3f061c5558c503ad8b2366a6713de1e5057f92efacc7362",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x8a1f5b2646ef5063c3f061c5558c503ad8b2366a6713de1e5057f92efacc7362\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x8a1f5b2646ef5063c3f061c5558c503ad8b2366a6713de1e5057f92efacc7362"
+        ]
+      },
+      "sha256": "770c382a4ecbc438a85354a336b36bf34d6c368d042c382e10ac9e6f3dc8c43a",
+      "to": "0x8a1f5b2646ef5063c3f061c5558c503ad8b2366a6713de1e5057f92efacc7362",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 2281,
+      "cache": "miss",
+      "cache_key": "910286658c41517168071ae4a76d2d4d02c2646d6656f7e41cdc348059d6fba6",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/055-range-set-transaction-0x4265e6f00d049d6a7bf1ed92f7c2ef48351ce9e184868d2717f1f94e70aaacbc.json",
+      "first_stored_utc": "2026-09-02T00:36:13.227Z",
+      "index": 55,
+      "label": "range set transaction 0x4265e6f00d049d6a7bf1ed92f7c2ef48351ce9e184868d2717f1f94e70aaacbc",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x4265e6f00d049d6a7bf1ed92f7c2ef48351ce9e184868d2717f1f94e70aaacbc\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x4265e6f00d049d6a7bf1ed92f7c2ef48351ce9e184868d2717f1f94e70aaacbc"
+        ]
+      },
+      "sha256": "708d38eadfe4d8e4610130641b6001e9239de4580a820221d733be25fa12836d",
+      "to": "0x4265e6f00d049d6a7bf1ed92f7c2ef48351ce9e184868d2717f1f94e70aaacbc",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 2284,
+      "cache": "miss",
+      "cache_key": "00966468a8d6b235e4d8e6ee4371c2e0bca69860dcb725976cce5f0644214d52",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/056-range-set-transaction-0x43000ddc380202ef7d575dab66213f6048e9a88a1a2f0f503af48b6cfab5baf8.json",
+      "first_stored_utc": "2026-09-02T00:36:13.279Z",
+      "index": 56,
+      "label": "range set transaction 0x43000ddc380202ef7d575dab66213f6048e9a88a1a2f0f503af48b6cfab5baf8",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x43000ddc380202ef7d575dab66213f6048e9a88a1a2f0f503af48b6cfab5baf8\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x43000ddc380202ef7d575dab66213f6048e9a88a1a2f0f503af48b6cfab5baf8"
+        ]
+      },
+      "sha256": "1052389f88db37a58a29ce18ec2c728712ac6cbf4ecd89a435c5a9d2fa5ff626",
+      "to": "0x43000ddc380202ef7d575dab66213f6048e9a88a1a2f0f503af48b6cfab5baf8",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 2284,
+      "cache": "miss",
+      "cache_key": "78904a34b2406a38171e87eaeeb4cce9b92e1222239342a71b9c10180d30ae4b",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/057-range-set-transaction-0x48a73a7b9ddb7445f43701b2adc48814f0130e4b681e7f6895fd80dfdc07331a.json",
+      "first_stored_utc": "2026-09-02T00:36:13.336Z",
+      "index": 57,
+      "label": "range set transaction 0x48a73a7b9ddb7445f43701b2adc48814f0130e4b681e7f6895fd80dfdc07331a",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x48a73a7b9ddb7445f43701b2adc48814f0130e4b681e7f6895fd80dfdc07331a\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x48a73a7b9ddb7445f43701b2adc48814f0130e4b681e7f6895fd80dfdc07331a"
+        ]
+      },
+      "sha256": "35bc504fffbdba308c29b787fca98b525a6a71ee904b54dc5f3d40483b485620",
+      "to": "0x48a73a7b9ddb7445f43701b2adc48814f0130e4b681e7f6895fd80dfdc07331a",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 2284,
+      "cache": "miss",
+      "cache_key": "295564ad1e643f6c5123ab35ec5e9867b75a7668d08d52814e2c874b99511a5b",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/058-range-set-transaction-0x7c323d95721e82f78dd937427e860f9686baf4d8379afa8af7f0a1f1bbdb96ed.json",
+      "first_stored_utc": "2026-09-02T00:36:13.470Z",
+      "index": 58,
+      "label": "range set transaction 0x7c323d95721e82f78dd937427e860f9686baf4d8379afa8af7f0a1f1bbdb96ed",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x7c323d95721e82f78dd937427e860f9686baf4d8379afa8af7f0a1f1bbdb96ed\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x7c323d95721e82f78dd937427e860f9686baf4d8379afa8af7f0a1f1bbdb96ed"
+        ]
+      },
+      "sha256": "b7ed4ef5350edcd7f1e3917d0b809b3f2bb14ffbfa7e6ee4c08cc9acb915132a",
+      "to": "0x7c323d95721e82f78dd937427e860f9686baf4d8379afa8af7f0a1f1bbdb96ed",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 2284,
+      "cache": "miss",
+      "cache_key": "40c75945accbaabe32d9cd92584901819057d998943093037021be1d7a9ccb63",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/059-range-set-transaction-0x2a2ebc1c508b2dd201013588d80af356325cf98a8e1c260fe325b40386c3dde7.json",
+      "first_stored_utc": "2026-09-02T00:36:13.521Z",
+      "index": 59,
+      "label": "range set transaction 0x2a2ebc1c508b2dd201013588d80af356325cf98a8e1c260fe325b40386c3dde7",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x2a2ebc1c508b2dd201013588d80af356325cf98a8e1c260fe325b40386c3dde7\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x2a2ebc1c508b2dd201013588d80af356325cf98a8e1c260fe325b40386c3dde7"
+        ]
+      },
+      "sha256": "7caff31cde5744189cb3a1a7915370d71559eeca1a7d6e5c18533fba22edb006",
+      "to": "0x2a2ebc1c508b2dd201013588d80af356325cf98a8e1c260fe325b40386c3dde7",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 2282,
+      "cache": "miss",
+      "cache_key": "7d277d3e99ef74e8ee8fa3f545a2cf38b0427a5ea9b819bb51d30b6459ad109c",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/060-range-set-transaction-0x320e4a5a84a4d58641d424fa05f04b15a0393a3a4d8ad68350acb234e38763b6.json",
+      "first_stored_utc": "2026-09-02T00:36:13.570Z",
+      "index": 60,
+      "label": "range set transaction 0x320e4a5a84a4d58641d424fa05f04b15a0393a3a4d8ad68350acb234e38763b6",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x320e4a5a84a4d58641d424fa05f04b15a0393a3a4d8ad68350acb234e38763b6\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x320e4a5a84a4d58641d424fa05f04b15a0393a3a4d8ad68350acb234e38763b6"
+        ]
+      },
+      "sha256": "ecb84d7f7fb2dbfd238fc35422d8dbd5473ed4041c59c47114558a6a2e327cb5",
+      "to": "0x320e4a5a84a4d58641d424fa05f04b15a0393a3a4d8ad68350acb234e38763b6",
+      "wire": "json_rpc"
+    },
+    {
+      "block": "mined",
+      "byte_len": 2283,
+      "cache": "miss",
+      "cache_key": "4e0ef9ec8120023849a9cd566504c47c978d597eb327834e973b72fe0c78f8ad",
+      "calldata": "",
+      "endpoint": "https://lb.drpc.org/ogrpc",
+      "file": "raw/061-range-set-transaction-0x24fde5559660fdda92a636dfaef06945ba5f417340472b1405d88c4481a1f86e.json",
+      "first_stored_utc": "2026-09-02T00:36:13.623Z",
+      "index": 61,
+      "label": "range set transaction 0x24fde5559660fdda92a636dfaef06945ba5f417340472b1405d88c4481a1f86e",
+      "method": "eth_getTransactionByHash",
+      "preimage": "crossfoot-cache-v1\nchain_id=1\nmethod=eth_getTransactionByHash\nblock=mined\nto=0x24fde5559660fdda92a636dfaef06945ba5f417340472b1405d88c4481a1f86e\ncalldata=\n",
+      "request": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [
+          "0x24fde5559660fdda92a636dfaef06945ba5f417340472b1405d88c4481a1f86e"
+        ]
+      },
+      "sha256": "f3d0be521fee1ab74d08b7e341797ab8b683ceeb80e3248ff4431e984fdd6960",
+      "to": "0x24fde5559660fdda92a636dfaef06945ba5f417340472b1405d88c4481a1f86e",
+      "wire": "json_rpc"
+    }
+  ],
+  "entry_count": 61,
+  "findings": [],
+  "format": "crossfoot-manifest-v2",
+  "summary": {
+    "baseline_block": 23264565,
+    "block": 25885411,
+    "range_sets_in_window": 12,
+    "verdict": "MODEL_MATCH"
+  },
+  "target": "usdy-run"
+}

@@ -1,0 +1,129 @@
+{
+  "check_class": "full recomputation",
+  "comparison": {
+    "check_class": "full recomputation",
+    "fields": [
+      {
+        "equal": true,
+        "field": "vault.pricePerShare()",
+        "modeled": "1208570496750105242",
+        "observed": "1208570496750105242",
+        "residual": "0"
+      },
+      {
+        "equal": true,
+        "field": "vault.totalAssets()",
+        "modeled": "36203237152360676115213293",
+        "observed": "36203237152360676115213293",
+        "residual": "0"
+      },
+      {
+        "equal": true,
+        "field": "vault.convertToAssets(1e18)",
+        "modeled": "1208570496750105241",
+        "observed": "1208570496750105241",
+        "residual": "0"
+      }
+    ],
+    "tolerance": "zero, to the wei"
+  },
+  "format": "crossfoot-result-v1",
+  "input_gaps": [],
+  "inputs": {
+    "formula": [
+      "pricePerShare(t) = mulDiv18(pricePerShareStored, exp(pricePerShareIncPerSecond * (t - lastSync)))",
+      "exp: PRBMath UD60x18, exp2 in 192.64 fixed point with the deployed 64 magic factors",
+      "totalAssets = pricePerShare * totalSupply / 1e18; convertToAssets(1e18) = 1e18 * totalAssets / totalSupply"
+    ],
+    "state_b0": {
+      "apy_bps": 465,
+      "block": 24320956,
+      "block_timestamp_unix": 1769454083,
+      "observed": {
+        "vault.convertToAssets(1e18)": "1179774437264554522",
+        "vault.pricePerShare()": "1179774437264554523",
+        "vault.totalAssets()": "28119169989945537515918215"
+      },
+      "vault.lastSync()": 1769107283,
+      "vault.pricePerShareIncPerSecond()": "1441248824",
+      "vault.pricePerShareStored()": "1179184903741814007",
+      "vault.timelockAddress()": "0x4b45d73b83686e69d08e61105fdb7f7b51f41bc1",
+      "vault.totalSupply()": "23834361130203102947981227"
+    },
+    "state_b1": {
+      "apy_bps": 480,
+      "block": 25885408,
+      "block_timestamp_unix": 1788301523,
+      "observed": {
+        "vault.convertToAssets(1e18)": "1208570496750105241",
+        "vault.pricePerShare()": "1208570496750105242",
+        "vault.totalAssets()": "36203237152360676115213293"
+      },
+      "vault.lastSync()": 1787856407,
+      "vault.pricePerShareIncPerSecond()": "1486668756",
+      "vault.pricePerShareStored()": "1207771001807249130",
+      "vault.timelockAddress()": "0x4b45d73b83686e69d08e61105fdb7f7b51f41bc1",
+      "vault.totalSupply()": "29955420266929102947981227"
+    },
+    "vault": "0xcf62F905562626CfcDD2261162a51fd02Fc9c5b6"
+  },
+  "modeled": {
+    "apy_bps": 480,
+    "seconds_since_last_sync": 445116,
+    "vault.convertToAssets(1e18)": "1208570496750105241",
+    "vault.pricePerShare()": "1208570496750105242",
+    "vault.totalAssets()": "36203237152360676115213293"
+  },
+  "setter_events": {
+    "by_kind": {
+      "inc": 6
+    },
+    "by_path": {
+      "other": 2,
+      "timelock_safe": 4
+    },
+    "implementation_upgrades": 0,
+    "in_window": 6,
+    "level_rewrites": 0,
+    "note": "the rate has no on-chain bound and the timelock address, a Safe, can rewrite the price level outright; which path each event took is what the record says",
+    "timelock_transfers": 0
+  },
+  "stale_reads": [],
+  "summary": {
+    "check_class": "full recomputation",
+    "consumer_action": "ALLOW",
+    "family": "recomputable-accrual",
+    "fields_compared": 3,
+    "fields_exact": 3,
+    "findings_count": 2,
+    "headline": "3 of 3 fields exact, residual 0",
+    "largest_residual": null,
+    "nav_recomputation": "FULL",
+    "posted": {
+      "decimals": 18,
+      "field": "vault.pricePerShare()",
+      "value": "1208570496750105242"
+    },
+    "recomputed": {
+      "decimals": 18,
+      "field": "vault.pricePerShare()",
+      "value": "1208570496750105242"
+    },
+    "target": "frax",
+    "verdict": "MODEL_MATCH",
+    "window": {
+      "baseline_block": 24320956,
+      "block": 25885408
+    }
+  },
+  "target": "frax",
+  "timeline_file": "timelines/frax.json",
+  "tolerance": "zero, to the wei",
+  "verdict": "MODEL_MATCH",
+  "window": {
+    "baseline_block": 24320956,
+    "baseline_timestamp_unix": 1769454083,
+    "block": 25885408,
+    "block_timestamp_unix": 1788301523
+  }
+}

@@ -1,0 +1,365 @@
+{
+  "check_class": "full recomputation",
+  "comparison": {
+    "check_class": "full recomputation",
+    "fields": [
+      {
+        "equal": true,
+        "field": "oracle.getPrice()",
+        "modeled": "1144746000000000000",
+        "observed": "1144746000000000000",
+        "residual": "0"
+      },
+      {
+        "equal": true,
+        "field": "oracle.getPrice() at the baseline block",
+        "modeled": "1103925820000000000",
+        "observed": "1103925820000000000",
+        "residual": "0"
+      }
+    ],
+    "tolerance": "zero, to the wei"
+  },
+  "format": "crossfoot-result-v1",
+  "input_gaps": [],
+  "inputs": {
+    "admin_safe": "0x1a694A09494E214a3Be3652e4B343B7B81A73ad7",
+    "formula": [
+      "elapsedDays = floor((t - start) / 86400), with t frozen at end - 1 once the range is over",
+      "price = roundTo8(rpow(dailyInterestRate, elapsedDays + 1, 1e27) * prevRangeClosePrice / 1e27)",
+      "rpow: MakerDAO ray exponentiation, half up at every multiply; roundTo8: half up to eight decimals"
+    ],
+    "oracle": "0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0",
+    "paused_at_block": false,
+    "ranges": [
+      {
+        "daily_ir": "1000133680000000000000000000",
+        "end": 1693526400,
+        "index": 0,
+        "prev_close": "999866337867953811",
+        "start": 1690848000
+      },
+      {
+        "daily_ir": "1000133680000000000000000000",
+        "end": 1696118400,
+        "index": 1,
+        "prev_close": "1004018180000000000",
+        "start": 1693526400
+      },
+      {
+        "daily_ir": "1000136290000000000000000000",
+        "end": 1698796800,
+        "index": 2,
+        "prev_close": "1008052510000000000",
+        "start": 1696118400
+      },
+      {
+        "daily_ir": "1000136290000000000000000000",
+        "end": 1701388800,
+        "index": 3,
+        "prev_close": "1012320240000000000",
+        "start": 1698796800
+      },
+      {
+        "daily_ir": "1000138890000000000000000000",
+        "end": 1704067200,
+        "index": 4,
+        "prev_close": "1016467500000000000",
+        "start": 1701388800
+      },
+      {
+        "daily_ir": "1000136290000000000000000000",
+        "end": 1706745600,
+        "index": 5,
+        "prev_close": "1020853120000000000",
+        "start": 1704067200
+      },
+      {
+        "daily_ir": "1000136290000000000000000000",
+        "end": 1709251200,
+        "index": 6,
+        "prev_close": "1025175040000000000",
+        "start": 1706745600
+      },
+      {
+        "daily_ir": "1000136290000000000000000000",
+        "end": 1711929600,
+        "index": 7,
+        "prev_close": "1029234690000000000",
+        "start": 1709251200
+      },
+      {
+        "daily_ir": "1000138890000000000000000000",
+        "end": 1714521600,
+        "index": 8,
+        "prev_close": "1033592100000000000",
+        "start": 1711929600
+      },
+      {
+        "daily_ir": "1000138890000000000000000000",
+        "end": 1717200000,
+        "index": 9,
+        "prev_close": "1037907450000000000",
+        "start": 1714521600
+      },
+      {
+        "daily_ir": "1000141498300000000000000000",
+        "end": 1719792000,
+        "index": 10,
+        "prev_close": "1042385580000000000",
+        "start": 1717200000
+      },
+      {
+        "daily_ir": "1000141500000000000000000000",
+        "end": 1722470400,
+        "index": 11,
+        "prev_close": "1046819540000000000",
+        "start": 1719792000
+      },
+      {
+        "daily_ir": "1000142800000000000000000000",
+        "end": 1725148800,
+        "index": 12,
+        "prev_close": "1051421170000000000",
+        "start": 1722470400
+      },
+      {
+        "daily_ir": "1000142800000000000000000000",
+        "end": 1727740800,
+        "index": 13,
+        "prev_close": "1056085580000000000",
+        "start": 1725148800
+      },
+      {
+        "daily_ir": "1000134990000000000000000000",
+        "end": 1730419200,
+        "index": 14,
+        "prev_close": "1060619230000000000",
+        "start": 1727740800
+      },
+      {
+        "daily_ir": "1000131070000000000000000000",
+        "end": 1733011200,
+        "index": 15,
+        "prev_close": "1065066590000000000",
+        "start": 1730419200
+      },
+      {
+        "daily_ir": "1000124530000000000000000000",
+        "end": 1735689600,
+        "index": 16,
+        "prev_close": "1069262510000000000",
+        "start": 1733011200
+      },
+      {
+        "daily_ir": "1000116670000000000000000000",
+        "end": 1738368000,
+        "index": 17,
+        "prev_close": "1073398040000000000",
+        "start": 1735689600
+      },
+      {
+        "daily_ir": "1000116670000000000000000000",
+        "end": 1740787200,
+        "index": 18,
+        "prev_close": "1077287080000000000",
+        "start": 1738368000
+      },
+      {
+        "daily_ir": "1000116670000000000000000000",
+        "end": 1743465600,
+        "index": 19,
+        "prev_close": "1080811870000000000",
+        "start": 1740787200
+      },
+      {
+        "daily_ir": "1000114040000000000000000000",
+        "end": 1746057600,
+        "index": 20,
+        "prev_close": "1084727770000000000",
+        "start": 1743465600
+      },
+      {
+        "daily_ir": "1000114040000000000000000000",
+        "end": 1748736000,
+        "index": 21,
+        "prev_close": "1088444980000000000",
+        "start": 1746057600
+      },
+      {
+        "daily_ir": "1000115090000000000000000000",
+        "end": 1751328000,
+        "index": 22,
+        "prev_close": "1092299480000000000",
+        "start": 1748736000
+      },
+      {
+        "daily_ir": "1000115090000000000000000000",
+        "end": 1754006400,
+        "index": 23,
+        "prev_close": "1096077160000000000",
+        "start": 1751328000
+      },
+      {
+        "daily_ir": "1000115090000000000000000000",
+        "end": 1756684800,
+        "index": 24,
+        "prev_close": "1099994490000000000",
+        "start": 1754006400
+      },
+      {
+        "daily_ir": "1000112720000000000000000000",
+        "end": 1759276800,
+        "index": 25,
+        "prev_close": "1103925820000000000",
+        "start": 1756684800
+      },
+      {
+        "daily_ir": "1000107460000000000000000000",
+        "end": 1761955200,
+        "index": 26,
+        "prev_close": "1107664960000000000",
+        "start": 1759276800
+      },
+      {
+        "daily_ir": "1000100870000000000000000000",
+        "end": 1764547200,
+        "index": 27,
+        "prev_close": "1111360830000000000",
+        "start": 1761955200
+      },
+      {
+        "daily_ir": "1000100870000000000000000000",
+        "end": 1767225600,
+        "index": 28,
+        "prev_close": "1114728840000000000",
+        "start": 1764547200
+      },
+      {
+        "daily_ir": "1000099550000000000000000000",
+        "end": 1769904000,
+        "index": 29,
+        "prev_close": "1118219840000000000",
+        "start": 1767225600
+      },
+      {
+        "daily_ir": "1000095580000000000000000000",
+        "end": 1772323200,
+        "index": 30,
+        "prev_close": "1121675880000000000",
+        "start": 1769904000
+      },
+      {
+        "daily_ir": "1000095580000000000000000000",
+        "end": 1775001600,
+        "index": 31,
+        "prev_close": "1124681630000000000",
+        "start": 1772323200
+      },
+      {
+        "daily_ir": "1000095580000000000000000000",
+        "end": 1777593600,
+        "index": 32,
+        "prev_close": "1128018820000000000",
+        "start": 1775001600
+      },
+      {
+        "daily_ir": "1000095580000000000000000000",
+        "end": 1780272000,
+        "index": 33,
+        "prev_close": "1131257790000000000",
+        "start": 1777593600
+      },
+      {
+        "daily_ir": "1000095580000000000000000000",
+        "end": 1782864000,
+        "index": 34,
+        "prev_close": "1134614490000000000",
+        "start": 1780272000
+      },
+      {
+        "daily_ir": "1000095580000000000000000000",
+        "end": 1785542400,
+        "index": 35,
+        "prev_close": "1137872400000000000",
+        "start": 1782864000
+      },
+      {
+        "daily_ir": "1000095580000000000000000000",
+        "end": 1788220800,
+        "index": 36,
+        "prev_close": "1141248730000000000",
+        "start": 1785542400
+      },
+      {
+        "daily_ir": "1000096900000000000000000000",
+        "end": 1790812800,
+        "index": 37,
+        "prev_close": "1144635080000000000",
+        "start": 1788220800
+      }
+    ],
+    "ranges_stored": 38,
+    "setter_safe": "0x19c114B7c6Ff86482cEbFc6AE3cef894e6793Db8"
+  },
+  "modeled": {
+    "current_range": {
+      "apy_bps": 360,
+      "daily_ir": "1000096900000000000000000000",
+      "elapsed_days": 0,
+      "end": 1790812800,
+      "index": 37,
+      "start": 1788220800
+    },
+    "oracle.getPrice()": "1144746000000000000",
+    "oracle.getPrice() at the baseline block": "1103925820000000000"
+  },
+  "range_sets": {
+    "by_path": {
+      "setter_role_holder": 12
+    },
+    "close_chain_breaks": [],
+    "in_window": 12,
+    "note": "a range is one key's choice of a daily rate for the month; setRange bounds the shape (contiguous, day aligned, rate at least one ray), not the rate",
+    "overrides_in_window": 0,
+    "paused_events_in_window": 0
+  },
+  "stale_reads": [],
+  "summary": {
+    "check_class": "full recomputation",
+    "consumer_action": "ALLOW",
+    "family": "recomputable-accrual",
+    "fields_compared": 2,
+    "fields_exact": 2,
+    "findings_count": 0,
+    "headline": "2 of 2 fields exact, residual 0",
+    "largest_residual": null,
+    "nav_recomputation": "FULL",
+    "posted": {
+      "decimals": 18,
+      "field": "oracle.getPrice()",
+      "value": "1144746000000000000"
+    },
+    "recomputed": {
+      "decimals": 18,
+      "field": "oracle.getPrice()",
+      "value": "1144746000000000000"
+    },
+    "target": "usdy",
+    "verdict": "MODEL_MATCH",
+    "window": {
+      "baseline_block": 23264565,
+      "block": 25885411
+    }
+  },
+  "target": "usdy",
+  "timeline_file": "timelines/usdy.json",
+  "tolerance": "zero, to the wei",
+  "verdict": "MODEL_MATCH",
+  "window": {
+    "baseline_block": 23264565,
+    "baseline_timestamp_unix": 1756684799,
+    "block": 25885411,
+    "block_timestamp_unix": 1788301559
+  }
+}

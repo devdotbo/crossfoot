@@ -1,0 +1,101 @@
+{
+  "format": "crossfoot-timeline-v1",
+  "rows": [
+    {
+      "apy_bps": 425,
+      "block": 24443507,
+      "kind": "inc",
+      "log_index": 158,
+      "path": "other",
+      "previous_apy_bps": 465,
+      "previous_value": "1441248824",
+      "sender": "0x6e74053a3798e0fc9a9775f7995316b27f21c4d2",
+      "target": "0x9641d764fc13c8b624c04430c7356c1c7c8102e2",
+      "timestamp_unix": 1770933227,
+      "timestamp_utc": "2026-02-12T21:53:47Z",
+      "transaction_hash": "0xf9c970d3513bacd64e4065d57b07c440cb6a0b2096d0ca2d6a52605b85413851",
+      "value": "1319813617"
+    },
+    {
+      "apy_bps": 390,
+      "block": 24894682,
+      "kind": "inc",
+      "log_index": 161,
+      "path": "other",
+      "previous_apy_bps": 425,
+      "previous_value": "1319813617",
+      "sender": "0x381e2495e683868f693aa5b1414f712f21d34b40",
+      "target": "0x9641d764fc13c8b624c04430c7356c1c7c8102e2",
+      "timestamp_unix": 1776370079,
+      "timestamp_utc": "2026-04-16T20:07:59Z",
+      "transaction_hash": "0x27305ab102b81e3ceadb31dd4106cee13f2daf4bf82e8a8fd8024ed1a6e09578",
+      "value": "1213174785"
+    },
+    {
+      "apy_bps": 405,
+      "block": 25095660,
+      "kind": "inc",
+      "log_index": 348,
+      "path": "timelock_safe",
+      "previous_apy_bps": 390,
+      "previous_value": "1213174785",
+      "sender": "0x381e2495e683868f693aa5b1414f712f21d34b40",
+      "target": "0x4b45d73b83686e69d08e61105fdb7f7b51f41bc1",
+      "timestamp_unix": 1778789219,
+      "timestamp_utc": "2026-05-14T20:06:59Z",
+      "transaction_hash": "0xe193a81db54a6778cda0c199f38b818542518555ce17a3929e2406d00dec8d05",
+      "value": "1258921043"
+    },
+    {
+      "apy_bps": 385,
+      "block": 25195601,
+      "kind": "inc",
+      "log_index": 93,
+      "path": "timelock_safe",
+      "previous_apy_bps": 405,
+      "previous_value": "1258921043",
+      "sender": "0x6933bcc3e96f1c4d2cb73cb391d854b18ab7a4f2",
+      "target": "0x4b45d73b83686e69d08e61105fdb7f7b51f41bc1",
+      "timestamp_unix": 1779992447,
+      "timestamp_utc": "2026-05-28T18:20:47Z",
+      "transaction_hash": "0x51f7694c7751d0d78682bc8f740474c6559012afc7a7f0e079fec64ae4540496",
+      "value": "1197911451"
+    },
+    {
+      "apy_bps": 410,
+      "block": 25547992,
+      "kind": "inc",
+      "log_index": 486,
+      "path": "timelock_safe",
+      "previous_apy_bps": 385,
+      "previous_value": "1197911451",
+      "sender": "0x381e2495e683868f693aa5b1414f712f21d34b40",
+      "target": "0x4b45d73b83686e69d08e61105fdb7f7b51f41bc1",
+      "timestamp_unix": 1784238191,
+      "timestamp_utc": "2026-07-16T21:43:11Z",
+      "transaction_hash": "0x24c82975009d061eef0f754aa8e078863b4f28185a2da5e6f5fb127b3c3cb67f",
+      "value": "1274155067"
+    },
+    {
+      "apy_bps": 480,
+      "block": 25848448,
+      "kind": "inc",
+      "log_index": 230,
+      "path": "timelock_safe",
+      "previous_apy_bps": 410,
+      "previous_value": "1274155067",
+      "sender": "0x6e74053a3798e0fc9a9775f7995316b27f21c4d2",
+      "target": "0x4b45d73b83686e69d08e61105fdb7f7b51f41bc1",
+      "timestamp_unix": 1787856407,
+      "timestamp_utc": "2026-08-27T18:46:47Z",
+      "transaction_hash": "0x6ec124f061851f90cdac76f6eb304e37410349d181df3a3b16d1eda23f3cfc76",
+      "value": "1486668756"
+    }
+  ],
+  "target": "frax",
+  "vault": "0xcf62F905562626CfcDD2261162a51fd02Fc9c5b6",
+  "window": {
+    "baseline_block": 24320956,
+    "block": 25885408
+  }
+}
