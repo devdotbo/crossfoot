@@ -129,7 +129,7 @@ fn feed_report(
         "address": entry.address,
         "kind": inputs.kind,
         "description": inputs.description,
-        "decimals": inputs.decimals,
+        "decimals": decimals,
         "nav_recomputation": "INPUT_GAP",
         "bound_at_block": inputs
             .bounds

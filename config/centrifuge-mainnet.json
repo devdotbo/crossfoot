@@ -1,0 +1,91 @@
+{
+  "family": "centrifuge-v3-shareprice",
+  "target": "centrifuge",
+  "chain_id": 1,
+  "explorer": {
+    "name": "eth.blockscout.com",
+    "api": "https://eth.blockscout.com/api",
+    "address_url": "https://eth.blockscout.com/address/",
+    "transaction_url": "https://eth.blockscout.com/tx/"
+  },
+  "mechanism": {
+    "description": "Centrifuge V3 share prices: a registered pool manager calls Hub.updateSharePrice(poolId, scId, price, computedAt), in practice inside Hub.multicall together with notifySharePrice, and the Spoke stores the price and emits UpdateSharePrice. The only checks on the path are that the caller is a manager of the pool, that computedAt is not in the future and not older than the stored one. No deviation bound, no minimum or maximum, and no maximum age on mainnet (every share class has maxAge at uint64 max). Class B, posted without guard.",
+    "source": {
+      "repo": "verified on Etherscan",
+      "path": "Spoke 0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB, Hub 0xa4a7bb3831958463b3fe3e27a6a160f764341953, ShareClassManager 0xaFFC269c8fe18EE9C7DDb22301AC2c2507d69BEf (solc 0.8.28)",
+      "note": "source read by the research teammate on 2026-09-02 (raw/centrifuge-v3-share-price-rpc-2026-09-02.md). The feed address is the share token; the price lives in the Spoke keyed by pool id and share class id, which are the feed's topics. Prices are D18 (18 decimals) whatever the token's decimals, so the feed list carries 18 and decimals() is not read."
+    },
+    "reads": {
+      "description": "name()",
+      "decimals": "",
+      "latest_round": "",
+      "latest_round_data": "",
+      "last_timestamp": ""
+    },
+    "guard": null,
+    "round_events": [
+      "UpdateSharePrice(uint64,bytes16,uint128,uint64)"
+    ],
+    "round_event_layout": "share_price",
+    "setters": [
+      {
+        "signature": "updateSharePrice(uint64,bytes16,uint128,uint64)",
+        "path": "raw",
+        "value_arg": 2
+      },
+      {
+        "signature": "updatePricePoolPerShare(uint64,bytes16,uint128,uint64)",
+        "path": "raw",
+        "value_arg": 2,
+        "note": "the Spoke's auth-only write reached from the Hub; seen in a trace when the round came through a pool setup helper instead of Hub.multicall"
+      }
+    ],
+    "relays": [
+      {
+        "address": "0xa4a7bb3831958463b3fe3e27a6a160f764341953",
+        "selector": "0xac9650d8",
+        "calls_word": 0,
+        "note": "Hub.multicall(bytes[]): the manager batches updateSharePrice with notifySharePrice; the update keyed by the feed's pool id and share class id is the posting call"
+      }
+    ],
+    "other_calls": [
+      {
+        "signature": "notifySharePrice(uint64,bytes16,uint16,address)",
+        "note": "pushes the stored price to a spoke; batched with the update"
+      }
+    ],
+    "bound_events": {
+      "upgraded": "Upgraded(address)",
+      "initialized": "Initialized(uint8)",
+      "initialized_min_version": 2
+    },
+    "spacing_rule": null,
+    "verified_implementations": []
+  },
+  "feeds": [
+    {
+      "product": "JTRSY",
+      "key": "sharePrice",
+      "address": "0x8c213ee79581Ff4984583C6a801e5263418C4b86",
+      "decimals": 18,
+      "kind": "unguarded",
+      "log_address": "0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB",
+      "topics": [
+        "0x0000000000000000000000000000000000000000000000000001000000000006",
+        "0x0001000000000006000000000000000100000000000000000000000000000000"
+      ]
+    },
+    {
+      "product": "JAAA",
+      "key": "sharePrice",
+      "address": "0x5a0F93D040De44e78F251b03c43be9CF317Dcf64",
+      "decimals": 18,
+      "kind": "unguarded",
+      "log_address": "0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB",
+      "topics": [
+        "0x0000000000000000000000000000000000000000000000000001000000000007",
+        "0x0001000000000007000000000000000100000000000000000000000000000000"
+      ]
+    }
+  ]
+}

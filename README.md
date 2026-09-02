@@ -82,7 +82,10 @@ Crossfoot writes nothing to any chain.
   prefix come from the config. Family configs in `config/`: `midas`
   (66 feeds, deviation guard), `hashnote` (USYC 18-decimal feed, no guard,
   posted through a reporter relay), `backed` (four BackedOracle v2 feeds,
-  a 10 percent clamp instead of a revert). The guard kind decides the
+  a 10 percent clamp instead of a revert), `centrifuge` (JTRSY and JAAA
+  share prices read from the Spoke's event stream keyed by pool and share
+  class, posted by one hub manager key through Hub.multicall, no guard,
+  no maximum age). The guard kind decides the
   finding vocabulary: `GUARD_BYPASS` and `UNGUARDED_POST` under a
   deviation guard, `GUARD_AT_BOUND` and `GUARD_CLAMPED` under a clamp,
   `UNGUARDED_POST` with `classification: no_guard` without a guard.
@@ -191,6 +194,7 @@ crossfoot run midas --block 25884405 --config config/midas-mainnet.json
 crossfoot run midas --block 25884405 --feed mRE7 --offline
 crossfoot run family --block 25885541 --config config/hashnote-mainnet.json
 crossfoot run family --block 25885541 --config config/backed-mainnet.json
+crossfoot run family --block 25885541 --config config/centrifuge-mainnet.json --trace-endpoint <archive url with traces>
 ```
 
 Prints the verdict, the summary headline, the result and bundle paths, the

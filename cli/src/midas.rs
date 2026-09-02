@@ -11,14 +11,16 @@ use std::collections::{BTreeMap, BTreeSet};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::abi::{encode_no_args, hex_decode, word_to_decimal, word_to_signed_decimal, Decoded};
+use crate::abi::{
+    encode_no_args, hex_decode, hex_encode, word_to_decimal, word_to_signed_decimal, Decoded,
+};
 use crate::bundle::BundleWriter;
 use crate::model::midas::{
     checked_blocks, round_id_gap, AttributedRound, Attribution, BoundEventGroup, Bounds, Era,
     PostPath, RoundEvent, SetterTx, StateAtBlock, Via,
 };
 use crate::rpc::{
-    blockscout_logs_descriptor, blockscout_txlist_descriptor, call_descriptor,
+    blockscout_logs_descriptor_full, blockscout_txlist_descriptor, call_descriptor,
     debug_trace_descriptor, get_block_descriptor, get_code_descriptor, get_transaction_descriptor,
     trace_transaction_descriptor, Descriptor, ReadSource, BLOCKSCOUT_RESULT_CAP,
 };
@@ -53,11 +55,24 @@ pub struct FeedEntry {
     /// the kind from the chain (R2) and reports a disagreement as a finding.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub kind: Option<String>,
+    /// The contract the round events are read from when it is not the feed
+    /// itself: a hub that emits one event stream for many feeds.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub log_address: Option<String>,
+    /// Indexed topics (topic1, then topic2) that select this feed's rounds
+    /// on a shared event stream; they are also the leading argument words
+    /// of a relayed setter call for this feed.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub topics: Vec<String>,
 }
 
 impl FeedEntry {
     pub fn name(&self) -> String {
         format!("{}.{}", self.product, self.key)
+    }
+
+    pub fn log_address(&self) -> &str {
+        self.log_address.as_deref().unwrap_or(&self.address)
     }
 }
 
@@ -187,6 +202,27 @@ pub struct SpacingSpec {
     pub seconds: u64,
 }
 
+/// How the round events of a family lay out their fields.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "snake_case")]
+pub enum RoundEventLayout {
+    /// `AnswerUpdated(int256 current, uint256 roundId, uint256 updatedAt)`
+    /// with the answer and the round id indexed; `updatedAt` indexed
+    /// (Midas) or in the data (the Chainlink shape).
+    #[default]
+    AnswerUpdated,
+    /// A hub event keyed by indexed identifiers (the feed's `topics`) with
+    /// the price in data word 0 and the timestamp in data word 1; round
+    /// ids are the position in log order, since the event carries none.
+    SharePrice,
+}
+
+impl RoundEventLayout {
+    fn is_default(&self) -> bool {
+        *self == RoundEventLayout::AnswerUpdated
+    }
+}
+
 /// Everything the replay needs to know about how a family posts.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Mechanism {
@@ -204,6 +240,9 @@ pub struct Mechanism {
     pub setters: Vec<SetterSpec>,
     #[serde(default)]
     pub relays: Vec<RelaySpec>,
+    /// How the round events lay out their fields; absent for AnswerUpdated.
+    #[serde(default, skip_serializing_if = "RoundEventLayout::is_default")]
+    pub round_event_layout: RoundEventLayout,
     #[serde(default)]
     pub other_calls: Vec<Value>,
     #[serde(default)]
@@ -518,6 +557,36 @@ pub fn decode_bytes_array(input: &str, word: usize) -> Option<Vec<String>> {
     Some(out)
 }
 
+/// Decodes one hub round event (`RoundEventLayout::SharePrice`): price in
+/// data word 0, timestamp in data word 1. The round id is assigned by the
+/// caller from the log order.
+pub fn decode_share_price(row: &Value) -> Option<RoundEvent> {
+    let data = row.get("data")?.as_str()?;
+    Some(RoundEvent {
+        round_id: 0,
+        answer: i128_word(data, 0)?,
+        timestamp: u64_word(data, 1)?,
+        block: dec_u64(row, "blockNumber")?,
+        log_index: dec_u64(row, "logIndex").unwrap_or(0),
+        transaction_hash: row.get("transactionHash")?.as_str()?.to_lowercase(),
+    })
+}
+
+/// The leading argument words of a call equal the feed's topics, so a
+/// batch that updates several feeds attributes each call to its own feed.
+fn call_is_keyed(data: &str, topics: &[String]) -> bool {
+    let body = data.strip_prefix("0x").unwrap_or(data);
+    let args = format!("0x{}", body.get(8..).unwrap_or(""));
+    topics.iter().enumerate().all(|(index, topic)| {
+        word_at(&args, index).is_some_and(|word| {
+            topic
+                .strip_prefix("0x")
+                .unwrap_or(topic)
+                .eq_ignore_ascii_case(&hex_encode(&word))
+        })
+    })
+}
+
 /// R6 steps (a) and (b): unwraps up to six nested Safe layers. Returns the
 /// final target, the inner selector, the inner calldata and the chain
 /// (executor, each Safe). None when the outer selector is not a Safe call.
@@ -562,6 +631,64 @@ fn unwrap_inner_calldata(input: &str) -> String {
 
 /// A resolved posting call: selector, calldata, and the callers seen.
 pub type ResolvedCall = (String, String, Vec<String>);
+
+/// Receives (to, input, from) of one traced call.
+trait CallSink: FnMut(Option<&str>, Option<&str>, Option<&str>) {}
+impl<T: FnMut(Option<&str>, Option<&str>, Option<&str>)> CallSink for T {}
+
+/// Every call to `target` in a trace whose selector is one of the family's
+/// setters and whose leading argument words equal `topics`, in trace
+/// order, from either the Parity flat list or the Geth callTracer tree.
+pub fn setter_calls_to(
+    trace: &Value,
+    target: &str,
+    mechanism: &Mechanism,
+    topics: &[String],
+) -> Vec<ResolvedCall> {
+    let target = target.to_lowercase();
+    let mut out = Vec::new();
+    let mut consider = |to: Option<&str>, input: Option<&str>, from: Option<&str>| {
+        let (Some(to), Some(input)) = (to, input) else {
+            return;
+        };
+        if to.to_lowercase() != target
+            || mechanism.setter(&selector_of(input)).is_none()
+            || !call_is_keyed(input, topics)
+        {
+            return;
+        }
+        out.push((
+            selector_of(input),
+            input.to_string(),
+            vec![from.unwrap_or("").to_lowercase()],
+        ));
+    };
+    if let Some(list) = trace.as_array() {
+        for item in list {
+            let action = &item["action"];
+            consider(
+                action.get("to").and_then(Value::as_str),
+                action.get("input").and_then(Value::as_str),
+                action.get("from").and_then(Value::as_str),
+            );
+        }
+        return out;
+    }
+    fn walk(node: &Value, consider: &mut dyn CallSink) {
+        consider(
+            node.get("to").and_then(Value::as_str),
+            node.get("input").and_then(Value::as_str),
+            node.get("from").and_then(Value::as_str),
+        );
+        if let Some(calls) = node.get("calls").and_then(Value::as_array) {
+            for call in calls {
+                walk(call, consider);
+            }
+        }
+    }
+    walk(trace, &mut consider);
+    out
+}
 
 /// R6 step (c): the deepest call to the feed in a trace result, from either
 /// the Parity flat trace list or the Geth callTracer tree.
@@ -743,6 +870,7 @@ pub fn sweep_logs(
     label: &str,
     address: &str,
     topic0: &str,
+    topics: &[String],
     to_block: u64,
 ) -> Result<Vec<Value>, String> {
     let address = address.to_string();
@@ -752,10 +880,41 @@ pub fn sweep_logs(
         bundle,
         label,
         &|label, from, to| {
-            blockscout_logs_descriptor(label, &address, Some(&topic0), None, from, to)
+            blockscout_logs_descriptor_full(
+                label,
+                &address,
+                Some(&topic0),
+                topics.first().map(String::as_str),
+                topics.get(1).map(String::as_str),
+                from,
+                to,
+            )
         },
         0,
         to_block,
+    )
+}
+
+/// A configured getter at the pinned block; an empty signature means the
+/// family has no such getter and the read is skipped.
+fn read_getter(
+    source: &mut dyn ReadSource,
+    bundle: &mut BundleWriter,
+    name: &str,
+    address: &str,
+    signature: &str,
+    block: u64,
+) -> Result<Option<String>, String> {
+    if signature.is_empty() {
+        return Ok(None);
+    }
+    call(
+        source,
+        bundle,
+        &format!("{name} {signature} @ {block}"),
+        address,
+        &encode_no_args(signature),
+        block,
     )
 }
 
@@ -923,26 +1082,12 @@ pub fn fetch(
         let address = entry.address.as_str();
 
         // R2: the eight getters at B1.
-        let description = call(
-            source,
-            bundle,
-            &format!("{name} {} @ {block}", reads.description),
-            address,
-            &encode_no_args(&reads.description),
-            block,
-        )?
-        .as_deref()
-        .and_then(decode_string);
-        let decimals = call(
-            source,
-            bundle,
-            &format!("{name} {} @ {block}", reads.decimals),
-            address,
-            &encode_no_args(&reads.decimals),
-            block,
-        )?
-        .and_then(|data| u64_word(&data, 0))
-        .map(|d| d as u32);
+        let description = read_getter(source, bundle, &name, address, &reads.description, block)?
+            .as_deref()
+            .and_then(decode_string);
+        let decimals = read_getter(source, bundle, &name, address, &reads.decimals, block)?
+            .and_then(|data| u64_word(&data, 0))
+            .map(|d| d as u32);
         let bounds = read_bounds(
             source,
             bundle,
@@ -951,34 +1096,21 @@ pub fn fetch(
             address,
             block,
         )?;
-        let latest_round = call(
+        let latest_round = read_getter(source, bundle, &name, address, &reads.latest_round, block)?
+            .and_then(|data| u64_word(&data, 0));
+        let latest = read_getter(
             source,
             bundle,
-            &format!("{name} {} @ {block}", reads.latest_round),
+            &name,
             address,
-            &encode_no_args(&reads.latest_round),
-            block,
-        )?
-        .and_then(|data| u64_word(&data, 0));
-        let latest = call(
-            source,
-            bundle,
-            &format!("{name} {} @ {block}", reads.latest_round_data),
-            address,
-            &encode_no_args(&reads.latest_round_data),
+            &reads.latest_round_data,
             block,
         )?
         .as_deref()
         .and_then(latest_round_data);
-        let last_timestamp = call(
-            source,
-            bundle,
-            &format!("{name} {} @ {block}", reads.last_timestamp),
-            address,
-            &encode_no_args(&reads.last_timestamp),
-            block,
-        )?
-        .and_then(|data| u64_word(&data, 0));
+        let last_timestamp =
+            read_getter(source, bundle, &name, address, &reads.last_timestamp, block)?
+                .and_then(|data| u64_word(&data, 0));
 
         // A feed without latestRound() still names its round in
         // latestRoundData.
@@ -1068,17 +1200,31 @@ pub fn fetch(
                 source,
                 bundle,
                 &format!("{name} {signature}"),
-                address,
+                entry.log_address(),
                 &topic0_of(signature),
+                &entry.topics,
                 block,
             )?;
-            let decoded: Vec<RoundEvent> = rows.iter().filter_map(decode_answer_updated).collect();
+            let decoded: Vec<RoundEvent> = match mechanism.round_event_layout {
+                RoundEventLayout::AnswerUpdated => {
+                    rows.iter().filter_map(decode_answer_updated).collect()
+                }
+                RoundEventLayout::SharePrice => {
+                    rows.iter().filter_map(decode_share_price).collect()
+                }
+            };
             if index == 0 || !decoded.is_empty() {
                 round_events.push(signature.clone());
             }
             events.extend(decoded);
         }
         inputs.round_events = round_events;
+        if mechanism.round_event_layout == RoundEventLayout::SharePrice {
+            events.sort_by_key(|e| (e.block, e.log_index));
+            for (index, event) in events.iter_mut().enumerate() {
+                event.round_id = index as u64 + 1;
+            }
+        }
         events.sort_by_key(|e| (e.round_id, e.block, e.log_index));
         inputs.round_id_gap = round_id_gap(&events);
         if let Some(latest_round) = latest_round {
@@ -1108,6 +1254,7 @@ pub fn fetch(
             &format!("{name} {}", mechanism.bound_events.upgraded),
             address,
             &topic0_of(&mechanism.bound_events.upgraded),
+            &[],
             block,
         )?;
         let init_rows = sweep_logs(
@@ -1116,6 +1263,7 @@ pub fn fetch(
             &format!("{name} {}", mechanism.bound_events.initialized),
             address,
             &topic0_of(&mechanism.bound_events.initialized),
+            &[],
             block,
         )?;
 
@@ -1185,6 +1333,21 @@ pub fn fetch(
                             chain.push(feed_lower.clone());
                             return Some((selector, mechanism.value_of(&inner), chain, None));
                         }
+                        // A relay reached through the Safe: a hub's batch
+                        // executed by a multisig, as at pool setup.
+                        let position = *seen_in_tx.get(&event.transaction_hash).unwrap_or(&0);
+                        if let Some((selector, calldata, batch_index, relay)) =
+                            relay_call(mechanism, &target, &inner, &entry.topics, &position)
+                        {
+                            chain.push(relay);
+                            chain.push(feed_lower.clone());
+                            return Some((
+                                selector,
+                                mechanism.value_of(&calldata),
+                                chain,
+                                Some(batch_index),
+                            ));
+                        }
                         // A multiSend batch executed by the Safe: the k-th
                         // call to the feed in the batch posted the k-th round
                         // of this transaction.
@@ -1220,7 +1383,7 @@ pub fn fetch(
                         mechanism,
                         &to,
                         &input,
-                        &feed_lower,
+                        &entry.topics,
                         &seen_in_tx_before(&seen_in_tx, &event.transaction_hash),
                     )
                     .is_some() =>
@@ -1229,7 +1392,7 @@ pub fn fetch(
                             mechanism,
                             &to,
                             &input,
-                            &feed_lower,
+                            &entry.topics,
                             &seen_in_tx_before(&seen_in_tx, &event.transaction_hash),
                         )
                         .expect("checked above");
@@ -1246,12 +1409,17 @@ pub fn fetch(
                     None => {
                         let mut resolved = None;
                         if let Some(tracer) = trace.as_deref_mut() {
+                            // The deepest call to the contract that emits the
+                            // rounds: the feed, or the hub it lives in.
                             resolved = trace_call(
                                 tracer,
                                 bundle,
                                 &format!("{name} trace for round {}", event.round_id),
                                 &event.transaction_hash,
-                                &feed_lower,
+                                &entry.log_address().to_lowercase(),
+                                mechanism,
+                                &entry.topics,
+                                seen_in_tx_before(&seen_in_tx, &event.transaction_hash),
                             )?;
                         }
                         match resolved {
@@ -1278,6 +1446,26 @@ pub fn fetch(
                 }
             };
             inputs.rounds.push(AttributedRound { event, attribution });
+        }
+
+        // A family without a round getter: the latest state is the last
+        // round event, so liveness reads the series instead of a getter.
+        if reads.latest_round_data.is_empty() {
+            if let Some(last) = inputs
+                .rounds
+                .iter()
+                .max_by_key(|r| (r.event.round_id, r.event.block, r.event.log_index))
+            {
+                inputs.latest = Some(LatestRound {
+                    round_id: last.event.round_id,
+                    answer: last.event.answer,
+                    started_at: last.event.timestamp,
+                    updated_at: last.event.timestamp,
+                });
+                inputs
+                    .latest_round
+                    .get_or_insert(inputs.rounds.len() as u64);
+            }
         }
 
         // R9: implementation eras with the bytecode scan.
@@ -1454,15 +1642,17 @@ fn seen_in_tx_before(seen: &BTreeMap<String, usize>, hash: &str) -> usize {
 
 /// A round posted through a configured relay: the k-th setter call in the
 /// relay's `bytes[]` argument posted the k-th round of the transaction.
-/// Returns (selector, calldata, position, relay address).
+/// When the feed has `topics`, only calls whose leading argument words
+/// equal them count, so a batch updating several feeds attributes each
+/// call to its own feed. Returns (selector, calldata, position, relay
+/// address).
 fn relay_call(
     mechanism: &Mechanism,
     to: &str,
     input: &str,
-    feed: &str,
+    topics: &[String],
     position: &usize,
 ) -> Option<(String, String, usize, String)> {
-    let _ = feed;
     let selector = selector_of(input);
     let relay = mechanism.relays.iter().find(|r| {
         r.address.eq_ignore_ascii_case(to) && r.selector.eq_ignore_ascii_case(&selector)
@@ -1470,7 +1660,7 @@ fn relay_call(
     let calls = decode_bytes_array(input, relay.calls_word)?;
     let setter_calls: Vec<&String> = calls
         .iter()
-        .filter(|c| mechanism.setter(&selector_of(c)).is_some())
+        .filter(|c| mechanism.setter(&selector_of(c)).is_some() && call_is_keyed(c, topics))
         .collect();
     let call = setter_calls.get(*position)?;
     Some((
@@ -1482,12 +1672,16 @@ fn relay_call(
 }
 
 /// R6 step (c): trace_transaction first, then debug_traceTransaction.
+#[allow(clippy::too_many_arguments)]
 fn trace_call(
     tracer: &mut dyn ReadSource,
     bundle: &mut BundleWriter,
     label: &str,
     hash: &str,
     feed: &str,
+    mechanism: &Mechanism,
+    topics: &[String],
+    position: usize,
 ) -> Result<Option<ResolvedCall>, String> {
     for descriptor in [
         trace_transaction_descriptor(label, hash),
@@ -1509,8 +1703,18 @@ fn trace_call(
             )
             .map_err(|e| e.to_string())?;
         if let Ok(result) = result {
-            if let Some(found) = deepest_call_to(&result, feed) {
-                return Ok(Some(found));
+            // The k-th setter call to the target keyed to this feed posted
+            // the k-th round of the transaction; a contract that receives
+            // other calls in the same transaction (a hub) needs the
+            // selector filter, a feed alone is served by the deepest call.
+            let setter_calls = setter_calls_to(&result, feed, mechanism, topics);
+            if let Some(found) = setter_calls.get(position) {
+                return Ok(Some(found.clone()));
+            }
+            if setter_calls.is_empty() {
+                if let Some(found) = deepest_call_to(&result, feed) {
+                    return Ok(Some(found));
+                }
             }
         }
     }

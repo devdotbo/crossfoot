@@ -23,8 +23,16 @@ struct Replayed {
 /// Replays a family archive through the bundle source and checks that the
 /// result is byte identical to the one the live run wrote.
 fn replay(name: &str) -> Replayed {
+    replay_with(name, false)
+}
+
+/// As `replay`, with the archive also serving the trace responses the live
+/// run recorded (R6 step c), for a family whose rounds needed one.
+fn replay_with(name: &str, traced: bool) -> Replayed {
     let fixture = bundle(name);
     let mut source = BundleSource::open(&fixture).expect("the fixture manifest parses");
+    let mut tracer =
+        traced.then(|| BundleSource::open(&fixture).expect("the fixture manifest parses"));
     let manifest: Value =
         serde_json::from_str(&std::fs::read_to_string(fixture.join("manifest.json")).unwrap())
             .unwrap();
@@ -46,7 +54,9 @@ fn replay(name: &str) -> Replayed {
             feed_list_source: summary["feed_list_source"].as_str().unwrap().to_string(),
             stale_after_days: summary["stale_after_days"].as_u64().unwrap(),
             recent_days: summary["recent_days"].as_u64().unwrap(),
-            trace: None,
+            trace: tracer
+                .as_mut()
+                .map(|t| t as &mut dyn crate::rpc::ReadSource),
         },
         &out,
     )
@@ -72,6 +82,11 @@ fn feed<'a>(result: &'a Value, product: &str) -> &'a Value {
         .iter()
         .find(|f| f["product"] == product)
         .unwrap_or_else(|| panic!("{product} is in the result"))
+}
+
+fn timeline(replay: &Replayed, feed: &Value) -> Value {
+    let file = feed["timeline_file"].as_str().unwrap();
+    serde_json::from_str(&std::fs::read_to_string(replay.out_bundle.join(file)).unwrap()).unwrap()
 }
 
 fn kinds(feed: &Value) -> BTreeMap<String, usize> {
@@ -256,4 +271,121 @@ fn backed_v2_reports_the_at_bound_rounds() {
     assert_eq!(rounds[0]["answer"], "0");
     assert!(rounds[2]["finding"].is_null());
     assert_eq!(rounds[36]["finding"], "GUARD_AT_BOUND");
+}
+
+/// Centrifuge V3 JTRSY and JAAA, class B: two share prices on the Spoke,
+/// 146 rounds each since 2026-01, 145 posted by the hub manager EOA through
+/// Hub.multicall and one at pool setup through a Safe and a setup helper,
+/// resolved from the trace; no guard, no max age, live. The expected
+/// numbers are the research page's (`wiki/asset-feed-candidates.md`,
+/// 2026-09-02).
+#[test]
+fn centrifuge_share_prices_replay_through_the_hub_multicall_and_the_setup_trace() {
+    let replay = replay_with("centrifuge-25885541", true);
+    let result = &replay.result;
+    assert_eq!(result["target"], "centrifuge");
+    assert_eq!(result["summary"]["family"], "posted-setter");
+    assert_eq!(result["summary"]["verdict"], "CONSISTENT");
+    assert_eq!(result["summary"]["consumer_action"], "ALLOW");
+    assert_eq!(result["family"]["mechanism"]["guard"], Value::Null);
+    assert_eq!(
+        result["family"]["mechanism"]["round_event_layout"],
+        "share_price"
+    );
+    let s = &result["family_summary"];
+    assert_eq!(s["feeds_replayed"], 2);
+    assert_eq!(s["rounds_total"], 292);
+    assert_eq!(s["posts_internal"]["raw"], 292);
+    assert_eq!(s["posts_external"]["raw"], 0);
+    assert_eq!(s["posts_total"]["unattributed"], 0);
+    assert_eq!(s["failed_setters"], 0);
+    assert_eq!(s["bypass_posts_total"], 0);
+    assert_eq!(s["attribution_gaps"], 0);
+    assert_eq!(s["liveness"]["LIVE"], 2);
+    assert_eq!(
+        s["survey_line"],
+        "2 feeds replayed, 292 rounds posted without an on-chain check, 0 failed posts, 2 live"
+    );
+
+    let manager = "0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec";
+    let setup_safe_signer = "0x8d566adace57ee5dd2bf98953b804991d634211a";
+    let hub = "0xa4a7bb3831958463b3fe3e27a6a160f764341953";
+    for (product, address, last_price, first_price, last_block) in [
+        (
+            "JTRSY",
+            "0x8c213ee79581ff4984583c6a801e5263418c4b86",
+            "1114706862997801246",
+            "1092899029530675814",
+            25_882_274,
+        ),
+        (
+            "JAAA",
+            "0x5a0f93d040de44e78f251b03c43be9cf317dcf64",
+            "1047512653622313284",
+            "1024439785604022111",
+            25_882_275,
+        ),
+    ] {
+        let f = feed(result, product);
+        assert_eq!(f["kind"], "unguarded", "{product}");
+        assert_eq!(f["decimals"], 18, "{product}: prices are D18");
+        assert_eq!(f["latest_round"], 146, "{product}");
+        assert_eq!(f["latest_answer"], last_price, "{product}");
+        assert_eq!(f["last_post_utc"], "2026-08-31T12:00:00Z", "{product}");
+        assert_eq!(f["verdict"], "CONSISTENT", "{product}");
+        assert_eq!(f["posting_path"], "GUARDED", "{product}");
+        assert_eq!(f["liveness"], "LIVE", "{product}");
+        assert_eq!(f["consumer_action"], "ALLOW", "{product}");
+        assert_eq!(f["rounds_total"], 146, "{product}");
+        assert_eq!(
+            f["poster_addresses"],
+            serde_json::json!([manager, setup_safe_signer]),
+            "{product}: one manager key plus the setup signer"
+        );
+        let kinds = kinds(f);
+        assert_eq!(kinds["UNGUARDED_POST"], 146, "{product}");
+        assert_eq!(kinds.len(), 1, "{product}: no other finding kind");
+
+        let posts: Vec<&Value> = f["findings"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|x| x["kind"] == "UNGUARDED_POST")
+            .collect();
+        let first = posts[0];
+        assert_eq!(first["round_id"], 1);
+        assert_eq!(first["initialization"], true);
+        assert_eq!(first["value"], first_price);
+        assert_eq!(first["sender"], setup_safe_signer);
+        // The setup round came through a Safe and a helper contract; the
+        // trace resolved the Spoke write updatePricePoolPerShare.
+        assert_eq!(first["selector"], "0x4869ac69");
+        let last = posts[145];
+        assert_eq!(last["round_id"], 146);
+        assert_eq!(last["classification"], "no_guard");
+        assert_eq!(last["selector"], "0xa50aafd5", "Hub.updateSharePrice");
+        assert_eq!(last["value"], last_price);
+        assert_eq!(last["sender"], manager);
+        assert_eq!(last["batch_index"], 0);
+        assert_eq!(last["block"], last_block);
+        assert_eq!(
+            last["safe_chain"],
+            serde_json::json!([hub, hub, address]),
+            "{product}: sender's transaction to the Hub, the Hub as relay, the feed"
+        );
+        // 145 of 146 rounds through the Hub multicall by the manager key.
+        assert_eq!(
+            posts.iter().filter(|x| x["sender"] == manager).count(),
+            145,
+            "{product}"
+        );
+
+        let timeline = timeline(&replay, f);
+        let rounds = timeline["rounds"].as_array().unwrap();
+        assert_eq!(rounds.len(), 146);
+        assert_eq!(rounds[145]["answer"], last_price);
+        assert_eq!(rounds[145]["block"], last_block);
+        assert!(rounds.iter().all(|r| r["path"] == "raw"));
+    }
+    assert!(replay.fixture.join("bundle.sha256").is_file());
 }

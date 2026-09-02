@@ -304,6 +304,29 @@ Further config fields, added for the families beyond Midas
   array posted the k-th round of the transaction (`batch_index`), the
   `safe_chain` is sender, relay, feed. Hashnote's PriceReporterProxy uses
   two selectors with the array at words 5 and 6.
+- Feeds on a shared event stream (`config/centrifuge-mainnet.json`): a
+  feed entry may carry `log_address` (the contract that emits its rounds,
+  the Centrifuge Spoke) and `topics` (topic1 and topic2 selecting its
+  rounds, the pool id and the share class id); the round sweep filters on
+  them. `mechanism.round_event_layout: "share_price"` decodes
+  `UpdateSharePrice(uint64,bytes16,uint128,uint64)`: price from data
+  word 0, timestamp from data word 1, round ids assigned in log order
+  because the event carries none. A read signature left empty (`""`) is
+  skipped; with `latest_round_data` empty the latest state is the last
+  round event, so liveness reads the series. The feed list's `decimals`
+  is the price scale (D18) whatever `decimals()` of the token says, and
+  the result row carries the decimals the replay used.
+- Relay calls keyed to a feed: when a feed has `topics`, `relay_call` only
+  counts setter calls in the relay's `bytes[]` whose leading argument
+  words equal them, so one `Hub.multicall` updating several pools
+  attributes each call to its own feed. A relay reached through a Safe is
+  unwrapped first (the pool setup transactions). The trace fallback (R6
+  step c) looks for the k-th setter call to `log_address` keyed the same
+  way, and falls back to the deepest call to the feed when the family
+  has no setter match; Centrifuge's setup round (a Safe calling a setup
+  helper that writes `updatePricePoolPerShare` on the Spoke) resolves
+  only through a trace, so the live run and the fixture carry one
+  `trace_transaction` response per feed.
 - The Chainlink shape of `AnswerUpdated` leaves `updatedAt` non-indexed;
   the decoder takes the timestamp from the data word when the fourth topic
   is absent. `latestRound()` falls back to the round id of
@@ -394,7 +417,7 @@ the family; `--rpc-delay-ms` applies.
 | R15 | `bypass_classification` (offline, fixture: mWIN, mTBILL round 3, mBASIS round 4 as scale resets; mROX, qHVNUSD from placeholder) |
 | R16 | `feed_verdict_precedence` (offline, synthetic, every branch) |
 | R17, R19 | `family_replay_reproduces_the_survey_counts_offline` (offline, checked-in bundle under `cli/tests/fixtures/midas-25884405/`, replayed through the bundle-backed source of `03-bundle-verify.md` R6) |
-| families | `hashnote_usyc_replays_through_the_reporter_relay`, `backed_v2_reports_the_at_bound_rounds` (offline, `cli/tests/fixtures/hashnote-25885541.tar.gz` and `backed-25885541.tar.gz` at block 25,885,541; the research page's facts: 503 USYC rounds by one key through the reporter, no guard, live; bNVDA rounds 37, 213 and 282 exactly on the 10 percent band, 0 truncated, ERNA, ERNX and bC3M stale since 2026-04-23) |
+| families | `hashnote_usyc_replays_through_the_reporter_relay`, `backed_v2_reports_the_at_bound_rounds`, `centrifuge_share_prices_replay_through_the_hub_multicall_and_the_setup_trace` (`cli/tests/fixtures/centrifuge-25885541.tar.gz`: JTRSY and JAAA 146 rounds each, 145 by the manager key through Hub.multicall, one at pool setup resolved from the trace, last prices 1.114706862997801246 and 1.047512653622313284, both live, CONSISTENT, ALLOW) (offline, `cli/tests/fixtures/hashnote-25885541.tar.gz` and `backed-25885541.tar.gz` at block 25,885,541; the research page's facts: 503 USYC rounds by one key through the reporter, no guard, live; bNVDA rounds 37, 213 and 282 exactly on the 10 percent band, 0 truncated, ERNA, ERNX and bC3M stale since 2026-04-23) |
 | R18 | `timeline_rows_are_in_round_order_and_carry_findings` (offline, fixture) |
 
 The fixture bundle is produced once during the event by
