@@ -9,7 +9,7 @@ Target: Subgraph Studio (04-subgraph.md D4, R14). Publishing to the network
 |---|---|
 | `bun install`, `bun run gen`, `graph codegen`, `graph build` | pass (2026-09-02, graph-cli 0.97.1, darwin-arm64) |
 | `graph test` (matchstick 0.6.0, `binary-macos-12-m1`) | 41 tests pass (one file per family) |
-| Studio deploy | v0.0.1 deployed 2026-09-02 (deployment ID Qmdzkdfsezd9m11omAppiDikkLgCJX2wX2dWpELf4ejDbJ, see the versions table); the first key supplied was rejected with "Deploy key not found" and turned out to be an API key |
+| Studio deploy | v0.0.1 deployed 2026-09-01 22:57 UTC (deployment ID Qmdzkdfsezd9m11omAppiDikkLgCJX2wX2dWpELf4ejDbJ, see the versions table); the first key supplied was rejected with "Deploy key not found" and turned out to be an API key |
 | Local graph-node (docker, dRPC with traces) | bounded manifest deployed; graph-node accepts the call handlers and finds one event plus one call trigger per Safe-routed round; entity checks below |
 | Network publish | not done |
 
@@ -49,10 +49,10 @@ query and record the first head at which `_meta.block.number` reached it.
 
 | Version | Deployment ID | Query URL | Date | First head >= 25,884,405 |
 |---|---|---|---|---|
-| v0.0.1 (`subgraph.yaml`, call handlers, 64 sources) | Qmdzkdfsezd9m11omAppiDikkLgCJX2wX2dWpELf4ejDbJ | archived by Studio on 2026-09-03 00:26 UTC when v0.0.3 and v0.0.4 were deployed (Studio keeps the two newest unpublished versions) | 2026-09-02 22:57 UTC | reached 17,280,865 at 6,900 blocks per minute before archiving |
-| v0.0.2 (`subgraph.events.yaml`, event-only, 64 sources) | QmPKyGq6snsNhQga5UsJzHvykRUx5QNhuXCm1LsQGt4hux | archived, same moment | 2026-09-03 00:12 UTC | reached 20,129,225 at about 230,000 blocks per minute before archiving |
-| v0.0.3 (`subgraph.events.yaml`, event-only, 73 sources: extension E2 included) | QmTb4Q48XqUeCSoWfkpMrDaCrZovHceN3HT5sHWBLaiGPd | https://api.studio.thegraph.com/query/115545/crossfoot/v0.0.3 | 2026-09-03 00:26 UTC | pending; started at 17,676,541 (Backed bC3M), no indexing errors, about 370,000 blocks in the first minute |
-| v0.0.4 (`subgraph.yaml`, call handlers, 73 sources) | QmY2FcaT6THZn7iN5Wn8Hq54X9GwqewMYKYkBqHVEoUrVa | https://api.studio.thegraph.com/query/115545/crossfoot/v0.0.4 (`.../version/latest`) | 2026-09-03 00:26 UTC | pending; the trace scan makes this the slow one (about a day) |
+| v0.0.1 (`subgraph.yaml`, call handlers, 64 sources) | Qmdzkdfsezd9m11omAppiDikkLgCJX2wX2dWpELf4ejDbJ | archived by Studio on 2026-09-02 00:26 UTC when v0.0.3 and v0.0.4 were deployed (Studio keeps the two newest unpublished versions) | 2026-09-01 22:57 UTC | reached 17,280,865 at 6,900 blocks per minute before archiving |
+| v0.0.2 (`subgraph.events.yaml`, event-only, 64 sources) | QmPKyGq6snsNhQga5UsJzHvykRUx5QNhuXCm1LsQGt4hux | archived, same moment | 2026-09-02 00:12 UTC | reached 20,129,225 at about 230,000 blocks per minute before archiving |
+| v0.0.3 (`subgraph.events.yaml`, event-only, 73 sources: extension E2 included) | QmTb4Q48XqUeCSoWfkpMrDaCrZovHceN3HT5sHWBLaiGPd | https://api.studio.thegraph.com/query/115545/crossfoot/v0.0.3 | 2026-09-02 00:26 UTC | pending; started at 17,676,541 (Backed bC3M), no indexing errors, about 370,000 blocks in the first minute |
+| v0.0.4 (`subgraph.yaml`, call handlers, 73 sources) | QmY2FcaT6THZn7iN5Wn8Hq54X9GwqewMYKYkBqHVEoUrVa | https://api.studio.thegraph.com/query/115545/crossfoot/v0.0.4 (`.../version/latest`) | 2026-09-02 00:26 UTC | pending; the trace scan makes this the slow one (about a day) |
 
 Lesson recorded: deploying a new version archives every version but the
 newest two, so deploy the event-only and the call-handler manifests as a

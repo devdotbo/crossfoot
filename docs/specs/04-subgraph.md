@@ -541,7 +541,7 @@ unchanged; the three sources are appended to the generated manifest.
   `rounds_openeden` 1158, `rounds_ondo` 757, `rounds_superstate` 433 at
   block 25,884,405, `bound_changes` 66, `reference_updates` 1056, feeds 64.
 
-## Extension E2 (2026-09-03): the production feeds
+## Extension E2 (2026-09-02): the production feeds
 
 Every feed the engine runs in production gets a data source so the
 consumer decides it from live Graph data (`config/hashnote-mainnet.json`,

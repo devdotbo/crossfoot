@@ -3,7 +3,7 @@
   "chain_id": 1,
   "network": "mainnet",
   "callHandlers": true,
-  "source": "raw/midas-customfeed-creators-2026-09-01.md (creation blocks) and raw/midas-customfeed-survey-2026-09-01.md (the 66 addresses minus the six customFeedDv/customFeedRv wrappers, which emit no events); OpenEden, Ondo and Superstate rows from wiki/asset-feed-candidates.md (raw/openeden-tbill-oracle-usdo-rpc-2026-09-02.md, raw/ondo-ousg-oracle-rpc-2026-09-02.md, raw/superstate-ustb-uscc-oracle-rpc-2026-09-02.md); Hashnote, Backed, Centrifuge rows from config/*.json on origin/main with creation blocks from Etherscan getcontractcreation (2026-09-03); Ethena from raw/ethena-susde-feeds-rpc-2026-09-02.md (first RewardsReceived block); Sky from raw/sky-susds-sdai-stusds-spbeam-rpc-2026-09-02.md",
+  "source": "raw/midas-customfeed-creators-2026-09-01.md (creation blocks) and raw/midas-customfeed-survey-2026-09-01.md (the 66 addresses minus the six customFeedDv/customFeedRv wrappers, which emit no events); OpenEden, Ondo and Superstate rows from wiki/asset-feed-candidates.md (raw/openeden-tbill-oracle-usdo-rpc-2026-09-02.md, raw/ondo-ousg-oracle-rpc-2026-09-02.md, raw/superstate-ustb-uscc-oracle-rpc-2026-09-02.md); Hashnote, Backed, Centrifuge rows from config/*.json on origin/main with creation blocks from Etherscan getcontractcreation (2026-09-02); Ethena from raw/ethena-susde-feeds-rpc-2026-09-02.md (first RewardsReceived block); Sky from raw/sky-susds-sdai-stusds-spbeam-rpc-2026-09-02.md",
   "feeds": [
     {
       "product": "mTBILL",
