@@ -80,6 +80,47 @@ pub fn svzchf(
     window: Window,
     findings_count: usize,
 ) -> Summary {
+    exact(
+        "svzchf",
+        "vault.price()",
+        "recognised interest series deviates",
+        verdict,
+        comparison,
+        window,
+        findings_count,
+    )
+}
+
+/// The sUSDe summary: the same shape, posted and recomputed being the
+/// vault's convertToAssets(1e18).
+pub fn susde(
+    verdict: Verdict,
+    comparison: &ComparisonSet,
+    window: Window,
+    findings_count: usize,
+) -> Summary {
+    exact(
+        "susde",
+        "vault.convertToAssets(1e18)",
+        "reward series deviates",
+        verdict,
+        comparison,
+        window,
+        findings_count,
+    )
+}
+
+/// A full recomputation compared field by field: the shared shape of the
+/// recomputable-accrual targets.
+fn exact(
+    target: &str,
+    posted_field: &str,
+    series_note: &str,
+    verdict: Verdict,
+    comparison: &ComparisonSet,
+    window: Window,
+    findings_count: usize,
+) -> Summary {
     let total = comparison.fields.len();
     let deviating = comparison.deviations();
     let exact = total - deviating.len();
@@ -93,7 +134,7 @@ pub fn svzchf(
     let headline = match verdict {
         Verdict::ModelMatch => format!("{exact} of {total} fields exact, residual 0"),
         Verdict::ObservedDeviation if deviating.is_empty() => {
-            format!("0 of {total} fields deviate, recognised interest series deviates")
+            format!("0 of {total} fields deviate, {series_note}")
         }
         Verdict::ObservedDeviation => format!("{} of {total} fields deviate", deviating.len()),
         other => format!("{}, {exact} of {total} fields exact", other.as_str()),
@@ -101,9 +142,9 @@ pub fn svzchf(
     let price = comparison
         .fields
         .iter()
-        .find(|field| field.field == "vault.price()");
+        .find(|field| field.field == posted_field);
     Summary {
-        target: "svzchf".to_string(),
+        target: target.to_string(),
         family: "recomputable-accrual",
         check_class: "full recomputation",
         nav_recomputation: "FULL",

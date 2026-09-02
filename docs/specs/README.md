@@ -20,6 +20,7 @@ corrections section at the end of this file.
 | `05-consumer-agent.md` | `crossfoot consume`: provenance-gated ALLOW or REVIEW per feed from live subgraph data joined with Crossfoot results | outcome 4 |
 | `06-arc-hook.md` | Deferred 2026-09-02: `CrossfootAttestations` on Arc testnet, mainnet-ready config, Chainlink stretch | deferred (Arc and Chainlink out of the plan) |
 | `07-app-explorer.md` | The app (separate repository `crossfoot-app`): explorer routes, chunked Convex ingestion for `site/data` and `decisions.json`, the 66-square field, the timeline chart, public read path | outcome 5 |
+| `09-derived-targets.md` | Exact recomputation beyond svZCHF: Ethena sUSDe (five state reads, reward posts attributed) and the Sky family (rpow, SPBEAM versus spell path) | outcome 1, added 2026-09-02 |
 | `08-saas-billing-and-x402.md` | The app's SaaS layer: accounts and workspaces, watchlists and alerts, Polar Monitoring subscription, risk-feed API with keys, x402 pay-per-query | x402 first optional feature after the five; the rest deferred |
 
 ## Spec format

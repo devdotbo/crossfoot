@@ -25,9 +25,11 @@ mod render;
 mod rpc;
 mod run_midas;
 mod run_mtbill;
+mod run_susde;
 mod run_svzchf;
 mod source;
 mod summary;
+mod susde;
 mod svzchf;
 mod util;
 mod verify;
@@ -140,6 +142,9 @@ enum RunTarget {
     Svzchf(RunOpts),
     /// Midas mTBILL consistency bundle.
     Mtbill(RunOpts),
+    /// Ethena sUSDe: exact recomputation from five state reads, reward
+    /// posts attributed to their path.
+    Susde(RunOpts),
     /// Midas customFeed family: posting-path replay of every feed in the list.
     Midas(MidasOpts),
     /// Any posted-feed family from its config file: `--config
@@ -373,6 +378,7 @@ struct Window {
 fn window_preset(target: &str, name: &str) -> Option<(u64, u64)> {
     match (target, name) {
         ("svzchf", "demo") => Some(run_svzchf::DEMO_WINDOW),
+        ("susde", "demo") => Some(run_susde::DEMO_WINDOW),
         _ => None,
     }
 }
@@ -508,6 +514,15 @@ fn main() -> ExitCode {
             }
         },
         Command::Run {
+            target: RunTarget::Susde(opts),
+        } => match recompute_susde(opts) {
+            Ok(()) => ExitCode::SUCCESS,
+            Err(message) => {
+                eprintln!("crossfoot: {message}");
+                ExitCode::FAILURE
+            }
+        },
+        Command::Run {
             target: RunTarget::Svzchf(opts),
         } => match recompute_svzchf(opts) {
             Ok(()) => ExitCode::SUCCESS,
@@ -632,6 +647,35 @@ fn recompute_svzchf(opts: RunOpts) -> Result<(), String> {
 
     println!("verdict         {}", outcome.verdict.as_str());
     println!("summary         {}", outcome.summary.headline);
+    println!("result          {}", outcome.result_path.display());
+    println!("bundle          {}", outcome.bundle_dir.display());
+    println!("root hash       {}", outcome.root_hash);
+    println!("cache hits      {}", outcome.cache_hits);
+    println!("network calls   {}", outcome.network_calls);
+    Ok(())
+}
+
+fn recompute_susde(opts: RunOpts) -> Result<(), String> {
+    let verify_root = opts.verify_root.canonicalize().map_err(|err| {
+        format!(
+            "--verify-root {} is not readable: {err}",
+            opts.verify_root.display()
+        )
+    })?;
+    let window = resolve_window("susde", &opts)?;
+    let mut client = read_source(&opts, &verify_root)?;
+    let outcome = run_susde::run(
+        client.as_mut(),
+        &run_susde::RunArgs {
+            baseline_block: window.baseline_block,
+            block: window.block,
+            window_name: window.name.clone(),
+        },
+        &verify_root,
+    )?;
+    println!("verdict         {}", outcome.verdict.as_str());
+    println!("summary         {}", outcome.summary.headline);
+    println!("reward posts    {} in the window", outcome.posts_in_window);
     println!("result          {}", outcome.result_path.display());
     println!("bundle          {}", outcome.bundle_dir.display());
     println!("root hash       {}", outcome.root_hash);
@@ -798,6 +842,11 @@ mod tests {
         assert_eq!(window.block, 25_853_000);
         assert_eq!(window.name, None);
 
+        let susde = resolve_window("susde", &opts).unwrap();
+        assert_eq!(
+            (susde.baseline_block, susde.block),
+            (25_800_000, 25_885_407)
+        );
         // No preset of that name for the other target.
         let err = resolve_window("mtbill", &opts).unwrap_err();
         assert!(

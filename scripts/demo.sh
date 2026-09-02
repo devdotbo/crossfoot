@@ -13,6 +13,7 @@
 #      into a fresh bundle: verdict, summary, root hash.
 #   2. Midas customFeed family, replayed from its fixture archive the same
 #      way: survey line, verdict, root hash.
+#   2b. Ethena sUSDe, replayed from its fixture: verdict, summary, root hash.
 #   3. render: static pages over the bundles just written.
 #   4. consume --replay: the consumer agent over the recorded subgraph
 #      responses, ALLOW or REVIEW per feed.
@@ -95,6 +96,22 @@ else
     echo "NO"
     exit 1
   fi
+fi
+
+say "2b. Ethena sUSDe: exact from five state reads, every reward post attributed, replayed from the fixture"
+susde_fixture="cli/tests/fixtures/susde-demo-25800000-25885407"
+"$crossfoot" run susde --window demo --from-bundle "$susde_fixture" --verify-root "$work" \
+  | tee "$work/susde.out"
+susde_bundle="$(sed -n 's/^bundle  *//p' "$work/susde.out")"
+bundles+=("$susde_bundle")
+printf 'summary block:  headline %s, consumer_action %s\n' \
+  "$(headline "$susde_bundle/result.json")" "$(consumer_action "$susde_bundle/result.json")"
+printf 'fixture result.json equals the replay:  '
+if cmp -s "$susde_fixture/result.json" "$susde_bundle/result.json"; then
+  echo "yes"
+else
+  echo "NO"
+  exit 1
 fi
 
 say "3. render: static pages over the bundles, no script, no fetch at view time"

@@ -289,6 +289,16 @@ fn replay(
             replay_root,
         )
         .map(|outcome| outcome.result_path),
+        "susde" => crate::run_susde::run(
+            &mut source,
+            &crate::run_susde::RunArgs {
+                baseline_block,
+                block,
+                window_name,
+            },
+            replay_root,
+        )
+        .map(|outcome| outcome.result_path),
         // A posted-feed family run (midas or any family config): the manifest
         // summary carries the mechanism. Spec 03 R7: the feed list comes from
         // the bundle's manifest, not from the working tree's config file.
@@ -1154,6 +1164,60 @@ mod tests {
             text.contains("entries         1812 checked, hashes ok"),
             "{text}"
         );
+    }
+
+    /// Spec 09 R2, R6: the sUSDe demo window fixture verifies and carries
+    /// the pinned observations.
+    #[test]
+    fn verify_passes_on_the_susde_fixture() {
+        let fixture = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests")
+            .join("fixtures")
+            .join("susde-demo-25800000-25885407");
+        let report = verify(&fixture, &Options::default());
+        let text = print(&report);
+        assert_eq!(report.exit_code, VERIFIED, "{text}");
+        assert!(
+            text.contains("target          susde, window 25800000 to 25885407"),
+            "{text}"
+        );
+        assert!(
+            text.contains("entries         58 checked, hashes ok"),
+            "{text}"
+        );
+        let result: Value = read_json(&fixture.join("result.json")).unwrap();
+        assert_eq!(result["verdict"], "MODEL_MATCH");
+        assert_eq!(
+            result["summary"]["headline"],
+            "3 of 3 fields exact, residual 0"
+        );
+        assert_eq!(result["summary"]["nav_recomputation"], "FULL");
+        let observed = |field: &str| -> String {
+            result["comparison"]["fields"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|f| f["field"] == field)
+                .unwrap()["observed"]
+                .as_str()
+                .unwrap()
+                .to_string()
+        };
+        assert_eq!(
+            observed("vault.getUnvestedAmount()"),
+            "28384861561507936507936"
+        );
+        assert_eq!(
+            observed("vault.totalAssets()"),
+            "1359753651665742891001164581"
+        );
+        assert_eq!(
+            observed("vault.convertToAssets(1e18)"),
+            "1246071134064908232"
+        );
+        assert_eq!(result["posting"]["posts_in_window"], 36);
+        assert_eq!(result["posting"]["by_path"]["operator_via_distributor"], 36);
+        assert_eq!(result["series_replay"]["consistent"], true);
     }
 
     /// The README claims exactly what the verifier proves, in the same

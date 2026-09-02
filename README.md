@@ -57,6 +57,16 @@ Crossfoot writes nothing to any chain.
   modeled `totalAssets()`, `price()` and account tuple are compared against
   the chain at the pinned block with zero tolerance. The demo window is
   `--window demo` (blocks 24570000 to 25853000).
+- `susde`, the Ethena sUSDe vault. Full recomputation from five state
+  reads with the contract's own formula: the unvested part of the last
+  reward, `totalAssets()` and `convertToAssets(1e18)` are compared against
+  the chain at the pinned block with zero tolerance. Every reward post in
+  the window is attributed to the transaction and path that made it (the
+  operator key through the distributor, a rewarder Safe directly, or
+  another route) and the reward series is replayed from the baseline state
+  onto the pinned state. The size of a reward is a role holder's choice and
+  is reported, not judged. Demo window `--window demo` (blocks 25800000 to
+  25885407). Specification: [`docs/specs/09-derived-targets.md`](docs/specs/09-derived-targets.md).
 - `mtbill`, Midas mTBILL. Consistency checks, no recomputation. The
   underlying portfolio is not observable, so the NAV is never recomputed
   and the result carries `nav_recomputation: INPUT_GAP` on every run. The
@@ -189,6 +199,8 @@ crossfoot run svzchf --window demo
 crossfoot run svzchf --baseline-block 24570000 --block 25853000
 crossfoot run svzchf --window demo --offline
 crossfoot run svzchf --window demo --from-bundle cli/tests/fixtures/svzchf-demo-24570000-25853000
+crossfoot run susde --window demo
+crossfoot run susde --window demo --from-bundle cli/tests/fixtures/susde-demo-25800000-25885407
 crossfoot run mtbill --baseline-block 25598000 --block 25850000
 crossfoot run midas --block 25884405 --config config/midas-mainnet.json
 crossfoot run midas --block 25884405 --feed mRE7 --offline

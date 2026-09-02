@@ -624,6 +624,7 @@ fn check_class_words(result: &Value) -> &'static str {
     }
     match result.get("target").and_then(Value::as_str) {
         Some("svzchf") => "Full recomputation, zero tolerance. Every compared value is recomputed from public inputs and must match the chain to the wei.",
+        Some("susde") => "Full recomputation, zero tolerance. The unvested reward, totalAssets and convertToAssets(1e18) are recomputed from five state reads at the pinned block and must match the chain to the wei. The reward posts of the window are attributed to the transaction and path that made them; their size is a role holder's choice and is reported, not judged.",
         Some("mtbill") => "Consistency bundle. The NAV itself is INPUT_GAP: the underlying portfolio is not observable, so it is not recomputed here. Everything below checks the issuer's own contractual and on-chain rules against itself.",
         _ => "Unknown target.",
     }
@@ -631,10 +632,11 @@ fn check_class_words(result: &Value) -> &'static str {
 
 /// The headline number for the index row.
 fn headline(result: &Value) -> String {
+    if let Some(headline) = str_at(result, &["summary", "headline"]) {
+        return headline.to_string();
+    }
     if is_family_run(result) {
-        return str_at(result, &["summary", "headline"])
-            .unwrap_or("")
-            .to_string();
+        return String::new();
     }
     match result.get("target").and_then(Value::as_str) {
         Some("svzchf") => {
@@ -838,12 +840,10 @@ fn window_block(result: &Value) -> String {
     )
 }
 
-fn svzchf_body(run: &Run) -> String {
-    let result = &run.result;
+/// The residual table of a full recomputation: field, modeled, observed,
+/// residual, equal, from `comparison.fields` only (spec 01 R9).
+fn comparison_table(result: &Value) -> String {
     let mut html = String::new();
-
-    html.push_str("<h2>Comparison</h2>\n");
-    html.push_str("<p class=\"note\">Modeled is recomputed from the log-derived rate path and the account's own flow history. Observed is read from the chain at the pinned block. Tolerance is zero.</p>\n");
     html.push_str(
         "<table>\n<tr><th>field</th><th>modeled</th><th>observed</th><th>residual</th><th>equal</th></tr>\n",
     );
@@ -884,6 +884,16 @@ fn svzchf_body(run: &Run) -> String {
         }
     }
     html.push_str("</table>\n");
+    html
+}
+
+fn svzchf_body(run: &Run) -> String {
+    let result = &run.result;
+    let mut html = String::new();
+
+    html.push_str("<h2>Comparison</h2>\n");
+    html.push_str("<p class=\"note\">Modeled is recomputed from the log-derived rate path and the account's own flow history. Observed is read from the chain at the pinned block. Tolerance is zero.</p>\n");
+    html.push_str(&comparison_table(result));
 
     if let Some(svg) = svg_svzchf(result) {
         let observed = result
@@ -923,6 +933,65 @@ fn svzchf_body(run: &Run) -> String {
         html.push_str("</div>\n");
     }
 
+    html
+}
+
+fn susde_body(run: &Run) -> String {
+    let result = &run.result;
+    let mut html = String::new();
+
+    html.push_str("<h2>Comparison</h2>\n");
+    html.push_str("<p class=\"note\">Modeled is recomputed from the vault's USDe balance, total supply, vestingAmount and lastDistributionTimestamp and the block timestamp, with the contract's own formula. Observed is read from the chain at the pinned block. Tolerance is zero.</p>\n");
+    html.push_str(&comparison_table(result));
+
+    html.push_str("<h2>Reward posts in the window</h2>\n");
+    let posting = result.get("posting");
+    let posts = posting
+        .and_then(|p| p.get("posts_in_window"))
+        .and_then(Value::as_u64)
+        .unwrap_or(0);
+    let by_path = posting
+        .and_then(|p| p.get("by_path"))
+        .and_then(Value::as_object)
+        .map(|m| {
+            m.iter()
+                .map(|(k, v)| format!("{} {}", v, k))
+                .collect::<Vec<String>>()
+                .join(", ")
+        })
+        .unwrap_or_default();
+    let series_ok = result
+        .get("series_replay")
+        .and_then(|s| s.get("consistent"))
+        .and_then(Value::as_bool)
+        .unwrap_or(false);
+    html.push_str(&format!(
+        "<p>{posts} reward post(s) between the two pinned blocks ({}). Replaying them from the state at the baseline block onto the state at the pinned block: <span class=\"mono\">{}</span>. The size of each reward is a role holder's choice; the vesting lock is the guard on timing, not on size.</p>\n",
+        escape(&by_path),
+        if series_ok { "consistent" } else { "INCONSISTENT" }
+    ));
+    if let Some(timeline) = read_json(&run.dir.join("timelines").join("susde.json")) {
+        html.push_str("<table>\n<tr><th>block</th><th>time (UTC)</th><th>amount (USDe)</th><th>path</th><th>gap</th><th>transaction</th></tr>\n");
+        for row in timeline
+            .get("rows")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+        {
+            let s = |k: &str| row.get(k).and_then(Value::as_str).unwrap_or("").to_string();
+            let n = |k: &str| row.get(k).and_then(Value::as_u64).unwrap_or(0);
+            html.push_str(&format!(
+                "<tr><td class=\"mono\">{}</td><td class=\"mono\">{}</td><td class=\"num\">{}</td><td>{}</td><td class=\"num\">{}s</td><td class=\"mono\">{}</td></tr>\n",
+                n("block"),
+                escape(&s("timestamp_utc")),
+                escape(&wei(&s("amount"), 18)),
+                escape(&s("path")),
+                n("seconds_since_previous"),
+                escape(&s("transaction_hash"))
+            ));
+        }
+        html.push_str("</table>\n");
+    }
     html
 }
 
@@ -1624,9 +1693,16 @@ fn feed_row(run: &Run, feed: Option<&Value>) -> Value {
             s(Some(feed), "timeline_file")
                 .map(|file| format!("data/timelines/{}", file.trim_start_matches("timelines/"))),
         ),
-        ("svzchf", _) => (
-            Some(crate::svzchf::VAULT.to_string()),
-            Some("svZCHF".to_string()),
+        ("svzchf", _) | ("susde", _) => (
+            Some(
+                if target == "susde" {
+                    crate::susde::VAULT
+                } else {
+                    crate::svzchf::VAULT
+                }
+                .to_string(),
+            ),
+            Some(if target == "susde" { "sUSDe" } else { "svZCHF" }.to_string()),
             Some("vault".to_string()),
             Some("recomputable".to_string()),
             s(summary, "verdict").or_else(|| Some(verdict_of(result))),
@@ -1671,7 +1747,7 @@ fn feed_row(run: &Run, feed: Option<&Value>) -> Value {
     };
     let family = s(summary, "family").unwrap_or_else(|| {
         match target {
-            "svzchf" => "recomputable-accrual",
+            "svzchf" | "susde" => "recomputable-accrual",
             _ => "guarded-setter",
         }
         .to_string()
@@ -1780,6 +1856,10 @@ fn run_page(run: &Run) -> String {
     if target == "svzchf" {
         addresses.push(("vault", crate::svzchf::VAULT.to_string()));
         addresses.push(("savings module", crate::svzchf::MODULE.to_string()));
+    } else if target == "susde" {
+        addresses.push(("vault", crate::susde::VAULT.to_string()));
+        addresses.push(("asset (USDe)", crate::susde::USDE.to_string()));
+        addresses.push(("rewards distributor", crate::susde::DISTRIBUTOR.to_string()));
     } else if target == "mtbill" {
         addresses.push(("token", crate::mtbill::TOKEN.to_string()));
         addresses.push(("oracle", crate::mtbill::ORACLE.to_string()));
@@ -1809,6 +1889,7 @@ fn run_page(run: &Run) -> String {
 
     html.push_str(&match target {
         "svzchf" => svzchf_body(run),
+        "susde" => susde_body(run),
         "mtbill" => mtbill_body(run),
         _ if is_family_run(result) => midas_body(run),
         _ => String::new(),
@@ -2336,6 +2417,63 @@ mod tests {
         assert!(hash_at > verdict_at && hash_at - verdict_at < 200);
         // A bundle without bundle.sha256 says so rather than showing nothing.
         assert!(mtbill.contains("bundle root hash not sealed"));
+    }
+
+    /// Spec 09: the sUSDe fixture renders a page with the residual table
+    /// and the reward posts, and a feeds.json row in the consumer's shape.
+    #[test]
+    fn susde_fixture_renders_a_feed_row_in_the_consumer_shape() {
+        let fixture = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/susde-demo-25800000-25885407");
+        let input = std::env::temp_dir().join("crossfoot-render-susde-in");
+        let _ = fs::remove_dir_all(&input);
+        fs::create_dir_all(&input).unwrap();
+        // The renderer takes a directory of bundles: link the fixture in by
+        // copying its files.
+        fn copy_dir(from: &Path, to: &Path) {
+            fs::create_dir_all(to).unwrap();
+            for entry in fs::read_dir(from).unwrap() {
+                let entry = entry.unwrap();
+                let target = to.join(entry.file_name());
+                if entry.path().is_dir() {
+                    copy_dir(&entry.path(), &target);
+                } else {
+                    fs::copy(entry.path(), target).unwrap();
+                }
+            }
+        }
+        copy_dir(&fixture, &input.join("susde-demo-25800000-25885407"));
+        let out = std::env::temp_dir().join("crossfoot-render-susde-out");
+        let _ = fs::remove_dir_all(&out);
+        render(&input, &out).unwrap();
+
+        let feeds: Value =
+            serde_json::from_str(&fs::read_to_string(out.join("data/feeds.json")).unwrap())
+                .unwrap();
+        let rows = feeds["rows"].as_array().unwrap();
+        assert_eq!(rows.len(), 1);
+        let row = &rows[0];
+        assert_eq!(row["target"], "susde");
+        assert_eq!(row["address"], crate::susde::VAULT);
+        assert_eq!(row["product"], "sUSDe");
+        assert_eq!(row["key"], "vault");
+        assert_eq!(row["kind"], "recomputable");
+        assert_eq!(row["family"], "recomputable-accrual");
+        assert_eq!(row["verdict"], "MODEL_MATCH");
+        assert_eq!(row["consumer_action"], "ALLOW");
+        assert_eq!(row["nav_recomputation"], "FULL");
+        assert_eq!(row["headline"], "3 of 3 fields exact, residual 0");
+        assert_eq!(row["block"], 25_885_407);
+        assert_eq!(row["baseline_block"], 25_800_000);
+        assert!(row["bundle_root"].as_str().unwrap().len() == 64);
+
+        let page = fs::read_to_string(out.join("susde-demo-25800000-25885407.html")).unwrap();
+        balanced(&page).unwrap();
+        assert!(page.contains("verdict: MODEL_MATCH"));
+        assert!(page.contains("<td>vault.convertToAssets(1e18)</td>"));
+        assert!(page.contains("36 reward post(s)"));
+        assert!(page.contains("operator_via_distributor"));
+        assert!(page.contains("rewards distributor"));
     }
 
     #[test]
