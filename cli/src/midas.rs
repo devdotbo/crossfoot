@@ -21,8 +21,9 @@ use crate::model::midas::{
 };
 use crate::rpc::{
     blockscout_logs_descriptor_full, blockscout_txlist_descriptor, call_descriptor,
-    debug_trace_descriptor, get_block_descriptor, get_code_descriptor, get_transaction_descriptor,
-    trace_transaction_descriptor, Descriptor, ReadSource, BLOCKSCOUT_RESULT_CAP,
+    debug_trace_descriptor, get_block_descriptor, get_code_descriptor, get_logs_descriptor_topics,
+    get_transaction_descriptor, trace_transaction_descriptor, Descriptor, ReadSource, RpcErrorKind,
+    BLOCKSCOUT_RESULT_CAP,
 };
 use crate::util::parse_hex_u64;
 
@@ -264,8 +265,35 @@ pub struct RelaySpec {
     pub address: String,
     pub selector: String,
     pub calls_word: usize,
+    /// `bytes_array` (the default: `bytes[]` of feed calls) or `aggregate3`
+    /// (Multicall3's `(address target, bool allowFailure, bytes data)[]`,
+    /// of which the elements whose target is the feed count).
+    #[serde(default = "default_calls_kind")]
+    pub calls_kind: String,
     #[serde(default)]
     pub note: String,
+}
+
+fn default_calls_kind() -> String {
+    "bytes_array".to_string()
+}
+
+/// Where the logs come from. Absent: the explorer's log API from block 0.
+/// `rpc`: eth_getLogs in windows of `chunk` blocks from `start_block`,
+/// halved when the node refuses a window; for a chain without a usable
+/// explorer. Round events read through the RPC carry no block timestamp,
+/// so their timestamp must come from a field.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct LogSourceSpec {
+    pub source: String,
+    #[serde(default)]
+    pub start_block: u64,
+    #[serde(default = "default_chunk")]
+    pub chunk: u64,
+}
+
+fn default_chunk() -> u64 {
+    2_000
 }
 
 /// The state getters read at the pinned block.
@@ -371,6 +399,13 @@ pub struct Mechanism {
     /// counts effective checkpoints): take latestRound from the events.
     #[serde(default)]
     pub latest_round_from_events: bool,
+    /// Where the logs come from (see `LogSourceSpec`).
+    #[serde(default)]
+    pub logs: Option<LogSourceSpec>,
+    /// A gap between consecutive rounds above this many seconds is a
+    /// `SILENCE` finding.
+    #[serde(default)]
+    pub max_silence_seconds: Option<u64>,
     /// The events that move a reference guard's reference value.
     #[serde(default)]
     pub reference_events: Option<ReferenceEventsSpec>,
@@ -792,6 +827,29 @@ fn call_is_keyed(data: &str, topics: &[String]) -> bool {
     })
 }
 
+/// Decodes Multicall3's `aggregate3((address,bool,bytes)[])` argument at
+/// head word `word`: the array of dynamic tuples, each (target,
+/// allowFailure, bytes). Returns (target, data) per element in order.
+pub fn decode_aggregate3(input: &str, word: usize) -> Option<Vec<(String, String)>> {
+    let body = input.strip_prefix("0x").unwrap_or(input);
+    let args = body.get(8..)?;
+    let array = usize::from_str_radix(args.get(word * 64..(word + 1) * 64)?, 16).ok()? * 2;
+    let count = usize::from_str_radix(args.get(array..array + 64)?, 16).ok()?;
+    let elements = array + 64;
+    let mut out = Vec::with_capacity(count);
+    for index in 0..count {
+        let head = elements + index * 64;
+        let start = elements + usize::from_str_radix(args.get(head..head + 64)?, 16).ok()? * 2;
+        let target = format!("0x{}", args.get(start + 24..start + 64)?).to_lowercase();
+        let data_offset = usize::from_str_radix(args.get(start + 128..start + 192)?, 16).ok()? * 2;
+        let data_start = start + data_offset;
+        let length = usize::from_str_radix(args.get(data_start..data_start + 64)?, 16).ok()? * 2;
+        let data = args.get(data_start + 64..data_start + 64 + length)?;
+        out.push((target, format!("0x{data}")));
+    }
+    Some(out)
+}
+
 /// R6 steps (a) and (b): unwraps up to six nested Safe layers. Returns the
 /// final target, the inner selector, the inner calldata and the chain
 /// (executor, each Safe). None when the outer selector is not a Safe call.
@@ -1069,6 +1127,7 @@ fn sweep(
     Ok(out)
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn sweep_logs(
     source: &mut dyn ReadSource,
     bundle: &mut BundleWriter,
@@ -1077,7 +1136,24 @@ pub fn sweep_logs(
     topic0: &str,
     topics: &[String],
     to_block: u64,
+    logs: Option<&LogSourceSpec>,
 ) -> Result<Vec<Value>, String> {
+    if let Some(spec) = logs.filter(|l| l.source == "rpc") {
+        let filter: Vec<Option<String>> = std::iter::once(Some(topic0.to_string()))
+            .chain(topics.iter().map(|t| Some(t.clone())))
+            .collect();
+        let mut rows = Vec::new();
+        let mut from = spec.start_block;
+        let chunk = spec.chunk.max(1);
+        while from <= to_block {
+            let to = from.saturating_add(chunk - 1).min(to_block);
+            rows.extend(sweep_rpc_logs(
+                source, bundle, label, address, &filter, from, to,
+            )?);
+            from = to + 1;
+        }
+        return Ok(rows);
+    }
     let address = address.to_string();
     let topic0 = topic0.to_string();
     sweep(
@@ -1121,6 +1197,61 @@ fn read_getter(
         &encode_no_args(signature),
         block,
     )
+}
+
+/// One eth_getLogs window, halved when the node refuses the range.
+fn sweep_rpc_logs(
+    source: &mut dyn ReadSource,
+    bundle: &mut BundleWriter,
+    label: &str,
+    address: &str,
+    filter: &[Option<String>],
+    from: u64,
+    to: u64,
+) -> Result<Vec<Value>, String> {
+    let descriptor = get_logs_descriptor_topics(
+        &format!("{label} {from}..{to}"),
+        address,
+        &crate::util::block_hex(from),
+        &crate::util::block_hex(to),
+        filter,
+    );
+    match source.fetch(descriptor) {
+        Ok(fetched) => {
+            let rows = fetched
+                .result()
+                .map_err(|err| format!("{label} failed: {err}"))?
+                .as_array()
+                .cloned()
+                .unwrap_or_default();
+            bundle
+                .record(
+                    &fetched,
+                    Some(Decoded::Other {
+                        hex: format!("rows={}", rows.len()),
+                        byte_len: rows.len(),
+                    }),
+                    None,
+                )
+                .map_err(|e| e.to_string())?;
+            Ok(rows)
+        }
+        Err(err) if matches!(err.kind, RpcErrorKind::RequestTooBroad) && from < to => {
+            let mid = from + (to - from) / 2;
+            let mut out = sweep_rpc_logs(source, bundle, label, address, filter, from, mid)?;
+            out.extend(sweep_rpc_logs(
+                source,
+                bundle,
+                label,
+                address,
+                filter,
+                mid + 1,
+                to,
+            )?);
+            Ok(out)
+        }
+        Err(err) => Err(err.message),
+    }
 }
 
 pub fn sweep_txlist(
@@ -1174,6 +1305,9 @@ pub struct FeedInputs {
     pub clamp_band: Option<i128>,
     /// Moves of the reference value under a reference guard.
     pub reference_moves: Vec<ReferenceMove>,
+    /// False when the family has no explorer API: failed setters are then
+    /// unknown and every round was resolved through its transaction.
+    pub txlist_available: bool,
     pub latest_round: Option<u64>,
     pub latest: Option<LatestRound>,
     pub last_timestamp: Option<u64>,
@@ -1199,6 +1333,9 @@ pub struct FetchArgs<'a, 'b> {
     pub block: u64,
     pub feeds: &'b [FeedEntry],
     pub mechanism: &'b Mechanism,
+    /// Whether the family config names an explorer API (the txlist); a
+    /// chain without one resolves every round through the transaction.
+    pub has_explorer: bool,
     pub trace: Option<&'a mut dyn ReadSource>,
 }
 
@@ -1315,6 +1452,7 @@ pub fn fetch(
 
     let mechanism = args.mechanism;
     let reads = &mechanism.reads;
+    let logs = mechanism.logs.as_ref();
     let mut implementation_scan: BTreeMap<String, bool> = BTreeMap::new();
     let mut trace = args.trace;
     let mut feeds = Vec::with_capacity(args.feeds.len());
@@ -1407,6 +1545,7 @@ pub fn fetch(
             bounds,
             clamp_band,
             reference_moves: Vec::new(),
+            txlist_available: true,
             latest_round,
             latest,
             last_timestamp,
@@ -1449,6 +1588,7 @@ pub fn fetch(
                 &topic0_of(&signature),
                 &entry.topics,
                 block,
+                logs,
             )?;
             let decoded: Vec<RoundEvent> = match spec {
                 RoundEventSpec::Signature(_) => {
@@ -1464,6 +1604,7 @@ pub fn fetch(
                             &topic0_of(event),
                             &entry.topics,
                             block,
+                            logs,
                         )?,
                         AnswerSpec::Field(_) => Vec::new(),
                     };
@@ -1530,6 +1671,7 @@ pub fn fetch(
                 &topic0_of(&mechanism.bound_events.upgraded),
                 &[],
                 block,
+                logs,
             )?
         };
         let init_rows = if mechanism.bound_events.initialized.is_empty() {
@@ -1543,6 +1685,7 @@ pub fn fetch(
                 &topic0_of(&mechanism.bound_events.initialized),
                 &[],
                 block,
+                logs,
             )?
         };
         let mut extra_rows: Vec<Value> = Vec::new();
@@ -1555,6 +1698,7 @@ pub fn fetch(
                 &topic0_of(signature),
                 &[],
                 block,
+                logs,
             )?);
         }
         // Reference moves under a reference guard.
@@ -1575,6 +1719,7 @@ pub fn fetch(
                     &topic0_of(signature),
                     &[],
                     block,
+                    logs,
                 )?;
                 for row in &rows {
                     let data = row.get("data").and_then(Value::as_str).unwrap_or("0x");
@@ -1605,7 +1750,12 @@ pub fn fetch(
         }
 
         // R4, R5: the external transaction list.
-        let tx_rows = sweep_txlist(source, bundle, &format!("{name} txlist"), address, block)?;
+        let tx_rows = if args.has_explorer {
+            sweep_txlist(source, bundle, &format!("{name} txlist"), address, block)?
+        } else {
+            Vec::new()
+        };
+        inputs.txlist_available = args.has_explorer;
         let mut by_hash: BTreeMap<String, SetterTx> = BTreeMap::new();
         for row in &tx_rows {
             if let Some(tx) = decode_txlist_row(row, mechanism) {
@@ -1680,9 +1830,14 @@ pub fn fetch(
                         // A relay reached through the Safe: a hub's batch
                         // executed by a multisig, as at pool setup.
                         let position = *seen_in_tx.get(&event.transaction_hash).unwrap_or(&0);
-                        if let Some((selector, calldata, batch_index, relay)) =
-                            relay_call(mechanism, &target, &inner, &entry.topics, &position)
-                        {
+                        if let Some((selector, calldata, batch_index, relay)) = relay_call(
+                            mechanism,
+                            &target,
+                            &inner,
+                            &feed_lower,
+                            &entry.topics,
+                            &position,
+                        ) {
                             chain.push(relay);
                             chain.push(feed_lower.clone());
                             return Some((
@@ -1737,6 +1892,7 @@ pub fn fetch(
                         mechanism,
                         &to,
                         &input,
+                        &feed_lower,
                         &entry.topics,
                         &seen_in_tx_before(&seen_in_tx, &event.transaction_hash),
                     )
@@ -1746,6 +1902,7 @@ pub fn fetch(
                             mechanism,
                             &to,
                             &input,
+                            &feed_lower,
                             &entry.topics,
                             &seen_in_tx_before(&seen_in_tx, &event.transaction_hash),
                         )
@@ -2169,6 +2326,7 @@ fn relay_call(
     mechanism: &Mechanism,
     to: &str,
     input: &str,
+    feed: &str,
     topics: &[String],
     position: &usize,
 ) -> Option<(String, String, usize, String)> {
@@ -2176,7 +2334,15 @@ fn relay_call(
     let relay = mechanism.relays.iter().find(|r| {
         r.address.eq_ignore_ascii_case(to) && r.selector.eq_ignore_ascii_case(&selector)
     })?;
-    let calls = decode_bytes_array(input, relay.calls_word)?;
+    let calls: Vec<String> = if relay.calls_kind == "aggregate3" {
+        decode_aggregate3(input, relay.calls_word)?
+            .into_iter()
+            .filter(|(target, _)| target.eq_ignore_ascii_case(feed))
+            .map(|(_, data)| data)
+            .collect()
+    } else {
+        decode_bytes_array(input, relay.calls_word)?
+    };
     let setter_calls: Vec<&String> = calls
         .iter()
         .filter(|c| mechanism.setter(&selector_of(c)).is_some() && call_is_keyed(c, topics))
@@ -2523,5 +2689,39 @@ mod tests {
             decode_bytes_array(&input, 4).is_none()
                 || decode_bytes_array(&input, 4).unwrap().len() != 1
         );
+    }
+
+    /// Multicall3 aggregate3 with two elements, the second targeting the
+    /// feed: the tuple array of (address, bool, bytes) decodes in order.
+    #[test]
+    fn aggregate3_relay_calldata_is_decoded() {
+        fn word(v: u64) -> String {
+            format!("{v:064x}")
+        }
+        let feed = "14f753940720c1fa4247cd464c7ea28c806d123f";
+        let other = "1111111111111111111111111111111111111111";
+        let call1 = "a4381d1f".to_string() + &word(5);
+        let call2 = "a4381d1f".to_string() + &word(7);
+        let element = |target: &str, call: &str| {
+            format!(
+                "{}{}{}{}{}",
+                "0".repeat(24) + target,
+                word(0),
+                word(0x60),
+                word(call.len() as u64 / 2),
+                call
+            )
+        };
+        let e1 = element(other, &call1);
+        let e2 = element(feed, &call2);
+        let e1_len = e1.len() / 2;
+        let tuples = format!("{}{}{}{}", word(0x40), word(0x40 + e1_len as u64), e1, e2);
+        let input = format!("0x82ad56cb{}{}{}", word(0x20), word(2), tuples);
+        let calls = decode_aggregate3(&input, 0).unwrap();
+        assert_eq!(calls.len(), 2);
+        assert_eq!(calls[1].0, format!("0x{feed}"));
+        assert_eq!(selector_of(&calls[1].1), "0xa4381d1f");
+        assert_eq!(argument_word_at(&calls[1].1, 0), Some(7));
+        assert_eq!(calls[0].0, format!("0x{other}"));
     }
 }

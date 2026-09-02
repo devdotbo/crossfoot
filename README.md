@@ -124,7 +124,8 @@ sUSDS, sDAI and stUSDS.
   `UNGUARDED_POST` under a deviation guard, `GUARD_AT_BOUND` and
   `GUARD_CLAMPED` under a clamp, `UNGUARDED_POST` with `classification:
   no_guard` without a guard, `UNGUARDED_REFERENCE_MOVE` under a reference
-  guard, and `OVERRIDE_FLAG_SET` where a setter carries an override flag.
+  guard, `OVERRIDE_FLAG_SET` where a setter carries an override flag, and
+  `SILENCE` where a family sets a maximum gap between rounds.
   The posting path of a feed without a guard is `ATTRIBUTED`, never
   `GUARDED`; `feeds.json` rows carry `guard_kind` and `family_name` so a
   reader can tell the families apart.

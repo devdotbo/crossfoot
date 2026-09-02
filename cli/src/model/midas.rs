@@ -444,6 +444,8 @@ pub struct FeedReplayInput<'a> {
     /// `StateAtBlock.bound` in answer units and the previous round's answer
     /// in `last_answer`.
     pub absolute_guard: bool,
+    /// A gap between consecutive rounds above this is a `SILENCE` finding.
+    pub max_silence_seconds: Option<u64>,
     /// For an event-rules guard: the constants; every rule is replayed from
     /// the round's own fields (`old`, `ref_old`, `ref_new`, `ref_old_round`,
     /// `ref_new_round`).
@@ -480,6 +482,7 @@ pub struct FeedReplay {
     pub reference_moves: usize,
     pub unguarded_reference_moves: usize,
     pub override_flags: usize,
+    pub silences: usize,
     pub bound_changes: usize,
     pub unattributed: usize,
     pub poster_addresses: Vec<String>,
@@ -1021,6 +1024,31 @@ pub fn replay_feed(input: &FeedReplayInput) -> FeedReplay {
         }
     }
 
+    // Silence: gaps between consecutive rounds above the family's limit.
+    let mut silences = 0usize;
+    if let Some(limit) = input.max_silence_seconds {
+        for pair in input.rounds.windows(2) {
+            let gap = pair[1]
+                .event
+                .timestamp
+                .saturating_sub(pair[0].event.timestamp);
+            if gap > limit {
+                silences += 1;
+                findings.push(json!({
+                    "kind": "SILENCE",
+                    "feed": input.feed_name,
+                    "from_round": pair[0].event.round_id,
+                    "round_id": pair[1].event.round_id,
+                    "transaction_hash": pair[1].event.transaction_hash,
+                    "block": pair[1].event.block,
+                    "timestamp_unix": pair[1].event.timestamp,
+                    "gap_seconds": gap,
+                    "note": format!("no round for {gap} seconds, above the family's {limit} second limit"),
+                }));
+            }
+        }
+    }
+
     // R12: bound changes from the event groups.
     let mut bound_changes = 0usize;
     let mut previous: Option<Bounds> = None;
@@ -1105,6 +1133,7 @@ pub fn replay_feed(input: &FeedReplayInput) -> FeedReplay {
         reference_moves: input.reference_moves.len(),
         unguarded_reference_moves: unguarded_reference,
         override_flags,
+        silences,
         bound_changes,
         unattributed,
         poster_addresses: posters.into_iter().collect(),
@@ -1226,6 +1255,7 @@ mod tests {
             reference_moves: &[],
             absolute_guard: false,
             event_rules: None,
+            max_silence_seconds: None,
             rounds,
             failed: &[],
             states: &states,
@@ -1614,6 +1644,7 @@ mod tests {
             reference_moves: &[],
             absolute_guard: false,
             event_rules: None,
+            max_silence_seconds: None,
             rounds: &rounds,
             failed: &[],
             states: &states,
@@ -1694,6 +1725,7 @@ mod tests {
             reference_moves: &moves,
             absolute_guard: false,
             event_rules: None,
+            max_silence_seconds: None,
             rounds: &rounds,
             failed: &[],
             states: &states,
@@ -1760,6 +1792,7 @@ mod tests {
             reference_moves: &[],
             absolute_guard: true,
             event_rules: None,
+            max_silence_seconds: None,
             rounds: &rounds,
             failed: &[],
             states: &states,
@@ -1820,6 +1853,7 @@ mod tests {
             reference_moves: &[],
             absolute_guard: false,
             event_rules: Some(&rules),
+            max_silence_seconds: None,
             rounds: &rounds,
             failed: &[],
             states: &states,
@@ -1837,5 +1871,44 @@ mod tests {
             replay.findings[0]["rule"],
             "spacing,reference_round_unchanged"
         );
+    }
+
+    /// A gap above the family's silence limit is a SILENCE finding naming
+    /// both rounds.
+    #[test]
+    fn silence_above_the_limit_is_a_finding() {
+        let mut a = round(1, ONE, 100, PostPath::Safe, Via::External);
+        let mut b = round(2, ONE, 200, PostPath::Safe, Via::External);
+        let mut c = round(3, ONE, 300, PostPath::Safe, Via::External);
+        a.event.timestamp = 1_000;
+        b.event.timestamp = 1_000 + 3_600;
+        c.event.timestamp = 1_000 + 3_600 + 100_000;
+        let rounds = vec![a, b, c];
+        let states = BTreeMap::new();
+        let replay = replay_feed(&FeedReplayInput {
+            feed_name: "TONIC.feed".to_string(),
+            decimals: 12,
+            bound_at_b1: None,
+            spacing_seconds: None,
+            clamp_band: None,
+            reference_guard: false,
+            reference_moves: &[],
+            absolute_guard: false,
+            event_rules: None,
+            max_silence_seconds: Some(86_400),
+            rounds: &rounds,
+            failed: &[],
+            states: &states,
+            bound_groups: &[],
+            eras: &[],
+            b1_timestamp: 1_800_000_000,
+            recent_seconds: 183 * 86_400,
+            round_id_gap: None,
+        });
+        assert_eq!(kinds(&replay), vec!["SILENCE"]);
+        assert_eq!(replay.findings[0]["from_round"], 2);
+        assert_eq!(replay.findings[0]["round_id"], 3);
+        assert_eq!(replay.findings[0]["gap_seconds"], 100_000);
+        assert_eq!(replay.silences, 1);
     }
 }

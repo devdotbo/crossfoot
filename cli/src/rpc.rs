@@ -847,6 +847,37 @@ pub fn get_logs_descriptor(label: &str, address: &str, from_hex: &str, to_hex: &
     }
 }
 
+/// eth_getLogs with a topic filter (None is a wildcard slot). The filter
+/// goes in the calldata key slot so filtered and unfiltered sweeps over one
+/// range never share a key.
+pub fn get_logs_descriptor_topics(
+    label: &str,
+    address: &str,
+    from_hex: &str,
+    to_hex: &str,
+    topics: &[Option<String>],
+) -> Descriptor {
+    let filter = topics
+        .iter()
+        .map(|t| t.clone().unwrap_or_else(|| "none".to_string()))
+        .collect::<Vec<String>>()
+        .join(",");
+    Descriptor {
+        label: label.to_string(),
+        wire: Wire::JsonRpc,
+        method: "eth_getLogs".to_string(),
+        block: format!("{from_hex}..{to_hex}"),
+        to: address.to_string(),
+        calldata: format!("topics={filter}"),
+        params: json!([{
+            "address": address,
+            "fromBlock": from_hex,
+            "toBlock": to_hex,
+            "topics": topics,
+        }]),
+    }
+}
+
 /// Blockscout log history request. The cache key slots follow the same
 /// convention as eth_getLogs: `block` holds the inclusive range, `calldata`
 /// holds the topic filter.

@@ -383,6 +383,20 @@ Further config fields, added for the families beyond Midas
   guarded values are re-read either side (a bound setter's own event on a
   non-proxy contract); `upgraded` and `initialized` may be empty. Empty
   getter signatures in `reads` mean the family has no such getter.
+- `logs: {source: "rpc", start_block, chunk}` reads every log sweep
+  through `eth_getLogs` in windows of `chunk` blocks from `start_block`,
+  halving a window the node refuses, for a chain without a usable
+  explorer API; round events read this way carry no block timestamp, so
+  their timestamp must come from a field. `explorer: null` means no
+  transaction list is read: every round is resolved through its
+  transaction and the relay, failed setter calls are unknown (the feed
+  carries `external_txlist: false` and `failed_setters_note`).
+- `relays[].calls_kind: "aggregate3"` decodes Multicall3's `(address,
+  bool, bytes)[]` and counts the elements whose target is the feed;
+  `bytes_array` (the default) is the `bytes[]` shape.
+- `max_silence_seconds`: a gap between consecutive rounds above it is a
+  `SILENCE` finding (`from_round`, `round_id`, `gap_seconds`); the feed
+  and the family summary carry `silences`.
 - `survey_line` per guard kind: the Midas sentence for `max_deviation`;
   "N feeds replayed, B unchecked posts over the reference bound on M
   feeds, R reference moves, U of them without the on-chain check" for

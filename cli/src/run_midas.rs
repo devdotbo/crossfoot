@@ -77,6 +77,7 @@ fn kind_name(kind: &str) -> &'static str {
         "GUARD_CLAMPED" => "GUARD_CLAMPED",
         "UNGUARDED_REFERENCE_MOVE" => "UNGUARDED_REFERENCE_MOVE",
         "OVERRIDE_FLAG_SET" => "OVERRIDE_FLAG_SET",
+        "SILENCE" => "SILENCE",
         "BOUND_CHANGED" => "BOUND_CHANGED",
         "BOUND_HISTORY_INCONSISTENT" => "BOUND_HISTORY_INCONSISTENT",
         "FAILED_SETTER" => "FAILED_SETTER",
@@ -110,6 +111,7 @@ fn feed_report(
     reference_guard: bool,
     absolute_guard: bool,
     event_rules: Option<&BTreeMap<String, i128>>,
+    inputs_silence: Option<u64>,
 ) -> FeedReport {
     let entry = &inputs.entry;
     let name = entry.name();
@@ -213,6 +215,7 @@ fn feed_report(
                 reference_moves: &inputs.reference_moves,
                 absolute_guard,
                 event_rules,
+                max_silence_seconds: inputs_silence,
                 rounds: &inputs.rounds,
                 failed: &inputs.failed,
                 states: &inputs.states,
@@ -267,6 +270,11 @@ fn feed_report(
             value["reference_moves"] = json!(replay.reference_moves);
             value["unguarded_reference_moves"] = json!(replay.unguarded_reference_moves);
             value["override_flags"] = json!(replay.override_flags);
+            value["silences"] = json!(replay.silences);
+            value["external_txlist"] = json!(inputs.txlist_available);
+            if !inputs.txlist_available {
+                value["failed_setters_note"] = json!("no explorer API on this chain: the external transaction list was not read, so failed setter calls are unknown");
+            }
             value["bound_changes"] = json!(replay.bound_changes);
             value["other_transactions"] = json!(inputs.other);
             value["findings"] = json!(replay.findings);
@@ -341,6 +349,7 @@ pub fn run(
             block: args.block,
             feeds: &args.feeds,
             mechanism: &args.mechanism,
+            has_explorer: !args.explorer.is_null(),
             trace: args.trace,
         },
     )?;
@@ -373,6 +382,7 @@ pub fn run(
                     .as_ref()
                     .filter(|g| g.is_event_rules())
                     .map(|g| &g.rules),
+                args.mechanism.max_silence_seconds,
             )
         })
         .collect();
@@ -416,6 +426,7 @@ pub fn run(
     let mut reference_moves = 0usize;
     let mut unguarded_reference_moves = 0usize;
     let mut override_flags = 0usize;
+    let mut silences = 0usize;
     let mut unattributed = 0usize;
     let mut findings_count = 0usize;
     let mut kind_counts: BTreeMap<&str, usize> = BTreeMap::new();
@@ -461,6 +472,7 @@ pub fn run(
         reference_moves += replay.reference_moves;
         unguarded_reference_moves += replay.unguarded_reference_moves;
         override_flags += replay.override_flags;
+        silences += replay.silences;
         if replay.at_bound_posts + replay.clamped_posts > 0 {
             feeds_at_bound += 1;
         }
@@ -549,6 +561,7 @@ pub fn run(
         "reference_moves": reference_moves,
         "unguarded_reference_moves": unguarded_reference_moves,
         "override_flags": override_flags,
+        "silences": silences,
         "guard_kind": guard_kind,
         "recent": {"days": args.recent_days, "posts": recent_posts, "feeds": recent_feeds},
         "liveness": liveness_counts,
