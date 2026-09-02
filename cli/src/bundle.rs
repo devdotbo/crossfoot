@@ -378,7 +378,7 @@ mod tests {
     /// header names the chain, the preimage version and the code identity.
     #[test]
     fn manifest_v2_preimage_recomputes_the_cache_key() {
-        let root = std::env::temp_dir().join("crossfoot-manifest-v2");
+        let root = crate::util::scratch_dir("manifest-v2");
         let _ = fs::remove_dir_all(&root);
         let mut writer = BundleWriter::create(&root, "svzchf-run-1-2-stamp", 1).unwrap();
         let reads = [
@@ -433,7 +433,7 @@ mod tests {
     /// checksum tool accepts it.
     #[test]
     fn sha256sums_is_sorted_complete_and_checkable_by_sha256sum() {
-        let root = std::env::temp_dir().join("crossfoot-sha256sums");
+        let root = crate::util::scratch_dir("sha256sums");
         let _ = fs::remove_dir_all(&root);
         let mut writer = BundleWriter::create(&root, "midas-run-1-2-stamp", 1).unwrap();
         // Two raw bodies, out of alphabetical order by label, a timeline,
@@ -518,7 +518,7 @@ mod tests {
     /// directories, whichever order the file system answers in.
     #[test]
     fn two_bundles_never_share_a_directory() {
-        let root = std::env::temp_dir().join("crossfoot-bundle-names");
+        let root = crate::util::scratch_dir("bundle-names");
         let _ = fs::remove_dir_all(&root);
         let handles: Vec<_> = (0..8)
             .map(|_| {
@@ -575,7 +575,7 @@ mod tests {
         }
 
         // And the writer refuses such a result instead of writing it.
-        let dir = std::env::temp_dir().join("crossfoot-bundle-purity");
+        let dir = crate::util::scratch_dir("bundle-purity");
         let _ = fs::remove_dir_all(&dir);
         let writer = BundleWriter::create(&dir, "run", 1).unwrap();
         let err = writer

@@ -2315,7 +2315,7 @@ mod tests {
     /// result.json so the skip path is exercised. Every number is invented;
     /// the fixture only has to carry the shape the renderer reads.
     fn synthetic_input(tag: &str) -> PathBuf {
-        let input = std::env::temp_dir().join(format!("crossfoot-render-{tag}"));
+        let input = crate::util::scratch_dir(&format!("render-{tag}"));
         let _ = fs::remove_dir_all(&input);
         fs::create_dir_all(&input).unwrap();
 
@@ -2489,7 +2489,7 @@ mod tests {
     #[test]
     fn renders_synthetic_bundles_and_skips_one_without_a_result() {
         let input = synthetic_input("synthetic");
-        let out = std::env::temp_dir().join("crossfoot-render-synthetic-out");
+        let out = crate::util::scratch_dir("render-synthetic-out");
         let _ = fs::remove_dir_all(&out);
 
         let outcome = render(&input, &out).unwrap();
@@ -2537,8 +2537,8 @@ mod tests {
     #[test]
     fn rendering_twice_is_byte_identical() {
         let input = synthetic_input("identical");
-        let first = std::env::temp_dir().join("crossfoot-render-a");
-        let second = std::env::temp_dir().join("crossfoot-render-b");
+        let first = crate::util::scratch_dir("render-a");
+        let second = crate::util::scratch_dir("render-b");
         let _ = fs::remove_dir_all(&first);
         let _ = fs::remove_dir_all(&second);
 
@@ -2565,7 +2565,7 @@ mod tests {
     #[test]
     fn the_required_statements_are_on_the_page() {
         let input = synthetic_input("statements");
-        let out = std::env::temp_dir().join("crossfoot-render-statements-out");
+        let out = crate::util::scratch_dir("render-statements-out");
         let _ = fs::remove_dir_all(&out);
         render(&input, &out).unwrap();
 
@@ -2628,7 +2628,7 @@ mod tests {
     fn susde_fixture_renders_a_feed_row_in_the_consumer_shape() {
         let fixture = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .join("tests/fixtures/susde-demo-25800000-25885407");
-        let input = std::env::temp_dir().join("crossfoot-render-susde-in");
+        let input = crate::util::scratch_dir("render-susde-in");
         let _ = fs::remove_dir_all(&input);
         fs::create_dir_all(&input).unwrap();
         // The renderer takes a directory of bundles: link the fixture in by
@@ -2646,7 +2646,7 @@ mod tests {
             }
         }
         copy_dir(&fixture, &input.join("susde-demo-25800000-25885407"));
-        let out = std::env::temp_dir().join("crossfoot-render-susde-out");
+        let out = crate::util::scratch_dir("render-susde-out");
         let _ = fs::remove_dir_all(&out);
         render(&input, &out).unwrap();
 
@@ -2685,10 +2685,10 @@ mod tests {
     fn sky_fixture_renders_one_feed_row_per_vault() {
         let archive = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .join("tests/fixtures/sky-demo-23264565-25885408.tar.gz");
-        let input = std::env::temp_dir().join("crossfoot-render-sky-in");
+        let input = crate::util::scratch_dir("render-sky-in");
         let _ = fs::remove_dir_all(&input);
         crate::pack::unpack(&archive, &input).unwrap();
-        let out = std::env::temp_dir().join("crossfoot-render-sky-out");
+        let out = crate::util::scratch_dir("render-sky-out");
         let _ = fs::remove_dir_all(&out);
         render(&input, &out).unwrap();
 
@@ -2758,7 +2758,7 @@ mod tests {
     #[test]
     fn feeds_json_has_one_row_per_run() {
         let input = synthetic_input("feeds-json");
-        let out = std::env::temp_dir().join("crossfoot-render-feeds-json-out");
+        let out = crate::util::scratch_dir("render-feeds-json-out");
         let _ = fs::remove_dir_all(&out);
         render(&input, &out).unwrap();
         let feeds: Value =
@@ -2802,12 +2802,12 @@ mod tests {
     #[test]
     fn midas_page_draws_the_timeline_from_the_timeline_file() {
         let fixture = crate::fixtures::midas_bundle();
-        let input = std::env::temp_dir().join("crossfoot-render-midas-in");
+        let input = crate::util::scratch_dir("render-midas-in");
         let _ = fs::remove_dir_all(&input);
         fs::create_dir_all(&input).unwrap();
         // Symlink the fixture in as one bundle directory.
         std::os::unix::fs::symlink(&fixture, input.join("midas-run-25884405")).unwrap();
-        let out = std::env::temp_dir().join("crossfoot-render-midas-out");
+        let out = crate::util::scratch_dir("render-midas-out");
         let _ = fs::remove_dir_all(&out);
         let outcome = render(&input, &out).unwrap();
         assert_eq!(outcome.rendered, 1);

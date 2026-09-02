@@ -196,7 +196,7 @@ mod tests {
     /// field, so there is nothing that could open a socket.
     #[test]
     fn bundle_source_serves_bodies_by_key_and_never_opens_a_socket() {
-        let root = std::env::temp_dir().join("crossfoot-bundle-source");
+        let root = crate::util::scratch_dir("bundle-source");
         let _ = fs::remove_dir_all(&root);
         let mut writer = BundleWriter::create(&root, "svzchf-run-1-2-stamp", 1).unwrap();
         let chain = fetched(

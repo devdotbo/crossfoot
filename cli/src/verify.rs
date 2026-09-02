@@ -775,7 +775,7 @@ mod tests {
 
     /// A scratch copy of the fixture to tamper with.
     fn scratch(tag: &str) -> PathBuf {
-        let dir = std::env::temp_dir().join(format!("crossfoot-verify-{tag}"));
+        let dir = crate::util::scratch_dir(&format!("verify-{tag}"));
         let _ = fs::remove_dir_all(&dir);
         copy_dir(&fixture(), &dir);
         dir
@@ -1091,7 +1091,7 @@ mod tests {
     /// by the checksum list rather than by the entry hashes.
     #[test]
     fn verify_detects_a_tampered_timeline() {
-        let dir = std::env::temp_dir().join("crossfoot-verify-midas-timeline");
+        let dir = crate::util::scratch_dir("verify-midas-timeline");
         let _ = fs::remove_dir_all(&dir);
         copy_dir(&crate::fixtures::midas_bundle(), &dir);
         let timeline = fs::read_dir(dir.join("timelines"))

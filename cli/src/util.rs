@@ -126,6 +126,17 @@ pub fn code_identity() -> serde_json::Value {
     })
 }
 
+/// A scratch directory for one test, unique per process so two test runs
+/// on one machine never share a path: `<tmp>/crossfoot-<tag>-<pid>`. Any
+/// leftover from an earlier run is removed; the directory itself is not
+/// created, since the code under test creates what it needs.
+#[cfg(test)]
+pub fn scratch_dir(tag: &str) -> std::path::PathBuf {
+    let dir = std::env::temp_dir().join(format!("crossfoot-{tag}-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    dir
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

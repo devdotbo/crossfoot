@@ -48,6 +48,17 @@ Crossfoot writes nothing to any chain.
 
 ## Targets
 
+Coverage as of block 25,885,578: the Midas customFeed family replays as
+66 feeds replayed, 57 unchecked posts over the bound on 16 feeds, 12 in
+the last six months. Families covered, with their mechanism class: Midas
+customFeed (guarded setter with a deviation bound), Hashnote USYC (reporter
+relay, no guard), Backed v2 (clamp), Centrifuge JTRSY and JAAA (hub manager
+multicall, no guard), OpenEden TBILL (reference guard of 15 basis points),
+Ondo OUSG (rules replayed from the event's fields), Superstate USTB
+(absolute delta cap per checkpoint with an override flag); exact
+recomputation from contractual terms: Frankencoin svZCHF, Ethena sUSDe, Sky
+sUSDS, sDAI and stUSDS.
+
 - `svzchf`, the Frankencoin savings vault. Full recomputation from
   contractual terms. The administered rate path is rebuilt from the savings
   module's `RateChanged` logs into an integer tick clock, the vault's
@@ -99,27 +110,22 @@ Crossfoot writes nothing to any chain.
   table with path class and value argument, the bound events, the spacing
   rule marker and the verified implementations. `run midas` is this command
   with the Midas config as the default; the target name and the bundle
-  prefix come from the config. Family configs in `config/`: `midas`
-  (66 feeds, deviation guard), `hashnote` (USYC 18-decimal feed, no guard,
-  posted through a reporter relay), `backed` (four BackedOracle v2 feeds,
-  a 10 percent clamp instead of a revert), `centrifuge` (JTRSY and JAAA
-  share prices read from the Spoke's event stream keyed by pool and share
-  class, posted by one hub manager key through Hub.multicall, no guard,
-  no maximum age). The guard kind decides the
-  finding vocabulary: `GUARD_BYPASS` and `UNGUARDED_POST` under a
-  deviation guard, `GUARD_AT_BOUND` and `GUARD_CLAMPED` under a clamp,
-  `UNGUARDED_POST` with `classification: no_guard` without a guard.
-  a 10 percent clamp instead of a revert), `openeden` (the TBILL price
-  oracle, a 15 basis point guard against a close NAV the operator moves
-  minutes earlier), `ondo` (the OUSG oracle, whose rules replay from the
-  event's own fields), `superstate` (the USTB oracle, an absolute delta
-  cap per checkpoint with an override flag). The guard kind decides the finding vocabulary:
-  `GUARD_BYPASS` and `UNGUARDED_POST` under a deviation guard,
-  `GUARD_AT_BOUND` and `GUARD_CLAMPED` under a clamp, `UNGUARDED_POST`
-  with `classification: no_guard` without a guard,
-  `UNGUARDED_REFERENCE_MOVE` under a reference guard, and
-  `OVERRIDE_FLAG_SET` where a setter carries an override flag. The
-  posting path of a feed without a guard is `ATTRIBUTED`, never
+  prefix come from the config. Family configs in `config/`: `midas` (66
+  feeds, deviation guard), `hashnote` (USYC 18-decimal feed, no guard,
+  posted through a reporter relay), `backed` (four BackedOracle v2 feeds, a
+  10 percent clamp instead of a revert), `centrifuge` (JTRSY and JAAA share
+  prices read from the Spoke's event stream keyed by pool and share class,
+  posted by one hub manager key through Hub.multicall, no guard, no maximum
+  age), `openeden` (the TBILL price oracle, a 15 basis point guard against
+  a close NAV the operator moves minutes earlier), `ondo` (the OUSG oracle,
+  whose rules replay from the event's own fields), `superstate` (the USTB
+  oracle, an absolute delta cap per checkpoint with an override flag). The
+  guard kind decides the finding vocabulary: `GUARD_BYPASS` and
+  `UNGUARDED_POST` under a deviation guard, `GUARD_AT_BOUND` and
+  `GUARD_CLAMPED` under a clamp, `UNGUARDED_POST` with `classification:
+  no_guard` without a guard, `UNGUARDED_REFERENCE_MOVE` under a reference
+  guard, and `OVERRIDE_FLAG_SET` where a setter carries an override flag.
+  The posting path of a feed without a guard is `ATTRIBUTED`, never
   `GUARDED`; `feeds.json` rows carry `guard_kind` and `family_name` so a
   reader can tell the families apart.
 
