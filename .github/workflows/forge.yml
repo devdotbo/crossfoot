@@ -38,7 +38,9 @@ jobs:
       - run: forge test -vv
       # The committed snapshot is the gas record cited in docs/specs/10-guard-wrapper.md.
       # Fork tests skip themselves without CROSSFOOT_FORK_URL, so the snapshot excludes them.
-      - run: forge snapshot --check --tolerance 5
+      # The fork tests skip without the secret and report zero gas, which the tolerance
+      # arithmetic rejects, so they are excluded from the snapshot on both sides.
+      - run: forge snapshot --check --tolerance 5 --no-match-contract Fork
       # Mainnet fork replay (test/ForkMorpho.t.sol): only when the repository holds the
       # CROSSFOOT_FORK_URL secret (an archive endpoint). Skipped otherwise.
       - name: Fork tests

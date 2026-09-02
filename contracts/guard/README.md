@@ -45,7 +45,7 @@ Tests replay recorded series through the guard:
 forge build
 forge test
 forge test --match-contract GasTest -vvvv | grep GasMeasured
-forge snapshot --check
+forge snapshot --check --tolerance 5 --no-match-contract Fork
 CROSSFOOT_FORK_URL=<archive endpoint> FOUNDRY_PROFILE=fork forge test --match-contract Fork -vv
 ```
 
