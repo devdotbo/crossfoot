@@ -49,8 +49,15 @@ query and record the first head at which `_meta.block.number` reached it.
 
 | Version | Deployment ID | Query URL | Date | First head >= 25,884,405 |
 |---|---|---|---|---|
-| v0.0.1 (`subgraph.yaml`, call handlers on; 64 sources: 60 Midas, OpenEden, Ondo, Superstate, Frankencoin; Ondo from its deploy block 17,124,713) | Qmdzkdfsezd9m11omAppiDikkLgCJX2wX2dWpELf4ejDbJ | https://api.studio.thegraph.com/query/115545/crossfoot/v0.0.1 | 2026-09-02 22:57 UTC | pending; no indexing errors; measured 6,900 blocks per minute over the first 10 minutes (17,138,828 to 17,196,666), which projects about 21 hours to head |
-| v0.0.2 (`subgraph.events.yaml`, call handlers off, same schema; Ondo from its first PriceSet 18,014,096) | QmPKyGq6snsNhQga5UsJzHvykRUx5QNhuXCm1LsQGt4hux | https://api.studio.thegraph.com/query/115545/crossfoot/v0.0.2 (`.../version/latest` follows the newest deploy) | 2026-09-02 00:12 UTC (03 Sep local) | pending; started at 18,014,095, no indexing errors; the Safe-routed Midas rounds stay `path: UNKNOWN` in this version (fallback below) |
+| v0.0.1 (`subgraph.yaml`, call handlers, 64 sources) | Qmdzkdfsezd9m11omAppiDikkLgCJX2wX2dWpELf4ejDbJ | archived by Studio on 2026-09-03 00:26 UTC when v0.0.3 and v0.0.4 were deployed (Studio keeps the two newest unpublished versions) | 2026-09-02 22:57 UTC | reached 17,280,865 at 6,900 blocks per minute before archiving |
+| v0.0.2 (`subgraph.events.yaml`, event-only, 64 sources) | QmPKyGq6snsNhQga5UsJzHvykRUx5QNhuXCm1LsQGt4hux | archived, same moment | 2026-09-03 00:12 UTC | reached 20,129,225 at about 230,000 blocks per minute before archiving |
+| v0.0.3 (`subgraph.events.yaml`, event-only, 73 sources: extension E2 included) | QmTb4Q48XqUeCSoWfkpMrDaCrZovHceN3HT5sHWBLaiGPd | https://api.studio.thegraph.com/query/115545/crossfoot/v0.0.3 | 2026-09-03 00:26 UTC | pending; started at 17,676,541 (Backed bC3M), no indexing errors, about 370,000 blocks in the first minute |
+| v0.0.4 (`subgraph.yaml`, call handlers, 73 sources) | QmY2FcaT6THZn7iN5Wn8Hq54X9GwqewMYKYkBqHVEoUrVa | https://api.studio.thegraph.com/query/115545/crossfoot/v0.0.4 (`.../version/latest`) | 2026-09-03 00:26 UTC | pending; the trace scan makes this the slow one (about a day) |
+
+Lesson recorded: deploying a new version archives every version but the
+newest two, so deploy the event-only and the call-handler manifests as a
+pair and never deploy a third version while one of the pair is the
+fallback in use.
 
 The Studio development URL answers without an API key (rate-limited, 3,000
 queries per day). The gateway form with the API key from `.env`
