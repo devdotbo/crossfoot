@@ -2,8 +2,8 @@
   "format": "crossfoot-decisions-v1",
   "header": {
     "decided": 61,
-    "allow": 17,
-    "review": 44,
+    "allow": 11,
+    "review": 50,
     "unindexed": [],
     "wrappers": [
       "0x0f46c1e4f51b92c2966bea4bd5a52e71e423d6e0",
@@ -26,10 +26,13 @@
       "decision": "REVIEW",
       "reason": "INIT_ONLY",
       "reasons": [
-        "INIT_ONLY"
+        "INIT_ONLY",
+        "POLICY_SILENCE"
       ],
       "reason_text": "INIT_ONLY: 1 rounds, no unchecked post over the bound, liveness INIT_ONLY at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -127,13 +130,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "3c660a8ec58fd30454134146e44880a191383b148d73dadbc634f4a9d7fffd23"
+      "record_sha256": "b792357a2778a190fb44c5d632a9c4f8e808305dc57bce31d5c38ab8e92b8239"
     },
     {
       "feed": {
@@ -146,10 +160,13 @@
       "decision": "REVIEW",
       "reason": "PLACEHOLDER",
       "reasons": [
-        "PLACEHOLDER"
+        "PLACEHOLDER",
+        "POLICY_SILENCE"
       ],
       "reason_text": "PLACEHOLDER: 3 rounds, no unchecked post over the bound, liveness PLACEHOLDER at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -247,13 +264,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "b168b88eed89edbf437ed7078d249be9d48e6e1d1b99db07f0b5ce8ec0cdbd58"
+      "record_sha256": "4297b23ec95d495565acdb4d65515271c1f3b0695430dfeba753f03565d311ee"
     },
     {
       "feed": {
@@ -367,13 +395,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "324120379a914cb01ce42491cd5b3f21dfd23d8a316a237f4cf321852afd847d"
+      "record_sha256": "e9d0e6839e5644c3b383378961ca46af27aa5bdf880e96d0f0d2460313954a7e"
     },
     {
       "feed": {
@@ -511,13 +550,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "eaf2a69396f719541adda969d4e28fdf5c22c802ca4c1c5bfda816e42538df7d"
+      "record_sha256": "368f69683f00127ad115fe953f69fd818ed284b4b0e7c7fb9a4160d8de92a9d1"
     },
     {
       "feed": {
@@ -530,10 +580,13 @@
       "decision": "REVIEW",
       "reason": "STALE",
       "reasons": [
-        "STALE"
+        "STALE",
+        "POLICY_SILENCE"
       ],
       "reason_text": "STALE: 29 rounds, no unchecked post over the bound, liveness STALE at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -631,13 +684,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "478f3f019f769b9e3f10c415f458b96e35a6be6e4a684be10fbfecadd18e88ea"
+      "record_sha256": "b8997dd191842f9bc027a4640975d177079feea79e694d411a5d90cfe0b5a9db"
     },
     {
       "feed": {
@@ -778,13 +842,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "6574daf8e4010a629b0cf65bb25162ebc1c0ce0164dda6de2cb92aba8d60396e"
+      "record_sha256": "604904ae43469850bc65c8653b558aa368f95002eb3dd7d13e772e3ca46ae09f"
     },
     {
       "feed": {
@@ -798,10 +873,13 @@
       "reason": "ADMIN_GUARD_BYPASSED",
       "reasons": [
         "ADMIN_GUARD_BYPASSED",
-        "BOUND_CHANGED"
+        "BOUND_CHANGED",
+        "POLICY_DEVIATION"
       ],
       "reason_text": "ADMIN_GUARD_BYPASSED: round 0 posted through setRoundData (0xa4381d1f) at block 25637034, deviation 12977071.07972339 percent against bound 0.27 percent in force; tx 0xc7edd28227c30ab6dafd30ce402128c4df59cf6373a5c4e0d7ef11859bc34726; Crossfoot posting_path ADMIN_GUARD_BYPASSED, bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -925,13 +1003,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "26074c8b3a3c69aa9cb8d608064aa5df5f7749766d187350fad40dfa0b45ac5f"
+      "record_sha256": "11af2985a18367c57f428f53db6242cfaf96d8ef19410a2a80ddb98f708bd8d0"
     },
     {
       "feed": {
@@ -941,11 +1030,15 @@
         "family": "POSTED",
         "registry_key": "mWINDialectic.customFeed"
       },
-      "decision": "ALLOW",
-      "reason": null,
-      "reasons": [],
-      "reason_text": "CONSISTENT: 1 rounds, no unchecked post over the bound at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "decision": "REVIEW",
+      "reason": "POLICY_SILENCE",
+      "reasons": [
+        "POLICY_SILENCE"
+      ],
+      "reason_text": "POLICY_SILENCE: last post at 1786535700 is 1753668 seconds before the pinned block at 1788289368, policy default allows 604800; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -1043,13 +1136,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "c782bc7c76774b7a9a84a9342fab7013b1fcf4c4ea63fe35c10d48e90bb6d393"
+      "record_sha256": "1bf7318c393340f7c5b9e3b5218b9fb5566c700c49440ddd698e31303b991b52"
     },
     {
       "feed": {
@@ -1062,10 +1166,13 @@
       "decision": "REVIEW",
       "reason": "STALE",
       "reasons": [
-        "STALE"
+        "STALE",
+        "POLICY_SILENCE"
       ],
       "reason_text": "STALE: 9 rounds, no unchecked post over the bound, liveness STALE at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -1163,13 +1270,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "639482965ab2acb50bd2b817d177bdb88faf581220b7c7a2b9d8ef2f28c9a826"
+      "record_sha256": "6cdf1d6e839d96d2c679c9c7c272c6385cd88948cdfdfdbc21a9fb268c6a880f"
     },
     {
       "feed": {
@@ -1281,13 +1399,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "b1988cde89292ddaaffe0c54521aded3a742664836da7ad24f8c25a7469a01ea"
+      "record_sha256": "3259284635f6b5393eaadbca3c60c38d945062925f730f70fe1bf153ea064219"
     },
     {
       "feed": {
@@ -1300,10 +1429,13 @@
       "decision": "REVIEW",
       "reason": "STALE",
       "reasons": [
-        "STALE"
+        "STALE",
+        "POLICY_SILENCE"
       ],
       "reason_text": "STALE: 22 rounds, no unchecked post over the bound, liveness STALE at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -1401,13 +1533,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "ac619fcb1124b506c3960317a76eec6743393a61b1b5ea97b808c81acc73ccfe"
+      "record_sha256": "5eda7c32cd24bdcee3cbd4a3f4b078a012c3bc9b37d685af9ebfb23ce27e23ff"
     },
     {
       "feed": {
@@ -1519,13 +1662,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "8d3e611512d7f6fff437b5866f630878427d2dbc95b1e887359474fd4da18cd2"
+      "record_sha256": "6a8e72ffc45c6880adeabb41cfe3a9a1d57063d38a044b3a51c9a97f7836f88c"
     },
     {
       "feed": {
@@ -1538,10 +1692,13 @@
       "decision": "REVIEW",
       "reason": "STALE",
       "reasons": [
-        "STALE"
+        "STALE",
+        "POLICY_SILENCE"
       ],
       "reason_text": "STALE: 76 rounds, no unchecked post over the bound, liveness STALE at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -1639,13 +1796,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "5a1d11026573cc50c224dedd041c296ab2c3b10daf0d25923f0fbaea6aa2a447"
+      "record_sha256": "5b51163a56152166ba8faa793b23b63780cb1c699d912cf573d2821b9bf52135"
     },
     {
       "feed": {
@@ -1759,13 +1927,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "0900d4a862a23c7f741d7dd752da9b370a1c9b51bf42ced9e1f0ceb435cc334b"
+      "record_sha256": "a6785ac117c9ff3c5d33bd09967375461af93de7c510323b949ae39bdcc370f0"
     },
     {
       "feed": {
@@ -1775,11 +1954,15 @@
         "family": "POSTED",
         "registry_key": "mGLOBALDialectic.customFeed"
       },
-      "decision": "ALLOW",
-      "reason": null,
-      "reasons": [],
-      "reason_text": "CONSISTENT: 1 rounds, no unchecked post over the bound at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "decision": "REVIEW",
+      "reason": "POLICY_SILENCE",
+      "reasons": [
+        "POLICY_SILENCE"
+      ],
+      "reason_text": "POLICY_SILENCE: last post at 1786609020 is 1680348 seconds before the pinned block at 1788289368, policy default allows 604800; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -1877,13 +2060,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "3b5003f131c797420689e44f269cc5a6a3385f403dd6518fa5ddb2e84cc4c082"
+      "record_sha256": "367e92eb6d552b60c8fbdd4b4e231fdc24770598b44e60749c3586b5c8e21965"
     },
     {
       "feed": {
@@ -1896,10 +2090,13 @@
       "decision": "REVIEW",
       "reason": "PLACEHOLDER",
       "reasons": [
-        "PLACEHOLDER"
+        "PLACEHOLDER",
+        "POLICY_SILENCE"
       ],
       "reason_text": "PLACEHOLDER: 2 rounds, no unchecked post over the bound, liveness PLACEHOLDER at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -1997,13 +2194,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "8c721cf0df250fea3614f7433b60b6df31ab485c200a2dd3e910a6f05e7d64b6"
+      "record_sha256": "1a345ccbc19326c2906a7b5e4bc8fc489681bf7ce9c00de4d5581dad9f10cf50"
     },
     {
       "feed": {
@@ -2017,10 +2225,13 @@
       "reason": "ADMIN_GUARD_BYPASSED",
       "reasons": [
         "ADMIN_GUARD_BYPASSED",
-        "STALE"
+        "STALE",
+        "POLICY_SILENCE"
       ],
       "reason_text": "ADMIN_GUARD_BYPASSED: round 0 posted through setRoundData (0xa4381d1f) at block 24680097, deviation 0.47607278 percent against bound 0.4 percent in force; tx 0xe98c5826df67adc1ce256bb4fbf14af4ffb11fae0d687da6757b2dbc76f68185; Crossfoot posting_path ADMIN_GUARD_BYPASSED, bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -2132,13 +2343,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "3891bfec97080a33d522d78a851b7aa4787ac1bc934372fd3b145fc2141c0ed2"
+      "record_sha256": "3d7ca02b78d82e08eb369c0c2c9580be99dec3f700e54ac05fd2d5e1385a6d5d"
     },
     {
       "feed": {
@@ -2250,13 +2472,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "02ea77709c58bade083e137c3b96fcd9a4c88c474ab5167ed5f44faefe2edf8f"
+      "record_sha256": "8103c20dea88cd5e2b4f9253d51565e464c65f2c681a692edd950dec85a65e74"
     },
     {
       "feed": {
@@ -2269,10 +2502,13 @@
       "decision": "REVIEW",
       "reason": "INIT_ONLY",
       "reasons": [
-        "INIT_ONLY"
+        "INIT_ONLY",
+        "POLICY_SILENCE"
       ],
       "reason_text": "INIT_ONLY: 1 rounds, no unchecked post over the bound, liveness INIT_ONLY at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -2370,13 +2606,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "4b5339bac02f899cfb655530a9d011de533956d852e5d7450c6d1964fbce07a4"
+      "record_sha256": "cd488188d7bce45a3065a6eb84b1ba6d328bf6b5ba949f1825d0fe8df631e002"
     },
     {
       "feed": {
@@ -2389,10 +2636,13 @@
       "decision": "REVIEW",
       "reason": "INIT_ONLY",
       "reasons": [
-        "INIT_ONLY"
+        "INIT_ONLY",
+        "POLICY_SILENCE"
       ],
       "reason_text": "INIT_ONLY: 1 rounds, no unchecked post over the bound, liveness INIT_ONLY at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -2490,13 +2740,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "ccec48a92add4a557d7ebcaa627503ebde1821d1479ed54b369bdb12a1ea942d"
+      "record_sha256": "6831e318972248020c56a174922728fcbeefff4e836d1497a6cb0e43550861ab"
     },
     {
       "feed": {
@@ -2610,13 +2871,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "0d28acdd0e5a6293a069c0b3f55cfe132a51f14de8c19337656f571b9151b0dc"
+      "record_sha256": "72c979dc986811c898cd6c4b4a8a831ff1422b7b04ea1be23713aaf06dba1690"
     },
     {
       "feed": {
@@ -2626,11 +2898,15 @@
         "family": "POSTED",
         "registry_key": "customFeed"
       },
-      "decision": "ALLOW",
-      "reason": null,
-      "reasons": [],
-      "reason_text": "CONSISTENT: 2 rounds, no unchecked post over the bound at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "decision": "REVIEW",
+      "reason": "POLICY_SILENCE",
+      "reasons": [
+        "POLICY_SILENCE"
+      ],
+      "reason_text": "POLICY_SILENCE: last post at 1787331360 is 958008 seconds before the pinned block at 1788289368, policy default allows 604800; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -2728,13 +3004,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "f74a60ca5bd42d37a8f57825a3a3b5da7e8f5fa608db518915f93387af7c7086"
+      "record_sha256": "e4f40192be912aa2aefa1b0aa6a199644a497fec54b5036ddfdbc5e9f85792b8"
     },
     {
       "feed": {
@@ -2748,10 +3035,13 @@
       "reason": "ADMIN_GUARD_BYPASSED",
       "reasons": [
         "ADMIN_GUARD_BYPASSED",
-        "STALE"
+        "STALE",
+        "POLICY_SILENCE"
       ],
       "reason_text": "ADMIN_GUARD_BYPASSED: round 0 posted through setRoundData (0xa4381d1f) at block 25483092, deviation 0.58604557 percent against bound 0.34 percent in force; tx 0xcc493f7cbdeb17b86bb774cee34f447ac3b1f6d9e07924fb03a0843a97cd1463; Crossfoot posting_path ADMIN_GUARD_BYPASSED, bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -2863,13 +3153,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "d12f5dbf9301a92c7ae83523ac6da17eae410b4af161407cd0175878bc4b04c4"
+      "record_sha256": "cfee843bb7e0649c27cbff44e7a7d274806cd1d0d66ba6d8499eaa184f9e4300"
     },
     {
       "feed": {
@@ -2981,13 +3282,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "7f277965d581f32faae45a9a38202b5c466e375d8f070c77eeca3d90c97f2039"
+      "record_sha256": "9853b9661c387cba790dfa9fb53af61d5489b0e3e0bb4407b325754dc554dc31"
     },
     {
       "feed": {
@@ -3000,10 +3312,13 @@
       "decision": "REVIEW",
       "reason": "INIT_ONLY",
       "reasons": [
-        "INIT_ONLY"
+        "INIT_ONLY",
+        "POLICY_SILENCE"
       ],
       "reason_text": "INIT_ONLY: 1 rounds, no unchecked post over the bound, liveness INIT_ONLY at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -3101,13 +3416,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "c0a2fa68719dffbaf3b1d2710f0bc27f96ae2b25ee4a9b98d152fefda3978e89"
+      "record_sha256": "f2b4c033ab78b83b4cb323ce703ac58e13cb1acf0ee00114818f773aaf6ce06e"
     },
     {
       "feed": {
@@ -3121,10 +3447,13 @@
       "reason": "ADMIN_GUARD_BYPASSED",
       "reasons": [
         "ADMIN_GUARD_BYPASSED",
-        "STALE"
+        "STALE",
+        "POLICY_SILENCE"
       ],
       "reason_text": "ADMIN_GUARD_BYPASSED: Crossfoot posting_path ADMIN_GUARD_BYPASSED at block 25884405, no unchecked round over the bound in the window; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -3222,13 +3551,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "0b29d7b0f4432144ef6b16c69cfb04964e75b51e3cc47e4e61243b6dd4dccb19"
+      "record_sha256": "4396a2d0c233d95e0eb70b8b024645cc2e5a0af70b2d3d4e726f7dde2bfd4172"
     },
     {
       "feed": {
@@ -3238,11 +3578,15 @@
         "family": "POSTED",
         "registry_key": "customFeedGrowth"
       },
-      "decision": "ALLOW",
-      "reason": null,
-      "reasons": [],
-      "reason_text": "CONSISTENT: 5 rounds, no unchecked post over the bound at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "decision": "REVIEW",
+      "reason": "POLICY_SILENCE",
+      "reasons": [
+        "POLICY_SILENCE"
+      ],
+      "reason_text": "POLICY_SILENCE: last post at 1787250420 is 1038948 seconds before the pinned block at 1788289368, policy default allows 604800; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -3340,13 +3684,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "6f36374a8bcd1448a3f45de6db3b0fa1412c0359d29c1cfa67dba48ce2f55632"
+      "record_sha256": "bd60c978186c5a203926374a92e2633a20c7334ad33f25930f484dfff1718087"
     },
     {
       "feed": {
@@ -3458,13 +3813,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "6778ba185e5a6cac96811863993b2ce2ae2d0a3cec3678bf257f3529c3918429"
+      "record_sha256": "9dc7d704ac4cf0db24dcd45522a0ba644c5d811c3e16873723517ed3c042be50"
     },
     {
       "feed": {
@@ -3477,10 +3843,13 @@
       "decision": "REVIEW",
       "reason": "STALE",
       "reasons": [
-        "STALE"
+        "STALE",
+        "POLICY_SILENCE"
       ],
       "reason_text": "STALE: 1 rounds, no unchecked post over the bound, liveness STALE at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -3578,13 +3947,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "a13a534ed64e6c8c5832f8a9915bdc342393088c1094ba4dbad656a39c0e0bfc"
+      "record_sha256": "eb84519623591c2a9db5b4a7ec953039c22ef35ef43320a76dc20328e8b7f62b"
     },
     {
       "feed": {
@@ -3597,10 +3977,13 @@
       "decision": "REVIEW",
       "reason": "STALE",
       "reasons": [
-        "STALE"
+        "STALE",
+        "POLICY_SILENCE"
       ],
       "reason_text": "STALE: 65 rounds, no unchecked post over the bound, liveness STALE at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -3698,13 +4081,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "6e4115f499d1fc31a96dd3f0e24f70ae412680e6241306855d814322abe076be"
+      "record_sha256": "2885712d55388f8146efe08cb82159f68d1d0d2ef5847b3953921cce04ec3186"
     },
     {
       "feed": {
@@ -3832,13 +4226,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "5b320139942583162258560e44653df6557b8def79a1f25a9fe8e82ba24c1834"
+      "record_sha256": "68bb43c1e9595d39c443b852144126af34289ce74a402fe7a2d4bf9e9b9e4410"
     },
     {
       "feed": {
@@ -3851,10 +4256,13 @@
       "decision": "REVIEW",
       "reason": "INIT_ONLY",
       "reasons": [
-        "INIT_ONLY"
+        "INIT_ONLY",
+        "POLICY_SILENCE"
       ],
       "reason_text": "INIT_ONLY: 1 rounds, no unchecked post over the bound, liveness INIT_ONLY at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -3952,13 +4360,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "f02ce1925d9099c71d218caef98c6ea6d855b064657a341ea89be5abe7044a2f"
+      "record_sha256": "ee3fbf493ce0147486a313fa5e1cd6601b349c756ba287dcd6d691915cf2ed46"
     },
     {
       "feed": {
@@ -3971,10 +4390,13 @@
       "decision": "REVIEW",
       "reason": "ADMIN_GUARD_BYPASSED",
       "reasons": [
-        "ADMIN_GUARD_BYPASSED"
+        "ADMIN_GUARD_BYPASSED",
+        "POLICY_DEVIATION"
       ],
       "reason_text": "ADMIN_GUARD_BYPASSED: round 0 posted through setRoundData (0xa4381d1f) at block 24592120, deviation 11.036174 percent against bound 0.31 percent in force; tx 0x975e67094ea62006fcdcbf456e9bc0c910ded0d640c91fedba84ee91bbf91247; Crossfoot posting_path ADMIN_GUARD_BYPASSED, bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -4086,13 +4508,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "b08fcbb8673be613b92ee7ba7a7eae60c1da943be092ccb778e114e290b98d1b"
+      "record_sha256": "8b2b9b484e6527995e42c48b179c49c4d65c441e8c9b770a6c6afc9744cde21f"
     },
     {
       "feed": {
@@ -4204,13 +4637,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "20b122f9afb619624ea4d2253eb824c7db540542649435f0a8dbc0a3f60bf415"
+      "record_sha256": "d8001e2b36835daf4ddb5cf0c90a91a3929569debac1b25a3d20b399eaea86ea"
     },
     {
       "feed": {
@@ -4223,10 +4667,13 @@
       "decision": "REVIEW",
       "reason": "PLACEHOLDER",
       "reasons": [
-        "PLACEHOLDER"
+        "PLACEHOLDER",
+        "POLICY_SILENCE"
       ],
       "reason_text": "PLACEHOLDER: 2 rounds, no unchecked post over the bound, liveness PLACEHOLDER at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -4324,13 +4771,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "85f6d530fca6bef3c3d66c0083dbbb0093dd2d9cdf0b685c362972f36034c3e5"
+      "record_sha256": "cf880cf0dee87cd41effa92727a7adc0430586e0940fc7ed63f8886b2fb34271"
     },
     {
       "feed": {
@@ -4343,10 +4801,13 @@
       "decision": "REVIEW",
       "reason": "INIT_ONLY",
       "reasons": [
-        "INIT_ONLY"
+        "INIT_ONLY",
+        "POLICY_SILENCE"
       ],
       "reason_text": "INIT_ONLY: 1 rounds, no unchecked post over the bound, liveness INIT_ONLY at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -4444,13 +4905,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "a3422de9b9c72d643db04c3a2da529f47fdaa5e0f9e9250494f7deea17c9504d"
+      "record_sha256": "e7b1b80d64260464656809a52adea2c5bdde3039b09397fcd473b4718424c0a6"
     },
     {
       "feed": {
@@ -4460,11 +4932,15 @@
         "family": "POSTED",
         "registry_key": "customFeed"
       },
-      "decision": "ALLOW",
-      "reason": null,
-      "reasons": [],
-      "reason_text": "CONSISTENT: 1 rounds, no unchecked post over the bound at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "decision": "REVIEW",
+      "reason": "POLICY_SILENCE",
+      "reasons": [
+        "POLICY_SILENCE"
+      ],
+      "reason_text": "POLICY_SILENCE: last post at 1785832920 is 2456448 seconds before the pinned block at 1788289368, policy default allows 604800; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -4562,13 +5038,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "c8818fe3d20b89f5837076f22bc89cc9aa587b2e71fe9275e1c54609556cc9a4"
+      "record_sha256": "74ba84f302ad10b8f5588729af11e171e73614762e07d8db5a921508bd899eb4"
     },
     {
       "feed": {
@@ -4581,10 +5068,13 @@
       "decision": "REVIEW",
       "reason": "PLACEHOLDER",
       "reasons": [
-        "PLACEHOLDER"
+        "PLACEHOLDER",
+        "POLICY_SILENCE"
       ],
       "reason_text": "PLACEHOLDER: 3 rounds, no unchecked post over the bound, liveness PLACEHOLDER at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -4682,13 +5172,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "80ac1fa25345b4c1f661b6422af385698d8e6ad784a358caff8012b88e98282b"
+      "record_sha256": "c94c284f614b114d5e8e03f37f7cc0df9f828795892a152cdfdf185267fc6236"
     },
     {
       "feed": {
@@ -4802,13 +5303,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "6bbfa83e8ed6aa9b2c539c59c5a5b3108203e3c1dd75b04b0a225702eabd7d68"
+      "record_sha256": "848026b00c3687e81b550240f7d9cb58c578f0d062465baea523dd7d100284ca"
     },
     {
       "feed": {
@@ -4949,13 +5461,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "a9e8229ed20dada53027fdb9bd04f21b1ff125c65a670a5a261996a5326bab1f"
+      "record_sha256": "e0f11b5fca575d22f60d8ef8cc8293d18d9498013c9693a48e838d2bc671a7d9"
     },
     {
       "feed": {
@@ -4968,10 +5491,13 @@
       "decision": "REVIEW",
       "reason": "INIT_ONLY",
       "reasons": [
-        "INIT_ONLY"
+        "INIT_ONLY",
+        "POLICY_SILENCE"
       ],
       "reason_text": "INIT_ONLY: 1 rounds, no unchecked post over the bound, liveness INIT_ONLY at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -5069,13 +5595,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "b802d151de8a98009c2c949e348582e93f4f5398dd44c094a0320cd86d8dc482"
+      "record_sha256": "646f4099ce3cf4c751eee0aa76f6afdf309c0e5cb09f4dda79ab7dbeb416700a"
     },
     {
       "feed": {
@@ -5089,10 +5626,13 @@
       "reason": "ADMIN_GUARD_BYPASSED",
       "reasons": [
         "ADMIN_GUARD_BYPASSED",
-        "STALE"
+        "STALE",
+        "POLICY_SILENCE"
       ],
       "reason_text": "ADMIN_GUARD_BYPASSED: Crossfoot posting_path ADMIN_GUARD_BYPASSED at block 25884405, no unchecked round over the bound in the window; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -5190,13 +5730,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "38d6aa6ebede3d5b0f38d6eafc3b4499ee9d56b4dba3b5141d8d2c9b15ad3275"
+      "record_sha256": "a5485aa4bfd13039fe7f3d8a4d568d93d6d343ff2a8f7f31233201c175eefa17"
     },
     {
       "feed": {
@@ -5206,11 +5757,15 @@
         "family": "POSTED",
         "registry_key": "customFeed"
       },
-      "decision": "ALLOW",
-      "reason": null,
-      "reasons": [],
-      "reason_text": "CONSISTENT: 12 rounds, no unchecked post over the bound at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "decision": "REVIEW",
+      "reason": "POLICY_SILENCE",
+      "reasons": [
+        "POLICY_SILENCE"
+      ],
+      "reason_text": "POLICY_SILENCE: last post at 1787237220 is 1052148 seconds before the pinned block at 1788289368, policy default allows 604800; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -5308,13 +5863,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "c62668ebffd3f8367ca867fc4ec0e517521d8afa5099079141d783ac09093c06"
+      "record_sha256": "0490044e3ccaf0dcc6d17606b94d04f6caf8538ea62746068c7307629d46585f"
     },
     {
       "feed": {
@@ -5327,10 +5893,13 @@
       "decision": "REVIEW",
       "reason": "PLACEHOLDER",
       "reasons": [
-        "PLACEHOLDER"
+        "PLACEHOLDER",
+        "POLICY_SILENCE"
       ],
       "reason_text": "PLACEHOLDER: 3 rounds, no unchecked post over the bound, liveness PLACEHOLDER at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -5428,13 +5997,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "075685a38e44785c0d4b4d0c00db4d2f32555bbd8563e9863456538e7d1bc2f2"
+      "record_sha256": "f04b4fa3a0ce7346ad73d7eaee9c89dd5738a8bcb8e7238c93d2e1d3ba6ac4ed"
     },
     {
       "feed": {
@@ -5447,10 +6027,13 @@
       "decision": "REVIEW",
       "reason": "INIT_ONLY",
       "reasons": [
-        "INIT_ONLY"
+        "INIT_ONLY",
+        "POLICY_SILENCE"
       ],
       "reason_text": "INIT_ONLY: 1 rounds, no unchecked post over the bound, liveness INIT_ONLY at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -5548,13 +6131,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "cec2d27ab6767649b09058a12bec5bbeb36b705c6505ac97e91aafbeaced3386"
+      "record_sha256": "f7726f84d61f069facc36bc4dd7c18dfcee4959e82f71706c47215e5b566bd12"
     },
     {
       "feed": {
@@ -5567,10 +6161,13 @@
       "decision": "REVIEW",
       "reason": "INIT_ONLY",
       "reasons": [
-        "INIT_ONLY"
+        "INIT_ONLY",
+        "POLICY_SILENCE"
       ],
       "reason_text": "INIT_ONLY: 1 rounds, no unchecked post over the bound, liveness INIT_ONLY at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -5668,13 +6265,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "7aed51c2aa86e0a2b1c13d3c95331bebf6cbb8324e1ac330499a330b4ad5979c"
+      "record_sha256": "1facc0f56b24593ec80ace93adc3d1165ea7b28eca7ec3512a3cddfd4c9aa505"
     },
     {
       "feed": {
@@ -5786,13 +6394,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "f1e28074930ade86bfe847e474e903a6078e6766ecb637d627e581fd66440fe4"
+      "record_sha256": "65e0ea0091cffb407f9b1502545f76ccdfd232b1c3d58c3b77c16ba66bee2480"
     },
     {
       "feed": {
@@ -5805,10 +6424,13 @@
       "decision": "REVIEW",
       "reason": "INIT_ONLY",
       "reasons": [
-        "INIT_ONLY"
+        "INIT_ONLY",
+        "POLICY_SILENCE"
       ],
       "reason_text": "INIT_ONLY: 1 rounds, no unchecked post over the bound, liveness INIT_ONLY at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -5906,13 +6528,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "e4a26f0e855896fbd867cff2ddd30811ea4bd4bb80de1d8b923f42b0ef6a301a"
+      "record_sha256": "6e4b5d7d48a8b51662751730556835622a57809232d477932b0f5b3e58158853"
     },
     {
       "feed": {
@@ -6024,13 +6657,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "d1c86fdbcff32a2d809e407e50e0d706c37fb879db78edf4eb188afcae9c615f"
+      "record_sha256": "df19e01f568b56f069e68c00b07f081cdca868e1283372c13ab32eecea148c69"
     },
     {
       "feed": {
@@ -6144,13 +6788,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "f3c15a48e4c72e22b3981e6a5b56c4e259c8d16f8df32a380339a8ddc919e0f6"
+      "record_sha256": "54736237d5fb72f84b3959aabd190af3f9546cf4900050f46dc44cdcfd3b21b6"
     },
     {
       "feed": {
@@ -6262,13 +6917,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "342fcc0fafd7d107462ee356d00a3ff508b5759d0d08fb9246adcc729909a5ed"
+      "record_sha256": "260df127fa86b9e5eedf9a34de7ac65359c384f69c4da1aca569d55d49c5fc4e"
     },
     {
       "feed": {
@@ -6382,13 +7048,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "2ad055c36ad7f9789d4716781fe001597b2b5ff151b4c3f470dface0e3c8205f"
+      "record_sha256": "65d96d9329c6f3bec15a123eb6bbfe10ed1ba76f945289c09e6c88f51b87f4c2"
     },
     {
       "feed": {
@@ -6401,10 +7078,13 @@
       "decision": "REVIEW",
       "reason": "ADMIN_GUARD_BYPASSED",
       "reasons": [
-        "ADMIN_GUARD_BYPASSED"
+        "ADMIN_GUARD_BYPASSED",
+        "POLICY_SILENCE"
       ],
       "reason_text": "ADMIN_GUARD_BYPASSED: round 0 posted through setRoundData (0xa4381d1f) at block 25073665, deviation 0.92501129 percent against bound 0.23 percent in force; tx 0x0f8d5b96e1c32d290d2c6e9e6aa99b4447efa0422f1de0d63a0e9edc1add7b9e; Crossfoot posting_path ADMIN_GUARD_BYPASSED, bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -6529,13 +7209,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "7e8e9158eeb0152385159a72e2f3e910efefcd511e25785c20bfa8aeadb8ada5"
+      "record_sha256": "4852e110d0b1f210c5aad3252832ce870f8ea1de5faa61d22f836e3b3fe0ba51"
     },
     {
       "feed": {
@@ -6649,13 +7340,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "c6d2478e1e41b44b10bfb1eb358e5b6d49614b5960c4623759fafc3530527058"
+      "record_sha256": "c85047b2fa02135ad88624d05a1acc33ec1ba655782a03276c072a09bfd17c4f"
     },
     {
       "feed": {
@@ -6769,13 +7471,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "2274fed6c1fab0e08872a86860199b163211bfb3655e60a1f6475624756b4b92"
+      "record_sha256": "ce81749582917768f246177741a1e51934562f184c4ee934e4bb05f987438617"
     },
     {
       "feed": {
@@ -6887,13 +7600,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "555754d85fb1318437d7f9417b3804ecf0da2025b6a6a0b62d69fd6754a3458a"
+      "record_sha256": "2e02a103da73dead3844f34cfc4b2a43ac25096580d06e562c428fb0657b9432"
     },
     {
       "feed": {
@@ -6906,10 +7630,13 @@
       "decision": "REVIEW",
       "reason": "INIT_ONLY",
       "reasons": [
-        "INIT_ONLY"
+        "INIT_ONLY",
+        "POLICY_SILENCE"
       ],
       "reason_text": "INIT_ONLY: 1 rounds, no unchecked post over the bound, liveness INIT_ONLY at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -7007,13 +7734,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "61752a42fdecb318c44ebd83c5898850d10de05b9d74b97f37f2871c1e345cb4"
+      "record_sha256": "597f7641801f6324c7209f7d39137465baa84c188fc14a0381419046662deebb"
     },
     {
       "feed": {
@@ -7026,10 +7764,13 @@
       "decision": "REVIEW",
       "reason": "INIT_ONLY",
       "reasons": [
-        "INIT_ONLY"
+        "INIT_ONLY",
+        "POLICY_SILENCE"
       ],
       "reason_text": "INIT_ONLY: 1 rounds, no unchecked post over the bound, liveness INIT_ONLY at block 25884405; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -7127,13 +7868,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "409b929f1bee203c07762ecf56c455dab58c01e6c453d4a24fc9ab941b4b7f9c"
+      "record_sha256": "337f1eff21353ca9ed860b9ffde2da659cbffdbd507334272b799dc722ec19e1"
     },
     {
       "feed": {
@@ -7245,13 +7997,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "065d1ec1a095d1c6a64662f4af2925009a54cd4ae965f9c875cd889ac084aa55"
+      "record_sha256": "312211daacff74fecb846cae4ff86b18c5f19b2cda074f18dd8407f842107bd3"
     },
     {
       "feed": {
@@ -7265,10 +8028,13 @@
       "reason": "ADMIN_GUARD_BYPASSED",
       "reasons": [
         "ADMIN_GUARD_BYPASSED",
-        "STALE"
+        "STALE",
+        "POLICY_SILENCE"
       ],
       "reason_text": "ADMIN_GUARD_BYPASSED: Crossfoot posting_path ADMIN_GUARD_BYPASSED at block 25884405, no unchecked round over the bound in the window; bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -7366,13 +8132,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "d3fe72ccf86921d8d7322def70210572a8a88b9cf658ce2583d9cd351bc5e3be"
+      "record_sha256": "f58d81c1d1f974266cb3a6520d361de5a84df023539b08b7ca94c53d403401b6"
     },
     {
       "feed": {
@@ -7386,10 +8163,14 @@
       "reason": "ADMIN_GUARD_BYPASSED",
       "reasons": [
         "ADMIN_GUARD_BYPASSED",
-        "STALE"
+        "STALE",
+        "POLICY_SILENCE",
+        "POLICY_DEVIATION"
       ],
       "reason_text": "ADMIN_GUARD_BYPASSED: round 0 posted through setRoundData (0xa4381d1f) at block 24683249, deviation 19.31153493 percent against bound 0.4 percent in force; tx 0xf82b7c2e9e0aa9b8e935f033294c00a74748d7c739f0a0302d172c3a11668835; Crossfoot posting_path ADMIN_GUARD_BYPASSED, bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-      "notes": [],
+      "notes": [
+        "policy default: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings"
+      ],
       "evidence": {
         "subgraph": {
           "latest_round": {
@@ -7501,13 +8282,24 @@
           "stale_after_days": 30,
           "max_head_lag_seconds": 900,
           "max_result_age_days": 30
+        },
+        "eligibility": {
+          "file": "policy-default.json",
+          "name": "default",
+          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "gates": {
+            "require_on_chain_guard": false,
+            "max_seconds_since_last_post": 604800,
+            "max_unchecked_deviation_percent": "5",
+            "min_poster_keys": 1
+          }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
+        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
       },
-      "record_sha256": "d9ae5d7f1bccec9f313d6d59024739f6ae14ba79b3c084e4f27ab0a7450cd106"
+      "record_sha256": "54dce7c5eb271e676177875dcdc0b869f9889b5f9048c1973eef35680304fcab"
     }
   ]
 }

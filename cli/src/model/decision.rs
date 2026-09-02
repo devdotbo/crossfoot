@@ -39,6 +39,65 @@ pub struct Policy {
     pub max_result_age_days: u64,
 }
 
+/// The consumer's eligibility policy (`crossfoot consume --policy`): the
+/// consumer's thresholds on the evidence, never the feed's own rule. A gate
+/// that fails adds a `POLICY_` word to `reasons` after every table row.
+#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq, Eq)]
+pub struct PolicyGates {
+    /// A feed without an on-chain deviation check is REVIEW.
+    #[serde(default)]
+    pub require_on_chain_guard: bool,
+    /// The last post may be at most this old at the pinned block.
+    #[serde(default)]
+    pub max_seconds_since_last_post: Option<u64>,
+    /// An unchecked post in the window may move at most this many percent
+    /// (decimal string) against the previous answer.
+    #[serde(default)]
+    pub max_unchecked_deviation_percent: Option<String>,
+    /// At least this many distinct poster keys, when the row lists them.
+    #[serde(default)]
+    pub min_poster_keys: Option<usize>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct EligibilityPolicy {
+    pub format: String,
+    pub name: String,
+    #[serde(default)]
+    pub description: String,
+    #[serde(default)]
+    pub gates: PolicyGates,
+}
+
+pub const POLICY_FORMAT: &str = "crossfoot-policy-v1";
+
+/// The note on every record a policy gate touched.
+pub fn policy_note(name: &str) -> String {
+    format!("policy {name}: the threshold is the consumer's rule, not the feed's; the feed's own on-chain checks are reported in posting_path and the findings")
+}
+
+/// A decimal percent string to the 1e8 scale used by the deviations.
+pub fn percent_to_1e8(text: &str) -> Option<u128> {
+    let (whole, frac) = match text.split_once('.') {
+        Some((w, f)) => (w, f),
+        None => (text, ""),
+    };
+    if frac.len() > 8 || (whole.is_empty() && frac.is_empty()) {
+        return None;
+    }
+    let whole: u128 = if whole.is_empty() {
+        0
+    } else {
+        whole.parse().ok()?
+    };
+    let frac: u128 = if frac.is_empty() {
+        0
+    } else {
+        format!("{frac:0<8}").parse().ok()?
+    };
+    Some(whole * 100_000_000 + frac)
+}
+
 /// `_meta` of the Head query: the live indexed head (05 corrections C1).
 #[derive(Debug, Clone)]
 pub struct Head {
@@ -213,6 +272,8 @@ pub struct FeedInputs<'a> {
     pub bound_changes: Vec<BoundChangeRow>,
     /// Rate changes after the DERIVED result block.
     pub rate_changes: Vec<RateChangeRow>,
+    /// The consumer's policy, when one was given.
+    pub eligibility: Option<&'a EligibilityPolicy>,
 }
 
 /// Facts from the FeedTimeline query, attached when the feed was queried.
@@ -598,6 +659,84 @@ pub fn decide(inputs: &FeedInputs) -> Outcome {
         notes.push(UNVERIFIED_SELECTOR_NOTE.to_string());
     }
 
+    // Policy gates (the consumer's thresholds), after every table row so a
+    // table word always comes first in `reasons`.
+    if let (Some(policy), Family::Posted) = (inputs.eligibility, feed.family) {
+        let gates = &policy.gates;
+        let before = reasons.len();
+        let suffix = bundle_suffix(row);
+        if gates.require_on_chain_guard && row.is_some_and(is_guard_less) {
+            push(
+                &mut reasons,
+                &mut texts,
+                "POLICY_NO_ON_CHAIN_GUARD".into(),
+                format!(
+                    "POLICY_NO_ON_CHAIN_GUARD: the feed has no on-chain deviation check and policy {} requires one{suffix}",
+                    policy.name
+                ),
+            );
+        }
+        if let (Some(limit), Some(age)) = (gates.max_seconds_since_last_post, feed_age) {
+            if age > limit as i64 {
+                push(
+                    &mut reasons,
+                    &mut texts,
+                    "POLICY_SILENCE".into(),
+                    format!(
+                        "POLICY_SILENCE: last post at {} is {age} seconds before the pinned block at {}, policy {} allows {limit}{suffix}",
+                        feed.latest_updated_at.unwrap_or(0),
+                        pinned.timestamp,
+                        policy.name
+                    ),
+                );
+            }
+        }
+        if let Some(limit) = gates
+            .max_unchecked_deviation_percent
+            .as_deref()
+            .and_then(percent_to_1e8)
+        {
+            if let Some(round) = inputs.unchecked_rounds.iter().find(|r| {
+                r.deviation
+                    .as_deref()
+                    .and_then(|d| d.parse::<u128>().ok())
+                    .is_some_and(|d| d > limit)
+            }) {
+                push(
+                    &mut reasons,
+                    &mut texts,
+                    "POLICY_DEVIATION".into(),
+                    format!(
+                        "POLICY_DEVIATION: round {} moved {} percent in one unchecked post at block {}, policy {} allows {} percent; tx {}{suffix}",
+                        round.round_id,
+                        opt_percent(&round.deviation),
+                        round.block,
+                        policy.name,
+                        gates.max_unchecked_deviation_percent.as_deref().unwrap_or("0"),
+                        round.tx
+                    ),
+                );
+            }
+        }
+        if let (Some(min), Some(r)) = (gates.min_poster_keys, row) {
+            if !r.poster_addresses.is_empty() && r.poster_addresses.len() < min {
+                push(
+                    &mut reasons,
+                    &mut texts,
+                    "POLICY_SINGLE_KEY".into(),
+                    format!(
+                        "POLICY_SINGLE_KEY: {} poster key(s) attributed, policy {} requires {min}{suffix}",
+                        r.poster_addresses.len(),
+                        policy.name
+                    ),
+                );
+            }
+        }
+        if reasons.len() > before {
+            notes.push(policy_note(&policy.name));
+        }
+    }
+
     // Row 11, and 11a for a guard-less POSTED feed: ALLOW stays, with the
     // note and a sentence that says what the decision rests on.
     let (decision, reason, reason_text) = if reasons.is_empty() {
@@ -676,7 +815,7 @@ mod tests {
 
     const ROOT: &str = "1111111111111111111111111111111111111111111111111111111111111111";
 
-    fn policy() -> Policy {
+    fn policy_defaults() -> Policy {
         Policy {
             window_days: 183,
             stale_after_days: 30,
@@ -817,7 +956,112 @@ mod tests {
             unknown_rounds: vec![],
             bound_changes: vec![],
             rate_changes: vec![],
+            eligibility: None,
         }
+    }
+
+    fn policy(gates: PolicyGates) -> EligibilityPolicy {
+        EligibilityPolicy {
+            format: POLICY_FORMAT.into(),
+            name: "test".into(),
+            description: String::new(),
+            gates,
+        }
+    }
+
+    /// The four policy gates, one at a time: each adds its POLICY_ word
+    /// after the table's words and the policy note, and an ALLOW feed that
+    /// fails a gate is REVIEW with the gate as the reason.
+    #[test]
+    fn policy_gates_add_their_words_after_the_table() {
+        let h = head();
+        let p = policy_defaults();
+        let posted = posted_feed();
+        let consistent = consistent_row();
+
+        // Gate 1: require_on_chain_guard on a guard-less row.
+        let guard = policy(PolicyGates {
+            require_on_chain_guard: true,
+            ..PolicyGates::default()
+        });
+        let guard_less = guard_less_row("LIVE", "CONSISTENT");
+        let mut i = inputs(&h, &p, &posted, Some(&guard_less));
+        i.eligibility = Some(&guard);
+        let out = decide(&i);
+        assert_eq!(out.decision, Decision::Review);
+        assert_eq!(out.reason.as_deref(), Some("POLICY_NO_ON_CHAIN_GUARD"));
+        assert_eq!(out.notes, vec![policy_note("test")]);
+        assert!(out.reason_text.starts_with("POLICY_NO_ON_CHAIN_GUARD: the feed has no on-chain deviation check and policy test requires one; bundle"));
+        // A guarded row passes the gate.
+        let mut i = inputs(&h, &p, &posted, Some(&consistent));
+        i.eligibility = Some(&guard);
+        assert_eq!(decide(&i).decision, Decision::Allow);
+
+        // Gate 2: max_seconds_since_last_post against the pinned block.
+        let silence = policy(PolicyGates {
+            max_seconds_since_last_post: Some(3_600),
+            ..PolicyGates::default()
+        });
+        let mut i = inputs(&h, &p, &posted, Some(&consistent));
+        i.eligibility = Some(&silence);
+        let out = decide(&i);
+        assert_eq!(out.reason.as_deref(), Some("POLICY_SILENCE"));
+        assert!(out.reason_text.contains("policy test allows 3600"));
+
+        // Gate 3: max_unchecked_deviation_percent over an unchecked round
+        // that the feed's own bound allowed.
+        let deviation = policy(PolicyGates {
+            max_unchecked_deviation_percent: Some("0.5".into()),
+            ..PolicyGates::default()
+        });
+        let mut within = round_36();
+        within.over_bound = false;
+        within.deviation = Some("60000000".into());
+        let mut i = inputs(&h, &p, &posted, Some(&consistent));
+        i.unchecked_rounds = vec![within];
+        i.eligibility = Some(&deviation);
+        let out = decide(&i);
+        assert_eq!(out.reason.as_deref(), Some("POLICY_DEVIATION"));
+        assert!(out.reason_text.starts_with("POLICY_DEVIATION: round 36 moved 0.6 percent in one unchecked post at block 25037959, policy test allows 0.5 percent; tx 0x7579"));
+        assert_eq!(percent_to_1e8("0.5"), Some(50_000_000));
+        assert_eq!(percent_to_1e8("5"), Some(500_000_000));
+        assert_eq!(percent_to_1e8("x"), None);
+
+        // Gate 4: min_poster_keys when the row lists the keys.
+        let keys = policy(PolicyGates {
+            min_poster_keys: Some(3),
+            ..PolicyGates::default()
+        });
+        let two_keys = guard_less_row("LIVE", "CONSISTENT");
+        let mut i = inputs(&h, &p, &posted, Some(&two_keys));
+        i.eligibility = Some(&keys);
+        let out = decide(&i);
+        assert_eq!(out.reason.as_deref(), Some("POLICY_SINGLE_KEY"));
+        assert!(out
+            .reason_text
+            .starts_with("POLICY_SINGLE_KEY: 2 poster key(s) attributed, policy test requires 3"));
+        // Without keys on the row the gate is silent.
+        let mut i = inputs(&h, &p, &posted, Some(&consistent));
+        i.eligibility = Some(&keys);
+        assert_eq!(decide(&i).decision, Decision::Allow);
+
+        // A table word stays first: row 5 then the policy word.
+        let mut i = inputs(&h, &p, &posted, Some(&consistent));
+        i.unchecked_rounds = vec![round_36()];
+        i.eligibility = Some(&deviation);
+        let out = decide(&i);
+        assert_eq!(
+            out.reasons,
+            vec!["ADMIN_GUARD_BYPASSED", "POLICY_DEVIATION"]
+        );
+        assert_eq!(out.reason.as_deref(), Some("ADMIN_GUARD_BYPASSED"));
+
+        // DERIVED feeds are outside the gates.
+        let derived = derived_feed();
+        let matched = match_row();
+        let mut i = inputs(&h, &p, &derived, Some(&matched));
+        i.eligibility = Some(&silence);
+        assert_eq!(decide(&i).decision, Decision::Allow);
     }
 
     #[test]
@@ -836,7 +1080,7 @@ mod tests {
     #[test]
     fn decision_table_every_row() {
         let h = head();
-        let p = policy();
+        let p = policy_defaults();
         let posted = posted_feed();
         let derived = derived_feed();
         let consistent = consistent_row();
@@ -1022,7 +1266,7 @@ mod tests {
     #[test]
     fn guard_less_feed_allows_with_the_no_guard_note() {
         let h = head();
-        let p = policy();
+        let p = policy_defaults();
         let posted = posted_feed();
         let live = guard_less_row("LIVE", "CONSISTENT");
         let out = decide(&inputs(&h, &p, &posted, Some(&live)));
@@ -1083,7 +1327,7 @@ mod tests {
     #[test]
     fn aggregated_feed_allows_with_the_no_single_key_note() {
         let h = head();
-        let p = policy();
+        let p = policy_defaults();
         let posted = posted_feed();
         let mut live = row("chainlink", "CONSISTENT", Some("AGGREGATED"), Some("LIVE"));
         live.headline = Some("351 rounds by 16 transmitters".into());
@@ -1118,7 +1362,7 @@ mod tests {
     #[test]
     fn decision_serialises_only_allow_or_review() {
         let h = head();
-        let p = policy();
+        let p = policy_defaults();
         let posted = posted_feed();
         let derived = derived_feed();
         let consistent = consistent_row();
@@ -1153,7 +1397,7 @@ mod tests {
     #[test]
     fn unverified_selector_adds_a_note() {
         let h = head();
-        let p = policy();
+        let p = policy_defaults();
         let posted = posted_feed();
         let consistent = consistent_row();
         let mut i = inputs(&h, &p, &posted, Some(&consistent));
@@ -1175,7 +1419,7 @@ mod tests {
     #[test]
     fn posted_feed_freshness_uses_the_indexed_head() {
         let h = head();
-        let p = policy();
+        let p = policy_defaults();
         let consistent = consistent_row();
         let mut feed = posted_feed();
         feed.latest_updated_at = Some(h.timestamp - 30 * 86_400);
@@ -1194,7 +1438,7 @@ mod tests {
     #[test]
     fn rate_change_after_the_window_routes_to_review() {
         let h = head();
-        let p = policy();
+        let p = policy_defaults();
         let derived = derived_feed();
         let matched = match_row();
         let mut i = inputs(&h, &p, &derived, Some(&matched));

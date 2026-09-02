@@ -366,6 +366,27 @@ above without changing a decision word.
   and max` and the sentence `<verdict>: <headline> at block <n>; posted by
   an aggregator transmitter set, no single key; bundle <root>`. Rows 1 to
   10 unchanged. Test: `aggregated_feed_allows_with_the_no_single_key_note`.
+- Eligibility policy (`--policy <file>`, default `config/policy-default.json`
+  when it exists). The consumer's own thresholds on the evidence, applied
+  after every table row so a table word is always first in `reasons`:
+  `require_on_chain_guard` (a guard-less row, 11a, is REVIEW
+  `POLICY_NO_ON_CHAIN_GUARD`), `max_seconds_since_last_post` (last post
+  older than that at the pinned block: `POLICY_SILENCE`),
+  `max_unchecked_deviation_percent` (an unchecked post in the window moved
+  more than that against the previous answer, whatever the feed's own
+  bound allowed: `POLICY_DEVIATION`), `min_poster_keys` (fewer distinct
+  keys than that when the row lists `poster_addresses`:
+  `POLICY_SINGLE_KEY`). A gate that fires adds the note `policy <name>: the
+  threshold is the consumer's rule, not the feed's; ...` and its sentence
+  names the policy and the limit. DERIVED feeds are outside the gates.
+  Every record carries `provenance.eligibility` (file, name, sha256 of the
+  file bytes, gates), so a POLICY_ word is re-checkable from the record.
+  The policy is never presented as the feed's rule: `posting_path` and the
+  findings keep reporting what the feed's own contract checks. Default
+  gates: no guard required (11a decides), seven days since the last post, 5
+  percent per unchecked post, one key; 7 days since the last post. Tests:
+  `policy_gates_add_their_words_after_the_table`,
+  `policy_hash_and_gates_are_in_every_record`.
 - Header counts are JSON numbers. Wrappers come from the entries with
   `kind: "derived"` of `--midas-config` (default
   `config/midas-mainnet.json`); a

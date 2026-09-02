@@ -24,9 +24,9 @@ use serde_json::{json, Value};
 use crate::abi::hex_encode;
 use crate::cache::sha256_hex;
 use crate::model::decision::{
-    decide, BoundChangeRow, CrossfootEvidence, CrossfootRow, Decision, Family, FeedInputs, Head,
-    LatestRound, Pinned, Policy, RateChangeRow, SubgraphEvidence, SubgraphFeed, TimelineEvidence,
-    UncheckedRound, UnknownRound,
+    decide, BoundChangeRow, CrossfootEvidence, CrossfootRow, Decision, EligibilityPolicy, Family,
+    FeedInputs, Head, LatestRound, Pinned, Policy, RateChangeRow, SubgraphEvidence, SubgraphFeed,
+    TimelineEvidence, UncheckedRound, UnknownRound,
 };
 use crate::rpc::redact_endpoint;
 use crate::util::{git_provenance, now_stamp, unix_to_utc};
@@ -60,6 +60,11 @@ pub struct ConsumeOpts {
     /// wrappers and not decided. Missing file: no wrappers.
     #[arg(long, default_value = "config/midas-mainnet.json")]
     pub midas_config: PathBuf,
+
+    /// The consumer's eligibility policy (config/policy-default.json when
+    /// that file exists); its sha256 goes into every record.
+    #[arg(long)]
+    pub policy: Option<PathBuf>,
 
     /// Directory the run directory is created under.
     #[arg(long, default_value = "decisions")]
@@ -174,6 +179,16 @@ pub struct QueryProvenance {
     pub response_file: String,
 }
 
+/// The policy file as the record carries it: name, hash and gates, so a
+/// reader can re-check every POLICY_ word from the record alone.
+#[derive(Debug, Clone, Serialize)]
+pub struct EligibilityProvenance {
+    pub file: String,
+    pub name: String,
+    pub sha256: String,
+    pub gates: crate::model::decision::PolicyGates,
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct Provenance {
     pub subgraph: SubgraphProvenance,
@@ -181,6 +196,48 @@ pub struct Provenance {
     pub feeds_json_sha256: String,
     pub now_unix: i64,
     pub policy: Policy,
+    pub eligibility: Option<EligibilityProvenance>,
+}
+
+pub const DEFAULT_POLICY_PATH: &str = "config/policy-default.json";
+
+/// Reads the policy file: `--policy` when given, else the default path when
+/// it exists, else none.
+fn load_policy(
+    path: Option<&Path>,
+) -> Result<Option<(EligibilityPolicy, EligibilityProvenance)>, String> {
+    let path = match path {
+        Some(path) => path.to_path_buf(),
+        None => {
+            let default = PathBuf::from(DEFAULT_POLICY_PATH);
+            if !default.exists() {
+                return Ok(None);
+            }
+            default
+        }
+    };
+    let bytes = fs::read(&path)
+        .map_err(|err| format!("policy {} is not readable: {err}", path.display()))?;
+    let policy: EligibilityPolicy = serde_json::from_slice(&bytes)
+        .map_err(|err| format!("policy {} does not parse: {err}", path.display()))?;
+    if policy.format != crate::model::decision::POLICY_FORMAT {
+        return Err(format!(
+            "policy {} has format {}, expected {}",
+            path.display(),
+            policy.format,
+            crate::model::decision::POLICY_FORMAT
+        ));
+    }
+    let provenance = EligibilityProvenance {
+        file: path
+            .file_name()
+            .map(|f| f.to_string_lossy().to_string())
+            .unwrap_or_else(|| path.display().to_string()),
+        name: policy.name.clone(),
+        sha256: sha256_hex(&bytes),
+        gates: policy.gates.clone(),
+    };
+    Ok(Some((policy, provenance)))
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -810,6 +867,7 @@ pub fn run_with_key(opts: &ConsumeOpts, key: Option<String>) -> Result<RunOutcom
     // Inputs that do not need the network first, so a missing feeds.json
     // fails before any query is sent.
     let (rows, feeds_json_sha256) = load_feed_rows(&opts.feeds)?;
+    let eligibility = load_policy(opts.policy.as_deref())?;
     let joined = join_rows(&rows);
     let wrappers = load_wrappers(&opts.midas_config)?;
     let queries: BTreeMap<&str, String> = QUERY_NAMES
@@ -954,6 +1012,7 @@ pub fn run_with_key(opts: &ConsumeOpts, key: Option<String>) -> Result<RunOutcom
         feeds_json_sha256,
         now_unix: now,
         policy: policy.clone(),
+        eligibility: eligibility.as_ref().map(|(_, p)| p.clone()),
     };
     let agent = Agent {
         tool_version: env!("CARGO_PKG_VERSION").to_string(),
@@ -996,6 +1055,7 @@ pub fn run_with_key(opts: &ConsumeOpts, key: Option<String>) -> Result<RunOutcom
                 .get(&feed.address)
                 .cloned()
                 .unwrap_or_default(),
+            eligibility: eligibility.as_ref().map(|(p, _)| p),
         };
         let mut outcome = decide(&inputs);
         outcome.notes.extend(run_notes.iter().cloned());
@@ -1196,8 +1256,30 @@ mod tests {
             now: Some(FIXTURE_NOW),
             block: None,
             replay: Some(fixture),
+            policy: Some(repo_root().join(DEFAULT_POLICY_PATH)),
             timelines: vec!["mRE7".into()],
         }
+    }
+
+    /// The policy file's hash and gates travel in every record, and the
+    /// default policy leaves the fixture's decisions unchanged.
+    #[test]
+    fn policy_hash_and_gates_are_in_every_record() {
+        let outcome = run_with_key(&fixture_opts(&temp("policy")), None).unwrap();
+        let output = read_output(&outcome);
+        let bytes = fs::read(repo_root().join(DEFAULT_POLICY_PATH)).unwrap();
+        for record in output["decisions"].as_array().unwrap() {
+            let e = &record["provenance"]["eligibility"];
+            assert_eq!(e["name"], "default");
+            assert_eq!(e["sha256"], sha256_hex(&bytes));
+            assert_eq!(e["gates"]["max_seconds_since_last_post"], 604_800);
+            assert_eq!(e["gates"]["max_unchecked_deviation_percent"], "5");
+        }
+        assert_eq!(output["header"]["allow"], 11);
+        // Without a policy the field is null and nothing else changes.
+        let mut opts = fixture_opts(&temp("no-policy"));
+        opts.policy = Some(PathBuf::from("/nonexistent/policy.json"));
+        assert!(run_with_key(&opts, None).unwrap_err().contains("policy"));
     }
 
     fn read_output(outcome: &RunOutcome) -> Value {
