@@ -1891,6 +1891,15 @@ fn feed_headline(result: &Value, feed: &Value) -> String {
             n("reference_moves"),
             n("unguarded_reference_moves")
         ),
+        Some("absolute_delta") => format!(
+            "{rounds} checkpoint(s) within the delta cap, {} over it, {} override flag(s) set, liveness {liveness}",
+            n("bypass_posts"),
+            n("override_flags")
+        ),
+        Some("event_rules") => format!(
+            "{rounds} post(s) replayed against the feed's own rules, {} unchecked post(s) over them, liveness {liveness}",
+            n("bypass_posts")
+        ),
         _ => format!(
             "{} unchecked post(s) over the bound in force, posting path {}, liveness {liveness}",
             n("bypass_posts"),

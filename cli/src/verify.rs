@@ -332,6 +332,9 @@ fn replay(
                         format!("the manifest summary carries no mechanism: {err}"),
                     )
                 })?;
+            // Rounds that needed a trace on the live run are served from the
+            // same bundle on the replay.
+            let mut tracer = BundleSource::open(dir).map_err(|err| (OTHER, err))?;
             crate::run_midas::run(
                 &mut source,
                 crate::run_midas::RunArgs {
@@ -350,7 +353,7 @@ fn replay(
                         .to_string(),
                     stale_after_days: summary["stale_after_days"].as_u64().unwrap_or(30),
                     recent_days: summary["recent_days"].as_u64().unwrap_or(183),
-                    trace: None,
+                    trace: Some(&mut tracer),
                 },
                 replay_root,
             )
