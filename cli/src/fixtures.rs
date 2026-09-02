@@ -2,9 +2,13 @@
 //!
 //! The Midas family bundle at block 25,884,405 holds about 2,000 verbatim
 //! responses (12 MB uncompressed), so it is committed as a tar.gz and
-//! extracted once per build into `target/fixtures/`. The extraction is
-//! atomic (extract into a temporary directory, then rename), so tests
-//! running in parallel see either nothing or the complete bundle.
+//! extracted once per build into `target/fixtures/`. The extraction
+//! directory is keyed by the archive's sha256
+//! (`target/fixtures/<name>-<sha256 prefix>/`), so a regenerated archive
+//! extracts afresh and never meets a stale extraction of its predecessor.
+//! The extraction is atomic (extract into a temporary directory, then
+//! rename), so tests running in parallel see either nothing or the
+//! complete bundle.
 
 use std::path::PathBuf;
 use std::process::Command;
@@ -17,20 +21,24 @@ fn workspace_root() -> PathBuf {
 }
 
 /// The extracted Midas family bundle, `bundles/midas-run-25884405` in the
-/// archive, extracted to `target/fixtures/midas-25884405/`.
+/// archive, extracted to `target/fixtures/midas-25884405-<sha256 prefix>/`.
 pub fn midas_bundle() -> PathBuf {
     bundle("midas-25884405")
 }
 
 /// Any checked-in family archive `cli/tests/fixtures/<name>.tar.gz`,
-/// extracted once per process to `target/fixtures/<name>/`.
+/// extracted once per archive content to
+/// `target/fixtures/<name>-<sha256 prefix>/`.
 pub fn bundle(name: &str) -> PathBuf {
     // One extraction per process; other test threads wait for it.
     static LOCK: Mutex<()> = Mutex::new(());
     let _guard = LOCK.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
     let archive = workspace_root().join(format!("cli/tests/fixtures/{name}.tar.gz"));
+    let bytes = std::fs::read(&archive)
+        .unwrap_or_else(|err| panic!("could not read {}: {err}", archive.display()));
+    let digest = crate::cache::sha256_hex(&bytes);
     let target = workspace_root().join("target/fixtures");
-    let dir = target.join(name);
+    let dir = target.join(format!("{name}-{}", &digest[..12]));
     if dir.join("result.json").is_file() {
         return dir;
     }
