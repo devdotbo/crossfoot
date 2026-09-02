@@ -16,7 +16,9 @@ says so on its own line (`nav_recomputation: INPUT_GAP`) instead of implying
 a check that did not happen.
 
 Site: https://crossfoot.tech. Explorer: https://app.crossfoot.tech.
-Specifications: [`docs/specs/`](docs/specs/README.md). Flow diagram:
+Specifications: [`docs/specs/`](docs/specs/README.md). Families and
+targets, one section each with counts and commands:
+[`docs/families.md`](docs/families.md). Flow diagram:
 [`docs/evidence-flow.md`](docs/evidence-flow.md).
 
 ## The evidence flow
