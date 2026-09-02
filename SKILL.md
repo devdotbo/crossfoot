@@ -27,7 +27,7 @@ the policy is missing.
 | File | Variables | Gives |
 |---|---|---|
 | Head.graphql | none | the live head: deployment, block, timestamp, hasIndexingErrors |
-| FeedStatus.graphql | block | every feed's latest posted state |
+| FeedStatus.graphql | block | every feed's latest posted state and its newest 20 answers |
 | WindowFindings.graphql | block, since, resultBlock | unchecked posts, unattributable rounds, bound changes in the window; rate changes after the DERIVED result |
 | FeedTimeline.graphql | block, feed | one feed's rounds and bound history |
 
@@ -43,8 +43,8 @@ first matching row of the table in docs/specs/05-consumer-agent.md:
 INDEXING_ERRORS, SUBGRAPH_STALE, NO_CROSSFOOT_RESULT, PATH_NOT_ATTRIBUTABLE,
 ADMIN_GUARD_BYPASSED, BOUND_CHANGED, the liveness word (STALE, PLACEHOLDER,
 INIT_ONLY), the verdict word, RESULT_STALE, RATE_CHANGED_AFTER_WINDOW, then
-the policy words POLICY_NO_ON_CHAIN_GUARD, POLICY_SILENCE, POLICY_DEVIATION,
-POLICY_SINGLE_KEY. A guard-less feed (posting_path ATTRIBUTED) that is LIVE
+the policy words POLICY_NO_RULE, POLICY_PATH_GAP, POLICY_DEVIATION,
+POLICY_SILENCE, POLICY_CONSTANT, POLICY_POSTER. A guard-less feed (posting_path ATTRIBUTED) that is LIVE
 and CONSISTENT is ALLOW with the note that no on-chain deviation check
 exists; an aggregator feed (AGGREGATED) with the note that no single key
 posts. `reasons` lists every row that matched.
@@ -52,8 +52,10 @@ posts. `reasons` lists every row that matched.
 ## Policy
 
 `config/policy-default.json` (format crossfoot-policy-v1) holds the
-consumer's gates: require_on_chain_guard, max_seconds_since_last_post,
-max_unchecked_deviation_percent, min_poster_keys. They are the consumer's
+consumer's gates: accept_guard_less_feeds, max_unattributed_rounds,
+max_unchecked_deviation_percent, max_seconds_since_last_post,
+flag_constant_value, require_poster_keys, min_poster_keys,
+allowed_posters. They are the consumer's
 thresholds on the evidence, never the feed's rule; the record carries the
 file's sha256 and gates under `provenance.eligibility`.
 

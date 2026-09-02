@@ -1,11 +1,15 @@
 {
   "format": "crossfoot-policy-v1",
   "name": "default",
-  "description": "Evidence-gated eligibility for automatic acceptance. Every gate is the consumer's threshold on the evidence, never the feed's own rule; a feed that fails a gate is REVIEW with a POLICY_ word, and a feed with no on-chain rule is not made to look as if it had one.",
+  "description": "Evidence-gated eligibility for automatic acceptance (wiki/prevention-layer.md, candidate c). Every gate is the consumer's threshold on the evidence, never the feed's own rule; a feed that fails a gate is REVIEW with a POLICY_ word, and a feed with no on-chain rule is not made to look as if it had one.",
   "gates": {
-    "require_on_chain_guard": false,
-    "max_seconds_since_last_post": 604800,
+    "accept_guard_less_feeds": false,
+    "max_unattributed_rounds": 0,
     "max_unchecked_deviation_percent": "5",
-    "min_poster_keys": 1
+    "max_seconds_since_last_post": 604800,
+    "flag_constant_value": true,
+    "require_poster_keys": false,
+    "min_poster_keys": 1,
+    "allowed_posters": []
   }
 }

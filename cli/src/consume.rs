@@ -571,6 +571,18 @@ fn parse_feeds(data: &Value) -> Result<Vec<SubgraphFeed>, String> {
             unchecked_count: int_field(feed, "uncheckedCount").unwrap_or(0),
             over_bound_count: int_field(feed, "overBoundCount").unwrap_or(0),
             latest_round,
+            recent_answers: feed
+                .get("rounds")
+                .and_then(Value::as_array)
+                .map(|rounds| {
+                    rounds
+                        .iter()
+                        .filter_map(|r| {
+                            Some((str_field(r, "answer")?, int_field(r, "blockTimestamp")?))
+                        })
+                        .collect()
+                })
+                .unwrap_or_default(),
         });
     }
     out.sort_by(|a, b| a.address.cmp(&b.address));

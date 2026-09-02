@@ -23,5 +23,6 @@ query FeedStatus($block: Int!) {
     uncheckedCount
     overBoundCount
     latestRound { roundId path overBound updatedAt }
+    rounds(first: 20, orderBy: block, orderDirection: desc) { answer blockTimestamp }
   }
 }

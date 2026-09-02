@@ -102,9 +102,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -134,20 +134,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "b792357a2778a190fb44c5d632a9c4f8e808305dc57bce31d5c38ab8e92b8239"
+      "record_sha256": "84083c914d41b82aa3794fd3b2272ce5db9725f1ce462be9e470f4e3e5efd150"
     },
     {
       "feed": {
@@ -236,9 +240,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -268,20 +272,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "4297b23ec95d495565acdb4d65515271c1f3b0695430dfeba753f03565d311ee"
+      "record_sha256": "ee3a8b8dd4e89ab8da61e1fb54e3fa0ed1f60bbb4f9f06785639bed43af1359e"
     },
     {
       "feed": {
@@ -367,9 +375,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -399,20 +407,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "e9d0e6839e5644c3b383378961ca46af27aa5bdf880e96d0f0d2460313954a7e"
+      "record_sha256": "fa0a0ebd3c0292d9fd2340bc9accdd6d12b74f367e41566a8de5a2f68cd4123f"
     },
     {
       "feed": {
@@ -522,9 +534,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -554,20 +566,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "368f69683f00127ad115fe953f69fd818ed284b4b0e7c7fb9a4160d8de92a9d1"
+      "record_sha256": "374be9c0171bdca170e25148b13b803b517c76df2d015eb7ea434d46f5bf57a8"
     },
     {
       "feed": {
@@ -656,9 +672,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -688,20 +704,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "b8997dd191842f9bc027a4640975d177079feea79e694d411a5d90cfe0b5a9db"
+      "record_sha256": "cedd68d4f0fe4f020f09c6510f5939cd763be2f16417da795b9c8d0e5e76c45c"
     },
     {
       "feed": {
@@ -814,9 +834,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -846,20 +866,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "604904ae43469850bc65c8653b558aa368f95002eb3dd7d13e772e3ca46ae09f"
+      "record_sha256": "bf23f0d2f2a70ea925ce4d33be0ea7c185bb525de5d0b36c7c078190e43309bc"
     },
     {
       "feed": {
@@ -975,9 +999,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -1007,20 +1031,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "11af2985a18367c57f428f53db6242cfaf96d8ef19410a2a80ddb98f708bd8d0"
+      "record_sha256": "836a601be77f11ea1eb21023cd8da11e4ae947b14b89e33ef7c9128dcdb2f8c1"
     },
     {
       "feed": {
@@ -1108,9 +1136,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -1140,20 +1168,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "1bf7318c393340f7c5b9e3b5218b9fb5566c700c49440ddd698e31303b991b52"
+      "record_sha256": "a0d6bc2819677e2ef7e3554c5b7c396020f7a6900252db4328f209083429285e"
     },
     {
       "feed": {
@@ -1242,9 +1274,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -1274,20 +1306,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "6cdf1d6e839d96d2c679c9c7c272c6385cd88948cdfdfdbc21a9fb268c6a880f"
+      "record_sha256": "1ea0e81451fd2c5480a7bc13c91d6a71599b9283d7435a69755ce0e4bbaea2a0"
     },
     {
       "feed": {
@@ -1371,9 +1407,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -1403,20 +1439,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "3259284635f6b5393eaadbca3c60c38d945062925f730f70fe1bf153ea064219"
+      "record_sha256": "b9365bf063b5b858cf17df3ed4abb6ee0fb44db51dd5332dc226a42b1313fdb1"
     },
     {
       "feed": {
@@ -1505,9 +1545,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -1537,20 +1577,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "5eda7c32cd24bdcee3cbd4a3f4b078a012c3bc9b37d685af9ebfb23ce27e23ff"
+      "record_sha256": "1a97385655abaacdb28ac9d0ad89eff0e87dff3f4c053113874f018e516e3176"
     },
     {
       "feed": {
@@ -1634,9 +1678,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -1666,20 +1710,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "6a8e72ffc45c6880adeabb41cfe3a9a1d57063d38a044b3a51c9a97f7836f88c"
+      "record_sha256": "9c930c3f1cfe7e225a1f854c64829fe394670c985cfaa90dd0497d6a056efe94"
     },
     {
       "feed": {
@@ -1768,9 +1816,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -1800,20 +1848,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "5b51163a56152166ba8faa793b23b63780cb1c699d912cf573d2821b9bf52135"
+      "record_sha256": "9281967b373b1f377ab6d7c1227c78d3e76def05196cefaeea48e48143897aea"
     },
     {
       "feed": {
@@ -1899,9 +1951,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -1931,20 +1983,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "a6785ac117c9ff3c5d33bd09967375461af93de7c510323b949ae39bdcc370f0"
+      "record_sha256": "a574153158e954648d11500842b24c2647a004d7eedbb9dcec5d7638c27c43ce"
     },
     {
       "feed": {
@@ -2032,9 +2088,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -2064,20 +2120,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "367e92eb6d552b60c8fbdd4b4e231fdc24770598b44e60749c3586b5c8e21965"
+      "record_sha256": "b584fc256704bb3aedd76f913edfdeae2dce8759fafc81f8a4fe2e701dc78cc6"
     },
     {
       "feed": {
@@ -2166,9 +2226,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -2198,20 +2258,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "1a345ccbc19326c2906a7b5e4bc8fc489681bf7ce9c00de4d5581dad9f10cf50"
+      "record_sha256": "97dba7434ec80d491f0e32102e07c1fcc75ae5a5d3ca77856b2f74e20d8a4084"
     },
     {
       "feed": {
@@ -2315,9 +2379,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -2347,20 +2411,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "3d7ca02b78d82e08eb369c0c2c9580be99dec3f700e54ac05fd2d5e1385a6d5d"
+      "record_sha256": "a5b5a8cbf580c3cdffdc49974c26320a5659c8b284ab4f98ff43f456605239ba"
     },
     {
       "feed": {
@@ -2444,9 +2512,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -2476,20 +2544,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "8103c20dea88cd5e2b4f9253d51565e464c65f2c681a692edd950dec85a65e74"
+      "record_sha256": "517f23fe36bb386a6adde615aed977e8cbcbd231eca7306ed5a4fbdf44ede3cc"
     },
     {
       "feed": {
@@ -2578,9 +2650,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -2610,20 +2682,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "cd488188d7bce45a3065a6eb84b1ba6d328bf6b5ba949f1825d0fe8df631e002"
+      "record_sha256": "e95ae02aa2b813fcd00b9a0459453f446b16fa81c62e4154e88e976b193ec440"
     },
     {
       "feed": {
@@ -2712,9 +2788,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -2744,20 +2820,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "6831e318972248020c56a174922728fcbeefff4e836d1497a6cb0e43550861ab"
+      "record_sha256": "c80ad1dbcab2c22dfaeab1a5722e7827ebffe07a93aa5d1aabd97f58205c4fbe"
     },
     {
       "feed": {
@@ -2843,9 +2923,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -2875,20 +2955,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "72c979dc986811c898cd6c4b4a8a831ff1422b7b04ea1be23713aaf06dba1690"
+      "record_sha256": "23fd00639384762df5d8d62715d2a673d776f0da8162a1fd4ba310530628c9c0"
     },
     {
       "feed": {
@@ -2976,9 +3060,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -3008,20 +3092,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "e4f40192be912aa2aefa1b0aa6a199644a497fec54b5036ddfdbc5e9f85792b8"
+      "record_sha256": "7f1618e943c6ef4e7fba86f6f59942aca5cb3f925d4ed8c03b6646645f8eb348"
     },
     {
       "feed": {
@@ -3125,9 +3213,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -3157,20 +3245,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "cfee843bb7e0649c27cbff44e7a7d274806cd1d0d66ba6d8499eaa184f9e4300"
+      "record_sha256": "be8fe819df50a575029ce7b2de404c3cdc3abc7344364e613e8719c8a72270aa"
     },
     {
       "feed": {
@@ -3254,9 +3346,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -3286,20 +3378,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "9853b9661c387cba790dfa9fb53af61d5489b0e3e0bb4407b325754dc554dc31"
+      "record_sha256": "ea377f275d7257a391b55d66e60d0f9a484ec1afef0b6981b7c99a827fcd91d2"
     },
     {
       "feed": {
@@ -3388,9 +3484,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -3420,20 +3516,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "f2b4c033ab78b83b4cb323ce703ac58e13cb1acf0ee00114818f773aaf6ce06e"
+      "record_sha256": "b8c78a070e42fb8939c4cb9613d562fb754b83ee06b4d3bcb89201a2614c5432"
     },
     {
       "feed": {
@@ -3523,9 +3623,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -3555,20 +3655,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "4396a2d0c233d95e0eb70b8b024645cc2e5a0af70b2d3d4e726f7dde2bfd4172"
+      "record_sha256": "7574a7b4aea8023de28cf350244b0c2a834e657cb4be929357eb57bf8e54a94a"
     },
     {
       "feed": {
@@ -3656,9 +3760,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -3688,20 +3792,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "bd60c978186c5a203926374a92e2633a20c7334ad33f25930f484dfff1718087"
+      "record_sha256": "b078493a77a9d005cb37a51d15ae5ff2e308ca87211eec40cc97769186d6921e"
     },
     {
       "feed": {
@@ -3785,9 +3893,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -3817,20 +3925,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "9dc7d704ac4cf0db24dcd45522a0ba644c5d811c3e16873723517ed3c042be50"
+      "record_sha256": "d76bee74dc53ccfd5ab5594c27d5968cc5668962b05834652deb5497aa6ce4b6"
     },
     {
       "feed": {
@@ -3919,9 +4031,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -3951,20 +4063,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "eb84519623591c2a9db5b4a7ec953039c22ef35ef43320a76dc20328e8b7f62b"
+      "record_sha256": "c9605e3f2fe484bedc1cf9c7fe9467a5e23d4e346af9bf65b175bd591be48428"
     },
     {
       "feed": {
@@ -4053,9 +4169,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -4085,20 +4201,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "2885712d55388f8146efe08cb82159f68d1d0d2ef5847b3953921cce04ec3186"
+      "record_sha256": "e59eef7af8cb7bdc1c1b9e2bd7a1d58549fa8311081e81b659cbbc614a126608"
     },
     {
       "feed": {
@@ -4198,9 +4318,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -4230,20 +4350,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "68bb43c1e9595d39c443b852144126af34289ce74a402fe7a2d4bf9e9b9e4410"
+      "record_sha256": "fb76b4ee7c21051700e2a0857fb576c0b3c0845187d40550bc9fcefdd4a7d666"
     },
     {
       "feed": {
@@ -4332,9 +4456,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -4364,20 +4488,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "ee3fbf493ce0147486a313fa5e1cd6601b349c756ba287dcd6d691915cf2ed46"
+      "record_sha256": "444157f52ba37e7f43dcd6a7f8509ecaac960d3118dbad92eadaf01b6dfc3940"
     },
     {
       "feed": {
@@ -4480,9 +4608,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -4512,20 +4640,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "8b2b9b484e6527995e42c48b179c49c4d65c441e8c9b770a6c6afc9744cde21f"
+      "record_sha256": "1cbfdb0b56cd4eba241a5136e41dbd5d8fa3ed70cb19dd03cacbae8f71de5cf7"
     },
     {
       "feed": {
@@ -4609,9 +4741,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -4641,20 +4773,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "d8001e2b36835daf4ddb5cf0c90a91a3929569debac1b25a3d20b399eaea86ea"
+      "record_sha256": "1072b9717548cbfe2eb4fec3d656804fbe89fa60380779e71de7e55e0c647103"
     },
     {
       "feed": {
@@ -4743,9 +4879,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -4775,20 +4911,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "cf880cf0dee87cd41effa92727a7adc0430586e0940fc7ed63f8886b2fb34271"
+      "record_sha256": "7fb0591ab8492d372d2c45170b4b1c4464c6f0b6b963cf463ced968994d4e794"
     },
     {
       "feed": {
@@ -4877,9 +5017,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -4909,20 +5049,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "e7b1b80d64260464656809a52adea2c5bdde3039b09397fcd473b4718424c0a6"
+      "record_sha256": "d2b983f1c5f9ecca88af19d9d074974041ab8745256c89a40b42131f8966e607"
     },
     {
       "feed": {
@@ -5010,9 +5154,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -5042,20 +5186,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "74ba84f302ad10b8f5588729af11e171e73614762e07d8db5a921508bd899eb4"
+      "record_sha256": "b0ae5b842b62f717fdb8258aebb557e9d59787bc63c9ac977e3306b66c5b94aa"
     },
     {
       "feed": {
@@ -5144,9 +5292,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -5176,20 +5324,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "c94c284f614b114d5e8e03f37f7cc0df9f828795892a152cdfdf185267fc6236"
+      "record_sha256": "526403a2ecf5d4574a1f895a4aed8de4417d81991500582338875996ce4cf683"
     },
     {
       "feed": {
@@ -5275,9 +5427,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -5307,20 +5459,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "848026b00c3687e81b550240f7d9cb58c578f0d062465baea523dd7d100284ca"
+      "record_sha256": "d8690aa7a5b7e25ca858b3d69db0069653556b831cfaa34bb412e0f51166330c"
     },
     {
       "feed": {
@@ -5433,9 +5589,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -5465,20 +5621,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "e0f11b5fca575d22f60d8ef8cc8293d18d9498013c9693a48e838d2bc671a7d9"
+      "record_sha256": "7b29f5da65c8ae5a9efbb1c6d9b8a367e067bcc44139a80443b506d4f217d9c4"
     },
     {
       "feed": {
@@ -5567,9 +5727,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -5599,20 +5759,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "646f4099ce3cf4c751eee0aa76f6afdf309c0e5cb09f4dda79ab7dbeb416700a"
+      "record_sha256": "b5df6c9e9d41d110b419407ab432d4a881d0a7edd620be998a41e0fb35d53a17"
     },
     {
       "feed": {
@@ -5702,9 +5866,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -5734,20 +5898,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "a5485aa4bfd13039fe7f3d8a4d568d93d6d343ff2a8f7f31233201c175eefa17"
+      "record_sha256": "a71172795327ce2f93e4503c9cc568fc42ad5c1426323892407ac4927b637191"
     },
     {
       "feed": {
@@ -5835,9 +6003,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -5867,20 +6035,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "0490044e3ccaf0dcc6d17606b94d04f6caf8538ea62746068c7307629d46585f"
+      "record_sha256": "913835cd1734080623a637b2f89dcca8ae466414a0ac2f6c07d9c3643fdb591e"
     },
     {
       "feed": {
@@ -5969,9 +6141,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -6001,20 +6173,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "f04b4fa3a0ce7346ad73d7eaee9c89dd5738a8bcb8e7238c93d2e1d3ba6ac4ed"
+      "record_sha256": "d3a785395077ae34ab7108da9aadad85e6498b51a9e6628806d99e6c345f7b83"
     },
     {
       "feed": {
@@ -6103,9 +6279,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -6135,20 +6311,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "f7726f84d61f069facc36bc4dd7c18dfcee4959e82f71706c47215e5b566bd12"
+      "record_sha256": "d1f83ffd34ae7aaf8835d6c6e0f3660c145083202e2ace4a8c756d51ee87a0e8"
     },
     {
       "feed": {
@@ -6237,9 +6417,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -6269,20 +6449,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "1facc0f56b24593ec80ace93adc3d1165ea7b28eca7ec3512a3cddfd4c9aa505"
+      "record_sha256": "554634f26d4bb1b68740a7df31b6517b82eae210bb9fd352004435d328eda747"
     },
     {
       "feed": {
@@ -6366,9 +6550,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -6398,20 +6582,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "65e0ea0091cffb407f9b1502545f76ccdfd232b1c3d58c3b77c16ba66bee2480"
+      "record_sha256": "58be6a7f00ac91130a358a51d17d0ac9eabe21d004cd698c9cddd58983f4bdaa"
     },
     {
       "feed": {
@@ -6500,9 +6688,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -6532,20 +6720,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "6e4b5d7d48a8b51662751730556835622a57809232d477932b0f5b3e58158853"
+      "record_sha256": "8c69a812c7d733440ddd0b585772f3bbf1dd77e6cda37148e41fbda5c8665e29"
     },
     {
       "feed": {
@@ -6629,9 +6821,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -6661,20 +6853,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "df19e01f568b56f069e68c00b07f081cdca868e1283372c13ab32eecea148c69"
+      "record_sha256": "2d5ccd07dd5a20a431caae060bd524734ef79e37ce560b2c16a97ad6f008a852"
     },
     {
       "feed": {
@@ -6760,9 +6956,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -6792,20 +6988,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "54736237d5fb72f84b3959aabd190af3f9546cf4900050f46dc44cdcfd3b21b6"
+      "record_sha256": "215493e8558db6712d1e92fbdb38a0e2d770e08ed61ecb7fd20b794a4c6437c0"
     },
     {
       "feed": {
@@ -6889,9 +7089,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -6921,20 +7121,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "260df127fa86b9e5eedf9a34de7ac65359c384f69c4da1aca569d55d49c5fc4e"
+      "record_sha256": "184a70255e5a512445dd5aad0c78aa7e1767105f2bdcb28924ed263bf8870873"
     },
     {
       "feed": {
@@ -7020,9 +7224,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -7052,20 +7256,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "65d96d9329c6f3bec15a123eb6bbfe10ed1ba76f945289c09e6c88f51b87f4c2"
+      "record_sha256": "b7b41dd946ad13d6160d91efdf741c1c3dacc504f8caf7919a335beced7b306c"
     },
     {
       "feed": {
@@ -7181,9 +7389,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -7213,20 +7421,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "4852e110d0b1f210c5aad3252832ce870f8ea1de5faa61d22f836e3b3fe0ba51"
+      "record_sha256": "96b3dcca556cc0c8d81fbe43ae935d35c6d2d7a6565dace76de5e02194f738f5"
     },
     {
       "feed": {
@@ -7312,9 +7524,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -7344,20 +7556,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "c85047b2fa02135ad88624d05a1acc33ec1ba655782a03276c072a09bfd17c4f"
+      "record_sha256": "35e3a550b783b937ec1ac86a913fe02d71d10bce9e2348cdf47c6ad3e3e164e9"
     },
     {
       "feed": {
@@ -7443,9 +7659,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -7475,20 +7691,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "ce81749582917768f246177741a1e51934562f184c4ee934e4bb05f987438617"
+      "record_sha256": "0ae11a7cc43acdc9a69268eaa05f95b0ed54bda7e43e9c1d743f9c9bdb8576f0"
     },
     {
       "feed": {
@@ -7572,9 +7792,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -7604,20 +7824,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "2e02a103da73dead3844f34cfc4b2a43ac25096580d06e562c428fb0657b9432"
+      "record_sha256": "f6b6ddd1b176dee99a0d0c79fe0c3989f557f6ccf58473147d2b037a98db2c58"
     },
     {
       "feed": {
@@ -7706,9 +7930,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -7738,20 +7962,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "597f7641801f6324c7209f7d39137465baa84c188fc14a0381419046662deebb"
+      "record_sha256": "f6628f77e717d6533965a238031a6b30f5bea5f5c6d5626c137a8be3e27042e8"
     },
     {
       "feed": {
@@ -7840,9 +8068,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -7872,20 +8100,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "337f1eff21353ca9ed860b9ffde2da659cbffdbd507334272b799dc722ec19e1"
+      "record_sha256": "c641389c2ad4861975197279e1c0c218dd28c411ea98453f31e442e28dcda22c"
     },
     {
       "feed": {
@@ -7969,9 +8201,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -8001,20 +8233,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "312211daacff74fecb846cae4ff86b18c5f19b2cda074f18dd8407f842107bd3"
+      "record_sha256": "4ce4140ae681d892b8b2a01c0de318b3199ddffdb4cbbd1057e40b4f604dd825"
     },
     {
       "feed": {
@@ -8104,9 +8340,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -8136,20 +8372,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "f58d81c1d1f974266cb3a6520d361de5a84df023539b08b7ca94c53d403401b6"
+      "record_sha256": "1b352fcc9c595d241feb038b9ca8129cc0bbc5e3dfffabbeb5c885499d63c0e1"
     },
     {
       "feed": {
@@ -8164,8 +8404,8 @@
       "reasons": [
         "ADMIN_GUARD_BYPASSED",
         "STALE",
-        "POLICY_SILENCE",
-        "POLICY_DEVIATION"
+        "POLICY_DEVIATION",
+        "POLICY_SILENCE"
       ],
       "reason_text": "ADMIN_GUARD_BYPASSED: round 0 posted through setRoundData (0xa4381d1f) at block 24683249, deviation 19.31153493 percent against bound 0.4 percent in force; tx 0xf82b7c2e9e0aa9b8e935f033294c00a74748d7c739f0a0302d172c3a11668835; Crossfoot posting_path ADMIN_GUARD_BYPASSED, bundle 33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
       "notes": [
@@ -8254,9 +8494,9 @@
           },
           {
             "name": "FeedStatus",
-            "query_sha256": "df9dce50f1f8b2552ebf4bf594783eafecff3bae5f48ec0c56bc0d32ab590f5c",
+            "query_sha256": "660bc278550b63efce08fa9f132ef5e0979803af4632bd9ccc49eab15d9ff482",
             "variables_sha256": "986b9acbb15723bd0c31b25b9fbaa885024137e71bf63ddcce3bb1bf9583d5e0",
-            "response_sha256": "dd337bde5c0161b83cf093e7d596e37c96d980b7e192c38af722ed4f35c2b31f",
+            "response_sha256": "905369ab9b75d7b05a3197739f7335cd055eb80592204697e6a0cf5253079ae6",
             "response_file": "responses/FeedStatus.json"
           },
           {
@@ -8286,20 +8526,24 @@
         "eligibility": {
           "file": "policy-default.json",
           "name": "default",
-          "sha256": "baad723ee8bec3579de3495066d5a54737afa60149f823f53746f3d8713b01b0",
+          "sha256": "84806934fd5b556105392032b6b4a0b2d2fb3e69035101021582d4ec3e2c1ab4",
           "gates": {
-            "require_on_chain_guard": false,
-            "max_seconds_since_last_post": 604800,
+            "accept_guard_less_feeds": false,
+            "max_unattributed_rounds": 0,
             "max_unchecked_deviation_percent": "5",
-            "min_poster_keys": 1
+            "max_seconds_since_last_post": 604800,
+            "flag_constant_value": true,
+            "require_poster_keys": false,
+            "min_poster_keys": 1,
+            "allowed_posters": []
           }
         }
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "8a698eae0dbd25b0f848c997f4ea3334bfe36dd5"
+        "git_commit": "0858b8f71359582200afff368b1f9acea5db74b4"
       },
-      "record_sha256": "54dce7c5eb271e676177875dcdc0b869f9889b5f9048c1973eef35680304fcab"
+      "record_sha256": "343defe52e4194a36a59f6b4951c5aab1124ff3e4222e2dfd9a75b5034fb9c49"
     }
   ]
 }

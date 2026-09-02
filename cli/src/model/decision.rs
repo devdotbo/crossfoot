@@ -44,19 +44,31 @@ pub struct Policy {
 /// that fails adds a `POLICY_` word to `reasons` after every table row.
 #[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq, Eq)]
 pub struct PolicyGates {
-    /// A feed without an on-chain deviation check is REVIEW.
+    /// Gate 1: a feed without an on-chain rule is REVIEW unless accepted.
     #[serde(default)]
-    pub require_on_chain_guard: bool,
-    /// The last post may be at most this old at the pinned block.
+    pub accept_guard_less_feeds: bool,
+    /// Gate 2: rounds in the window without an attributed path, at most.
     #[serde(default)]
-    pub max_seconds_since_last_post: Option<u64>,
-    /// An unchecked post in the window may move at most this many percent
-    /// (decimal string) against the previous answer.
+    pub max_unattributed_rounds: usize,
+    /// Gate 3: an unchecked post in the window may move at most this many
+    /// percent (decimal string) against the previous answer.
     #[serde(default)]
     pub max_unchecked_deviation_percent: Option<String>,
-    /// At least this many distinct poster keys, when the row lists them.
+    /// Gate 3: the last post may be at most this old at the pinned block.
+    #[serde(default)]
+    pub max_seconds_since_last_post: Option<u64>,
+    /// Gate 4: a value that never changed over the window is REVIEW.
+    #[serde(default)]
+    pub flag_constant_value: bool,
+    /// Gate 5: the row must list the poster keys the run attributed.
+    #[serde(default)]
+    pub require_poster_keys: bool,
+    /// Gate 5: at least this many distinct poster keys, when listed.
     #[serde(default)]
     pub min_poster_keys: Option<usize>,
+    /// Gate 5: when non-empty, every poster key must be on this list.
+    #[serde(default)]
+    pub allowed_posters: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -96,6 +108,10 @@ pub fn percent_to_1e8(text: &str) -> Option<u128> {
         format!("{frac:0<8}").parse().ok()?
     };
     Some(whole * 100_000_000 + frac)
+}
+
+fn policy_window_seconds(policy: &Policy) -> i64 {
+    policy.window_days as i64 * 86_400
 }
 
 /// `_meta` of the Head query: the live indexed head (05 corrections C1).
@@ -139,6 +155,9 @@ pub struct SubgraphFeed {
     pub unchecked_count: i64,
     pub over_bound_count: i64,
     pub latest_round: Option<LatestRound>,
+    /// The newest rounds (answer, block timestamp), newest first, as far as
+    /// FeedStatus selects them; the constant-value gate reads the window.
+    pub recent_answers: Vec<(String, i64)>,
 }
 
 /// An unchecked, non-first round inside the window (the `overBound` alias of
@@ -665,32 +684,40 @@ pub fn decide(inputs: &FeedInputs) -> Outcome {
         let gates = &policy.gates;
         let before = reasons.len();
         let suffix = bundle_suffix(row);
-        if gates.require_on_chain_guard && row.is_some_and(is_guard_less) {
+        let name = policy.name.as_str();
+        // Gate 1: an on-chain rule exists, or the consumer accepts its absence.
+        if !gates.accept_guard_less_feeds && row.is_some_and(is_guard_less) {
             push(
                 &mut reasons,
                 &mut texts,
-                "POLICY_NO_ON_CHAIN_GUARD".into(),
+                "POLICY_NO_RULE".into(),
                 format!(
-                    "POLICY_NO_ON_CHAIN_GUARD: the feed has no on-chain deviation check and policy {} requires one{suffix}",
-                    policy.name
+                    "POLICY_NO_RULE: the feed has no on-chain deviation rule and policy {name} does not accept guard-less feeds{suffix}"
                 ),
             );
         }
-        if let (Some(limit), Some(age)) = (gates.max_seconds_since_last_post, feed_age) {
-            if age > limit as i64 {
-                push(
-                    &mut reasons,
-                    &mut texts,
-                    "POLICY_SILENCE".into(),
-                    format!(
-                        "POLICY_SILENCE: last post at {} is {age} seconds before the pinned block at {}, policy {} allows {limit}{suffix}",
-                        feed.latest_updated_at.unwrap_or(0),
-                        pinned.timestamp,
-                        policy.name
-                    ),
-                );
-            }
+        // Gate 2: every round in the window has an attributed path.
+        let unattributed_row = row
+            .and_then(|r| r.posting_path.as_deref())
+            .is_some_and(|p| p == "UNATTRIBUTED");
+        if inputs.unknown_rounds.len() > gates.max_unattributed_rounds || unattributed_row {
+            push(
+                &mut reasons,
+                &mut texts,
+                "POLICY_PATH_GAP".into(),
+                format!(
+                    "POLICY_PATH_GAP: {} rounds in the window without an attributed path{}, policy {name} allows {}{suffix}",
+                    inputs.unknown_rounds.len(),
+                    if unattributed_row {
+                        " and the Crossfoot posting_path is UNATTRIBUTED"
+                    } else {
+                        ""
+                    },
+                    gates.max_unattributed_rounds
+                ),
+            );
         }
+        // Gate 3: the consumer's own deviation and silence thresholds.
         if let Some(limit) = gates
             .max_unchecked_deviation_percent
             .as_deref()
@@ -707,33 +734,88 @@ pub fn decide(inputs: &FeedInputs) -> Outcome {
                     &mut texts,
                     "POLICY_DEVIATION".into(),
                     format!(
-                        "POLICY_DEVIATION: round {} moved {} percent in one unchecked post at block {}, policy {} allows {} percent; tx {}{suffix}",
+                        "POLICY_DEVIATION: round {} moved {} percent in one unchecked post at block {}, policy {name} allows {} percent; tx {}{suffix}",
                         round.round_id,
                         opt_percent(&round.deviation),
                         round.block,
-                        policy.name,
                         gates.max_unchecked_deviation_percent.as_deref().unwrap_or("0"),
                         round.tx
                     ),
                 );
             }
         }
-        if let (Some(min), Some(r)) = (gates.min_poster_keys, row) {
-            if !r.poster_addresses.is_empty() && r.poster_addresses.len() < min {
+        if let (Some(limit), Some(age)) = (gates.max_seconds_since_last_post, feed_age) {
+            if age > limit as i64 {
                 push(
                     &mut reasons,
                     &mut texts,
-                    "POLICY_SINGLE_KEY".into(),
+                    "POLICY_SILENCE".into(),
                     format!(
-                        "POLICY_SINGLE_KEY: {} poster key(s) attributed, policy {} requires {min}{suffix}",
-                        r.poster_addresses.len(),
-                        policy.name
+                        "POLICY_SILENCE: last post at {} is {age} seconds before the pinned block at {}, policy {name} allows {limit}{suffix}",
+                        feed.latest_updated_at.unwrap_or(0),
+                        pinned.timestamp
                     ),
                 );
             }
         }
+        // Gate 4: the value moved at least once over the window.
+        if gates.flag_constant_value {
+            let since = inputs.now - (policy_window_seconds(inputs.policy));
+            let in_window: Vec<&String> = feed
+                .recent_answers
+                .iter()
+                .filter(|(_, t)| *t >= since)
+                .map(|(a, _)| a)
+                .collect();
+            if in_window.len() >= 2 && in_window.iter().all(|a| *a == in_window[0]) {
+                push(
+                    &mut reasons,
+                    &mut texts,
+                    "POLICY_CONSTANT".into(),
+                    format!(
+                        "POLICY_CONSTANT: {} posts in the window all carry the value {}, policy {name} flags a constant value{suffix}",
+                        in_window.len(),
+                        in_window[0]
+                    ),
+                );
+            }
+        }
+        // Gate 5: poster keys recorded, enough of them, and allowed.
+        if let Some(r) = row {
+            let keys = &r.poster_addresses;
+            let missing = gates.require_poster_keys && keys.is_empty();
+            let too_few = gates
+                .min_poster_keys
+                .is_some_and(|min| !keys.is_empty() && keys.len() < min);
+            let outsider = !gates.allowed_posters.is_empty()
+                && keys.iter().any(|k| {
+                    !gates
+                        .allowed_posters
+                        .iter()
+                        .any(|a| a.eq_ignore_ascii_case(k))
+                });
+            if missing || too_few || outsider {
+                let why = if missing {
+                    "no poster keys recorded on the row".to_string()
+                } else if too_few {
+                    format!(
+                        "{} poster key(s) attributed, fewer than the {} required",
+                        keys.len(),
+                        gates.min_poster_keys.unwrap_or(0)
+                    )
+                } else {
+                    "a poster key is not on the allowlist".to_string()
+                };
+                push(
+                    &mut reasons,
+                    &mut texts,
+                    "POLICY_POSTER".into(),
+                    format!("POLICY_POSTER: {why}, policy {name}{suffix}"),
+                );
+            }
+        }
         if reasons.len() > before {
-            notes.push(policy_note(&policy.name));
+            notes.push(policy_note(name));
         }
     }
 
@@ -852,6 +934,10 @@ mod tests {
                 over_bound: false,
                 updated_at: Some("1788282600".into()),
             }),
+            recent_answers: vec![
+                ("107833620".into(), 1_788_282_600),
+                ("107600000".into(), 1_787_000_000),
+            ],
         }
     }
 
@@ -869,6 +955,7 @@ mod tests {
             unchecked_count: 0,
             over_bound_count: 0,
             latest_round: None,
+            recent_answers: vec![],
         }
     }
 
@@ -969,8 +1056,8 @@ mod tests {
         }
     }
 
-    /// The four policy gates, one at a time: each adds its POLICY_ word
-    /// after the table's words and the policy note, and an ALLOW feed that
+    /// The six policy gates, one at a time: each adds its POLICY_ word
+    /// after the table's words and the policy note; an ALLOW feed that
     /// fails a gate is REVIEW with the gate as the reason.
     #[test]
     fn policy_gates_add_their_words_after_the_table() {
@@ -978,39 +1065,66 @@ mod tests {
         let p = policy_defaults();
         let posted = posted_feed();
         let consistent = consistent_row();
+        let lenient = |gates: PolicyGates| {
+            policy(PolicyGates {
+                accept_guard_less_feeds: true,
+                ..gates
+            })
+        };
 
-        // Gate 1: require_on_chain_guard on a guard-less row.
-        let guard = policy(PolicyGates {
-            require_on_chain_guard: true,
-            ..PolicyGates::default()
-        });
+        // Gate 1: a guard-less row without explicit acceptance.
+        let strict = policy(PolicyGates::default());
         let guard_less = guard_less_row("LIVE", "CONSISTENT");
         let mut i = inputs(&h, &p, &posted, Some(&guard_less));
-        i.eligibility = Some(&guard);
+        i.eligibility = Some(&strict);
         let out = decide(&i);
         assert_eq!(out.decision, Decision::Review);
-        assert_eq!(out.reason.as_deref(), Some("POLICY_NO_ON_CHAIN_GUARD"));
+        assert_eq!(out.reason.as_deref(), Some("POLICY_NO_RULE"));
         assert_eq!(out.notes, vec![policy_note("test")]);
-        assert!(out.reason_text.starts_with("POLICY_NO_ON_CHAIN_GUARD: the feed has no on-chain deviation check and policy test requires one; bundle"));
-        // A guarded row passes the gate.
-        let mut i = inputs(&h, &p, &posted, Some(&consistent));
-        i.eligibility = Some(&guard);
+        assert!(out.reason_text.starts_with("POLICY_NO_RULE: the feed has no on-chain deviation rule and policy test does not accept guard-less feeds; bundle"));
+        let accepting = lenient(PolicyGates::default());
+        let mut i = inputs(&h, &p, &posted, Some(&guard_less));
+        i.eligibility = Some(&accepting);
         assert_eq!(decide(&i).decision, Decision::Allow);
+        let mut i = inputs(&h, &p, &posted, Some(&consistent));
+        i.eligibility = Some(&strict);
+        assert_eq!(decide(&i).decision, Decision::Allow, "a guarded row passes");
 
-        // Gate 2: max_seconds_since_last_post against the pinned block.
-        let silence = policy(PolicyGates {
-            max_seconds_since_last_post: Some(3_600),
+        // Gate 2: unattributed rounds beyond the tolerance, or the row word.
+        let mut i = inputs(&h, &p, &posted, Some(&consistent));
+        i.unknown_rounds = vec![UnknownRound {
+            round_id: "7".into(),
+            block: 25_800_000,
+            tx: "0xaa".into(),
+        }];
+        i.eligibility = Some(&strict);
+        let out = decide(&i);
+        assert_eq!(
+            out.reasons,
+            vec!["PATH_NOT_ATTRIBUTABLE", "POLICY_PATH_GAP"]
+        );
+        let tolerant = lenient(PolicyGates {
+            max_unattributed_rounds: 1,
             ..PolicyGates::default()
         });
-        let mut i = inputs(&h, &p, &posted, Some(&consistent));
-        i.eligibility = Some(&silence);
-        let out = decide(&i);
-        assert_eq!(out.reason.as_deref(), Some("POLICY_SILENCE"));
-        assert!(out.reason_text.contains("policy test allows 3600"));
+        i.eligibility = Some(&tolerant);
+        assert_eq!(decide(&i).reasons, vec!["PATH_NOT_ATTRIBUTABLE"]);
+        let unattributed = row(
+            "midas",
+            "INSUFFICIENT_WINDOW",
+            Some("UNATTRIBUTED"),
+            Some("LIVE"),
+        );
+        let mut i = inputs(&h, &p, &posted, Some(&unattributed));
+        i.eligibility = Some(&strict);
+        assert_eq!(
+            decide(&i).reasons,
+            vec!["INSUFFICIENT_WINDOW", "POLICY_PATH_GAP"]
+        );
 
-        // Gate 3: max_unchecked_deviation_percent over an unchecked round
-        // that the feed's own bound allowed.
-        let deviation = policy(PolicyGates {
+        // Gate 3: the consumer's deviation threshold over a round the feed's
+        // own bound allowed, and the silence threshold at the pinned block.
+        let deviation = lenient(PolicyGates {
             max_unchecked_deviation_percent: Some("0.5".into()),
             ..PolicyGates::default()
         });
@@ -1026,26 +1140,83 @@ mod tests {
         assert_eq!(percent_to_1e8("0.5"), Some(50_000_000));
         assert_eq!(percent_to_1e8("5"), Some(500_000_000));
         assert_eq!(percent_to_1e8("x"), None);
+        let silence = lenient(PolicyGates {
+            max_seconds_since_last_post: Some(3_600),
+            ..PolicyGates::default()
+        });
+        let mut i = inputs(&h, &p, &posted, Some(&consistent));
+        i.eligibility = Some(&silence);
+        let out = decide(&i);
+        assert_eq!(out.reason.as_deref(), Some("POLICY_SILENCE"));
+        assert!(out.reason_text.contains("policy test allows 3600"));
 
-        // Gate 4: min_poster_keys when the row lists the keys.
-        let keys = policy(PolicyGates {
+        // Gate 4: a constant value over the window.
+        let constant = lenient(PolicyGates {
+            flag_constant_value: true,
+            ..PolicyGates::default()
+        });
+        let mut flat = posted_feed();
+        flat.recent_answers = vec![
+            ("100000000".into(), h.timestamp - 100),
+            ("100000000".into(), h.timestamp - 200_000),
+            ("99000000".into(), h.timestamp - 400 * 86_400),
+        ];
+        let mut i = inputs(&h, &p, &flat, Some(&consistent));
+        i.eligibility = Some(&constant);
+        let out = decide(&i);
+        assert_eq!(out.reason.as_deref(), Some("POLICY_CONSTANT"));
+        assert!(out
+            .reason_text
+            .starts_with("POLICY_CONSTANT: 2 posts in the window all carry the value 100000000"));
+        let mut i = inputs(&h, &p, &posted, Some(&consistent));
+        i.eligibility = Some(&constant);
+        assert_eq!(
+            decide(&i).decision,
+            Decision::Allow,
+            "a moving value passes"
+        );
+
+        // Gate 5: poster keys recorded, enough, and on the allowlist.
+        let required = lenient(PolicyGates {
+            require_poster_keys: true,
+            ..PolicyGates::default()
+        });
+        let mut i = inputs(&h, &p, &posted, Some(&consistent));
+        i.eligibility = Some(&required);
+        let out = decide(&i);
+        assert_eq!(out.reason.as_deref(), Some("POLICY_POSTER"));
+        assert!(out
+            .reason_text
+            .starts_with("POLICY_POSTER: no poster keys recorded on the row, policy test"));
+        let two_keys = guard_less_row("LIVE", "CONSISTENT");
+        let min = lenient(PolicyGates {
             min_poster_keys: Some(3),
             ..PolicyGates::default()
         });
-        let two_keys = guard_less_row("LIVE", "CONSISTENT");
         let mut i = inputs(&h, &p, &posted, Some(&two_keys));
-        i.eligibility = Some(&keys);
-        let out = decide(&i);
-        assert_eq!(out.reason.as_deref(), Some("POLICY_SINGLE_KEY"));
-        assert!(out
+        i.eligibility = Some(&min);
+        assert!(decide(&i)
             .reason_text
-            .starts_with("POLICY_SINGLE_KEY: 2 poster key(s) attributed, policy test requires 3"));
-        // Without keys on the row the gate is silent.
-        let mut i = inputs(&h, &p, &posted, Some(&consistent));
-        i.eligibility = Some(&keys);
+            .starts_with("POLICY_POSTER: 2 poster key(s) attributed, fewer than the 3 required"));
+        let allow_one = lenient(PolicyGates {
+            allowed_posters: vec!["0x7BF090B97F896FB77E852CC98AA52A8CB7DC02EC".into()],
+            ..PolicyGates::default()
+        });
+        let mut i = inputs(&h, &p, &posted, Some(&two_keys));
+        i.eligibility = Some(&allow_one);
+        assert!(decide(&i)
+            .reason_text
+            .starts_with("POLICY_POSTER: a poster key is not on the allowlist"));
+        let allow_both = lenient(PolicyGates {
+            allowed_posters: two_keys.poster_addresses.clone(),
+            min_poster_keys: Some(2),
+            ..PolicyGates::default()
+        });
+        let mut i = inputs(&h, &p, &posted, Some(&two_keys));
+        i.eligibility = Some(&allow_both);
         assert_eq!(decide(&i).decision, Decision::Allow);
 
-        // A table word stays first: row 5 then the policy word.
+        // A table word stays first, and DERIVED feeds are outside the gates.
         let mut i = inputs(&h, &p, &posted, Some(&consistent));
         i.unchecked_rounds = vec![round_36()];
         i.eligibility = Some(&deviation);
@@ -1054,308 +1225,11 @@ mod tests {
             out.reasons,
             vec!["ADMIN_GUARD_BYPASSED", "POLICY_DEVIATION"]
         );
-        assert_eq!(out.reason.as_deref(), Some("ADMIN_GUARD_BYPASSED"));
-
-        // DERIVED feeds are outside the gates.
         let derived = derived_feed();
         let matched = match_row();
         let mut i = inputs(&h, &p, &derived, Some(&matched));
-        i.eligibility = Some(&silence);
+        i.eligibility = Some(&strict);
         assert_eq!(decide(&i).decision, Decision::Allow);
-    }
-
-    #[test]
-    fn percent_strings_trim_trailing_zeros() {
-        assert_eq!(percent_from_1e8("222466613"), "2.22466613");
-        assert_eq!(percent_from_1e8("36000000"), "0.36");
-        assert_eq!(percent_from_1e8("200000000"), "2");
-        assert_eq!(percent_from_1e8("5000000"), "0.05");
-        assert_eq!(percent_from_1e8("0"), "0");
-        assert_eq!(percent_from_1e8("1297707108000000"), "12977071.08");
-        assert_eq!(percent_from_1e8("abc"), "abc");
-    }
-
-    /// 05 R6: one synthetic input per table row, asserting `reason` and
-    /// `reasons`.
-    #[test]
-    fn decision_table_every_row() {
-        let h = head();
-        let p = policy_defaults();
-        let posted = posted_feed();
-        let derived = derived_feed();
-        let consistent = consistent_row();
-        let matched = match_row();
-
-        // Row 1.
-        let mut errors = h.clone();
-        errors.has_indexing_errors = true;
-        let out = decide(&inputs(&errors, &p, &posted, Some(&consistent)));
-        assert_eq!(out.reason.as_deref(), Some("INDEXING_ERRORS"));
-        assert_eq!(out.reasons, vec!["INDEXING_ERRORS"]);
-        assert_eq!(out.decision, Decision::Review);
-
-        // Row 2.
-        let mut i = inputs(&h, &p, &posted, Some(&consistent));
-        i.now = h.timestamp + 901;
-        let out = decide(&i);
-        assert_eq!(out.reason.as_deref(), Some("SUBGRAPH_STALE"));
-        assert_eq!(out.reasons, vec!["SUBGRAPH_STALE"]);
-
-        // Row 3.
-        let out = decide(&inputs(&h, &p, &posted, None));
-        assert_eq!(out.reason.as_deref(), Some("NO_CROSSFOOT_RESULT"));
-        assert_eq!(out.reasons, vec!["NO_CROSSFOOT_RESULT"]);
-        assert_eq!(out.decision, Decision::Review);
-
-        // Row 4.
-        let mut i = inputs(&h, &p, &posted, Some(&consistent));
-        i.unknown_rounds = vec![UnknownRound {
-            round_id: "7".into(),
-            block: 25_800_000,
-            tx: "0xaa".into(),
-        }];
-        let out = decide(&i);
-        assert_eq!(out.reason.as_deref(), Some("PATH_NOT_ATTRIBUTABLE"));
-        assert_eq!(out.reasons, vec!["PATH_NOT_ATTRIBUTABLE"]);
-
-        // Row 5, subgraph side.
-        let mut i = inputs(&h, &p, &posted, Some(&consistent));
-        i.unchecked_rounds = vec![round_36()];
-        let out = decide(&i);
-        assert_eq!(out.reason.as_deref(), Some("ADMIN_GUARD_BYPASSED"));
-        assert_eq!(out.reasons, vec!["ADMIN_GUARD_BYPASSED"]);
-        assert_eq!(out.evidence.over_bound_rounds.len(), 1);
-
-        // Row 5, Crossfoot side only.
-        let bypassed = row(
-            "midas",
-            "OBSERVED_DEVIATION",
-            Some("ADMIN_GUARD_BYPASSED"),
-            Some("LIVE"),
-        );
-        let out = decide(&inputs(&h, &p, &posted, Some(&bypassed)));
-        assert_eq!(out.reason.as_deref(), Some("ADMIN_GUARD_BYPASSED"));
-        assert_eq!(out.reasons, vec!["ADMIN_GUARD_BYPASSED"]);
-        assert!(out.evidence.over_bound_rounds.is_empty());
-        assert!(out.reason_text.starts_with(
-            "ADMIN_GUARD_BYPASSED: Crossfoot posting_path ADMIN_GUARD_BYPASSED at block 25884405"
-        ));
-
-        // An unchecked round within the bound is not row 5.
-        let mut i = inputs(&h, &p, &posted, Some(&consistent));
-        let mut within = round_36();
-        within.over_bound = false;
-        i.unchecked_rounds = vec![within];
-        let out = decide(&i);
-        assert_eq!(out.decision, Decision::Allow);
-        assert_eq!(out.evidence.unchecked_rounds_in_window, 1);
-
-        // Row 6.
-        let mut i = inputs(&h, &p, &posted, Some(&consistent));
-        i.bound_changes = vec![BoundChangeRow {
-            old_bound: Some("5000000".into()),
-            new_bound: Some("35000000".into()),
-            old_min_answer: None,
-            new_min_answer: None,
-            old_max_answer: None,
-            new_max_answer: None,
-            block: 24_987_310,
-            tx: "0xbb".into(),
-            caller: "0xcc".into(),
-        }];
-        let out = decide(&i);
-        assert_eq!(out.reason.as_deref(), Some("BOUND_CHANGED"));
-        assert_eq!(out.reasons, vec!["BOUND_CHANGED"]);
-        assert!(out
-            .reason_text
-            .starts_with("BOUND_CHANGED: bound 0.05 to 0.35 percent"));
-
-        // Row 7, liveness word from the row.
-        let stale_row = row(
-            "midas",
-            "SOURCE_STALE",
-            Some("GUARDED"),
-            Some("PLACEHOLDER"),
-        );
-        let out = decide(&inputs(&h, &p, &posted, Some(&stale_row)));
-        assert_eq!(out.reason.as_deref(), Some("PLACEHOLDER"));
-        assert_eq!(out.reasons, vec!["PLACEHOLDER"]);
-
-        // Row 7, feed freshness against the indexed head.
-        let mut old = posted_feed();
-        old.latest_updated_at = Some(h.timestamp - 31 * 86_400);
-        let out = decide(&inputs(&h, &p, &old, Some(&consistent)));
-        assert_eq!(out.reason.as_deref(), Some("STALE"));
-        assert_eq!(out.reasons, vec!["STALE"]);
-
-        // Row 8.
-        let deviating = row(
-            "midas",
-            "INSUFFICIENT_WINDOW",
-            Some("UNATTRIBUTED"),
-            Some("LIVE"),
-        );
-        let out = decide(&inputs(&h, &p, &posted, Some(&deviating)));
-        assert_eq!(out.reason.as_deref(), Some("INSUFFICIENT_WINDOW"));
-        assert_eq!(out.reasons, vec!["INSUFFICIENT_WINDOW"]);
-
-        // Row 8 does not fire when a row above matched.
-        let mut i = inputs(&h, &p, &posted, Some(&deviating));
-        i.unchecked_rounds = vec![round_36()];
-        let out = decide(&i);
-        assert_eq!(out.reasons, vec!["ADMIN_GUARD_BYPASSED"]);
-
-        // Row 9.
-        let mut deviation = match_row();
-        deviation.verdict = "OBSERVED_DEVIATION".into();
-        let out = decide(&inputs(&h, &p, &derived, Some(&deviation)));
-        assert_eq!(out.reason.as_deref(), Some("OBSERVED_DEVIATION"));
-        assert_eq!(out.reasons, vec!["OBSERVED_DEVIATION"]);
-
-        // Row 10, result age.
-        let mut old_result = match_row();
-        old_result.block = h.number - 30 * 7_200 - 1;
-        let out = decide(&inputs(&h, &p, &derived, Some(&old_result)));
-        assert_eq!(out.reason.as_deref(), Some("RESULT_STALE"));
-        assert_eq!(out.reasons, vec!["RESULT_STALE"]);
-
-        // Row 10, rate change after the window.
-        let mut i = inputs(&h, &p, &derived, Some(&matched));
-        i.rate_changes = vec![RateChangeRow {
-            rate_ppm: 25_000,
-            block: 25_860_000,
-            tx: "0xdd".into(),
-        }];
-        let out = decide(&i);
-        assert_eq!(out.reason.as_deref(), Some("RATE_CHANGED_AFTER_WINDOW"));
-        assert_eq!(out.reasons, vec!["RATE_CHANGED_AFTER_WINDOW"]);
-
-        // Row 11, both families.
-        let out = decide(&inputs(&h, &p, &posted, Some(&consistent)));
-        assert_eq!(out.decision, Decision::Allow);
-        assert_eq!(out.reason, None);
-        assert!(out.reasons.is_empty());
-        assert_eq!(
-            out.reason_text,
-            format!("CONSISTENT: 56 rounds at block 25884405; bundle {ROOT}")
-        );
-        let out = decide(&inputs(&h, &p, &derived, Some(&matched)));
-        assert_eq!(out.decision, Decision::Allow);
-        assert_eq!(
-            out.reason_text,
-            format!(
-                "MODEL_MATCH: 5 of 5 fields exact, residual 0 at block 25853000; bundle {ROOT}"
-            )
-        );
-
-        // Every matching row is listed, the first one is the reason.
-        let mut i = inputs(&h, &p, &posted, Some(&stale_row));
-        i.now = h.timestamp + 901;
-        i.unchecked_rounds = vec![round_36()];
-        let out = decide(&i);
-        assert_eq!(out.reason.as_deref(), Some("SUBGRAPH_STALE"));
-        assert_eq!(
-            out.reasons,
-            vec!["SUBGRAPH_STALE", "ADMIN_GUARD_BYPASSED", "PLACEHOLDER"]
-        );
-    }
-
-    /// 05 row 11a: a guard-less POSTED feed that is LIVE and CONSISTENT is
-    /// ALLOW with the mandatory note and the sentence naming the keys;
-    /// every other row stays as it is.
-    #[test]
-    fn guard_less_feed_allows_with_the_no_guard_note() {
-        let h = head();
-        let p = policy_defaults();
-        let posted = posted_feed();
-        let live = guard_less_row("LIVE", "CONSISTENT");
-        let out = decide(&inputs(&h, &p, &posted, Some(&live)));
-        assert_eq!(out.decision, Decision::Allow);
-        assert_eq!(out.reason, None);
-        assert!(out.reasons.is_empty());
-        assert_eq!(out.notes, vec![NO_GUARD_NOTE]);
-        assert_eq!(
-            out.reason_text,
-            format!("CONSISTENT: 146 rounds posted without an on-chain check at block 25884405; no on-chain deviation check, attribution rests on the poster key(s) 0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec, 0x8d566adace57ee5dd2bf98953b804991d634211a; bundle {ROOT}")
-        );
-
-        // The guard_kind alone marks the family when the path word is old.
-        let mut by_kind = guard_less_row("LIVE", "CONSISTENT");
-        by_kind.posting_path = Some("GUARDED".into());
-        by_kind.poster_addresses.clear();
-        let out = decide(&inputs(&h, &p, &posted, Some(&by_kind)));
-        assert_eq!(out.decision, Decision::Allow);
-        assert_eq!(out.notes, vec![NO_GUARD_NOTE]);
-        assert!(out
-            .reason_text
-            .contains("rests on the poster key(s); bundle"));
-
-        // Rows 7 and 8 are unchanged: STALE and INIT_ONLY stay REVIEW.
-        for word in ["STALE", "INIT_ONLY", "PLACEHOLDER"] {
-            let stale = guard_less_row(word, "SOURCE_STALE");
-            let out = decide(&inputs(&h, &p, &posted, Some(&stale)));
-            assert_eq!(out.decision, Decision::Review, "{word}");
-            assert_eq!(out.reason.as_deref(), Some(word));
-            assert!(out.notes.is_empty(), "{word}: the note is for ALLOW only");
-        }
-        let deviating = guard_less_row("LIVE", "INSUFFICIENT_WINDOW");
-        let out = decide(&inputs(&h, &p, &posted, Some(&deviating)));
-        assert_eq!(out.reason.as_deref(), Some("INSUFFICIENT_WINDOW"));
-
-        // Row 4 still wins: UNKNOWN rounds from the subgraph.
-        let mut i = inputs(&h, &p, &posted, Some(&live));
-        i.unknown_rounds = vec![UnknownRound {
-            round_id: "9".into(),
-            block: 25_800_000,
-            tx: "0xaa".into(),
-        }];
-        let out = decide(&i);
-        assert_eq!(out.reason.as_deref(), Some("PATH_NOT_ATTRIBUTABLE"));
-        assert!(out.notes.is_empty());
-
-        // A DERIVED feed never takes row 11a.
-        let derived = derived_feed();
-        let mut matched = match_row();
-        matched.guard_kind = Some("none".into());
-        let out = decide(&inputs(&h, &p, &derived, Some(&matched)));
-        assert!(out.notes.is_empty());
-    }
-
-    /// 05 row 11b: an aggregator feed (posting_path AGGREGATED) that is
-    /// LIVE and CONSISTENT is ALLOW with the no-single-key note; stale or
-    /// deviating rows stay REVIEW.
-    #[test]
-    fn aggregated_feed_allows_with_the_no_single_key_note() {
-        let h = head();
-        let p = policy_defaults();
-        let posted = posted_feed();
-        let mut live = row("chainlink", "CONSISTENT", Some("AGGREGATED"), Some("LIVE"));
-        live.headline = Some("351 rounds by 16 transmitters".into());
-        let out = decide(&inputs(&h, &p, &posted, Some(&live)));
-        assert_eq!(out.decision, Decision::Allow);
-        assert_eq!(out.notes, vec![AGGREGATED_NOTE]);
-        assert_eq!(
-            out.reason_text,
-            format!("CONSISTENT: 351 rounds by 16 transmitters at block 25884405; posted by an aggregator transmitter set, no single key; bundle {ROOT}")
-        );
-        let stale = row(
-            "chainlink",
-            "SOURCE_STALE",
-            Some("AGGREGATED"),
-            Some("STALE"),
-        );
-        let out = decide(&inputs(&h, &p, &posted, Some(&stale)));
-        assert_eq!(out.decision, Decision::Review);
-        assert_eq!(out.reason.as_deref(), Some("STALE"));
-        assert!(out.notes.is_empty());
-        let deviating = row(
-            "chainlink",
-            "OBSERVED_DEVIATION",
-            Some("AGGREGATED"),
-            Some("LIVE"),
-        );
-        let out = decide(&inputs(&h, &p, &posted, Some(&deviating)));
-        assert_eq!(out.reason.as_deref(), Some("OBSERVED_DEVIATION"));
     }
 
     /// 05 R8: no code path serialises a third word.
