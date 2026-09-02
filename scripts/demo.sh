@@ -14,6 +14,7 @@
 #   2. Midas customFeed family, replayed from its fixture archive the same
 #      way: survey line, verdict, root hash.
 #   2b. Ethena sUSDe, replayed from its fixture: verdict, summary, root hash.
+#   2c. Sky sUSDS, sDAI and stUSDS, replayed from the fixture archive.
 #   3. render: static pages over the bundles just written.
 #   4. consume --replay: the consumer agent over the recorded subgraph
 #      responses, ALLOW or REVIEW per feed.
@@ -108,6 +109,28 @@ printf 'summary block:  headline %s, consumer_action %s\n' \
   "$(headline "$susde_bundle/result.json")" "$(consumer_action "$susde_bundle/result.json")"
 printf 'fixture result.json equals the replay:  '
 if cmp -s "$susde_fixture/result.json" "$susde_bundle/result.json"; then
+  echo "yes"
+else
+  echo "NO"
+  exit 1
+fi
+
+say "2c. Sky sUSDS, sDAI, stUSDS: rpow to the wei, every rate change attributed, replayed from the fixture archive"
+sky_archive="cli/tests/fixtures/sky-demo-23264565-25885408.tar.gz"
+mkdir -p "$work/fixtures"
+tar -xzf "$sky_archive" -C "$work/fixtures"
+sky_fixture="$work/fixtures/sky-demo-23264565-25885408"
+"$crossfoot" run sky --window demo --from-bundle "$sky_fixture" --verify-root "$work" \
+  | tee "$work/sky.out"
+sky_bundle="$(sed -n 's/^bundle  *//p' "$work/sky.out")"
+bundles+=("$sky_bundle")
+printf 'summary block:  headline %s, consumer_action %s\n' \
+  "$(headline "$sky_bundle/result.json")" "$(consumer_action "$sky_bundle/result.json")"
+# The path counts, from the pretty-printed result: the by_path object spans
+# a few lines.
+sed -n '/"by_path": {/,/}/p' "$sky_bundle/result.json" | tr -d '\n' | tr -s ' '; echo
+printf 'fixture result.json equals the replay:  '
+if cmp -s "$sky_fixture/result.json" "$sky_bundle/result.json"; then
   echo "yes"
 else
   echo "NO"

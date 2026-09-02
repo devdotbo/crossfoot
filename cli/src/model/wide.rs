@@ -29,10 +29,25 @@ fn mul_full(a: u128, b: u128) -> (u128, u128) {
 /// floor(a * b / divisor), exact, or None when the divisor is zero or the
 /// quotient does not fit in u128.
 pub fn mul_div_floor(a: u128, b: u128, divisor: u128) -> Option<u128> {
+    let (hi, lo) = mul_full(a, b);
+    div_256(hi, lo, divisor)
+}
+
+/// floor((a * b + add) / divisor), exact in 256 bits. This is the shape of
+/// Sky's `_rpow` steps, `(x * x + RAY / 2) / RAY`, which round half up.
+pub fn mul_add_div_floor(a: u128, b: u128, add: u128, divisor: u128) -> Option<u128> {
+    let (hi, lo) = mul_full(a, b);
+    let (lo, carry) = lo.overflowing_add(add);
+    let hi = hi.checked_add(if carry { 1 } else { 0 })?;
+    div_256(hi, lo, divisor)
+}
+
+/// floor((hi, lo) / divisor) for a 256-bit numerator, or None when the
+/// divisor is zero or the quotient does not fit in u128.
+fn div_256(hi: u128, lo: u128, divisor: u128) -> Option<u128> {
     if divisor == 0 {
         return None;
     }
-    let (hi, lo) = mul_full(a, b);
     if hi == 0 {
         return Some(lo / divisor);
     }
@@ -74,6 +89,19 @@ pub fn mul_div_floor(a: u128, b: u128, divisor: u128) -> Option<u128> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn mul_add_div_rounds_half_up_like_rpow() {
+        const RAY: u128 = 1_000_000_000_000_000_000_000_000_000;
+        // (x * x + RAY / 2) / RAY for a per-second rate just above one ray
+        // needs the 256-bit intermediate and the added half.
+        let x: u128 = 1_000_000_001_096_988_989_836_188_433;
+        let squared = mul_add_div_floor(x, x, RAY / 2, RAY).unwrap();
+        assert_eq!(squared, 1_000_000_002_193_977_980_875_761_710);
+        assert_eq!(mul_add_div_floor(7, 7, 1, 10), Some(5));
+        assert_eq!(mul_add_div_floor(7, 7, 0, 10), Some(4));
+        assert_eq!(mul_add_div_floor(u128::MAX, u128::MAX, u128::MAX, 1), None);
+    }
 
     #[test]
     fn small_values_match_plain_arithmetic() {

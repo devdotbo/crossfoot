@@ -289,6 +289,16 @@ fn replay(
             replay_root,
         )
         .map(|outcome| outcome.result_path),
+        "sky" => crate::run_sky::run(
+            &mut source,
+            &crate::run_sky::RunArgs {
+                baseline_block,
+                block,
+                window_name: window_name.clone(),
+            },
+            replay_root,
+        )
+        .map(|outcome| outcome.result_path),
         "susde" => crate::run_susde::run(
             &mut source,
             &crate::run_susde::RunArgs {
@@ -1218,6 +1228,83 @@ mod tests {
         assert_eq!(result["posting"]["posts_in_window"], 36);
         assert_eq!(result["posting"]["by_path"]["operator_via_distributor"], 36);
         assert_eq!(result["series_replay"]["consistent"], true);
+    }
+
+    /// Spec 09.2: the Sky family fixture archive verifies and carries the
+    /// pinned observations and the attributed rate changes.
+    #[test]
+    fn verify_passes_on_the_sky_fixture() {
+        let archive = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests")
+            .join("fixtures")
+            .join("sky-demo-23264565-25885408.tar.gz");
+        let report = verify(&archive, &Options::default());
+        let text = print(&report);
+        assert_eq!(report.exit_code, VERIFIED, "{text}");
+        assert!(
+            text.contains("target          sky, window 23264565 to 25885408"),
+            "{text}"
+        );
+        assert!(
+            text.contains("entries         191 checked, hashes ok"),
+            "{text}"
+        );
+        let dir =
+            std::env::temp_dir().join(format!("crossfoot-sky-fixture-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        let bundle = crate::pack::unpack(&archive, &dir).unwrap();
+        let result: Value = read_json(&bundle.join("result.json")).unwrap();
+        assert_eq!(result["verdict"], "MODEL_MATCH");
+        assert_eq!(
+            result["summary"]["headline"],
+            "3 of 3 fields exact, residual 0"
+        );
+        let observed = |field: &str| -> String {
+            result["comparison"]["fields"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|f| f["field"] == field)
+                .unwrap()["observed"]
+                .as_str()
+                .unwrap()
+                .to_string()
+        };
+        assert_eq!(
+            observed("susds.convertToAssets(1e18)"),
+            "1108162724614623666"
+        );
+        assert_eq!(
+            observed("sdai.convertToAssets(1e18)"),
+            "1180012163563431758"
+        );
+        assert_eq!(
+            observed("stusds.convertToAssets(1e18)"),
+            "1072222891118653161"
+        );
+        assert_eq!(result["rate_changes"]["total"], 145);
+        assert_eq!(result["rate_changes"]["by_path"]["bounded_setter"], 144);
+        assert_eq!(result["rate_changes"]["by_path"]["spell"], 1);
+        assert_eq!(result["rate_changes"]["by_vault"]["susds"], 9);
+        assert_eq!(result["rate_changes"]["by_vault"]["sdai"], 2);
+        assert_eq!(result["rate_changes"]["by_vault"]["stusds"], 134);
+        // The one spell is the stUSDS launch; the nine SSR changes all took
+        // SPBEAM with the rule held.
+        let timeline: Value = read_json(&bundle.join("timelines/sky.json")).unwrap();
+        let rows = timeline["rows"].as_array().unwrap();
+        let spells: Vec<&Value> = rows.iter().filter(|r| r["path"] == "spell").collect();
+        assert_eq!(spells.len(), 1);
+        assert_eq!(spells[0]["product"], "stUSDS");
+        assert_eq!(spells[0]["block"], 23_319_630);
+        let ssr: Vec<&Value> = rows.iter().filter(|r| r["product"] == "sUSDS").collect();
+        assert_eq!(ssr.len(), 9);
+        assert!(ssr.iter().all(|r| r["path"] == "bounded_setter"
+            && r["within_bounds"] == true
+            && r["within_step"] == true
+            && r["cooldown_ok"] == true));
+        assert_eq!(ssr[0]["previous_bps"], 475);
+        assert_eq!(ssr[8]["new_bps"], 352);
+        assert_eq!(ssr[8]["block"], 25_596_101);
     }
 
     /// The README claims exactly what the verifier proves, in the same

@@ -25,8 +25,10 @@ mod render;
 mod rpc;
 mod run_midas;
 mod run_mtbill;
+mod run_sky;
 mod run_susde;
 mod run_svzchf;
+mod sky;
 mod source;
 mod summary;
 mod susde;
@@ -145,6 +147,9 @@ enum RunTarget {
     /// Ethena sUSDe: exact recomputation from five state reads, reward
     /// posts attributed to their path.
     Susde(RunOpts),
+    /// Sky sUSDS, sDAI and stUSDS: rpow to the wei, every rate change
+    /// attributed to the bounded setter or the spell path.
+    Sky(RunOpts),
     /// Midas customFeed family: posting-path replay of every feed in the list.
     Midas(MidasOpts),
     /// Any posted-feed family from its config file: `--config
@@ -379,6 +384,7 @@ fn window_preset(target: &str, name: &str) -> Option<(u64, u64)> {
     match (target, name) {
         ("svzchf", "demo") => Some(run_svzchf::DEMO_WINDOW),
         ("susde", "demo") => Some(run_susde::DEMO_WINDOW),
+        ("sky", "demo") => Some(run_sky::DEMO_WINDOW),
         _ => None,
     }
 }
@@ -507,6 +513,15 @@ fn main() -> ExitCode {
         Command::Run {
             target: RunTarget::Midas(opts) | RunTarget::Family(opts),
         } => match replay_midas(opts) {
+            Ok(()) => ExitCode::SUCCESS,
+            Err(message) => {
+                eprintln!("crossfoot: {message}");
+                ExitCode::FAILURE
+            }
+        },
+        Command::Run {
+            target: RunTarget::Sky(opts),
+        } => match recompute_sky(opts) {
             Ok(()) => ExitCode::SUCCESS,
             Err(message) => {
                 eprintln!("crossfoot: {message}");
@@ -676,6 +691,35 @@ fn recompute_susde(opts: RunOpts) -> Result<(), String> {
     println!("verdict         {}", outcome.verdict.as_str());
     println!("summary         {}", outcome.summary.headline);
     println!("reward posts    {} in the window", outcome.posts_in_window);
+    println!("result          {}", outcome.result_path.display());
+    println!("bundle          {}", outcome.bundle_dir.display());
+    println!("root hash       {}", outcome.root_hash);
+    println!("cache hits      {}", outcome.cache_hits);
+    println!("network calls   {}", outcome.network_calls);
+    Ok(())
+}
+
+fn recompute_sky(opts: RunOpts) -> Result<(), String> {
+    let verify_root = opts.verify_root.canonicalize().map_err(|err| {
+        format!(
+            "--verify-root {} is not readable: {err}",
+            opts.verify_root.display()
+        )
+    })?;
+    let window = resolve_window("sky", &opts)?;
+    let mut client = read_source(&opts, &verify_root)?;
+    let outcome = run_sky::run(
+        client.as_mut(),
+        &run_sky::RunArgs {
+            baseline_block: window.baseline_block,
+            block: window.block,
+            window_name: window.name.clone(),
+        },
+        &verify_root,
+    )?;
+    println!("verdict         {}", outcome.verdict.as_str());
+    println!("summary         {}", outcome.summary.headline);
+    println!("rate changes    {} in the window", outcome.rate_changes);
     println!("result          {}", outcome.result_path.display());
     println!("bundle          {}", outcome.bundle_dir.display());
     println!("root hash       {}", outcome.root_hash);

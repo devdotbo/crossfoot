@@ -67,6 +67,16 @@ Crossfoot writes nothing to any chain.
   onto the pinned state. The size of a reward is a role holder's choice and
   is reported, not judged. Demo window `--window demo` (blocks 25800000 to
   25885407). Specification: [`docs/specs/09-derived-targets.md`](docs/specs/09-derived-targets.md).
+- `sky`, the Sky family: sUSDS, sDAI (over the Pot) and stUSDS. Full
+  recomputation: each vault's `convertToAssets(1e18)` is recomputed from
+  `(rate, chi, rho)` and the block timestamp with Sky's own rpow and
+  compared against the chain with zero tolerance. Every rate change in the
+  window is attributed to the bounded setter (SPBEAM for the SSR and DSR,
+  the stUSDS rate setter for `str`, each behind a Safe, with its own bounds,
+  step and cooldown replayed) or to the governance spell path; both are
+  legitimate and are recorded, not judged. Demo window `--window demo`
+  (blocks 23264565 to 25885408). Specification:
+  [`docs/specs/09-derived-targets.md`](docs/specs/09-derived-targets.md).
 - `mtbill`, Midas mTBILL. Consistency checks, no recomputation. The
   underlying portfolio is not observable, so the NAV is never recomputed
   and the result carries `nav_recomputation: INPUT_GAP` on every run. The
@@ -214,6 +224,7 @@ crossfoot run svzchf --window demo --offline
 crossfoot run svzchf --window demo --from-bundle cli/tests/fixtures/svzchf-demo-24570000-25853000
 crossfoot run susde --window demo
 crossfoot run susde --window demo --from-bundle cli/tests/fixtures/susde-demo-25800000-25885407
+crossfoot run sky --window demo
 crossfoot run mtbill --baseline-block 25598000 --block 25850000
 crossfoot run midas --block 25884405 --config config/midas-mainnet.json
 crossfoot run midas --block 25884405 --feed mRE7 --offline

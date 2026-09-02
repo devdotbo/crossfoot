@@ -70,5 +70,74 @@ convertToAssets(1e18) = 1e18 * (totalAssets + 1) / (totalSupply + 1)
 
 ## 09.2 Sky sUSDS, sDAI and stUSDS
 
-Pending: rpow to the wei over `(rate, chi, rho)`, each rate change
-attributed to the bounded SPBEAM path or the spell path.
+Target `sky`. sUSDS `0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD`, sDAI
+`0x83F20F44975D03b1b09e64809B757c47f942BEeA` over the Pot
+`0x197E90f9FAD81970bA7976f33CbD77088E5D7cf7`, stUSDS
+`0x99CD4Ec3f88A45940936F469E4bB72A2A701EEB9`; setters SPBEAM
+`0x36B072ed8AFE665E3Aa6DaBa79Decbec63752b22` (SSR, DSR) and
+StUsdsRateSetter `0x30784615252B13E1DbE2bDf598627eaC297Bf4C5` (str), each
+behind a bud Safe (2 of 3); the pause proxy
+`0xBE8E3e3618f7474F8cB1d074A26afFef007E98FB` is the spell path. Evidence:
+`raw/sky-susds-sdai-stusds-spbeam-rpc-2026-09-02.md`; every address and
+getter shape confirmed by an `eth_call` at block 25,885,408 before use.
+
+Model (from the source):
+
+```
+chi_now = block timestamp > rho ? rpow(rate, timestamp - rho) * chi / RAY : chi
+convertToAssets(1e18) = 1e18 * chi_now / RAY
+rpow: exponentiation by squaring in ray, (x * x + RAY / 2) / RAY at every step
+```
+
+- R7. Reads at each pinned block per vault: `rate` (`ssr`, `dsr`, `str`),
+  `chi`, `rho` from the accumulator, the observed `convertToAssets(1e18)`
+  from the token, and the block header. At B1 the setter rule per id:
+  `cfgs(id)` or `strCfg()` (min, max, step in bps), `tau()`, `bad()`; at B0
+  the setter's `toc()`.
+- R8. `comparison.fields` holds three fields at B1, zero tolerance:
+  `susds.convertToAssets(1e18)`, `sdai.convertToAssets(1e18)`,
+  `stusds.convertToAssets(1e18)`.
+- R9. Rate changes in (B0, B1]: `File(what, data)` on sUSDS and stUSDS
+  filtered by the indexed name, the Pot's anonymous `LogNote` for
+  `file(bytes32,uint256)` filtered by `dsr`. A change whose transaction
+  carries the setter's `Set` event for the same id took the
+  `bounded_setter` path; otherwise it took the `spell` path (finding
+  `rate_change_by_spell`, informational). The previous and new annual rates
+  in bps are recovered from the rays by compounding over one year with the
+  same rpow; the setter's emitted bps must equal the compounded bps
+  (`filed_rate_differs_from_set_bps` otherwise).
+- R10. For a bounded change the setter's rule is replayed with the rule read
+  at B1: bounds, step against the previous bps clamped into the bounds,
+  cooldown since the previous bounded set (from `toc` at B0 onward). A
+  change that fails it is `setter_rule_inconsistent`, which means the rule
+  in force when it was made differed from the rule at B1 (a configuration
+  change between them), since the setter reverts otherwise. Informational.
+- R11. `Cut` events on stUSDS (loss socialisation) in the window are the
+  finding `stusds_cut_event`; a halted setter (`bad != 0`) is
+  `setter_halted`. Neither changes the comparison.
+- R12. Timeline `timelines/sky.json`: one row per change with vault, block,
+  time, previous and new rate and bps, path, the setter's bps, the three
+  rule checks, seconds since the previous bounded set, sender and target.
+  The renderer writes one feeds.json row per vault with the vault's own
+  address and field equality.
+- R13. Demo window `--window demo`: B0 = 23,264,565 (the survey start,
+  2025-09-01), B1 = 25,885,408 (the archive's read block). Pinned
+  observations at B1: sUSDS 1108162724614623666, sDAI 1180012163563431758,
+  stUSDS 1072222891118653161. 145 rate changes: 9 SSR and 2 DSR through
+  SPBEAM (rule held on every one), 134 stUSDS `str` changes of which 133
+  through the rate setter and 1 the launch spell at block 23,319,630; two
+  early stUSDS changes (0 to 4000 and 4000 to 2000 bps, October 2025) fail
+  the step of the rule read at B1 (1500), which records that the setter's
+  configuration at launch differed from the configuration at B1.
+
+| Requirement | Test |
+|---|---|
+| model | `rpow_reproduces_the_pinned_archive_observations` (offline, the archive's six rows), `mul_add_div_rounds_half_up_like_rpow` |
+| R9 | `bps_are_recovered_from_the_per_second_ray`, `parameter_names_are_left_aligned_words` |
+| R8, R13 | `verify_passes_on_the_sky_fixture` (offline, `cli/tests/fixtures/sky-demo-23264565-25885408.tar.gz`) |
+| R12 | `sky_fixture_renders_one_feed_row_per_vault` |
+
+Out of scope: replaying chi across the window (every drip rounds, and drips
+happen at every deposit and withdrawal), the Spark cross-chain SSR oracles
+(the same rpow over a relayed triple), and the Conv table itself (bps are
+recovered by compounding, not by the table).

@@ -624,6 +624,7 @@ fn check_class_words(result: &Value) -> &'static str {
     }
     match result.get("target").and_then(Value::as_str) {
         Some("svzchf") => "Full recomputation, zero tolerance. Every compared value is recomputed from public inputs and must match the chain to the wei.",
+        Some("sky") => "Full recomputation, zero tolerance. convertToAssets(1e18) of sUSDS, sDAI and stUSDS is recomputed from (rate, chi, rho) and the block timestamp with Sky's rpow and must match the chain to the wei. Every rate change of the window is attributed to the bounded setter (SPBEAM or the stUSDS rate setter, with its own bounds, step and cooldown replayed) or to the governance spell path; both are legitimate paths and are recorded, not judged.",
         Some("susde") => "Full recomputation, zero tolerance. The unvested reward, totalAssets and convertToAssets(1e18) are recomputed from five state reads at the pinned block and must match the chain to the wei. The reward posts of the window are attributed to the transaction and path that made them; their size is a role holder's choice and is reported, not judged.",
         Some("mtbill") => "Consistency bundle. The NAV itself is INPUT_GAP: the underlying portfolio is not observable, so it is not recomputed here. Everything below checks the issuer's own contractual and on-chain rules against itself.",
         _ => "Unknown target.",
@@ -987,6 +988,75 @@ fn susde_body(run: &Run) -> String {
                 escape(&wei(&s("amount"), 18)),
                 escape(&s("path")),
                 n("seconds_since_previous"),
+                escape(&s("transaction_hash"))
+            ));
+        }
+        html.push_str("</table>\n");
+    }
+    html
+}
+
+fn sky_body(run: &Run) -> String {
+    let result = &run.result;
+    let mut html = String::new();
+    html.push_str("<h2>Comparison</h2>\n");
+    html.push_str("<p class=\"note\">Modeled is chi compounded from rho to the block timestamp with Sky's rpow, times 1e18 over one ray. Observed is each vault's convertToAssets(1e18) at the pinned block. Tolerance is zero.</p>\n");
+    html.push_str(&comparison_table(result));
+
+    html.push_str("<h2>Rate changes in the window</h2>\n");
+    let changes = result.get("rate_changes");
+    let total = changes
+        .and_then(|c| c.get("total"))
+        .and_then(Value::as_u64)
+        .unwrap_or(0);
+    let by_path = changes
+        .and_then(|c| c.get("by_path"))
+        .and_then(Value::as_object)
+        .map(|m| {
+            m.iter()
+                .map(|(k, v)| format!("{} {}", v, k))
+                .collect::<Vec<String>>()
+                .join(", ")
+        })
+        .unwrap_or_default();
+    html.push_str(&format!(
+        "<p>{total} rate change(s) between the two pinned blocks ({}). A change took the bounded setter when its transaction carries the setter's Set event; otherwise it took the governance spell path, which has no on-chain bound. Both are legitimate paths; the table records which one, and whether the setter's own rule held.</p>\n",
+        escape(&by_path)
+    ));
+    if let Some(timeline) = read_json(&run.dir.join("timelines").join("sky.json")) {
+        html.push_str("<table>\n<tr><th>vault</th><th>block</th><th>time (UTC)</th><th>from bps</th><th>to bps</th><th>path</th><th>rule</th><th>transaction</th></tr>\n");
+        for row in timeline
+            .get("rows")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+        {
+            let s = |k: &str| row.get(k).and_then(Value::as_str).unwrap_or("").to_string();
+            let n = |k: &str| {
+                row.get(k)
+                    .and_then(Value::as_u64)
+                    .map(|v| v.to_string())
+                    .unwrap_or("?".into())
+            };
+            let rule = if s("path") == "bounded_setter" {
+                let ok = |k: &str| row.get(k).and_then(Value::as_bool).unwrap_or(false);
+                if ok("within_bounds") && ok("within_step") && ok("cooldown_ok") {
+                    "held".to_string()
+                } else {
+                    "NOT HELD".to_string()
+                }
+            } else {
+                "no bound".to_string()
+            };
+            html.push_str(&format!(
+                "<tr><td>{}</td><td class=\"mono\">{}</td><td class=\"mono\">{}</td><td class=\"num\">{}</td><td class=\"num\">{}</td><td>{}</td><td>{}</td><td class=\"mono\">{}</td></tr>\n",
+                escape(&s("product")),
+                n("block"),
+                escape(&s("timestamp_utc")),
+                n("previous_bps"),
+                n("new_bps"),
+                escape(&s("path")),
+                escape(&rule),
                 escape(&s("transaction_hash"))
             ));
         }
@@ -1686,16 +1756,23 @@ fn feed_row(run: &Run, feed: Option<&Value>) -> Value {
             s(Some(feed), "timeline_file")
                 .map(|file| format!("data/timelines/{}", file.trim_start_matches("timelines/"))),
         ),
-        ("svzchf", _) | ("susde", _) => (
+        ("svzchf", _) | ("susde", _) | ("sky", _) => (
             Some(
-                if target == "susde" {
-                    crate::susde::VAULT
-                } else {
-                    crate::svzchf::VAULT
+                match target {
+                    "susde" => crate::susde::VAULT,
+                    "sky" => crate::sky::SUSDS,
+                    _ => crate::svzchf::VAULT,
                 }
                 .to_string(),
             ),
-            Some(if target == "susde" { "sUSDe" } else { "svZCHF" }.to_string()),
+            Some(
+                match target {
+                    "susde" => "sUSDe",
+                    "sky" => "sUSDS",
+                    _ => "svZCHF",
+                }
+                .to_string(),
+            ),
             Some("vault".to_string()),
             Some("recomputable".to_string()),
             s(summary, "verdict").or_else(|| Some(verdict_of(result))),
@@ -1740,7 +1817,7 @@ fn feed_row(run: &Run, feed: Option<&Value>) -> Value {
     };
     let family = s(summary, "family").unwrap_or_else(|| {
         match target {
-            "svzchf" | "susde" => "recomputable-accrual",
+            "svzchf" | "susde" | "sky" => "recomputable-accrual",
             _ => "guarded-setter",
         }
         .to_string()
@@ -1852,6 +1929,62 @@ fn write_data_files(runs: &[Run], out_dir: &Path) -> Result<Vec<PathBuf>, String
                     }
                 }
             }
+        } else if run.result.get("target").and_then(Value::as_str) == Some("sky") {
+            // One row per vault: the same summary, the vault's own address,
+            // product and field equality.
+            for vault in run
+                .result
+                .get("vaults")
+                .and_then(Value::as_array)
+                .into_iter()
+                .flatten()
+            {
+                let mut row = feed_row(run, None);
+                if let Some(map) = row.as_object_mut() {
+                    map.insert("address".into(), vault["token"].clone());
+                    map.insert("product".into(), vault["product"].clone());
+                    let equal = vault["equal"].as_bool().unwrap_or(false);
+                    let verdict = map.get("verdict").cloned().unwrap_or(Value::Null);
+                    if verdict == "MODEL_MATCH" || verdict == "OBSERVED_DEVIATION" {
+                        map.insert(
+                            "verdict".into(),
+                            serde_json::json!(if equal {
+                                "MODEL_MATCH"
+                            } else {
+                                "OBSERVED_DEVIATION"
+                            }),
+                        );
+                        map.insert(
+                            "consumer_action".into(),
+                            serde_json::json!(if equal { "ALLOW" } else { "REVIEW" }),
+                        );
+                    }
+                    map.insert(
+                        "headline".into(),
+                        serde_json::json!(format!(
+                            "{}.convertToAssets(1e18) {}",
+                            vault["vault"].as_str().unwrap_or(""),
+                            if equal {
+                                "exact, residual 0"
+                            } else {
+                                "deviates"
+                            }
+                        )),
+                    );
+                    map.insert(
+                        "timeline_file".into(),
+                        serde_json::json!("data/timelines/sky.json"),
+                    );
+                }
+                rows.push(row);
+            }
+            let source = run.dir.join("timelines").join("sky.json");
+            if let Ok(bytes) = fs::read(&source) {
+                let path = timelines_dir.join("sky.json");
+                fs::write(&path, bytes)
+                    .map_err(|err| format!("could not write {}: {err}", path.display()))?;
+                written.push(path);
+            }
         } else {
             rows.push(feed_row(run, None));
         }
@@ -1905,6 +2038,17 @@ fn run_page(run: &Run) -> String {
     if target == "svzchf" {
         addresses.push(("vault", crate::svzchf::VAULT.to_string()));
         addresses.push(("savings module", crate::svzchf::MODULE.to_string()));
+    } else if target == "sky" {
+        addresses.push(("sUSDS", crate::sky::SUSDS.to_string()));
+        addresses.push(("sDAI", crate::sky::SDAI.to_string()));
+        addresses.push(("Pot", crate::sky::POT.to_string()));
+        addresses.push(("stUSDS", crate::sky::STUSDS.to_string()));
+        addresses.push(("SPBEAM", crate::sky::SPBEAM.to_string()));
+        addresses.push((
+            "stUSDS rate setter",
+            crate::sky::STUSDS_RATE_SETTER.to_string(),
+        ));
+        addresses.push(("pause proxy", crate::sky::PAUSE_PROXY.to_string()));
     } else if target == "susde" {
         addresses.push(("vault", crate::susde::VAULT.to_string()));
         addresses.push(("asset (USDe)", crate::susde::USDE.to_string()));
@@ -1939,6 +2083,7 @@ fn run_page(run: &Run) -> String {
     html.push_str(&match target {
         "svzchf" => svzchf_body(run),
         "susde" => susde_body(run),
+        "sky" => sky_body(run),
         "mtbill" => mtbill_body(run),
         _ if is_family_run(result) => midas_body(run),
         _ => String::new(),
@@ -2523,6 +2668,58 @@ mod tests {
         assert!(page.contains("36 reward post(s)"));
         assert!(page.contains("operator_via_distributor"));
         assert!(page.contains("rewards distributor"));
+    }
+
+    /// Spec 09.2: the Sky fixture renders one feeds.json row per vault and
+    /// the page carries the rate-change table with both paths.
+    #[test]
+    fn sky_fixture_renders_one_feed_row_per_vault() {
+        let archive = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/sky-demo-23264565-25885408.tar.gz");
+        let input = std::env::temp_dir().join("crossfoot-render-sky-in");
+        let _ = fs::remove_dir_all(&input);
+        crate::pack::unpack(&archive, &input).unwrap();
+        let out = std::env::temp_dir().join("crossfoot-render-sky-out");
+        let _ = fs::remove_dir_all(&out);
+        render(&input, &out).unwrap();
+
+        let feeds: Value =
+            serde_json::from_str(&fs::read_to_string(out.join("data/feeds.json")).unwrap())
+                .unwrap();
+        let rows = feeds["rows"].as_array().unwrap();
+        assert_eq!(rows.len(), 3);
+        let products: Vec<&str> = rows
+            .iter()
+            .map(|r| r["product"].as_str().unwrap())
+            .collect();
+        assert_eq!(products, vec!["sUSDS", "sDAI", "stUSDS"]);
+        let addresses: Vec<&str> = rows
+            .iter()
+            .map(|r| r["address"].as_str().unwrap())
+            .collect();
+        assert_eq!(
+            addresses,
+            vec![crate::sky::SUSDS, crate::sky::SDAI, crate::sky::STUSDS]
+        );
+        for row in rows {
+            assert_eq!(row["target"], "sky");
+            assert_eq!(row["family"], "recomputable-accrual");
+            assert_eq!(row["verdict"], "MODEL_MATCH");
+            assert_eq!(row["consumer_action"], "ALLOW");
+            assert_eq!(row["nav_recomputation"], "FULL");
+            assert_eq!(row["timeline_file"], "data/timelines/sky.json");
+            assert!(row["headline"]
+                .as_str()
+                .unwrap()
+                .ends_with("exact, residual 0"));
+        }
+        assert!(out.join("data/timelines/sky.json").is_file());
+        let page = fs::read_to_string(out.join("sky-demo-23264565-25885408.html")).unwrap();
+        balanced(&page).unwrap();
+        assert!(page.contains("145 rate change(s)"));
+        assert!(page.contains("<td>spell</td>"));
+        assert!(page.contains("<td>bounded_setter</td>"));
+        assert!(page.contains("<td>held</td>"));
     }
 
     #[test]

@@ -110,6 +110,25 @@ pub fn susde(
     )
 }
 
+/// The Sky family summary: three vaults, posted and recomputed being
+/// sUSDS's convertToAssets(1e18).
+pub fn sky(
+    verdict: Verdict,
+    comparison: &ComparisonSet,
+    window: Window,
+    findings_count: usize,
+) -> Summary {
+    exact(
+        "sky",
+        "susds.convertToAssets(1e18)",
+        "rate series deviates",
+        verdict,
+        comparison,
+        window,
+        findings_count,
+    )
+}
+
 /// A full recomputation compared field by field: the shared shape of the
 /// recomputable-accrual targets.
 fn exact(
