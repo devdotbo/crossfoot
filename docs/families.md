@@ -333,17 +333,48 @@ crossfoot run family --block 25885541 --config config/superstate-mainnet.json
 crossfoot run family --block 25885541 --config config/chainlink-mainnet.json
 ```
 
-## Tectonic (Cronos)
+## Tectonic TONIC/USD (Cronos)
 
-Pending: the config, fixture and counts land with the consume teammate's
-merge. The adapter already carries what the family needs: a chain id other
-than 1, `logs: {source: "rpc", start_block, chunk}` for a chain without a
-usable explorer API (every sweep through `eth_getLogs` in 2,000-block
-windows, `explorer: null`, so failed setter calls are unknown and the feed
-carries `external_txlist: false`), a `PriceUpdated` round event in the
-object form with the timestamp from a field, `relays[].calls_kind:
-"aggregate3"` for a Multicall3 relay, and `max_silence_seconds` for the
-`SILENCE` finding. Counts: unverified until the fixture is on main.
+- Issuer: Tectonic (a Compound v2 fork on Cronos), its internal TONIC/USD
+  price feed `0x14f753940720C1Fa4247Cd464C7EA28c806d123F`, 12 decimals.
+  Built by the consume teammate on the same adapter; the historical
+  exhibit of the 2026-08-30 incident (`wiki/cronos-incident-2026.md`).
+- Chain: Cronos, chain id 25. Config `config/tectonic-cronos.json`, 1
+  feed. No explorer API serves Cronos to this tool, so `explorer` is
+  null and every log sweep goes through `eth_getLogs` in 2,000-block
+  windows from block 90,800,000 (2026-08-29); round ids are the position
+  in that window, the contract's own millisecond round id is kept as the
+  field `round_id_ms`.
+- Mechanism: posted setter without a guard, `guard_kind: none`. The only
+  setter, `updatePrice(roundId, timestamp, price)`, is owner-only; the
+  owner is a Multicall3-shaped contract whose `aggregate3` one externally
+  owned account calls with the updates of 23 or 24 Tectonic feeds per
+  transaction, about every 29 minutes. No getter for a bound, a minimum
+  or maximum or an interval exists (selector scan of the deployed
+  bytecode; the source is not verified on an explorer).
+- Replayed: every `PriceUpdated` round attributed through the relay's
+  `aggregate3` tuples to the key that called it; the gap between
+  consecutive rounds against `max_silence_seconds` (7,200); liveness.
+- Not replayed: no bound exists; the value; failed setter attempts (no
+  transaction list exists, the feed carries `external_txlist: false`).
+  The exploit blocks of 2026-08-30 were discarded by the chain rollback:
+  on the canonical chain the feed shows ordinary posts, then silence.
+- Posting path words: `ATTRIBUTED`, `UNATTRIBUTED`.
+- Finding kinds: `UNGUARDED_POST` (`classification: no_guard`), `SILENCE`,
+  `ATTRIBUTION_GAP`.
+- Fixture `cli/tests/fixtures/tectonic-91260041.tar.gz` (217 KB, exhibit
+  note beside it in `tectonic-91260041.md`), Cronos block 91,260,041:
+  100 rounds, all by one key through the owner's `aggregate3`, 0 failed
+  posts known; one `SILENCE` of 95,529 seconds (26.5 hours) between the
+  last pre-rollback post at 12:19:37 UTC on 2026-08-30 and the first post
+  after the restart at 14:51:46 UTC on 2026-08-31; live at the pinned
+  block, `CONSISTENT`, `ALLOW`, with the consumer's guard-less note.
+- Command (endpoint order matters: the pruning public RPC first, dRPC
+  second, because dRPC answers pre-rollback transactions with null):
+
+```
+crossfoot run family --block 91260041 --config config/tectonic-cronos.json --endpoint <Cronos RPC with recent state> --endpoint https://evm.cronos.org
+```
 
 ## Frankencoin svZCHF
 
@@ -600,6 +631,7 @@ consumer's rule: it gates a listing, it monitors nothing after it.
 | Ondo OUSG | A | event_rules | 1 | ondo-25885541.tar.gz | 679 KB | 839 rounds | CONSISTENT |
 | Superstate USTB | A | absolute_delta | 1 | superstate-25885541.tar.gz | 200 KB | 433 checkpoints | CONSISTENT |
 | Chainlink aggregators | D | min_max | 20 (6 in the fixture) | chainlink-25885541.tar.gz | 758 KB | 2,545 rounds | CONSISTENT |
+| Tectonic TONIC/USD | B | none | 1 | tectonic-91260041.tar.gz | 217 KB | 100 rounds, 1 silence | CONSISTENT |
 | Frankencoin svZCHF | C | recomputation | 1 | svzchf-demo-24570000-25853000/ | 372 KB | 80 steps | MODEL_MATCH |
 | Ethena sUSDe | C | recomputation | 1 | susde-demo-25800000-25885407/ | 428 KB | 36 posts | MODEL_MATCH |
 | Sky | C | recomputation | 3 | sky-demo-23264565-25885408.tar.gz | 194 KB | 145 rate changes | MODEL_MATCH |
