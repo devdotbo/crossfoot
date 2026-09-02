@@ -8,7 +8,7 @@ Target: Subgraph Studio (04-subgraph.md D4, R14). Publishing to the network
 | Item | State |
 |---|---|
 | `bun install`, `bun run gen`, `graph codegen`, `graph build` | pass (2026-09-02, graph-cli 0.97.1, darwin-arm64) |
-| `graph test` (matchstick 0.6.0, `binary-macos-12-m1`) | 31 tests pass (shared, midas, openeden, ondo, superstate, frankencoin) |
+| `graph test` (matchstick 0.6.0, `binary-macos-12-m1`) | 41 tests pass (one file per family) |
 | Studio deploy | v0.0.1 deployed 2026-09-02 (deployment ID Qmdzkdfsezd9m11omAppiDikkLgCJX2wX2dWpELf4ejDbJ, see the versions table); the first key supplied was rejected with "Deploy key not found" and turned out to be an API key |
 | Local graph-node (docker, dRPC with traces) | bounded manifest deployed; graph-node accepts the call handlers and finds one event plus one call trigger per Safe-routed round; entity checks below |
 | Network publish | not done |

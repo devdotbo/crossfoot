@@ -16,6 +16,13 @@ families with one schema:
   move, every input in the event) and Superstate USTB (absolute delta cap
   per checkpoint, override flag from the calldata). Same Feed and Round
   shape; `Feed.issuer` and `boundKind` tell them apart.
+- POSTED, production feeds (extension E2): Hashnote USYC (one reporter key,
+  no guard), Backed v2 (four feeds, 10 percent clamp: `atBound` marks the
+  clamped posts), Centrifuge JTRSY and JAAA (share prices from the shared
+  Spoke, keyed by pool and share class, no guard).
+- DERIVED, production feeds (extension E2): Ethena sUSDe (one round per
+  RewardsReceived with convertToAssets(1e18)) and Sky sUSDS (one RateChange
+  and round per File(ssr), rate in ppm derived from the ray).
 - DERIVED: svZCHF. Every state transition of the Frankencoin savings module
   that concerns the vault (rate changes, deposits, withdrawals, interest)
   becomes a `Round` with `path: PROTOCOL` carrying the vault's `price()`.
@@ -41,8 +48,10 @@ Specification: `docs/specs/04-subgraph.md`. Design study:
 | `src/midas.ts` | Event handlers (AnswerUpdated, Initialized, Upgraded) and the four setter call handlers |
 | `src/posted.ts` | Shared Feed, Round, PostTx, Poster and call attribution logic of the other POSTED families |
 | `src/openeden.ts`, `src/ondo.ts`, `src/superstate.ts` | The issuer handlers of extension E1 |
+| `src/hashnote.ts`, `src/backed.ts`, `src/centrifuge.ts`, `src/ethena.ts`, `src/sky.ts` | The production feed handlers of extension E2 |
 | `src/frankencoin.ts` | RateChanged, RateProposed, Saved, Withdrawn, InterestCollected |
-| `tests/` | matchstick tests (`shared`, `midas`, `openeden`, `ondo`, `superstate`, `frankencoin`) and `expected-counts.json` |
+| `tests/` | matchstick tests, one file per family, and `expected-counts.json` |
+| `subgraph.events.yaml` | The same manifest without call handlers (`bun run gen` writes both); deployed as the fast-syncing fallback |
 | `queries/` | The three agent queries used verbatim by `crossfoot consume` |
 | `scripts/check-try.sh` | Every contract call goes through a `try_` variant |
 | `scripts/check-queries.ts` | Validates `queries/*.graphql` against the schema offline |

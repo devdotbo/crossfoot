@@ -540,3 +540,45 @@ unchanged; the three sources are appended to the generated manifest.
   rounds of each evidence file); `tests/expected-counts.json` rows
   `rounds_openeden` 1158, `rounds_ondo` 757, `rounds_superstate` 433 at
   block 25,884,405, `bound_changes` 66, `reference_updates` 1056, feeds 64.
+
+## Extension E2 (2026-09-03): the production feeds
+
+Every feed the engine runs in production gets a data source so the
+consumer decides it from live Graph data (`config/hashnote-mainnet.json`,
+`config/backed-mainnet.json`, `config/centrifuge-mainnet.json`,
+`raw/ethena-susde-feeds-rpc-2026-09-02.md`,
+`raw/sky-susds-sdai-stusds-spbeam-rpc-2026-09-02.md`). Same rule as E1:
+additive schema, existing counts unchanged, the R16 queries validate.
+
+- E2.1 Hashnote USYC 18-decimal feed 0x74f2199A (POSTED, `boundKind: NONE`,
+  no bound): one Round per AnswerUpdated (Chainlink layout, `updatedAt`
+  unindexed); every post is unguarded, path UNCHECKED from the relay
+  (outer transaction to the PriceReporterProxy with report selector
+  0xec46d0f6 or 0x217fd7c3) or from the `transmit(uint256,uint256)` call
+  handler (`caller` = the reporter proxy); Upgrade and BoundChange
+  (`changed: false`) from the proxy events as for Midas.
+- E2.2 Backed v2 (bC3M, ERNX, ERNA, bNVDA; POSTED, RELATIVE, bound the
+  constant 10 percent band 1000000000): path SAFE from
+  `updateAnswer(int192,uint32)` 0x309676e9; `overBound` cannot occur (the
+  contract clamps), `atBound` = deviationFromPrevious equals the band, the
+  engine's "clamped post".
+- E2.3 Centrifuge V3 (JTRSY, JAAA; POSTED, `boundKind: NONE`): one data
+  source on the Spoke 0xEC3582fc serving both feeds through the context
+  (`feeds` = token:poolId:scId:product); Round id = token ++ counter,
+  `answer` = D18 price, `updatedAt` = computedAt; path UNCHECKED from
+  Hub.multicall 0xac9650d8 on the outer transaction (`caller` = the Hub) or
+  from the Spoke call handler `updatePricePoolPerShare`, which joins by
+  (poolId, scId); the Safe setup round is UNKNOWN until that call handler.
+- E2.4 Ethena sUSDe (DERIVED, `inputsFrom` = the StakingRewardsDistributor):
+  one PROTOCOL round per RewardsReceived with convertToAssets(1e18),
+  totalAssets, totalSupply via try_ at the event block, `extra` = the
+  amount, and a VaultFlow of kind REWARDS_RECEIVED.
+- E2.5 Sky sUSDS (DERIVED, `inputsFrom` = MCD_SPBEAM): one RateChange per
+  File(what = "ssr") with `rateRaw` = the ray and `ratePPM` = the
+  annualised rate in ppm derived in f64 (deterministic IEEE arithmetic;
+  3.52 percent reads 35200), plus a PROTOCOL round with convertToAssets(1e18).
+- E2.6 Verification: `tests/hashnote.test.ts`, `backed.test.ts`,
+  `centrifuge.test.ts`, `ethena.test.ts`, `sky.test.ts` (matchstick,
+  offline, the evidence files' last rounds); `tests/expected-counts.json`
+  rows `rounds_hashnote` 503, `rounds_centrifuge` 292, `rate_changes_sky`
+  18, feeds 73; Backed and Ethena counts recorded at capture.
