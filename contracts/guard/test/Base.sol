@@ -28,6 +28,12 @@ interface Vm {
         view
         returns (string memory);
     function skip(bool skipTest) external;
+    function startBroadcast() external;
+    function stopBroadcast() external;
+    function envAddress(string calldata name) external view returns (address);
+    function envOr(string calldata name, address defaultValue) external view returns (address);
+    function envOr(string calldata name, uint256 defaultValue) external view returns (uint256);
+    function envOr(string calldata name, bool defaultValue) external view returns (bool);
     function getRecordedLogs() external returns (Log[] memory);
 }
 

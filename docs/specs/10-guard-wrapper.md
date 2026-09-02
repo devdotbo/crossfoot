@@ -407,3 +407,63 @@ CROSSFOOT_FORK_URL=<archive endpoint> FOUNDRY_PROFILE=fork forge test --match-co
 - Q3. Whether the velocity check should keep a small ring of accepted
   rounds instead of one anchor. Default: one anchor; the cost of the ring
   is paid on every read.
+
+## Appendix: testnet deployment plan (added 2026-09-03)
+
+A Sepolia or Base Sepolia deployment of `CrossfootAttestations` plus one
+`CrossfootGuard`, in minutes, with `script/Deploy.s.sol` (dry-run against
+a local anvil on 2026-09-03: registry, mock feed and guard in one run).
+
+From the user:
+
+- A funded deployer wallet on the target chain (Sepolia chain id 11155111
+  or Base Sepolia 84532; a few hundredths of an ETH cover three contract
+  creations at about 1.9 M gas in total). The private key reaches the
+  shell as `PK`, never a file; the address as `DEPLOYER`.
+- An RPC URL as `RPC` (dRPC: `https://lb.drpc.org/ogrpc?network=sepolia&dkey=...`
+  or `network=base-sepolia`, key from `.env` into the shell only).
+- The feed to wrap: unset `FEED` for a fresh owner-posted mock seeded with
+  `MOCK_ANSWER` (default 1e8 at 8 decimals; the deployer is the mock's
+  poster and can then post moves to demonstrate a rejection), or a live
+  AggregatorV3 feed on the chain. Chainlink's Sepolia ETH/USD is
+  `0x694AA1769357215DE4FAC081bf1f309aDC325306` and Base Sepolia ETH/USD
+  `0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1` (from memory, unverified:
+  confirm against data.chain.link before use). A live Chainlink feed
+  moves within its own 0.5 percent deviation rule, so a guard over it
+  demonstrates acceptance and staleness, not a rejection.
+
+Commands (`contracts/guard/`):
+
+```
+export RPC=... PK=... DEPLOYER=0x...
+# optional: OWNER GUARDIAN ATTESTER (default DEPLOYER), FEED, TIMELOCK_DELAY (3600),
+#           MAX_DEVIATION (200000000 = 2.0 percent), MAX_VELOCITY, VELOCITY_WINDOW,
+#           MAX_STALENESS, MIN_INTERVAL, HALT_ON_REJECT (true), REVERT_BY_DEFAULT (true),
+#           MOCK_ANSWER (100000000), MOCK_DECIMALS (8)
+forge script script/Deploy.s.sol --rpc-url $RPC --private-key $PK --broadcast \
+  --verify --verifier blockscout --verifier-url https://eth-sepolia.blockscout.com/api/
+# Base Sepolia: --verifier-url https://base-sepolia.blockscout.com/api/
+```
+
+`--verify` submits every created contract with the constructor arguments
+from the broadcast, so no manual `forge verify-contract` is needed; if
+Blockscout is slow, re-run with `--resume --verify`. Addresses land in
+`broadcast/Deploy.s.sol/<chain_id>/run-latest.json` (gitignored; copy the
+three addresses and the transaction hashes into `contracts/guard/DEPLOYMENT.md`
+with the date and chain id).
+
+Demonstration after deployment, mock feed:
+
+```
+cast send <mock> "updatePrice(uint256,uint256,int256)" 2 $(date +%s) 101000000 --rpc-url $RPC --private-key $PK
+cast send <guard> "sync()" --rpc-url $RPC --private-key $PK           # RoundAccepted
+cast send <mock> "updatePrice(uint256,uint256,int256)" 3 $(date +%s) 646000000 --rpc-url $RPC --private-key $PK
+cast call <guard> "evaluate()" --rpc-url $RPC                          # reason 4 Deviation, measured 53960396039
+cast send <guard> "sync()" --rpc-url $RPC --private-key $PK           # RoundRejected, Halted
+cast call <guard> "latestRoundData()" --rpc-url $RPC                   # reverts GuardRejected(11, 0, 0)
+cast send <registry> "attest(address,uint8,uint80,bytes32,bytes32,uint64,bytes32)" <mock> 2 3 0x<record_sha256> 0x<digest> <block> 0x<bundle_root> --rpc-url $RPC --private-key $PK
+cast send <guard> "resume(bool)" true --rpc-url $RPC --private-key $PK # owner only
+```
+
+Not part of the plan: mainnet, any lender integration, any claim beyond
+"deployed and verified on a testnet".

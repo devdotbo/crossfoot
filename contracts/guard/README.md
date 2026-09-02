@@ -49,5 +49,9 @@ forge snapshot --check --tolerance 5 --no-match-contract Fork
 CROSSFOOT_FORK_URL=<archive endpoint> FOUNDRY_PROFILE=fork forge test --match-contract Fork -vv
 ```
 
+`script/Deploy.s.sol` deploys the registry and one guard over a live or a
+mock feed from environment variables; the testnet plan with the exact
+commands is the appendix of spec 10.
+
 No submodules: `test/Base.sol` carries the cheatcode interface the tests
 use. `evm_version = paris` so the bytecode runs on chains behind Cancun.
