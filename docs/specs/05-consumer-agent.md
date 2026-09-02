@@ -331,9 +331,9 @@ above without changing a decision word.
   `RATE_CHANGED_AFTER_WINDOW: rate changed to <ppm> ppm at block <n> after the result block <rb>; tx <hash>; bundle <root>`;
   every verdict or liveness word taken from the row uses the row 11
   template. Where no row exists the suffix is `; no Crossfoot result`.
-- Fixture. `cli/tests/fixtures/consume-QmPm4RhwubryZFgcrXmhEEAxB3eTkpKCevUjbA9vg3kGgh/`
-  is the live recording from Studio v0.0.5 (73 feeds) at its head, block
-  25,887,077, with a feeds.json rendered over the twelve checked-in fixture
+- Fixture. `cli/tests/fixtures/consume-QmeTCucCXDhT27pMMExg2EtDx1t7SA3Abgcw2p4BuZgmdQ/`
+  is the live recording from Studio v0.0.7 (95 feeds) at its head, block
+  25,887,730, with a feeds.json rendered over the fifteen checked-in fixture
   bundles; Studio keeps about 1,000 blocks of history and serves no
   time-travel query below that, so the survey block of 04 R17 was out of
   reach and the fixture is pinned at the recording head (its README says

@@ -1254,17 +1254,17 @@ mod tests {
 
     fn fixture_dir() -> PathBuf {
         Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("tests/fixtures/consume-QmPm4RhwubryZFgcrXmhEEAxB3eTkpKCevUjbA9vg3kGgh")
+            .join("tests/fixtures/consume-QmeTCucCXDhT27pMMExg2EtDx1t7SA3Abgcw2p4BuZgmdQ")
     }
 
-    /// The live recording from Studio v0.0.5 at its head (fixture README).
-    const FIXTURE_NOW: i64 = 1_788_321_647;
-    const FIXTURE_BLOCK: u64 = 25_887_077;
-    const FIXTURE_BLOCK_TIMESTAMP: i64 = 1788321635;
-    const FIXTURE_FEEDS: usize = 73;
-    const FIXTURE_UNINDEXED: usize = 9;
-    const FIXTURE_DEPLOYMENT: &str = "QmPm4RhwubryZFgcrXmhEEAxB3eTkpKCevUjbA9vg3kGgh";
-    const FIXTURE_DIGEST: &str = "151c718a5c41700eb03bfbd838e552d7caad16cd326f364eabb5271fc6b5c492";
+    /// The live recording from Studio v0.0.7 at its head (fixture README).
+    const FIXTURE_NOW: i64 = 1_788_329_482;
+    const FIXTURE_BLOCK: u64 = 25_887_730;
+    const FIXTURE_BLOCK_TIMESTAMP: i64 = 1_788_329_471;
+    const FIXTURE_FEEDS: usize = 95;
+    const FIXTURE_UNINDEXED: usize = 5;
+    const FIXTURE_DEPLOYMENT: &str = "QmeTCucCXDhT27pMMExg2EtDx1t7SA3Abgcw2p4BuZgmdQ";
+    const FIXTURE_DIGEST: &str = "ef68e1e52bd596431373a900a17cd7a4f26a74936433e1cf79306fb0b7847407";
     const MRE7: &str = "0x0a2a51f2f206447de3e3a80fcf92240244722395";
     const SVZCHF: &str = "0xe5f130253ff137f9917c0107659a4c5262abf6b0";
 
@@ -1312,7 +1312,7 @@ mod tests {
             assert_eq!(e["gates"]["max_seconds_since_last_post"], 604_800);
             assert_eq!(e["gates"]["max_unchecked_deviation_percent"], "5");
         }
-        assert_eq!(output["header"]["allow"], 16);
+        assert_eq!(output["header"]["allow"], 19);
         // Without a policy the field is null and nothing else changes.
         let mut opts = fixture_opts(&temp("no-policy"));
         opts.policy = Some(PathBuf::from("/nonexistent/policy.json"));
