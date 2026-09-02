@@ -335,6 +335,15 @@ above without changing a decision word.
   `cli/tests/fixtures/consume-fixture-v1/` with hand-built responses; its
   README states which numbers are from the research memos and how to swap
   in `consume-<deployment-id>/`.
+- Pinned `_meta` on Studio returns a null hash and timestamp for a
+  block-pinned query (verified 2026-09-02 on v0.0.4). The pinned block's
+  timestamp is then the head's: silently when the pinned block is the
+  head, and with the note `the subgraph returned no timestamp for the
+  pinned block; feed and result freshness were measured against the head
+  timestamp` on every record when it is older. Studio also keeps about
+  1,000 blocks of history unless the manifest asks for more, so a
+  replay pinned further back fails at the endpoint, not in the agent.
+  Test: `pinned_block_without_timestamp_uses_the_head_timestamp`.
 - Row 11a, guard-less families (Hashnote, Centrifuge and every family
   whose `guard_kind` is `none`). A POSTED row whose `posting_path` is the
   guard-less word (`ATTRIBUTED`; `UNGUARDED` is accepted as well) or whose

@@ -450,6 +450,28 @@ fn parse_meta(name: &str, data: &Value) -> Result<Head, String> {
     })
 }
 
+/// The note on every record when the pinned block's timestamp had to be
+/// taken from the head: graph-node answers `_meta(block: {number})` with a
+/// null hash and timestamp, so a run pinned below the head measures feed
+/// and result freshness against the head's timestamp.
+pub const PINNED_TIMESTAMP_NOTE: &str = "the subgraph returned no timestamp for the pinned block; feed and result freshness were measured against the head timestamp";
+
+/// `_meta` of a pinned query: deployment, number and the timestamp when
+/// the node returned one (Studio returns null for a pinned block).
+fn parse_pinned_meta(name: &str, data: &Value) -> Result<(String, u64, Option<i64>), String> {
+    let meta = data
+        .get("_meta")
+        .ok_or_else(|| format!("{name}: _meta is missing"))?;
+    let block = meta
+        .get("block")
+        .ok_or_else(|| format!("{name}: _meta.block is missing"))?;
+    Ok((
+        require_str(name, meta, "deployment")?,
+        require_int(name, block, "number")? as u64,
+        int_field(block, "timestamp"),
+    ))
+}
+
 fn parse_feeds(data: &Value) -> Result<Vec<SubgraphFeed>, String> {
     let list = data
         .get("feeds")
@@ -830,22 +852,31 @@ pub fn run_with_key(opts: &ConsumeOpts, key: Option<String>) -> Result<RunOutcom
         &json!({"block": block}),
     )?;
     let status_data = response_data("FeedStatus", &status.body)?;
-    let status_meta = parse_meta("FeedStatus", &status_data)?;
-    if status_meta.number != block {
+    let (status_deployment, status_number, status_timestamp) =
+        parse_pinned_meta("FeedStatus", &status_data)?;
+    if status_number != block {
         return Err(format!(
-            "FeedStatus: response is at block {} but the run is pinned to {block}",
-            status_meta.number
+            "FeedStatus: response is at block {status_number} but the run is pinned to {block}"
         ));
     }
-    if status_meta.deployment != head.deployment {
+    if status_deployment != head.deployment {
         return Err(format!(
-            "FeedStatus: response comes from deployment {}, Head from {}",
-            status_meta.deployment, head.deployment
+            "FeedStatus: response comes from deployment {status_deployment}, Head from {}",
+            head.deployment
         ));
     }
+    let mut run_notes: Vec<String> = Vec::new();
+    let pinned_timestamp = match status_timestamp {
+        Some(timestamp) => timestamp,
+        None if status_number == head.number => head.timestamp,
+        None => {
+            run_notes.push(PINNED_TIMESTAMP_NOTE.to_string());
+            head.timestamp
+        }
+    };
     let pinned = Pinned {
-        number: status_meta.number,
-        timestamp: status_meta.timestamp,
+        number: status_number,
+        timestamp: pinned_timestamp,
     };
     let feeds = parse_feeds(&status_data)?;
     executed.push(status);
@@ -967,6 +998,7 @@ pub fn run_with_key(opts: &ConsumeOpts, key: Option<String>) -> Result<RunOutcom
                 .unwrap_or_default(),
         };
         let mut outcome = decide(&inputs);
+        outcome.notes.extend(run_notes.iter().cloned());
         outcome.evidence.timeline = timelines.get(&feed.address).cloned();
         match outcome.decision {
             Decision::Allow => allow += 1,
@@ -1433,6 +1465,51 @@ mod tests {
         let output = read_output(&outcome);
         let svzchf = record_for(&output, SVZCHF);
         assert_eq!(svzchf["reasons"], json!(["SUBGRAPH_STALE"]));
+    }
+
+    /// A pinned `_meta` without hash and timestamp (what Studio returns for
+    /// a block-pinned query): the head's timestamp serves, silently when
+    /// the pinned block is the head and with the note when it is older.
+    #[test]
+    fn pinned_block_without_timestamp_uses_the_head_timestamp() {
+        let s = Synthetic::new("pinned-no-timestamp");
+        let mut status = default_feed_status();
+        status["data"]["_meta"]["block"] = json!({"number": FIXTURE_BLOCK});
+        s.write("FeedStatus.json", &status);
+        let outcome = run_with_key(&s.opts(), None).unwrap();
+        assert_eq!(outcome.block_timestamp, FIXTURE_NOW);
+        let output = read_output(&outcome);
+        let record = record_for(&output, MRE7);
+        assert_eq!(
+            record["provenance"]["subgraph"]["block"]["timestamp"],
+            FIXTURE_NOW
+        );
+        assert_eq!(
+            record["provenance"]["subgraph"]["block"]["hash"],
+            Value::Null
+        );
+        assert!(record["notes"].as_array().unwrap().is_empty());
+
+        // The head moved on: the pinned block is older, so the note is set.
+        let mut head = meta();
+        head["block"]["number"] = json!(FIXTURE_BLOCK + 500);
+        head["block"]["timestamp"] = json!(FIXTURE_NOW + 6_000);
+        s.write("Head.json", &json!({"data": {"_meta": head}}));
+        let mut opts = s.opts();
+        opts.now = Some(FIXTURE_NOW + 6_000);
+        let outcome = run_with_key(&opts, None).unwrap();
+        let output = read_output(&outcome);
+        let record = record_for(&output, MRE7);
+        assert_eq!(record["decision"], "ALLOW");
+        assert_eq!(record["notes"], json!([PINNED_TIMESTAMP_NOTE]));
+        assert_eq!(
+            record["provenance"]["subgraph"]["head"]["number"],
+            FIXTURE_BLOCK + 500
+        );
+        assert_eq!(
+            record["provenance"]["subgraph"]["block"]["number"],
+            FIXTURE_BLOCK
+        );
     }
 
     /// 05 R4: hasIndexingErrors routes every feed to REVIEW.
