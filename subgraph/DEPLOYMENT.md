@@ -174,12 +174,39 @@ Entity checks against the research archive (2026-09-02, store head
 Extension E1 (OpenEden, Ondo, Superstate) was added after this run and is
 covered by the offline tests only until the next local or Studio sync.
 
-## Publish (stretch, R15)
+## Network publish (stretch, R15): facts checked on 2026-09-02
+
+Nothing below was executed. Sources: The Graph docs re-fetched on
+2026-09-02 into the research repository (`raw/thegraph-docs-publishing-a-subgraph-2026-09-02.md`,
+`raw/thegraph-docs-curating-2026-09-02.md`, `raw/thegraph-docs-billing-2026-09-02.md`,
+`raw/thegraph-docs-upgrade-indexer-2026-09-02.md`,
+`raw/thegraph-docs-managing-api-keys-2026-09-02.md`,
+`raw/thegraph-docs-studio-faq-2026-09-02.md`, `raw/thegraph-studio-pricing-2026-09-02.md`).
+
+| Question | Fact | Source |
+|---|---|---|
+| Chain of the publish transaction | Arbitrum One ("all activity, including the billing contracts, is now on Arbitrum One"; publish targets `arbitrum-one` or `arbitrum-sepolia`) regardless of the network the subgraph indexes | publishing page, billing page |
+| Gas cost of publishing | not stated in the docs; paid in ETH on Arbitrum One. Own estimate, unverified: well under one US dollar at typical Arbitrum fees for the publish transaction; the first curator's signal transaction is described as "much more gas-intensive" because it initialises the curation share token | publishing and curating pages |
+| Is curation signal required | optional. "The Sunrise Upgrade Indexer ensures the indexing of all Subgraphs"; signal only attracts additional indexers. Studio can add GRT signal in the same transaction as the publish | publishing page |
+| What the Upgrade Indexer does for an unsignalled subgraph | Edge & Node's Upgrade Indexer serves every newly published subgraph immediately, but "does not permanently index Subgraphs" and all its subgraphs are auto-pruned, so time-travel queries (`block: {number: N}`) are not supported there. No query-rate figure and no sunset date is stated on the page (unverified); the consumer's replay at block 25,884,405 therefore needs an independent indexer, hence signal, or must stay on the Studio development URL (limit 3,000 queries per day, per the Studio page archived 2026-09-01) | upgrade indexer page |
+| Sensible signal amount | the docs recommend curating your own subgraph with at least 3,000 GRT to attract additional indexers when the subgraph is eligible for indexing rewards (Ethereum mainnet is); a 1 percent curation tax is burned on every signal and 0.5 percent on each auto-migration to a new version; the deposit minus tax is withdrawable at any time on Arbitrum | publishing and curating pages |
+| Query plans | Free Plan: 100,000 queries per month and the Studio testing environment. Growth Plan: every query beyond 100,000 per month is paid, 2 US dollars per 100,000 queries (pricing page), with GRT on Arbitrum (ETH on Arbitrum for gas) or a credit card via Stripe, invoiced monthly | billing and pricing pages |
+| Is `graph_api_key` the key for network queries | yes in kind: API keys come from Studio's "API Keys" tab, are the only way to query published subgraphs through the gateway, and go either in the URL path `https://gateway.thegraph.com/api/<API_KEY>/subgraphs/id/<SUBGRAPH_ID>` or in an `Authorization: Bearer <API_KEY>` header on `https://gateway.thegraph.com/api/subgraphs/id/<SUBGRAPH_ID>`. The stored value has that shape (32 hex characters, and Studio rejected it as a Deploy Key), but whether it was created under the same account and is unrestricted by domain is unverified until a gateway query answers | managing API keys page, Studio FAQ |
+
+Commands, in order, once the schema is final (a published version cannot be
+replaced under curators' signal without the 0.5 percent migration tax on them):
 
 ```
-bunx graph publish
+cd subgraph
+bun run gen && bunx graph codegen && bunx graph build
+bunx graph publish subgraph.events.yaml --protocol-network arbitrum-one   # opens the wallet UI; add metadata and, if wanted, GRT signal in the same transaction
+# afterwards, with the Subgraph ID from Studio or Graph Explorer:
+curl -s https://gateway.thegraph.com/api/subgraphs/id/<SUBGRAPH_ID> \
+  -H "Authorization: Bearer $(sed -n 's/^graph_api_key=//p' ../../ethonline2026/.env)" \
+  -H 'content-type: application/json' --data '{"query":"{ _meta { deployment block { number } } }"}'
 ```
 
-Costs Arbitrum One gas (amount unverified) and cannot be replaced once
-curated; publish only the final schema. Record the subgraph ID and gateway
-URL here if done.
+Which manifest to publish: `subgraph.events.yaml` (event-only) unless the
+call-handler version has synced on Studio by then; the published version
+can be moved to the call-handler manifest later at the cost of one migration.
+Record the Subgraph ID, the gateway URL and the signal amount here when done.
