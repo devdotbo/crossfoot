@@ -270,6 +270,17 @@ pub const GUARD_LESS_PATHS: [&str; 2] = ["ATTRIBUTED", "UNGUARDED"];
 /// The mandatory note on an ALLOW for a guard-less feed (row 11a).
 pub const NO_GUARD_NOTE: &str = "no on-chain deviation check: the family has no guard, so the decision rests on the poster key(s) the run attributed";
 
+/// The posting_path word of an aggregator feed (Chainlink OCR): rounds are
+/// written by a transmitter set, no single key posts.
+pub const AGGREGATED_PATH: &str = "AGGREGATED";
+
+/// The mandatory note on an ALLOW for an aggregator feed (row 11b).
+pub const AGGREGATED_NOTE: &str = "posted by an aggregator transmitter set: no single key posts, so the decision rests on the aggregator's configured set and its on-chain min and max";
+
+fn is_aggregated(row: &CrossfootRow) -> bool {
+    row.posting_path.as_deref() == Some(AGGREGATED_PATH)
+}
+
 /// Row 11a: a POSTED row whose family has no on-chain guard.
 fn is_guard_less(row: &CrossfootRow) -> bool {
     row.posting_path
@@ -603,6 +614,19 @@ pub fn decide(inputs: &FeedInputs) -> Outcome {
                 None,
                 format!(
                     "{}: {} at block {}; no on-chain deviation check, attribution rests on the poster key(s){keys}; bundle {}",
+                    r.verdict,
+                    r.headline.as_deref().unwrap_or("no headline"),
+                    r.block,
+                    r.bundle_root
+                ),
+            )
+        } else if feed.family == Family::Posted && is_aggregated(r) {
+            notes.push(AGGREGATED_NOTE.to_string());
+            (
+                Decision::Allow,
+                None,
+                format!(
+                    "{}: {} at block {}; posted by an aggregator transmitter set, no single key; bundle {}",
                     r.verdict,
                     r.headline.as_deref().unwrap_or("no headline"),
                     r.block,
@@ -1051,6 +1075,43 @@ mod tests {
         matched.guard_kind = Some("none".into());
         let out = decide(&inputs(&h, &p, &derived, Some(&matched)));
         assert!(out.notes.is_empty());
+    }
+
+    /// 05 row 11b: an aggregator feed (posting_path AGGREGATED) that is
+    /// LIVE and CONSISTENT is ALLOW with the no-single-key note; stale or
+    /// deviating rows stay REVIEW.
+    #[test]
+    fn aggregated_feed_allows_with_the_no_single_key_note() {
+        let h = head();
+        let p = policy();
+        let posted = posted_feed();
+        let mut live = row("chainlink", "CONSISTENT", Some("AGGREGATED"), Some("LIVE"));
+        live.headline = Some("351 rounds by 16 transmitters".into());
+        let out = decide(&inputs(&h, &p, &posted, Some(&live)));
+        assert_eq!(out.decision, Decision::Allow);
+        assert_eq!(out.notes, vec![AGGREGATED_NOTE]);
+        assert_eq!(
+            out.reason_text,
+            format!("CONSISTENT: 351 rounds by 16 transmitters at block 25884405; posted by an aggregator transmitter set, no single key; bundle {ROOT}")
+        );
+        let stale = row(
+            "chainlink",
+            "SOURCE_STALE",
+            Some("AGGREGATED"),
+            Some("STALE"),
+        );
+        let out = decide(&inputs(&h, &p, &posted, Some(&stale)));
+        assert_eq!(out.decision, Decision::Review);
+        assert_eq!(out.reason.as_deref(), Some("STALE"));
+        assert!(out.notes.is_empty());
+        let deviating = row(
+            "chainlink",
+            "OBSERVED_DEVIATION",
+            Some("AGGREGATED"),
+            Some("LIVE"),
+        );
+        let out = decide(&inputs(&h, &p, &posted, Some(&deviating)));
+        assert_eq!(out.reason.as_deref(), Some("OBSERVED_DEVIATION"));
     }
 
     /// 05 R8: no code path serialises a third word.

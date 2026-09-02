@@ -1,0 +1,79 @@
+{
+  "family": "tectonic-oracle",
+  "target": "tectonic",
+  "chain_id": 25,
+  "explorer": null,
+  "mechanism": {
+    "description": "Tectonic's internal TONIC/USD price feed on Cronos: an AggregatorV3-shaped contract with 12 decimals whose only setter, updatePrice(roundId, timestamp, price), is owner-only. The owner is a Multicall3-shaped contract; one externally owned account calls its aggregate3 with updatePrice for 23 or 24 Tectonic feeds per transaction, about every 29 minutes. The contract has no getter for a deviation bound, a minimum or maximum answer, or a minimum interval, and no maximum age: nothing on chain checks the posted value. Class B, posted without guard. The 2026-08-30 exploit blocks were discarded by the chain rollback; on the canonical chain the feed shows ordinary posts, then 26.5 hours of silence.",
+    "source": {
+      "repo": "not verified on an explorer",
+      "path": "selector scan of the deployed bytecode (17 selectors, resolved on openchain) and Tectonic's Price Oracle docs page",
+      "note": "chain reads by the research teammate on 2026-09-01 (raw/cronos-tonic-oracle-chain-reads-2026-09-01.md, wiki/cronos-incident-2026.md). The source is not verified; the selector scan is the evidence for the single setter and the absent guard getters. No explorer API serves Cronos to this tool (cronos.org/explorer 404, Cronoscan 502, explorer-api.cronos.org keyed) and both public RPCs prune state, so explorer is null, rounds come from eth_getLogs in 2,000-block windows from logs.start_block (2026-08-29; round ids are the position in that window), getters are read at a recent block, and no transaction list exists: failed setter attempts are not observable. The contract emits the round id as a millisecond timestamp; it is kept as the field round_id_ms."
+    },
+    "reads": {
+      "description": "description()",
+      "decimals": "decimals()",
+      "latest_round": "",
+      "latest_round_data": "latestRoundData()",
+      "last_timestamp": "latestTimestamp()"
+    },
+    "guard": null,
+    "round_events": [
+      {
+        "signature": "PriceUpdated(uint256,uint256,int256)",
+        "round_id": "sequence",
+        "answer": {
+          "topic": 3
+        },
+        "timestamp": {
+          "topic": 2
+        },
+        "fields": {
+          "round_id_ms": {
+            "topic": 1
+          }
+        }
+      }
+    ],
+    "latest_round_from_events": true,
+    "setters": [
+      {
+        "signature": "updatePrice(uint256,uint256,int256)",
+        "path": "raw",
+        "value_arg": 2
+      }
+    ],
+    "relays": [
+      {
+        "address": "0x38ddb3b72326a3501b66bb52c277df4990a580c3",
+        "selector": "0x82ad56cb",
+        "calls_word": 0,
+        "calls_kind": "aggregate3",
+        "note": "the oracle's owner contract; Multicall3.aggregate3((address,bool,bytes)[]) carrying updatePrice for 23 or 24 Tectonic feeds, the element targeting this feed is the posting call"
+      }
+    ],
+    "other_calls": [],
+    "bound_events": {
+      "upgraded": "Upgraded(address)",
+      "initialized": "Initialized(uint8)",
+      "initialized_min_version": 2
+    },
+    "spacing_rule": null,
+    "verified_implementations": [],
+    "logs": {
+      "source": "rpc",
+      "start_block": 90800000,
+      "chunk": 2000
+    },
+    "max_silence_seconds": 7200
+  },
+  "feeds": [
+    {
+      "product": "TONIC",
+      "key": "usdOracle",
+      "address": "0x14f753940720C1Fa4247Cd464C7EA28c806d123F",
+      "decimals": 12,
+      "kind": "unguarded"
+    }
+  ]
+}

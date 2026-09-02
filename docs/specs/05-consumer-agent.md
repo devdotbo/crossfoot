@@ -349,6 +349,14 @@ above without changing a decision word.
   `PATH_NOT_ATTRIBUTABLE`. The row fields `guard_kind` and
   `poster_addresses` are optional and copied into `evidence.crossfoot`.
   Test: `guard_less_feed_allows_with_the_no_guard_note`.
+- Row 11b, aggregator feeds (the `chainlink` target, `posting_path`
+  `AGGREGATED`: rounds written by an OCR transmitter set under a min and
+  max). Treated like `GUARDED` for `ALLOW`, with the mandatory note
+  `posted by an aggregator transmitter set: no single key posts, so the
+  decision rests on the aggregator's configured set and its on-chain min
+  and max` and the sentence `<verdict>: <headline> at block <n>; posted by
+  an aggregator transmitter set, no single key; bundle <root>`. Rows 1 to
+  10 unchanged. Test: `aggregated_feed_allows_with_the_no_single_key_note`.
 - Header counts are JSON numbers. Wrappers come from the entries with
   `kind: "derived"` of `--midas-config` (default
   `config/midas-mainnet.json`); a

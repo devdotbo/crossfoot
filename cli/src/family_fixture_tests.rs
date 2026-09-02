@@ -684,3 +684,126 @@ fn chainlink_navlink_feeds_replay_across_phase_aggregators() {
     assert_eq!(ustb["latest_answer"], "11197244");
     assert_eq!(ustb["threshold_percent"], 0.0001);
 }
+
+/// Tectonic TONIC/USD on Cronos (chain 25), class B, the incident exhibit:
+/// one feed, rounds from eth_getLogs since block 90,800,000 because no
+/// explorer serves Cronos, every round posted by one key through the
+/// owner contract's Multicall3 aggregate3, no guard, no maximum age. On
+/// the canonical chain: 16 posts before the rollback point, the last at
+/// 12:19:37 UTC on 2026-08-30 (10622), then 26.5 hours of silence until
+/// 14:51:46 UTC on 2026-08-31 (28388), then ordinary posts. The expected
+/// numbers are the research page's (`wiki/cronos-incident-2026.md` and
+/// `raw/cronos-tonic-oracle-chain-reads-2026-09-01.md`); the attack
+/// blocks were discarded and are absent from every read.
+#[test]
+fn tectonic_tonic_replays_the_rpc_logs_and_the_silence() {
+    let replay = replay("tectonic-91260041");
+    let result = &replay.result;
+    assert_eq!(result["target"], "tectonic");
+    assert_eq!(result["family"]["chain_id"], 25);
+    assert_eq!(result["family"]["explorer"], Value::Null);
+    assert_eq!(result["summary"]["family"], "posted-setter");
+    assert_eq!(result["summary"]["verdict"], "CONSISTENT");
+    assert_eq!(result["summary"]["consumer_action"], "ALLOW");
+    let mechanism = &result["family"]["mechanism"];
+    assert_eq!(mechanism["guard"], Value::Null);
+    assert_eq!(mechanism["logs"]["source"], "rpc");
+    assert_eq!(mechanism["logs"]["start_block"], 90_800_000);
+    assert_eq!(mechanism["max_silence_seconds"], 7_200);
+    assert_eq!(mechanism["relays"][0]["calls_kind"], "aggregate3");
+    let s = &result["family_summary"];
+    assert_eq!(s["feeds_replayed"], 1);
+    assert_eq!(s["rounds_total"], 100);
+    assert_eq!(s["posts_internal"]["raw"], 100);
+    assert_eq!(s["posts_total"]["unattributed"], 0);
+    assert_eq!(s["attribution_gaps"], 0);
+    assert_eq!(s["silences"], 1);
+    assert_eq!(s["liveness"]["LIVE"], 1);
+    assert_eq!(
+        s["survey_line"],
+        "1 feeds replayed, 100 rounds posted without an on-chain check, 0 failed posts, 1 live"
+    );
+
+    let poster = "0xd73c3e35ee96b62b0584bdd2039b748257fd1d1a";
+    let owner = "0x38ddb3b72326a3501b66bb52c277df4990a580c3";
+    let feed_address = "0x14f753940720c1fa4247cd464c7ea28c806d123f";
+    let f = feed(result, "TONIC");
+    assert_eq!(f["kind"], "unguarded");
+    assert_eq!(f["decimals"], 12);
+    assert_eq!(f["description"], "TONIC/USD ORACLE");
+    assert_eq!(f["latest_round"], 100);
+    assert_eq!(f["latest_answer"], "21269");
+    assert_eq!(f["verdict"], "CONSISTENT");
+    assert_eq!(f["posting_path"], "ATTRIBUTED");
+    assert_eq!(f["liveness"], "LIVE");
+    assert_eq!(f["consumer_action"], "ALLOW");
+    assert_eq!(f["external_txlist"], false, "no explorer on Cronos");
+    assert_eq!(
+        f["poster_addresses"],
+        serde_json::json!([poster]),
+        "one key"
+    );
+    let kinds = kinds(f);
+    assert_eq!(kinds["UNGUARDED_POST"], 100);
+    assert_eq!(kinds["SILENCE"], 1);
+    assert_eq!(
+        kinds.len(),
+        2,
+        "no bypass, no gap: there is no rule to break"
+    );
+
+    let posts: Vec<&Value> = f["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|x| x["kind"] == "UNGUARDED_POST")
+        .collect();
+    assert!(posts.iter().all(|x| x["sender"] == poster));
+    assert!(
+        posts.iter().all(|x| x["selector"] == "0x938608c2"),
+        "updatePrice"
+    );
+    assert!(posts
+        .iter()
+        .all(|x| x["safe_chain"] == serde_json::json!([owner, owner, feed_address])));
+    // The canonical chain around the rollback: the last pre-attack post
+    // and the first post after the restart, values as the research read them.
+    let round_16 = posts.iter().find(|x| x["round_id"] == 16).unwrap();
+    assert_eq!(round_16["value"], "10622");
+    assert_eq!(round_16["block"], 90_893_975);
+    assert_eq!(round_16["timestamp_unix"], 1_788_092_377);
+    let round_17 = posts.iter().find(|x| x["round_id"] == 17).unwrap();
+    assert_eq!(round_17["value"], "28388");
+    assert_eq!(round_17["block"], 90_963_071);
+    assert_eq!(round_17["timestamp_unix"], 1_788_187_906);
+    assert_eq!(
+        round_17["transaction_hash"],
+        "0xfa0cc30c9ebc2d2555f669a44649ef8a0bf0c58d21ae51636950360b7a7a7cdc"
+    );
+    assert_eq!(
+        posts
+            .iter()
+            .filter(|x| x["block"].as_u64().unwrap() <= 90_896_189)
+            .count(),
+        16
+    );
+
+    let silence = f["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|x| x["kind"] == "SILENCE")
+        .unwrap();
+    assert_eq!(silence["from_round"], 16);
+    assert_eq!(silence["round_id"], 17);
+    assert_eq!(silence["gap_seconds"], 95_529, "26.5 hours");
+    assert_eq!(silence["block"], 90_963_071);
+
+    let timeline = timeline(&replay, f);
+    let rounds = timeline["rounds"].as_array().unwrap();
+    assert_eq!(rounds.len(), 100);
+    assert_eq!(rounds[0]["block"], 90_852_750);
+    assert_eq!(rounds[99]["answer"], "21269");
+    assert!(rounds.iter().all(|r| r["path"] == "raw"));
+    assert!(replay.fixture.join("bundle.sha256").is_file());
+}

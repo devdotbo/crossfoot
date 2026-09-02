@@ -139,8 +139,12 @@ sUSDS, sDAI and stUSDS, Ondo USDY, Frax sfrxUSD.
   oracle, an absolute delta cap per checkpoint with an override flag),
   `chainlink` (NAVLink and Proof of Reserve feeds: rounds from every
   phase aggregator with the OCR transmitter as the poster, the range
-  bounds and the directory's heartbeat and deviation threshold). The
-  guard kind decides the finding vocabulary: `GUARD_BYPASS` and
+  bounds and the directory's heartbeat and deviation threshold),
+  `tectonic` (the TONIC/USD oracle on Cronos, chain 25: one key through
+  the owner's Multicall3 aggregate3, no guard, no maximum age, rounds from
+  eth_getLogs because no explorer serves Cronos; the exhibit of the
+  2026-08-30 incident, which Crossfoot would not have detected or
+  prevented). The guard kind decides the finding vocabulary: `GUARD_BYPASS` and
   `UNGUARDED_POST` under a deviation guard, `GUARD_AT_BOUND` and
   `GUARD_CLAMPED` under a clamp, `UNGUARDED_POST` with `classification:
   no_guard` without a guard, `UNGUARDED_REFERENCE_MOVE` under a reference
@@ -262,6 +266,7 @@ crossfoot run midas --block 25884405 --feed mRE7 --offline
 crossfoot run family --block 25885541 --config config/hashnote-mainnet.json
 crossfoot run family --block 25885541 --config config/backed-mainnet.json
 crossfoot run family --block 25885541 --config config/centrifuge-mainnet.json --trace-endpoint <archive url with traces>
+crossfoot run family --block <recent Cronos block> --config config/tectonic-cronos.json --endpoint <Cronos RPC with recent state> --endpoint https://evm.cronos.org
 crossfoot run family --block 25885541 --config config/openeden-mainnet.json
 crossfoot run family --block 25885541 --config config/ondo-mainnet.json
 crossfoot run family --block 25885541 --config config/superstate-mainnet.json
