@@ -158,7 +158,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "a7e2335ee0eed635907030e8bd47f373a1e4aff6137653a080f2dcef089516fc"
@@ -296,7 +296,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "b0b9d888e45f2fe116d388a622a2981da243ca347bb834c4587eaa78fdf0a196"
@@ -438,7 +438,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "967c2c98f682b707696f5b0ee335f849e3313f369b7ed4c6a9f028f9784a8b54"
@@ -573,7 +573,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "6042ef7032e65c748261b19d8bb6ff3814f64719cb8a5d4f3263e3fe9930fd18"
@@ -732,7 +732,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "ad11737fc4f6353d38042f173ac5e17ce1ed76a10ec545451712b695c3eca888"
@@ -871,7 +871,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "1370e96b8c6a913322080548b59dba405976db157e061c774deb6884f98471d1"
@@ -1033,7 +1033,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "1cec631cde0dbb1cec232c26c2727db12fc3bc1373e41f0a321cb14b524a0bbc"
@@ -1198,7 +1198,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "8e43b5f1e0099bc09d1b3c572ed9c20eceef0d841ba648050a1ff3d3edd30bbc"
@@ -1335,7 +1335,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "e19ccaecd81b755590e00a08b104511b59bf5e87574476e482ec1b8970d6d38a"
@@ -1473,7 +1473,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "1d599575897da19cfa248648ed9e84488332e7ffb0329ba401e9301df1cb322f"
@@ -1606,7 +1606,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "64c4d2a2cf0ecc28c39eed2f9a61d7aa945705cf579b7cb166d49b32b8281c9a"
@@ -1745,7 +1745,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "80e3a7c4bb718ff81a49bf0a3762f962775c41fff6bda910b623ff62ad09beb4"
@@ -1878,7 +1878,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "1893a85c2600ed88f12863f2a06202aa7b57f01dbe93494d7489be4c90deea6f"
@@ -2016,7 +2016,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "c6b96881d4033cec6c3b8da3e31379c12064e8fa13e8c0c6193f3c98bb4d9525"
@@ -2149,7 +2149,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "d1f3f8e8ed630b84091bf672695f80d1c0f6cb2ed8f4b701f971ad86832b8108"
@@ -2287,7 +2287,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "6589d82cef67358eeaa0474fde1fda4bcc26f4a0313a711d9b609f544c4145e2"
@@ -2422,7 +2422,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "bc71044770b2dbe4ed2d6fa6c9c5dc155d2b8e5cb6825f9eb6a26355ecd8fed3"
@@ -2559,7 +2559,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "6c57be344fd261b2a74bd580345aa09e9f5ae9e0cada5a2b6ea8c11b5d124498"
@@ -2697,7 +2697,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "a31364cd59cec50ec5537ce9ee1b00e3ea3fd26556f172aa5c2b593ea98a3251"
@@ -2850,7 +2850,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "ab1dae65021988742d0be1401e56f2148b4eb5d080f82dba75978ff1172cba0d"
@@ -2983,7 +2983,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "baa521a6f96265a3c3ba6c6d22dfa8e0e030ec0b7dab4fbd45c0d81fd995967d"
@@ -3121,7 +3121,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "fbab78111b892e98c6ddbbdeb123a48964c1df3bdf4d2b3fdb886181828b867a"
@@ -3259,7 +3259,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "e414a2bf6a75a0c747db5758cb4c130b4b66882f1280665564d1c6b361234bc7"
@@ -3397,7 +3397,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "296a65b59e67bdd57b1d66bcc68c3f030c4e9c93a4c463c134318eafdf457c8d"
@@ -3532,7 +3532,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "a3df38cbc21f48375a73aa2d3590fc17bf07728ec232b57b3bdacdbc35264693"
@@ -3670,7 +3670,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "59348b9b9e15083df3f9c5799d3c136c7cc70c52c2ad32ea95cebc7823059b1b"
@@ -3807,7 +3807,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "bfb09e1b66fbe0e85113390d3edce132f20ed616948bc557a5b57e61d68e9932"
@@ -3960,7 +3960,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "a32d86f8940717f564c6321550c3788a9132a5fa0450bc84f64718799faba56c"
@@ -4093,7 +4093,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "aa12cf3d89f039486b1d92d96c4761e64a0d0c7145e53a2f3f373350f0084f1a"
@@ -4231,7 +4231,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "16bd47734e3e484d3e61c744c80f744f1caf391d13174d093530b58707f7e25e"
@@ -4371,7 +4371,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "d28b3730094d84e958ff3dd36339a43f057f5028f3acad8492b30a060840e51f"
@@ -4508,7 +4508,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "aa2a8fd232244f8a3271ae0f10421010ff232399c2a93ad8020abc086172fe83"
@@ -4641,7 +4641,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "4d4ad689bae6e27a2450bdc3c6f3e2f1f1105dcc9a4ac8ced338e2cf9b369cf1"
@@ -4779,7 +4779,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "9ba92c568aa400a0744d0a565a0c3299afff965862b67e04bf2aebf0aa54ffe3"
@@ -4917,7 +4917,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "76460e79155531a2e839f5f28e4ae03102900524ddc1c0b26c2d0649a5635b1b"
@@ -5066,7 +5066,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "88e80a4a62429008a1d7da61f78ae36a956baa6ac7e0f4581a6f850a76ae84c3"
@@ -5204,7 +5204,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "115ad3774fdd8cd3f47ed4a24c36297a74f69e0d809587c692e06f4164138d89"
@@ -5341,7 +5341,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "47d4b327c1945eebc227b83a362324b0f538a797f684bc4bb41193066d3fc828"
@@ -5493,7 +5493,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "5029a3b31cf78500efa5a8953705661a98382d2d387465ddcce9b8fa670f1bc8"
@@ -5631,7 +5631,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "924d43e59ba32d14d8849bd5c206fecbf487ee779cf76a50cf0d119b38ed943d"
@@ -5764,7 +5764,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "dd8cbc209d219087ae8b32f9b245a9e9926594e04bc355260d139b19dad99f43"
@@ -5902,7 +5902,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "809373376a6c7e0ca172de825343aa460c53a1aca8a86922592254109bcb9b45"
@@ -6040,7 +6040,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "3765d4626d4519e2d900f7ae916c6cd56fabe3fccd0e7104b20b2faf96f3283f"
@@ -6177,7 +6177,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "1b83463c754028bdc6ebc82454ca1e27d953a84bcc44393984b5278b9fadbfda"
@@ -6314,7 +6314,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "e0d2ae80cd77c798907f20472bb76f8b463430f32d03d81e59aa62e1ff3d7bb9"
@@ -6452,7 +6452,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "6c26eaf8addc24745044dfcd80071b8a32ff35e8972ce563c1f583d9932c1622"
@@ -6587,7 +6587,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "fe7f0475fa9900e5fa529a8bab82aa1620b5710b08a686f8ab41caea6ddaf4e8"
@@ -6720,7 +6720,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "b4288026b9ab5a97c5823a92d756841ef63c7e00970c7eafcba316323a049f03"
@@ -6882,7 +6882,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "8d59f004656031829dff1ffd338be959ff5f70fc7915e444b4d57a2ea35ffe15"
@@ -7020,7 +7020,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "78a03a7576d69be7f90c8d1c5c283933e5cf1451eb9418c146dfb83561ea14d3"
@@ -7153,7 +7153,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "1c4da8b159a3dc468362470dc7c9f289a78598438f19370887de111857d430e7"
@@ -7293,7 +7293,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "4f7040090364bb926791bc0d9e9d7991c70444416b09504806e0a7230f1b2549"
@@ -7430,7 +7430,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "ca98295f78a9d14a083840d813805f7fb5255f8d5ce38e3ed1a5f3b99bb06474"
@@ -7568,7 +7568,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "fc75c3a7712a8a004ec9adc686fef55120ee9d7017ff83e60732d2f6ede61b42"
@@ -7706,7 +7706,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "cda09dc65853ecae23ebcae3f42f80e610a39ecf6761825ab8dfbd30ae0a765b"
@@ -7844,7 +7844,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "4c0a0d45b34600cec2db2a4fb52f0ea9c4d1c4bdce6ad730eb7c12701a5ca6e6"
@@ -7977,7 +7977,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "17067accc679433508f783c177ae4e78e44613832854bb96a18a351217eecd29"
@@ -8115,7 +8115,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "06c580f07b4c05a3f7d9f5bd20dee3cb01c3bbe738e8386a893b5c58e93b026f"
@@ -8248,7 +8248,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "01efae4c0b9c9e56ea6ff2c2490265b7966448c524c7f621cc99c6d39aef72fa"
@@ -8383,7 +8383,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "2756abda197ecbfdc510e850301a63f799c92c6954f9d41f51144aa813849ff5"
@@ -8516,7 +8516,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "6792f4df0a12e7bf4f60a0ba87b68beb6c5161302b1231eede25c0574acd5b08"
@@ -8651,7 +8651,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "97272493b69e672eafe8072b0c404c2093d1b516b5ae3656a668eea3be86c960"
@@ -8784,7 +8784,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "7160bdb60c195ee41fb9e4fb9c591f66cfad29d35db9c39669dcd7e7c41e6e44"
@@ -8949,7 +8949,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "7d37837c2a91898596ab7837bf8e70b1aa9af8f34ce0e04804cd6e41a08d6cbb"
@@ -9084,7 +9084,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "b9fcb47eb1b3d5d5fd0e198bea1694618abb1787f567f5f09458ecc8a9956d9d"
@@ -9219,7 +9219,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "bb56aea1a90fe1eabcd0eeb4cd81c8d4af7d78fc7e7e8efe15abbc14f46697fe"
@@ -9352,7 +9352,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "63965e193d6e9744b5a7fc492304b7f6fc54fd95f2165a6b8ce982509863e24c"
@@ -9485,7 +9485,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "8f738c612e50613aae841f03ec2edd0bd67695df4bbe841ee08b3990fe76051d"
@@ -9623,7 +9623,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "2e7f6be9886eba5fb2e2b5f3fefa36bbbcf676f98561a0e506c2e6c3a2bd5a9d"
@@ -9761,7 +9761,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "93c60de61a8f0b4dad22d96f92f81f1b830d3f474b8d1763ad792156c6ef6e21"
@@ -9894,7 +9894,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "ff6f5c85c1169e60812b63f8a6c3eebcee02ac22880f31087e405cfcd677e649"
@@ -10034,7 +10034,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "958e2a7ead206bb1e818dc5b1520844f7dd096909b154b20fe97a23ebfe7be0c"
@@ -10188,7 +10188,7 @@
         }
       },
       "agent": {
-        "tool_version": "0.2.0",
+        "tool_version": "0.2.1",
         "git_commit": "7db761eb606290b0ebc02d24bda32ebe58010838"
       },
       "record_sha256": "25484651fcb133efbc89b97264ec663a65ca72ec7bc01db0d65a99368c2b843d"

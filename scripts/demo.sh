@@ -165,14 +165,27 @@ say "3. render: static pages over the bundles, no script, no fetch at view time"
 head -n 4 "$work/render.out"
 
 say "4. consume --replay: ALLOW or REVIEW per feed from the recorded subgraph responses"
-consume_fixture="cli/tests/fixtures/consume-fixture-v1"
+# The consume fixture is the recorded directory cli/tests/fixtures/consume-*/
+# (named after the subgraph deployment it was recorded from), found by
+# glob so a re-recording does not break the demo. "now" is the recorded
+# head's block timestamp plus twelve seconds, as the consume tests use.
+consume_fixture=""
+for candidate in cli/tests/fixtures/consume-*/; do
+  if [ -f "$candidate/feeds.json" ] && [ -d "$candidate/responses" ]; then
+    consume_fixture="${candidate%/}"
+    break
+  fi
+done
+[ -n "$consume_fixture" ] || { echo "no consume fixture under cli/tests/fixtures/consume-*/"; exit 1; }
+head_ts="$(grep -o '"timestamp": *"*[0-9]*' "$consume_fixture/responses/Head.json" | head -n 1 | tr -dc '0-9')"
+[ -n "$head_ts" ] || { echo "no head timestamp in $consume_fixture/responses/Head.json"; exit 1; }
 "$crossfoot" consume \
   --replay "$consume_fixture" \
   --feeds "$consume_fixture/feeds.json" \
   --midas-config "$consume_fixture/midas-mainnet.json" \
   --queries subgraph/queries \
   --out "$work/decisions" \
-  --now 1788289368 > "$work/consume.out"
+  --now $((head_ts + 12)) > "$work/consume.out"
 grep -iE "svzchf|mRE7\.|^decisions|^head|^decided" "$work/consume.out" | head -n 12
 
 say "5. verify: every bundle written above, re-hashed and recomputed without the network"
