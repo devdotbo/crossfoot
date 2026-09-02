@@ -59,7 +59,8 @@ multicall, no guard), OpenEden TBILL (reference guard of 15 basis points),
 Ondo OUSG (rules replayed from the event's fields), Superstate USTB
 (absolute delta cap per checkpoint with an override flag); exact
 recomputation from contractual terms: Frankencoin svZCHF, Ethena sUSDe, Sky
-sUSDS, sDAI and stUSDS, Ondo USDY, Frax sfrxUSD.
+sUSDS, sDAI and stUSDS, Ondo USDY, Frax sfrxUSD, Maple syrupUSDC and
+syrupUSDT.
 
 - `svzchf`, the Frankencoin savings vault. Full recomputation from
   contractual terms. The administered rate path is rebuilt from the savings
@@ -107,6 +108,16 @@ sUSDS, sDAI and stUSDS, Ondo USDY, Frax sfrxUSD.
   is attributed to its transaction; the rate has no on-chain bound and the
   timelock address, a Safe, can rewrite the price level, which the record
   states. Demo window `--window demo` (blocks 24320956 to 25885408).
+- `maple`, the Maple syrupUSDC and syrupUSDT pools. Full recomputation:
+  the open-term loan manager's assets under management from its four
+  accounting words and the block timestamp, the pool's `totalAssets()`
+  from its balance and every strategy's figure, and `convertToAssets(1e6)`
+  from the supply, each compared against the chain with zero tolerance.
+  Every accounting event in the window (a payment claimed by a loan, a
+  funding, a refinance, a call, an impairment) is attributed to its
+  transaction, function and path; the terms behind it are the delegate's
+  and the borrower's choice and are recorded, not judged. Demo window
+  `--window demo` (blocks 25800000 to 25885541).
 - `mtbill`, Midas mTBILL. Consistency checks, no recomputation. The
   underlying portfolio is not observable, so the NAV is never recomputed
   and the result carries `nav_recomputation: INPUT_GAP` on every run. The
@@ -262,6 +273,8 @@ crossfoot run susde --window demo --from-bundle cli/tests/fixtures/susde-demo-25
 crossfoot run sky --window demo
 crossfoot run usdy --window demo
 crossfoot run frax --window demo
+crossfoot run maple --window demo
+crossfoot run maple --window demo --from-bundle cli/tests/fixtures/maple-demo-25800000-25885541.tar.gz
 crossfoot run mtbill --baseline-block 25598000 --block 25850000
 crossfoot run midas --block 25884405 --config config/midas-mainnet.json
 crossfoot run midas --block 25884405 --feed mRE7 --offline

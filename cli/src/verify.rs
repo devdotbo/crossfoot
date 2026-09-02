@@ -324,6 +324,16 @@ fn replay(
             &crate::run_susde::RunArgs {
                 baseline_block,
                 block,
+                window_name: window_name.clone(),
+            },
+            replay_root,
+        )
+        .map(|outcome| outcome.result_path),
+        "maple" => crate::run_maple::run(
+            &mut source,
+            &crate::run_maple::RunArgs {
+                baseline_block,
+                block,
                 window_name,
             },
             replay_root,
@@ -1197,6 +1207,57 @@ mod tests {
             text.contains("entries         1812 checked, hashes ok"),
             "{text}"
         );
+    }
+
+    /// Spec 09 R26, R29: the Maple demo window fixture verifies, both
+    /// pools are exact to the unit, and the window's accounting events are
+    /// attributed.
+    #[test]
+    fn verify_passes_on_the_maple_fixture() {
+        let archive = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests")
+            .join("fixtures")
+            .join("maple-demo-25800000-25885541.tar.gz");
+        let report = verify(&archive, &Options::default());
+        let text = print(&report);
+        assert_eq!(report.exit_code, VERIFIED, "{text}");
+        assert!(
+            text.contains("target          maple, window 25800000 to 25885541"),
+            "{text}"
+        );
+        assert!(
+            text.contains("entries         132 checked, hashes ok"),
+            "{text}"
+        );
+        let dir =
+            std::env::temp_dir().join(format!("crossfoot-maple-fixture-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        let bundle = crate::pack::unpack(&archive, &dir).unwrap();
+        let result: Value = read_json(&bundle.join("result.json")).unwrap();
+        assert_eq!(result["verdict"], "MODEL_MATCH");
+        assert_eq!(
+            result["summary"]["headline"],
+            "6 of 6 fields exact, residual 0"
+        );
+        assert_eq!(result["summary"]["posted"]["value"], "1181091");
+        assert_eq!(result["summary"]["posted"]["decimals"], 6);
+        let fields = result["comparison"]["fields"].as_array().unwrap();
+        assert_eq!(fields.len(), 6);
+        assert!(fields.iter().all(|f| f["equal"] == true));
+        assert_eq!(fields[3]["observed"], "394113689617240");
+        assert_eq!(fields[5]["observed"], "1141373");
+        let events = &result["accounting_events"];
+        assert_eq!(events["in_window"], 37);
+        assert_eq!(events["by_pool"]["syrupUSDC"], 18);
+        assert_eq!(events["by_pool"]["syrupUSDT"], 19);
+        assert_eq!(events["by_function"]["acceptNewTerms"], 19);
+        assert_eq!(events["by_function"]["makePayment"], 15);
+        assert_eq!(events["by_function"]["fund"], 3);
+        assert_eq!(events["by_path"]["pool_delegate"], 3);
+        assert_eq!(events["by_path"]["loan_or_other_contract"], 34);
+        assert_eq!(events["impairments"], 0);
+        assert!(result["input_gaps"].as_array().unwrap().is_empty());
+        let _ = fs::remove_dir_all(&dir);
     }
 
     /// Spec 09 R2, R6: the sUSDe demo window fixture verifies and carries

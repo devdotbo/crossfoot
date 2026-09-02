@@ -137,7 +137,7 @@ fn address_of(decoded: &Option<Decoded>) -> Option<String> {
 
 /// One eth_call: fetch, decode, record. A revert or empty return data is a
 /// finding in the bundle, not a failure of the run.
-fn read_call(
+pub(crate) fn read_call(
     client: &mut dyn ReadSource,
     bundle: &mut BundleWriter,
     label: &str,

@@ -254,3 +254,89 @@ exp: PRBMath UD60x18, exp(x) = exp2(x * LOG2_E / 1e18), exp2 in 192.64 fixed poi
 | model | `exp_reproduces_the_pinned_archive_observations` (offline, the archive's two rows and PRBMath's exp(1)), `the_wide_helpers_shift_and_multiply_exactly` |
 | R21, R22, R24 | `verify_passes_on_the_frax_fixture` (offline, `cli/tests/fixtures/frax-demo-24320956-25885408`) |
 | R23 | `usdy_and_frax_fixtures_render_feed_rows_and_pages` |
+
+## 09.5 Maple syrupUSDC and syrupUSDT
+
+Target `maple`. syrupUSDC `0x80ac24aA929eaF5013f6436cdA2a7ba190f5Cc0b`
+(MaplePool, verified source, not a proxy) with PoolManager
+`0x7aD5fFa5fdF509E30186F4609c2f6269f4B6158F` and the open-term LoanManager
+`0x6ACEb4cAbA81Fa6a8065059f3A944fb066A10fAc`; syrupUSDT
+`0x356b8d89c1e1239cbbb9de4815c39a1474d5ba7d` with PoolManager
+`0x0cdA32E08B48bFDDbc7eE96B44b09cf286F9E21a` and the open-term LoanManager
+`0x616022E54324eF9c13B99c229Dac8ea69AF4FAFf` (the same implementation
+`0xbAD003DA...` as syrupUSDC's, confirmed by `implementation()` at block
+25,885,541). ERC-4626, 6 decimals, continuous accrual. Evidence:
+`raw/maple-syrup-pool-accounting-rpc-2026-09-02.md` and the verified
+LoanManager, MaplePool and MaplePoolManager sources; the pool's
+`manager()` and the manager's strategy list are read at the pinned block
+and compared with the constants. The survey's one-unit residual at block
+25,885,431 is an arithmetic slip in the evidence: the floor of the
+accrued interest is 35,401,149,372, not 35,401,149,371, and the
+contract's figure follows exactly.
+
+Model (from the source):
+
+```
+accrued                 = issuanceRate == 0 ? 0 : issuanceRate * (block timestamp - domainStart) / 1e27
+assetsUnderManagement   = principalOut + accountedInterest + accrued          (open-term LoanManager)
+totalAssets             = asset.balanceOf(pool) + sum over strategyList of assetsUnderManagement()
+convertToAssets(1e6)    = totalSupply == 0 ? 1e6 : 1e6 * totalAssets / totalSupply
+convertToExitAssets(1e6)= the same over totalAssets - unrealizedLosses
+```
+
+- R25. Reads at each pinned block per pool: the block header, `manager()`,
+  `asset()`, `totalSupply()`, `asset.balanceOf(pool)`,
+  `manager.poolDelegate()`, `manager.strategyListLength()` and
+  `strategyList(i)` for every entry, every strategy's
+  `assetsUnderManagement()`, `manager.unrealizedLosses()`, the open-term
+  loan manager's `principalOut()`, `accountedInterest()`, `issuanceRate()`
+  and `domainStart()`, and the observed `totalAssets()`,
+  `convertToAssets(1e6)` and `convertToExitAssets(1e6)`.
+- R26. `comparison.fields` holds three fields per pool at B1, zero
+  tolerance: `loanManager.assetsUnderManagement()` modeled from its four
+  words and the block timestamp, `totalAssets()` from the balance, the
+  modeled loan manager and the other strategies' observed figures (a
+  fixed-term loan manager at 0, Aave and Sky positions of 10 units), and
+  `convertToAssets(1e6)`. A configured loan manager absent from the
+  strategy list is `loan_manager_not_in_strategy_list`, an input gap.
+- R27. Accounting events: every `AccountingStateUpdated(issuanceRate,
+  accountedInterest)` and `UnrealizedLossesUpdated` on the loan manager in
+  (B0, B1] from Blockscout, attributed through `eth_getTransactionByHash`
+  (one read per distinct hash) to a path by the transaction's target:
+  `pool_delegate` (the loan manager called by the delegate read at B1),
+  `loan_manager_other_sender`, `pool_manager_call`,
+  `loan_or_other_contract` (a loan's own `makePayment` or `acceptNewTerms`,
+  or any other contract), `unattributed`. The selector is named from the
+  verified signatures (`fund`, `proposeNewTerms`, `rejectNewTerms`,
+  `callPrincipal`, `removeCall`, `impairLoan`, `removeLoanImpairment`,
+  `triggerDefault`, `makePayment`, `acceptNewTerms`) or recorded as hex.
+  A non-zero `UnrealizedLossesUpdated` is `unrealized_loss_recorded`; the
+  pool manager's `PendingDelegateAccepted` is `pool_delegate_changed` and
+  `StrategyAdded` is `strategy_added`. None changes the comparison: the
+  terms of a loan or a refinance are the delegate's and the borrower's
+  choice and are recorded, not judged.
+- R28. Timeline `timelines/maple.json`: one row per event with pool,
+  event, block, time, issuance rate, accounted interest or unrealized
+  losses, transaction, sender, target, selector, function and path. The
+  renderer writes one feeds.json row per pool with the pool's own address
+  and field equality.
+- R29. Demo window `--window demo`: B0 = 25,800,000, B1 = 25,885,541.
+  Pinned observations at B1: syrupUSDC loan manager 965551429376226,
+  totalAssets 965709626102356, convertToAssets(1e6) 1181091; syrupUSDT
+  394113689617240, 396908422893109, 1141373; 6 of 6 fields exact. 37
+  accounting events (syrupUSDC 18, syrupUSDT 19): 19 `acceptNewTerms` and
+  15 `makePayment` through loan contracts, 3 `fund` by the pool delegates;
+  0 impairments, 0 delegate changes, 0 strategies added.
+
+| Requirement | Test |
+|---|---|
+| model | `model_reproduces_the_pinned_archive_observations` (offline, the archive's block 25,885,431 row) |
+| R27 | `accounting_paths_are_classified_by_target_then_sender`, `selectors_and_topics_are_keccak_derived` |
+| R26, R29 | `verify_passes_on_the_maple_fixture` (offline, `cli/tests/fixtures/maple-demo-25800000-25885541.tar.gz`) |
+| R28 | `maple_fixture_renders_one_feed_row_per_pool` |
+
+Out of scope: the issuance rate of a refinance (the loan's terms are not
+read), the fixed-term loan manager's own accrual (0 principal out on both
+pools at B1, read as observed), the Aave and Sky strategies' internal
+accounting (dust, read as observed), and the Pyth redemption-rate ids
+that were never pushed to the Ethereum contract.

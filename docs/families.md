@@ -506,41 +506,46 @@ crossfoot run frax --window demo --from-bundle cli/tests/fixtures/frax-demo-2432
 
 ## Maple syrupUSDC and syrupUSDT
 
-Next. Class C (exact recomputation), decided from the survey section and
-the evidence in `raw/maple-syrup-pool-accounting-rpc-2026-09-02.md` and
-the verified LoanManager source; the survey's one-unit residual at block
-25,885,431 is an arithmetic slip in the evidence (the floor of the accrued
-interest is 35,401,149,372, not 35,401,149,371), so the formula is exact
-to the unit.
-
 - Issuer: Maple Finance. syrupUSDC `0x80ac24aA929eaF5013f6436cdA2a7ba190f5Cc0b`
   (PoolManager `0x7aD5fFa5fdF509E30186F4609c2f6269f4B6158F`, open-term
   LoanManager `0x6ACEb4cAbA81Fa6a8065059f3A944fb066A10fAc`) and syrupUSDT
   `0x356b8d89c1e1239cbbb9de4815c39a1474d5ba7d` (PoolManager
-  `0x0cdA32E08B48bFDDbc7eE96B44b09cf286F9E21a`). ERC-4626, 6 decimals,
-  continuous accrual, no rounds.
-- Model (verified source): `totalAssets = asset.balanceOf(pool) + sum over
-  strategyList of strategy.assetsUnderManagement()`; for the open-term
-  LoanManager `assetsUnderManagement = principalOut + accountedInterest +
-  issuanceRate * (timestamp - domainStart) / 1e27`; `convertToAssets(1e6)
-  = 1e6 * totalAssets / totalSupply` (floor) and `convertToExitAssets`
-  the same over `totalAssets - unrealizedLosses`.
-- Design: target `maple`, spec 09 shape. Reads at B1 per pool: the
-  strategy list, every strategy's `assetsUnderManagement()`, the
-  loan manager's four accounting words, the pool balance, supply and the
-  observed three getters. Comparison fields: the loan manager's
-  `assetsUnderManagement()` (modeled from its four words), the pool's
-  `totalAssets()` (the modeled loan manager plus the observed other
-  strategies plus the balance) and `convertToAssets(1e6)`, zero
-  tolerance. Window: every `AccountingStateUpdated` and
-  `UnrealizedLossesUpdated` on the loan manager attributed through its
-  transaction to `pool_delegate` (the delegate EOA read at B1),
-  `governor`, `loan_payment` (a borrower's payment claimed by the loan)
-  or `other`; an impairment is `unrealized_loss_recorded`, a delegate
-  change `pool_delegate_changed`. Not replayed: the issuance rate itself
-  (a refinance's terms are the delegate's and borrower's choice) and the
-  other strategies' own accounting (Aave and Sky positions of a few units
-  of dust today, read as observed).
+  `0x0cdA32E08B48bFDDbc7eE96B44b09cf286F9E21a`, open-term LoanManager
+  `0x616022E54324eF9c13B99c229Dac8ea69AF4FAFf`). ERC-4626, 6 decimals,
+  continuous accrual, no rounds; the pool delegate is one key per pool.
+- Chain: Ethereum mainnet. Target `maple`, specification section 09.5.
+- Mechanism: recomputable accrual, `nav_recomputation: FULL`. Class C from
+  the survey; the survey's one-unit residual is an arithmetic slip in the
+  evidence (the floor of the accrued interest is 35,401,149,372), the
+  formula is exact to the unit.
+- Recomputed: per pool the open-term loan manager's
+  `assetsUnderManagement()` from `principalOut`, `accountedInterest`,
+  `issuanceRate` and `domainStart` at the block timestamp, the pool's
+  `totalAssets()` from its balance and every strategy's figure, and
+  `convertToAssets(1e6)`, zero tolerance.
+- Replayed: every `AccountingStateUpdated` and `UnrealizedLossesUpdated`
+  of the loan manager in the window attributed to its transaction,
+  function and path (`pool_delegate`, `loan_manager_other_sender`,
+  `pool_manager_call`, `loan_or_other_contract`, `unattributed`);
+  delegate changes and strategy additions on the pool manager. Not
+  replayed: the issuance rate a refinance sets (the loan's terms are not
+  read); the fixed-term loan manager, Aave and Sky strategies' own
+  accounting (0 and dust at the fixture block, read as observed).
+- Finding kinds: `unrealized_loss_recorded`, `pool_delegate_changed`,
+  `strategy_added`, `loan_manager_not_in_strategy_list` (input gap),
+  `model_deviation`.
+- Fixture `cli/tests/fixtures/maple-demo-25800000-25885541.tar.gz` (78 KB),
+  window 25,800,000 to 25,885,541: 6 of 6 fields exact (syrupUSDC
+  1.181091, syrupUSDT 1.141373); 37 accounting events (syrupUSDC 18,
+  syrupUSDT 19): 19 `acceptNewTerms` and 15 `makePayment` through loan
+  contracts, 3 `fund` by the pool delegates; 0 impairments, 0 delegate
+  changes, 0 strategies added; `MODEL_MATCH`, `ALLOW`.
+- Command:
+
+```
+crossfoot run maple --window demo
+crossfoot run maple --window demo --from-bundle cli/tests/fixtures/maple-demo-25800000-25885541.tar.gz
+```
 
 ## Eligibility policy words
 
@@ -600,6 +605,7 @@ consumer's rule: it gates a listing, it monitors nothing after it.
 | Sky | C | recomputation | 3 | sky-demo-23264565-25885408.tar.gz | 194 KB | 145 rate changes | MODEL_MATCH |
 | Ondo USDY | C | recomputation | 1 | usdy-demo-23264565-25885411/ | 492 KB | 12 range sets | MODEL_MATCH |
 | Frax sfrxUSD | C | recomputation | 1 | frax-demo-24320956-25885408/ | 252 KB | 6 rate changes | MODEL_MATCH |
+| Maple syrupUSDC, syrupUSDT | C | recomputation | 2 | maple-demo-25800000-25885541.tar.gz | 78 KB | 37 accounting events | MODEL_MATCH |
 
 Classes follow the research survey: A a guarded setter (A-clamp when the
 guard truncates instead of reverting), B a setter without a guard, C an

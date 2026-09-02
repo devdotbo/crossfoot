@@ -110,6 +110,32 @@ pub fn susde(
     )
 }
 
+/// The Maple summary: two pools, posted and recomputed being syrupUSDC's
+/// convertToAssets(1e6), a 6-decimal figure.
+pub fn maple(
+    verdict: Verdict,
+    comparison: &ComparisonSet,
+    window: Window,
+    findings_count: usize,
+) -> Summary {
+    let mut summary = exact(
+        "maple",
+        "syrupusdc.convertToAssets(1e6)",
+        "accounting series deviates",
+        verdict,
+        comparison,
+        window,
+        findings_count,
+    );
+    for quantity in [summary.posted.as_mut(), summary.recomputed.as_mut()]
+        .into_iter()
+        .flatten()
+    {
+        quantity.decimals = Some(6);
+    }
+    summary
+}
+
 /// The Sky family summary: three vaults, posted and recomputed being
 /// sUSDS's convertToAssets(1e18).
 pub fn sky(

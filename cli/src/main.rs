@@ -16,6 +16,7 @@ mod fixtures;
 mod frax;
 #[cfg(test)]
 mod live_tests;
+mod maple;
 mod midas;
 #[cfg(test)]
 mod midas_fixture_tests;
@@ -25,6 +26,7 @@ mod pack;
 mod render;
 mod rpc;
 mod run_frax;
+mod run_maple;
 mod run_midas;
 mod run_mtbill;
 mod run_sky;
@@ -160,6 +162,9 @@ enum RunTarget {
     /// Frax sfrxUSD: pricePerShare from the stored anchor with the deployed
     /// exp, every setter event attributed.
     Frax(RunOpts),
+    /// Maple syrupUSDC and syrupUSDT: the pool's assets and rate from the
+    /// loan manager's accounting words, every accounting event attributed.
+    Maple(RunOpts),
     /// Midas customFeed family: posting-path replay of every feed in the list.
     Midas(MidasOpts),
     /// Any posted-feed family from its config file: `--config
@@ -397,6 +402,7 @@ fn window_preset(target: &str, name: &str) -> Option<(u64, u64)> {
         ("sky", "demo") => Some(run_sky::DEMO_WINDOW),
         ("usdy", "demo") => Some(run_usdy::DEMO_WINDOW),
         ("frax", "demo") => Some(run_frax::DEMO_WINDOW),
+        ("maple", "demo") => Some(run_maple::DEMO_WINDOW),
         _ => None,
     }
 }
@@ -534,6 +540,15 @@ fn main() -> ExitCode {
         Command::Run {
             target: RunTarget::Usdy(opts),
         } => match recompute_usdy(opts) {
+            Ok(()) => ExitCode::SUCCESS,
+            Err(message) => {
+                eprintln!("crossfoot: {message}");
+                ExitCode::FAILURE
+            }
+        },
+        Command::Run {
+            target: RunTarget::Maple(opts),
+        } => match recompute_maple(opts) {
             Ok(()) => ExitCode::SUCCESS,
             Err(message) => {
                 eprintln!("crossfoot: {message}");
@@ -721,6 +736,38 @@ fn recompute_susde(opts: RunOpts) -> Result<(), String> {
     println!("verdict         {}", outcome.verdict.as_str());
     println!("summary         {}", outcome.summary.headline);
     println!("reward posts    {} in the window", outcome.posts_in_window);
+    println!("result          {}", outcome.result_path.display());
+    println!("bundle          {}", outcome.bundle_dir.display());
+    println!("root hash       {}", outcome.root_hash);
+    println!("cache hits      {}", outcome.cache_hits);
+    println!("network calls   {}", outcome.network_calls);
+    Ok(())
+}
+
+fn recompute_maple(opts: RunOpts) -> Result<(), String> {
+    let verify_root = opts.verify_root.canonicalize().map_err(|err| {
+        format!(
+            "--verify-root {} is not readable: {err}",
+            opts.verify_root.display()
+        )
+    })?;
+    let window = resolve_window("maple", &opts)?;
+    let mut client = read_source(&opts, &verify_root)?;
+    let outcome = run_maple::run(
+        client.as_mut(),
+        &run_maple::RunArgs {
+            baseline_block: window.baseline_block,
+            block: window.block,
+            window_name: window.name.clone(),
+        },
+        &verify_root,
+    )?;
+    println!("verdict         {}", outcome.verdict.as_str());
+    println!("summary         {}", outcome.summary.headline);
+    println!(
+        "accounting      {} event(s) in the window",
+        outcome.events_in_window
+    );
     println!("result          {}", outcome.result_path.display());
     println!("bundle          {}", outcome.bundle_dir.display());
     println!("root hash       {}", outcome.root_hash);

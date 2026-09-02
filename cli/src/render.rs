@@ -627,6 +627,7 @@ fn check_class_words(result: &Value) -> &'static str {
         Some("usdy") => "Full recomputation, zero tolerance. The oracle's getPrice() at both pinned blocks is derived from the stored ranges with the contract's own formula (MakerDAO rpow over the daily rate, rounded to eight decimals) and must match the chain to the wei; every stored close is checked against the derived close of the range before it. Every range set in the window is attributed to the transaction and role holder that made it; the daily rate of a range is one key's choice and is recorded, not judged.",
         Some("frax") => "Full recomputation, zero tolerance. pricePerShare(), totalAssets() and convertToAssets(1e18) are recomputed from the stored anchor with the deployed PRBMath exp and must match the chain to the wei. Every setter event in the window is attributed to its transaction; the rate has no on-chain bound and the timelock address can rewrite the price level, which the record states.",
         Some("sky") => "Full recomputation, zero tolerance. convertToAssets(1e18) of sUSDS, sDAI and stUSDS is recomputed from (rate, chi, rho) and the block timestamp with Sky's rpow and must match the chain to the wei. Every rate change of the window is attributed to the bounded setter (SPBEAM or the stUSDS rate setter, with its own bounds, step and cooldown replayed) or to the governance spell path; both are legitimate paths and are recorded, not judged.",
+        Some("maple") => "Full recomputation, zero tolerance. The open-term loan manager's assetsUnderManagement is recomputed from principalOut, accountedInterest, issuanceRate and domainStart at the block timestamp with the contract's formula, the pool's totalAssets from its balance and every strategy's figure, and convertToAssets(1e6) from the supply; each must match the chain to the unit. Every accounting event of the window is attributed to the transaction and path that made it; the terms of a loan or a refinance are the delegate's and the borrower's choice and are recorded, not judged.",
         Some("susde") => "Full recomputation, zero tolerance. The unvested reward, totalAssets and convertToAssets(1e18) are recomputed from five state reads at the pinned block and must match the chain to the wei. The reward posts of the window are attributed to the transaction and path that made them; their size is a role holder's choice and is reported, not judged.",
         Some("mtbill") => "Consistency bundle. The NAV itself is INPUT_GAP: the underlying portfolio is not observable, so it is not recomputed here. Everything below checks the issuer's own contractual and on-chain rules against itself.",
         _ => "Unknown target.",
@@ -990,6 +991,76 @@ fn susde_body(run: &Run) -> String {
                 escape(&wei(&s("amount"), 18)),
                 escape(&s("path")),
                 n("seconds_since_previous"),
+                escape(&s("transaction_hash"))
+            ));
+        }
+        html.push_str("</table>\n");
+    }
+    html
+}
+
+/// The page body of the Maple target: the residual table over both pools
+/// and the attributed accounting events of the window.
+fn maple_body(run: &Run) -> String {
+    let result = &run.result;
+    let mut html = String::new();
+    html.push_str("<h2>Comparison</h2>\n");
+    html.push_str("<p class=\"note\">Modeled is the open-term loan manager's principalOut, accountedInterest and the interest accrued at its issuanceRate since domainStart, the pool's balance plus every strategy's figure, and the rate over the supply, with the contracts' own formulas. Observed is read from the chain at the pinned block. Tolerance is zero.</p>\n");
+    html.push_str(&comparison_table(result));
+
+    html.push_str("<h2>Accounting events in the window</h2>\n");
+    let counts = result.get("accounting_events");
+    let total = counts
+        .and_then(|c| c.get("in_window"))
+        .and_then(Value::as_u64)
+        .unwrap_or(0);
+    let by = |key: &str| {
+        counts
+            .and_then(|c| c.get(key))
+            .and_then(Value::as_object)
+            .map(|m| {
+                m.iter()
+                    .map(|(k, v)| format!("{} {}", v, k))
+                    .collect::<Vec<String>>()
+                    .join(", ")
+            })
+            .unwrap_or_default()
+    };
+    let note = counts
+        .and_then(|c| c.get("note"))
+        .and_then(Value::as_str)
+        .unwrap_or("");
+    html.push_str(&format!(
+        "<p>{total} event(s) between the two pinned blocks (by path: {}; by function: {}). {}</p>\n",
+        escape(&by("by_path")),
+        escape(&by("by_function")),
+        escape(note)
+    ));
+    if let Some(timeline) = read_json(&run.dir.join("timelines").join("maple.json")) {
+        html.push_str("<table>\n<tr><th>pool</th><th>event</th><th>block</th><th>time (UTC)</th><th>issuance rate (1e27/s)</th><th>accounted interest</th><th>function</th><th>path</th><th>transaction</th></tr>\n");
+        for row in timeline
+            .get("rows")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+        {
+            let s = |k: &str| row.get(k).and_then(Value::as_str).unwrap_or("").to_string();
+            let n = |k: &str| row.get(k).and_then(Value::as_u64).unwrap_or(0);
+            let function = if s("function").is_empty() {
+                s("selector")
+            } else {
+                s("function")
+            };
+            html.push_str(&format!(
+                "<tr><td>{}</td><td>{}</td><td class=\"mono\">{}</td><td class=\"mono\">{}</td><td class=\"num\">{}</td><td class=\"num\">{}</td><td class=\"mono\">{}</td><td>{}</td><td class=\"mono\">{}</td></tr>\n",
+                escape(&s("product")),
+                escape(&s("event")),
+                n("block"),
+                escape(&s("timestamp_utc")),
+                escape(&s("issuance_rate")),
+                escape(&wei(&s("accounted_interest"), 6)),
+                escape(&function),
+                escape(&s("path")),
                 escape(&s("transaction_hash"))
             ));
         }
@@ -1858,10 +1929,11 @@ fn feed_row(run: &Run, feed: Option<&Value>) -> Value {
             s(Some(feed), "timeline_file")
                 .map(|file| format!("data/timelines/{}", file.trim_start_matches("timelines/"))),
         ),
-        ("svzchf", _) | ("susde", _) | ("sky", _) | ("usdy", _) | ("frax", _) => (
+        ("svzchf", _) | ("susde", _) | ("sky", _) | ("usdy", _) | ("frax", _) | ("maple", _) => (
             Some(
                 match target {
                     "susde" => crate::susde::VAULT,
+                    "maple" => crate::maple::POOLS[0].pool,
                     "sky" => crate::sky::SUSDS,
                     "usdy" => crate::usdy::ORACLE,
                     "frax" => crate::frax::VAULT,
@@ -1872,6 +1944,7 @@ fn feed_row(run: &Run, feed: Option<&Value>) -> Value {
             Some(
                 match target {
                     "susde" => "sUSDe",
+                    "maple" => "syrupUSDC",
                     "sky" => "sUSDS",
                     "usdy" => "USDY",
                     "frax" => "sfrxUSD",
@@ -1923,7 +1996,7 @@ fn feed_row(run: &Run, feed: Option<&Value>) -> Value {
     };
     let family = s(summary, "family").unwrap_or_else(|| {
         match target {
-            "svzchf" | "susde" | "sky" | "usdy" | "frax" => "recomputable-accrual",
+            "svzchf" | "susde" | "sky" | "usdy" | "frax" | "maple" => "recomputable-accrual",
             _ => "guarded-setter",
         }
         .to_string()
@@ -2049,9 +2122,13 @@ fn write_data_files(runs: &[Run], out_dir: &Path) -> Result<Vec<PathBuf>, String
                     }
                 }
             }
-        } else if run.result.get("target").and_then(Value::as_str) == Some("sky") {
-            // One row per vault: the same summary, the vault's own address,
-            // product and field equality.
+        } else if matches!(
+            run.result.get("target").and_then(Value::as_str),
+            Some("sky") | Some("maple")
+        ) {
+            // One row per vault or pool: the same summary, the vault's own
+            // address, product and field equality.
+            let target = run.result["target"].as_str().unwrap_or("sky");
             for vault in run
                 .result
                 .get("vaults")
@@ -2079,11 +2156,17 @@ fn write_data_files(runs: &[Run], out_dir: &Path) -> Result<Vec<PathBuf>, String
                             serde_json::json!(if equal { "ALLOW" } else { "REVIEW" }),
                         );
                     }
+                    let field = match vault["field"].as_str() {
+                        Some(field) => field.to_string(),
+                        None => format!(
+                            "{}.convertToAssets(1e18)",
+                            vault["vault"].as_str().unwrap_or("")
+                        ),
+                    };
                     map.insert(
                         "headline".into(),
                         serde_json::json!(format!(
-                            "{}.convertToAssets(1e18) {}",
-                            vault["vault"].as_str().unwrap_or(""),
+                            "{field} {}",
                             if equal {
                                 "exact, residual 0"
                             } else {
@@ -2093,14 +2176,14 @@ fn write_data_files(runs: &[Run], out_dir: &Path) -> Result<Vec<PathBuf>, String
                     );
                     map.insert(
                         "timeline_file".into(),
-                        serde_json::json!("data/timelines/sky.json"),
+                        serde_json::json!(format!("data/timelines/{target}.json")),
                     );
                 }
                 rows.push(row);
             }
-            let source = run.dir.join("timelines").join("sky.json");
+            let source = run.dir.join("timelines").join(format!("{target}.json"));
             if let Ok(bytes) = fs::read(&source) {
-                let path = timelines_dir.join("sky.json");
+                let path = timelines_dir.join(format!("{target}.json"));
                 fs::write(&path, bytes)
                     .map_err(|err| format!("could not write {}: {err}", path.display()))?;
                 written.push(path);
@@ -2175,6 +2258,12 @@ fn run_page(run: &Run) -> String {
         addresses.push(("admin Safe", crate::usdy::ADMIN_SAFE.to_string()));
     } else if target == "frax" {
         addresses.push(("vault", crate::frax::VAULT.to_string()));
+    } else if target == "maple" {
+        for pool in &crate::maple::POOLS {
+            addresses.push((pool.product, pool.pool.to_string()));
+            addresses.push(("pool manager", pool.manager.to_string()));
+            addresses.push(("open-term loan manager", pool.loan_manager.to_string()));
+        }
     } else if target == "susde" {
         addresses.push(("vault", crate::susde::VAULT.to_string()));
         addresses.push(("asset (USDe)", crate::susde::USDE.to_string()));
@@ -2209,6 +2298,7 @@ fn run_page(run: &Run) -> String {
     html.push_str(&match target {
         "svzchf" => svzchf_body(run),
         "susde" => susde_body(run),
+        "maple" => maple_body(run),
         "sky" => sky_body(run),
         "usdy" => derived_body(run, "usdy"),
         "frax" => derived_body(run, "frax"),
@@ -2743,6 +2833,65 @@ mod tests {
 
     /// Spec 09: the sUSDe fixture renders a page with the residual table
     /// and the reward posts, and a feeds.json row in the consumer's shape.
+    #[test]
+    fn maple_fixture_renders_one_feed_row_per_pool() {
+        let archive = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/maple-demo-25800000-25885541.tar.gz");
+        let input = crate::util::scratch_dir("render-maple-in");
+        let _ = fs::remove_dir_all(&input);
+        fs::create_dir_all(&input).unwrap();
+        crate::pack::unpack(&archive, &input).unwrap();
+        let out = crate::util::scratch_dir("render-maple-out");
+        let _ = fs::remove_dir_all(&out);
+        render(&input, &out).unwrap();
+
+        let feeds: Value =
+            serde_json::from_str(&fs::read_to_string(out.join("data/feeds.json")).unwrap())
+                .unwrap();
+        let rows = feeds["rows"].as_array().unwrap();
+        assert_eq!(rows.len(), 2);
+        assert_eq!(rows[0]["target"], "maple");
+        assert_eq!(rows[0]["product"], "syrupUSDC");
+        assert_eq!(
+            rows[0]["address"],
+            crate::maple::POOLS[0].pool.to_lowercase()
+        );
+        assert_eq!(rows[1]["product"], "syrupUSDT");
+        assert_eq!(
+            rows[1]["address"],
+            crate::maple::POOLS[1].pool.to_lowercase()
+        );
+        for row in rows {
+            assert_eq!(row["key"], "vault");
+            assert_eq!(row["kind"], "recomputable");
+            assert_eq!(row["family"], "recomputable-accrual");
+            assert_eq!(row["verdict"], "MODEL_MATCH");
+            assert_eq!(row["consumer_action"], "ALLOW");
+            assert_eq!(row["nav_recomputation"], "FULL");
+            assert_eq!(row["timeline_file"], "data/timelines/maple.json");
+            assert_eq!(row["block"], 25_885_541);
+            assert_eq!(row["baseline_block"], 25_800_000);
+        }
+        assert_eq!(
+            rows[0]["headline"],
+            "syrupusdc.convertToAssets(1e6) exact, residual 0"
+        );
+        assert!(out.join("data/timelines/maple.json").exists());
+        let page = fs::read_dir(&out)
+            .unwrap()
+            .filter_map(|e| e.ok())
+            .map(|e| e.path())
+            .find(|p| {
+                p.file_name()
+                    .and_then(|n| n.to_str())
+                    .is_some_and(|n| n.starts_with("maple-run") && n.ends_with(".html"))
+            })
+            .expect("a maple run page");
+        let html = fs::read_to_string(page).unwrap();
+        assert!(html.contains("Accounting events in the window"));
+        assert!(html.contains("acceptNewTerms"));
+    }
+
     #[test]
     fn susde_fixture_renders_a_feed_row_in_the_consumer_shape() {
         let fixture = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
