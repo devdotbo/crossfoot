@@ -66,7 +66,9 @@
           "headline": "1 rounds, no unchecked post over the bound, liveness INIT_ONLY",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -129,9 +131,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "079a3dedab555ebff7d8116fc7fce9869cf1f939276d756945d26135d4085ae6"
+      "record_sha256": "3c660a8ec58fd30454134146e44880a191383b148d73dadbc634f4a9d7fffd23"
     },
     {
       "feed": {
@@ -184,7 +186,9 @@
           "headline": "3 rounds, no unchecked post over the bound, liveness PLACEHOLDER",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -247,9 +251,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "4c4bf1489c1fe6099a3570f461e855b46b8e6c7147d73e755a1572615453b521"
+      "record_sha256": "b168b88eed89edbf437ed7078d249be9d48e6e1d1b99db07f0b5ce8ec0cdbd58"
     },
     {
       "feed": {
@@ -302,7 +306,9 @@
           "headline": "445 rounds, 7 unchecked posts over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -365,9 +371,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "cbd8d399e64a1dbc331e33177e27c098cf47dd9421c4cfe89aaa36000f0e206b"
+      "record_sha256": "324120379a914cb01ce42491cd5b3f21dfd23d8a316a237f4cf321852afd847d"
     },
     {
       "feed": {
@@ -444,7 +450,9 @@
           "headline": "56 rounds, 1 unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -507,9 +515,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "306e918abba0124101211e21cd1b03c9e6dfc1580cce6ab6935d47751051e301"
+      "record_sha256": "eaf2a69396f719541adda969d4e28fdf5c22c802ca4c1c5bfda816e42538df7d"
     },
     {
       "feed": {
@@ -562,7 +570,9 @@
           "headline": "29 rounds, no unchecked post over the bound, liveness STALE",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -625,9 +635,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "e3b94843d17340ff81b8cb2c1bd2a8f81c8410a60ef684a60335a449d4f40501"
+      "record_sha256": "478f3f019f769b9e3f10c415f458b96e35a6be6e4a684be10fbfecadd18e88ea"
     },
     {
       "feed": {
@@ -707,7 +717,9 @@
           "headline": "37 rounds, 10 unchecked posts over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -770,9 +782,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "03c8c17ccf302d0d9be6720aae98c4ff824947906579d9787318234899666ccb"
+      "record_sha256": "6574daf8e4010a629b0cf65bb25162ebc1c0ce0164dda6de2cb92aba8d60396e"
     },
     {
       "feed": {
@@ -852,7 +864,9 @@
           "headline": "36 rounds, 1 unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -915,9 +929,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "96b3ff22314917428708a68aca0d11af6d0c8bafd6d42ad3c34645ca57392eb8"
+      "record_sha256": "26074c8b3a3c69aa9cb8d608064aa5df5f7749766d187350fad40dfa0b45ac5f"
     },
     {
       "feed": {
@@ -968,7 +982,9 @@
           "headline": "1 rounds, no unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -1031,9 +1047,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "aadb4773e09f72510418af4e3b3f566bf810fb98d688673f917f2e5aa25f572a"
+      "record_sha256": "c782bc7c76774b7a9a84a9342fab7013b1fcf4c4ea63fe35c10d48e90bb6d393"
     },
     {
       "feed": {
@@ -1086,7 +1102,9 @@
           "headline": "9 rounds, no unchecked post over the bound, liveness STALE",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -1149,9 +1167,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "83e9809dc1cc2d0e683fe92b36037cc561ca6aa7d2f92b7087a72fabad8f68ae"
+      "record_sha256": "639482965ab2acb50bd2b817d177bdb88faf581220b7c7a2b9d8ef2f28c9a826"
     },
     {
       "feed": {
@@ -1202,7 +1220,9 @@
           "headline": "39 rounds, no unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -1265,9 +1285,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "dd80b99c77807596f2e41da68799a3474171acc1250803e551e44372f0b61649"
+      "record_sha256": "b1988cde89292ddaaffe0c54521aded3a742664836da7ad24f8c25a7469a01ea"
     },
     {
       "feed": {
@@ -1320,7 +1340,9 @@
           "headline": "22 rounds, no unchecked post over the bound, liveness STALE",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -1383,9 +1405,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "da0286c5813ddc9d1ca1f8b301ac5593dfbac316005b4bad5d9c833a8307a477"
+      "record_sha256": "ac619fcb1124b506c3960317a76eec6743393a61b1b5ea97b808c81acc73ccfe"
     },
     {
       "feed": {
@@ -1436,7 +1458,9 @@
           "headline": "53 rounds, no unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -1499,9 +1523,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "b521919c11179b6dbba179aff50cf5d3ab259ec338869179ea1839a545d39a4b"
+      "record_sha256": "8d3e611512d7f6fff437b5866f630878427d2dbc95b1e887359474fd4da18cd2"
     },
     {
       "feed": {
@@ -1554,7 +1578,9 @@
           "headline": "76 rounds, no unchecked post over the bound, liveness STALE",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -1617,9 +1643,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "5e4faa4c9fbe40d25cbd69cb6a1159fbdf97db64071db03202b122c165a10ad4"
+      "record_sha256": "5a1d11026573cc50c224dedd041c296ab2c3b10daf0d25923f0fbaea6aa2a447"
     },
     {
       "feed": {
@@ -1672,7 +1698,9 @@
           "headline": "1 rounds, no unchecked post over the bound, liveness INIT_ONLY",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -1735,9 +1763,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "65e565f12934ba41aa3aad7af6d7b32bf0198bff90491cc987bfd4b1f5a429f6"
+      "record_sha256": "0900d4a862a23c7f741d7dd752da9b370a1c9b51bf42ced9e1f0ceb435cc334b"
     },
     {
       "feed": {
@@ -1788,7 +1816,9 @@
           "headline": "1 rounds, no unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -1851,9 +1881,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "d27a2f287c0cdb314a24e109b139a54c5303a5d0872e49a4a66749ae83b1026f"
+      "record_sha256": "3b5003f131c797420689e44f269cc5a6a3385f403dd6518fa5ddb2e84cc4c082"
     },
     {
       "feed": {
@@ -1906,7 +1936,9 @@
           "headline": "2 rounds, no unchecked post over the bound, liveness PLACEHOLDER",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -1969,9 +2001,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "b08352e197a4380c2efe52eada25dd7c40484588cb4baf08c002d53fc29a843e"
+      "record_sha256": "8c721cf0df250fea3614f7433b60b6df31ab485c200a2dd3e910a6f05e7d64b6"
     },
     {
       "feed": {
@@ -2039,7 +2071,9 @@
           "headline": "35 rounds, 1 unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -2102,9 +2136,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "16d39ff36561fb3203eb5f06b4476d90398e3f54cf0ea785fda0d1c3802acf41"
+      "record_sha256": "3891bfec97080a33d522d78a851b7aa4787ac1bc934372fd3b145fc2141c0ed2"
     },
     {
       "feed": {
@@ -2155,7 +2189,9 @@
           "headline": "116 rounds, no unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -2218,9 +2254,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "9995c39b1987050550f0910c39d38ec3adade3956e9fd39decb621ce2d279abb"
+      "record_sha256": "02ea77709c58bade083e137c3b96fcd9a4c88c474ab5167ed5f44faefe2edf8f"
     },
     {
       "feed": {
@@ -2273,7 +2309,9 @@
           "headline": "1 rounds, no unchecked post over the bound, liveness INIT_ONLY",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -2336,9 +2374,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "d55fc7833287070f470d0a3cc2c354d87f98c5a614d2192a40c2301b920914fa"
+      "record_sha256": "4b5339bac02f899cfb655530a9d011de533956d852e5d7450c6d1964fbce07a4"
     },
     {
       "feed": {
@@ -2391,7 +2429,9 @@
           "headline": "1 rounds, no unchecked post over the bound, liveness INIT_ONLY",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -2454,9 +2494,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "8eed41854afba42b03f01c2ed246d6886719ade8882da05c6fe4a6ed1615e640"
+      "record_sha256": "ccec48a92add4a557d7ebcaa627503ebde1821d1479ed54b369bdb12a1ea942d"
     },
     {
       "feed": {
@@ -2509,7 +2549,9 @@
           "headline": "1 rounds, no unchecked post over the bound, liveness INIT_ONLY",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -2572,9 +2614,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "90340be56cf87682d2ab08c93db7313c4a1ffc36b41e155514c8cabc8b873098"
+      "record_sha256": "0d28acdd0e5a6293a069c0b3f55cfe132a51f14de8c19337656f571b9151b0dc"
     },
     {
       "feed": {
@@ -2625,7 +2667,9 @@
           "headline": "2 rounds, no unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -2688,9 +2732,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "fcc5663f7e9800bdc6e0d2422defc7070c41122db494cc932c0d8e1c32b30559"
+      "record_sha256": "f74a60ca5bd42d37a8f57825a3a3b5da7e8f5fa608db518915f93387af7c7086"
     },
     {
       "feed": {
@@ -2758,7 +2802,9 @@
           "headline": "36 rounds, 1 unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -2821,9 +2867,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "056e5e57d814974808bc376225bcec5df8ccf3d58b1003e53f589921892ed1b6"
+      "record_sha256": "d12f5dbf9301a92c7ae83523ac6da17eae410b4af161407cd0175878bc4b04c4"
     },
     {
       "feed": {
@@ -2874,7 +2920,9 @@
           "headline": "137 rounds, no unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -2937,9 +2985,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "412fa34aaa2dd3cb94cfe38241f7d0461206503dcf422110d050d6c96e7ab1b8"
+      "record_sha256": "7f277965d581f32faae45a9a38202b5c466e375d8f070c77eeca3d90c97f2039"
     },
     {
       "feed": {
@@ -2992,7 +3040,9 @@
           "headline": "1 rounds, no unchecked post over the bound, liveness INIT_ONLY",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -3055,9 +3105,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "d6f075e0597450162ed0bb007b62f374d66fe210863ab04fdcc3765c787e666d"
+      "record_sha256": "c0a2fa68719dffbaf3b1d2710f0bc27f96ae2b25ee4a9b98d152fefda3978e89"
     },
     {
       "feed": {
@@ -3111,7 +3161,9 @@
           "headline": "38 rounds, 1 unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -3174,9 +3226,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "8508fe81f2e64ffedfeeeb8f267f9bd6395756774f3d5ab02aabca67f139f017"
+      "record_sha256": "0b29d7b0f4432144ef6b16c69cfb04964e75b51e3cc47e4e61243b6dd4dccb19"
     },
     {
       "feed": {
@@ -3227,7 +3279,9 @@
           "headline": "5 rounds, no unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -3290,9 +3344,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "6daf961d8ed0873d85acab60eef35eee1f87e4d66f39d8a8599ad6a48d2a7775"
+      "record_sha256": "6f36374a8bcd1448a3f45de6db3b0fa1412c0359d29c1cfa67dba48ce2f55632"
     },
     {
       "feed": {
@@ -3343,7 +3397,9 @@
           "headline": "132 rounds, no unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -3406,9 +3462,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "11f7eb9d9052a28bf0ec9ddbd1d6ad10524bdb8b96cbb31263ec1f29ea89698e"
+      "record_sha256": "6778ba185e5a6cac96811863993b2ce2ae2d0a3cec3678bf257f3529c3918429"
     },
     {
       "feed": {
@@ -3461,7 +3517,9 @@
           "headline": "1 rounds, no unchecked post over the bound, liveness STALE",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -3524,9 +3582,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "337e01c0e0db795e3c252fbd4972aded8ec834374efac6afafff14459d25dcd7"
+      "record_sha256": "a13a534ed64e6c8c5832f8a9915bdc342393088c1094ba4dbad656a39c0e0bfc"
     },
     {
       "feed": {
@@ -3579,7 +3637,9 @@
           "headline": "65 rounds, no unchecked post over the bound, liveness STALE",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -3642,9 +3702,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "b1262a02c2d06c0416d4b213ebedaa96e872c54305770331599290021170ac31"
+      "record_sha256": "6e4115f499d1fc31a96dd3f0e24f70ae412680e6241306855d814322abe076be"
     },
     {
       "feed": {
@@ -3711,7 +3771,9 @@
           "headline": "21 rounds, 1 unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -3774,9 +3836,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "86eae27b2ca40702ab8fc917752079ff348def3e721d6e47702be70ca8640ca9"
+      "record_sha256": "5b320139942583162258560e44653df6557b8def79a1f25a9fe8e82ba24c1834"
     },
     {
       "feed": {
@@ -3829,7 +3891,9 @@
           "headline": "1 rounds, no unchecked post over the bound, liveness INIT_ONLY",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -3892,9 +3956,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "151fcfb3c82439d08a9d605d995595072721279da4dcd1d40b596c6554cfaed2"
+      "record_sha256": "f02ce1925d9099c71d218caef98c6ea6d855b064657a341ea89be5abe7044a2f"
     },
     {
       "feed": {
@@ -3961,7 +4025,9 @@
           "headline": "51 rounds, 1 unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -4024,9 +4090,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "e950483d57ba9b181b6779ecf81de75dc2302ec50eb4cab142dc0d8216f4ae86"
+      "record_sha256": "b08fcbb8673be613b92ee7ba7a7eae60c1da943be092ccb778e114e290b98d1b"
     },
     {
       "feed": {
@@ -4077,7 +4143,9 @@
           "headline": "221 rounds, no unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -4140,9 +4208,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "67b6024d15fae63d2b7ff5c1473454893c2c6a99c48c9060ed231306fe7b4b56"
+      "record_sha256": "20b122f9afb619624ea4d2253eb824c7db540542649435f0a8dbc0a3f60bf415"
     },
     {
       "feed": {
@@ -4195,7 +4263,9 @@
           "headline": "2 rounds, no unchecked post over the bound, liveness PLACEHOLDER",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -4258,9 +4328,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "8756248a8be44a8b0559957838b0b42645ace0d5bcd08c35e738acbd45e8ada4"
+      "record_sha256": "85f6d530fca6bef3c3d66c0083dbbb0093dd2d9cdf0b685c362972f36034c3e5"
     },
     {
       "feed": {
@@ -4313,7 +4383,9 @@
           "headline": "1 rounds, no unchecked post over the bound, liveness INIT_ONLY",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -4376,9 +4448,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "8ca558aa9ecdd3eada771aba2eb8b2da3c3561129ae527fa74e854dd69fb1ce1"
+      "record_sha256": "a3422de9b9c72d643db04c3a2da529f47fdaa5e0f9e9250494f7deea17c9504d"
     },
     {
       "feed": {
@@ -4429,7 +4501,9 @@
           "headline": "1 rounds, no unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -4492,9 +4566,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "e7acd65bcfcca11cfa74da9ef792e39bd5405a67f412ba5216df669b6463bee8"
+      "record_sha256": "c8818fe3d20b89f5837076f22bc89cc9aa587b2e71fe9275e1c54609556cc9a4"
     },
     {
       "feed": {
@@ -4547,7 +4621,9 @@
           "headline": "3 rounds, no unchecked post over the bound, liveness PLACEHOLDER",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -4610,9 +4686,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "2c65e95e44b73d6ad4b9947a80a1a514595b544baef171bb30d27fbbf627eb31"
+      "record_sha256": "80ac1fa25345b4c1f661b6422af385698d8e6ad784a358caff8012b88e98282b"
     },
     {
       "feed": {
@@ -4665,7 +4741,9 @@
           "headline": "278 rounds, 1 unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -4728,9 +4806,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "c07c6cc0d562e7dee653b448e45e2a8ffd71446c6a9e8ee9c0623d5795c427db"
+      "record_sha256": "6bbfa83e8ed6aa9b2c539c59c5a5b3108203e3c1dd75b04b0a225702eabd7d68"
     },
     {
       "feed": {
@@ -4810,7 +4888,9 @@
           "headline": "41 rounds, 2 unchecked posts over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -4873,9 +4953,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "593cd5d9412fa99139eb408df3d1fe36aecb6c534ff30273e50cdc385b9c7228"
+      "record_sha256": "a9e8229ed20dada53027fdb9bd04f21b1ff125c65a670a5a261996a5326bab1f"
     },
     {
       "feed": {
@@ -4928,7 +5008,9 @@
           "headline": "1 rounds, no unchecked post over the bound, liveness INIT_ONLY",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -4991,9 +5073,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "b51cbafbf9a6288bc1fd3f2f50d0c97cf7fe919594bb443819b03c64b6bf9998"
+      "record_sha256": "b802d151de8a98009c2c949e348582e93f4f5398dd44c094a0320cd86d8dc482"
     },
     {
       "feed": {
@@ -5047,7 +5129,9 @@
           "headline": "162 rounds, 15 unchecked posts over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -5110,9 +5194,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "02e8f9a4680ec30b5092efeae6828e29940c853ac87e3af705eeaa9870a88a9f"
+      "record_sha256": "38d6aa6ebede3d5b0f38d6eafc3b4499ee9d56b4dba3b5141d8d2c9b15ad3275"
     },
     {
       "feed": {
@@ -5163,7 +5247,9 @@
           "headline": "12 rounds, no unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -5226,9 +5312,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "3ecbff25c725f1066a6436e79964451cd5b2f18afc43443a3c08e74244d4c938"
+      "record_sha256": "c62668ebffd3f8367ca867fc4ec0e517521d8afa5099079141d783ac09093c06"
     },
     {
       "feed": {
@@ -5281,7 +5367,9 @@
           "headline": "3 rounds, no unchecked post over the bound, liveness PLACEHOLDER",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -5344,9 +5432,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "7c9ab961b2e329cac283456c951d82606ded4f54bae2e7b0f555c8d5c24f9ed3"
+      "record_sha256": "075685a38e44785c0d4b4d0c00db4d2f32555bbd8563e9863456538e7d1bc2f2"
     },
     {
       "feed": {
@@ -5399,7 +5487,9 @@
           "headline": "1 rounds, no unchecked post over the bound, liveness INIT_ONLY",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -5462,9 +5552,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "95809f36160703aacabb8b1dd995032ba0514ad134c7f382a1e1e067f420d3bf"
+      "record_sha256": "cec2d27ab6767649b09058a12bec5bbeb36b705c6505ac97e91aafbeaced3386"
     },
     {
       "feed": {
@@ -5517,7 +5607,9 @@
           "headline": "1 rounds, no unchecked post over the bound, liveness INIT_ONLY",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -5580,9 +5672,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "06bc57b5e9b960d181105c0033af8cd3c885224cd5687d9e05fd3615933191b2"
+      "record_sha256": "7aed51c2aa86e0a2b1c13d3c95331bebf6cbb8324e1ac330499a330b4ad5979c"
     },
     {
       "feed": {
@@ -5633,7 +5725,9 @@
           "headline": "11 rounds, no unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -5696,9 +5790,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "a78c0c8312ccb82e4a4fdbd5385dfd166b7d54bd15d2da20a102c86701f4b210"
+      "record_sha256": "f1e28074930ade86bfe847e474e903a6078e6766ecb637d627e581fd66440fe4"
     },
     {
       "feed": {
@@ -5751,7 +5845,9 @@
           "headline": "1 rounds, no unchecked post over the bound, liveness INIT_ONLY",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -5814,9 +5910,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "404820356415c6d1658dc7521baa4c38d972970a4f5b12d62106d3586cd7f39c"
+      "record_sha256": "e4a26f0e855896fbd867cff2ddd30811ea4bd4bb80de1d8b923f42b0ef6a301a"
     },
     {
       "feed": {
@@ -5867,7 +5963,9 @@
           "headline": "40 rounds, no unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -5930,9 +6028,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "f50258ebd52cc70c8a964e93fc569dcd61641bf3f0dbefd4319b1bc15dbffc74"
+      "record_sha256": "d1c86fdbcff32a2d809e407e50e0d706c37fb879db78edf4eb188afcae9c615f"
     },
     {
       "feed": {
@@ -5985,7 +6083,9 @@
           "headline": "1 rounds, no unchecked post over the bound, liveness INIT_ONLY",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -6048,9 +6148,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "45f01a055ef33cb2adbe3534629e4c88abaee918213554627329b820fd3cb58d"
+      "record_sha256": "f3c15a48e4c72e22b3981e6a5b56c4e259c8d16f8df32a380339a8ddc919e0f6"
     },
     {
       "feed": {
@@ -6101,7 +6201,9 @@
           "headline": "9 rounds, no unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -6164,9 +6266,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "2d83bc0210a3f450cbc3eece010d56b03bab9cf2214196f791e9c4a3e3568632"
+      "record_sha256": "342fcc0fafd7d107462ee356d00a3ff508b5759d0d08fb9246adcc729909a5ed"
     },
     {
       "feed": {
@@ -6219,7 +6321,9 @@
           "headline": "1 rounds, no unchecked post over the bound, liveness INIT_ONLY",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -6282,9 +6386,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "9445dc6d86fd64a0dcea3c9b7443c80db10a812ddeefc4853e758514b5d49e1a"
+      "record_sha256": "2ad055c36ad7f9789d4716781fe001597b2b5ff151b4c3f470dface0e3c8205f"
     },
     {
       "feed": {
@@ -6364,7 +6468,9 @@
           "headline": "16 rounds, 2 unchecked posts over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -6427,9 +6533,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "6b99ba1936a6c9e9fcce259cc136f7657be8dc1025e67504ec3690a7ab27b4ae"
+      "record_sha256": "7e8e9158eeb0152385159a72e2f3e910efefcd511e25785c20bfa8aeadb8ada5"
     },
     {
       "feed": {
@@ -6482,7 +6588,9 @@
           "headline": "1 rounds, no unchecked post over the bound, liveness INIT_ONLY",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -6545,9 +6653,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "79db219b1004eb0ac2407641030663414c59a09050d376f3269bd7adde87020c"
+      "record_sha256": "c6d2478e1e41b44b10bfb1eb358e5b6d49614b5960c4623759fafc3530527058"
     },
     {
       "feed": {
@@ -6600,7 +6708,9 @@
           "headline": "158 rounds, 7 unchecked posts over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -6663,9 +6773,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "eb35616dea07079a49f6a4fa97604815a127531c4089323a44e73b3387e7ae8e"
+      "record_sha256": "2274fed6c1fab0e08872a86860199b163211bfb3655e60a1f6475624756b4b92"
     },
     {
       "feed": {
@@ -6716,7 +6826,9 @@
           "headline": "5 of 5 fields exact, residual 0",
           "block": 25853000,
           "bundle_root": "a2de2644d4581962249ae75514817ef3e1ec160404950e8a03ae3d3083b73fbd",
-          "result_path": "bundles/svzchf-run-24570000-25853000-20260901T214806Z/result.json"
+          "result_path": "bundles/svzchf-run-24570000-25853000-20260901T214806Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -6779,9 +6891,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "6c538fdd5c605323ee7c7ca20781d95e7623f0780c9f85db931180aba54e9191"
+      "record_sha256": "555754d85fb1318437d7f9417b3804ecf0da2025b6a6a0b62d69fd6754a3458a"
     },
     {
       "feed": {
@@ -6834,7 +6946,9 @@
           "headline": "1 rounds, no unchecked post over the bound, liveness INIT_ONLY",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -6897,9 +7011,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "63daff165a4d869d4326d15dcf8a06525e873964d81778b346424179faa2d5c0"
+      "record_sha256": "61752a42fdecb318c44ebd83c5898850d10de05b9d74b97f37f2871c1e345cb4"
     },
     {
       "feed": {
@@ -6952,7 +7066,9 @@
           "headline": "1 rounds, no unchecked post over the bound, liveness INIT_ONLY",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -7015,9 +7131,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "eaee9a3bb75a42bad5d5f9b48609f8c8680bcbf7490bba04ff30f79119787042"
+      "record_sha256": "409b929f1bee203c07762ecf56c455dab58c01e6c453d4a24fc9ab941b4b7f9c"
     },
     {
       "feed": {
@@ -7068,7 +7184,9 @@
           "headline": "25 rounds, no unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -7131,9 +7249,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "c8e5f2a3e25380e6e8f594eba4390f7e7ce18f8ba5e2b6f798db953bcc761928"
+      "record_sha256": "065d1ec1a095d1c6a64662f4af2925009a54cd4ae965f9c875cd889ac084aa55"
     },
     {
       "feed": {
@@ -7187,7 +7305,9 @@
           "headline": "27 rounds, 1 unchecked post over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -7250,9 +7370,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "de14eae1bebb84a64aaa0e1f596e1866adbf680671116a0c1a288da2f657fd87"
+      "record_sha256": "d3fe72ccf86921d8d7322def70210572a8a88b9cf658ce2583d9cd351bc5e3be"
     },
     {
       "feed": {
@@ -7320,7 +7440,9 @@
           "headline": "61 rounds, 5 unchecked posts over the bound",
           "block": 25884405,
           "bundle_root": "33756d0cc3c8ee9312da9b44706bee58c191560df9688de74d0a89bff13762dc",
-          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json"
+          "result_path": "bundles/midas-run-25884405-20260901T190500Z/result.json",
+          "guard_kind": null,
+          "poster_addresses": []
         }
       },
       "provenance": {
@@ -7383,9 +7505,9 @@
       },
       "agent": {
         "tool_version": "0.1.0",
-        "git_commit": "89a724580e9eb1bd53a4c833af53b569900f12a6"
+        "git_commit": "f762e037d35ef85da9289f379733811e79cc6e0a"
       },
-      "record_sha256": "431b8387d5f3194869c2f989b8107a8840f37c514ef490a563716e003b535875"
+      "record_sha256": "d9ae5d7f1bccec9f313d6d59024739f6ae14ba79b3c084e4f27ab0a7450cd106"
     }
   ]
 }

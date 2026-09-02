@@ -335,6 +335,20 @@ above without changing a decision word.
   `cli/tests/fixtures/consume-fixture-v1/` with hand-built responses; its
   README states which numbers are from the research memos and how to swap
   in `consume-<deployment-id>/`.
+- Row 11a, guard-less families (Hashnote, Centrifuge and every family
+  whose `guard_kind` is `none`). A POSTED row whose `posting_path` is the
+  guard-less word (`ATTRIBUTED`; `UNGUARDED` is accepted as well) or whose
+  `guard_kind` is `none`, reaching row 11 (so LIVE and CONSISTENT), is
+  `ALLOW` with the mandatory note `no on-chain deviation check: the family
+  has no guard, so the decision rests on the poster key(s) the run
+  attributed` and the sentence `<verdict>: <headline> at block <n>; no
+  on-chain deviation check, attribution rests on the poster key(s)
+  <addresses, when the row carries poster_addresses>; bundle <root>`.
+  Rows 1 to 10 are unchanged: `STALE`, `INIT_ONLY` and `PLACEHOLDER` stay
+  `REVIEW`, and a subgraph round with path `UNKNOWN` still gives
+  `PATH_NOT_ATTRIBUTABLE`. The row fields `guard_kind` and
+  `poster_addresses` are optional and copied into `evidence.crossfoot`.
+  Test: `guard_less_feed_allows_with_the_no_guard_note`.
 - Header counts are JSON numbers. Wrappers come from the entries with
   `kind: "derived"` of `--midas-config` (default
   `config/midas-mainnet.json`); a

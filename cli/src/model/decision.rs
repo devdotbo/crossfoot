@@ -152,6 +152,13 @@ pub struct CrossfootRow {
     pub result_path: Option<String>,
     #[serde(default)]
     pub block: u64,
+    /// The family's guard kind as the run reports it (`none`, `relative`,
+    /// `absolute`, `clamp`); absent on older rows.
+    #[serde(default)]
+    pub guard_kind: Option<String>,
+    /// The keys the run attributed the posts to, when the row carries them.
+    #[serde(default)]
+    pub poster_addresses: Vec<String>,
 }
 
 /// What the record shows under `evidence.crossfoot`.
@@ -168,6 +175,8 @@ pub struct CrossfootEvidence {
     pub block: u64,
     pub bundle_root: String,
     pub result_path: Option<String>,
+    pub guard_kind: Option<String>,
+    pub poster_addresses: Vec<String>,
 }
 
 impl CrossfootEvidence {
@@ -184,6 +193,8 @@ impl CrossfootEvidence {
             block: row.block,
             bundle_root: row.bundle_root.clone(),
             result_path: row.result_path.clone(),
+            guard_kind: row.guard_kind.clone(),
+            poster_addresses: row.poster_addresses.clone(),
         }
     }
 }
@@ -251,6 +262,21 @@ const SELECTOR_SET_ROUND_DATA3: &str = "0x2b6e02c7";
 const SELECTOR_SET_ROUND_DATA_SAFE3: &str = "0x92260352";
 
 pub const UNVERIFIED_SELECTOR_NOTE: &str = "selector semantics unverified (mGLOBAL growth feed)";
+
+/// The posting_path words of a family without an on-chain guard: every
+/// round was attributed to a setter that checks nothing.
+pub const GUARD_LESS_PATHS: [&str; 2] = ["ATTRIBUTED", "UNGUARDED"];
+
+/// The mandatory note on an ALLOW for a guard-less feed (row 11a).
+pub const NO_GUARD_NOTE: &str = "no on-chain deviation check: the family has no guard, so the decision rests on the poster key(s) the run attributed";
+
+/// Row 11a: a POSTED row whose family has no on-chain guard.
+fn is_guard_less(row: &CrossfootRow) -> bool {
+    row.posting_path
+        .as_deref()
+        .is_some_and(|p| GUARD_LESS_PATHS.contains(&p))
+        || row.guard_kind.as_deref() == Some("none")
+}
 
 fn selector_name(selector: Option<&str>) -> &'static str {
     match selector.map(|s| s.to_ascii_lowercase()).as_deref() {
@@ -561,10 +587,31 @@ pub fn decide(inputs: &FeedInputs) -> Outcome {
         notes.push(UNVERIFIED_SELECTOR_NOTE.to_string());
     }
 
-    // Row 11.
+    // Row 11, and 11a for a guard-less POSTED feed: ALLOW stays, with the
+    // note and a sentence that says what the decision rests on.
     let (decision, reason, reason_text) = if reasons.is_empty() {
         let r = row.expect("no reasons implies a row (row 3 fires otherwise)");
-        (Decision::Allow, None, row_sentence(&r.verdict, r))
+        if feed.family == Family::Posted && is_guard_less(r) {
+            notes.push(NO_GUARD_NOTE.to_string());
+            let keys = if r.poster_addresses.is_empty() {
+                String::new()
+            } else {
+                format!(" {}", r.poster_addresses.join(", "))
+            };
+            (
+                Decision::Allow,
+                None,
+                format!(
+                    "{}: {} at block {}; no on-chain deviation check, attribution rests on the poster key(s){keys}; bundle {}",
+                    r.verdict,
+                    r.headline.as_deref().unwrap_or("no headline"),
+                    r.block,
+                    r.bundle_root
+                ),
+            )
+        } else {
+            (Decision::Allow, None, row_sentence(&r.verdict, r))
+        }
     } else {
         (Decision::Review, Some(reasons[0].clone()), texts[0].clone())
     };
@@ -682,7 +729,21 @@ mod tests {
             bundle_root: ROOT.into(),
             result_path: Some("bundles/x/result.json".into()),
             block: 25_884_405,
+            guard_kind: None,
+            poster_addresses: vec![],
         }
+    }
+
+    fn guard_less_row(liveness: &str, verdict: &str) -> CrossfootRow {
+        let mut r = row("centrifuge", verdict, Some("ATTRIBUTED"), Some(liveness));
+        r.product = Some("JTRSY".into());
+        r.guard_kind = Some("none".into());
+        r.poster_addresses = vec![
+            "0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec".into(),
+            "0x8d566adace57ee5dd2bf98953b804991d634211a".into(),
+        ];
+        r.headline = Some("146 rounds posted without an on-chain check".into());
+        r
     }
 
     fn consistent_row() -> CrossfootRow {
@@ -929,6 +990,67 @@ mod tests {
             out.reasons,
             vec!["SUBGRAPH_STALE", "ADMIN_GUARD_BYPASSED", "PLACEHOLDER"]
         );
+    }
+
+    /// 05 row 11a: a guard-less POSTED feed that is LIVE and CONSISTENT is
+    /// ALLOW with the mandatory note and the sentence naming the keys;
+    /// every other row stays as it is.
+    #[test]
+    fn guard_less_feed_allows_with_the_no_guard_note() {
+        let h = head();
+        let p = policy();
+        let posted = posted_feed();
+        let live = guard_less_row("LIVE", "CONSISTENT");
+        let out = decide(&inputs(&h, &p, &posted, Some(&live)));
+        assert_eq!(out.decision, Decision::Allow);
+        assert_eq!(out.reason, None);
+        assert!(out.reasons.is_empty());
+        assert_eq!(out.notes, vec![NO_GUARD_NOTE]);
+        assert_eq!(
+            out.reason_text,
+            format!("CONSISTENT: 146 rounds posted without an on-chain check at block 25884405; no on-chain deviation check, attribution rests on the poster key(s) 0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec, 0x8d566adace57ee5dd2bf98953b804991d634211a; bundle {ROOT}")
+        );
+
+        // The guard_kind alone marks the family when the path word is old.
+        let mut by_kind = guard_less_row("LIVE", "CONSISTENT");
+        by_kind.posting_path = Some("GUARDED".into());
+        by_kind.poster_addresses.clear();
+        let out = decide(&inputs(&h, &p, &posted, Some(&by_kind)));
+        assert_eq!(out.decision, Decision::Allow);
+        assert_eq!(out.notes, vec![NO_GUARD_NOTE]);
+        assert!(out
+            .reason_text
+            .contains("rests on the poster key(s); bundle"));
+
+        // Rows 7 and 8 are unchanged: STALE and INIT_ONLY stay REVIEW.
+        for word in ["STALE", "INIT_ONLY", "PLACEHOLDER"] {
+            let stale = guard_less_row(word, "SOURCE_STALE");
+            let out = decide(&inputs(&h, &p, &posted, Some(&stale)));
+            assert_eq!(out.decision, Decision::Review, "{word}");
+            assert_eq!(out.reason.as_deref(), Some(word));
+            assert!(out.notes.is_empty(), "{word}: the note is for ALLOW only");
+        }
+        let deviating = guard_less_row("LIVE", "INSUFFICIENT_WINDOW");
+        let out = decide(&inputs(&h, &p, &posted, Some(&deviating)));
+        assert_eq!(out.reason.as_deref(), Some("INSUFFICIENT_WINDOW"));
+
+        // Row 4 still wins: UNKNOWN rounds from the subgraph.
+        let mut i = inputs(&h, &p, &posted, Some(&live));
+        i.unknown_rounds = vec![UnknownRound {
+            round_id: "9".into(),
+            block: 25_800_000,
+            tx: "0xaa".into(),
+        }];
+        let out = decide(&i);
+        assert_eq!(out.reason.as_deref(), Some("PATH_NOT_ATTRIBUTABLE"));
+        assert!(out.notes.is_empty());
+
+        // A DERIVED feed never takes row 11a.
+        let derived = derived_feed();
+        let mut matched = match_row();
+        matched.guard_kind = Some("none".into());
+        let out = decide(&inputs(&h, &p, &derived, Some(&matched)));
+        assert!(out.notes.is_empty());
     }
 
     /// 05 R8: no code path serialises a third word.
