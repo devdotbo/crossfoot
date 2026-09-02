@@ -210,7 +210,8 @@ Verdicts and summaries:
   was found; `liveness` per R14; `verdict` in the shared vocabulary:
   `INPUT_GAP` for R2 failures, `OBSERVED_DEVIATION` when bypassed,
   `INSUFFICIENT_WINDOW` when `UNATTRIBUTED`, `SOURCE_STALE` when liveness
-  is not `LIVE` and no bypass exists, else `CONSISTENT`. `consumer_action`
+  is not `LIVE` and no bypass exists, else `CONSISTENT`. Families without
+  a guard use `ATTRIBUTED` in place of `GUARDED` (see the config format). `consumer_action`
   is `ALLOW` on `CONSISTENT`, otherwise `REVIEW`; `REFUSE` is never emitted
   because the finding does not prove the posted value wrong.
 - R17. The family summary counts feeds configured, replayed, derived and
@@ -297,7 +298,16 @@ Further config fields, added for the families beyond Midas
   answer (launch placeholder) gives the clamp no reference and is skipped.
 - `guard: null`: a family without an on-chain check. Readable feeds are
   `kind: "unguarded"`; every post after the first is an `UNGUARDED_POST`
-  with `classification: "no_guard"`; `summary.family` is `posted-setter`.
+  with `classification: "no_guard"`; `summary.family` is `posted-setter`;
+  `posting_path` is `ATTRIBUTED` (every round attributed to a known
+  poster, no guard existed to replay), never `GUARDED`, which is reserved
+  for a guard that was replayed and held. A clamp family keeps `GUARDED`
+  with `guard_kind: clamp` beside it. `feeds.json` rows carry
+  `guard_kind` (`max_deviation`, `clamp`, `reference`, `absolute_delta`,
+  `event_rules`, `none`) and `family_name` (the config's family, e.g.
+  `hashnote-usyc`), and their `headline` is worded per guard kind ("no
+  on-chain deviation check; N post(s) by K key(s), liveness LIVE" without
+  a guard).
 - `relays[]`: `{address, selector, calls_word}`. A round whose transaction
   went to a relay with that selector is attributed from the relay's
   `bytes[]` argument at head word `calls_word`: the k-th setter call in the
@@ -331,7 +341,54 @@ Further config fields, added for the families beyond Midas
   the decoder takes the timestamp from the data word when the fourth topic
   is absent. `latestRound()` falls back to the round id of
   `latestRoundData()` when the getter is missing.
+- `guard.kind: reference` with `reference` (a getter) and `bound_scale`
+  (OpenEden: `maxPriceDeviation()` in basis points, `closeNavPrice()` as
+  the reference): every round after the first reads the bound and the
+  reference at block minus one; the deviation is the absolute difference
+  over the mean of reference and value (`deviation_over_mean`), a checked
+  post over it is `GUARD_INCONSISTENT` with `rule: "reference_bound"`, an
+  unchecked post over it a `GUARD_BYPASS`. `reference_events` names the
+  checked and the unchecked reference setter's events (old and new in the
+  data words): an unchecked move is `UNGUARDED_REFERENCE_MOVE`, a checked
+  move over the bound at B1 is `GUARD_INCONSISTENT` with `rule:
+  "reference_move"`. The family summary carries `reference_moves` and
+  `unguarded_reference_moves`.
+- `guard.kind: absolute_delta` with `max_delta` (a getter, Superstate's
+  `maximumAcceptablePriceDelta()`): the cap is read at block minus one in
+  answer units and compared with the absolute move against the previous
+  round; over it is `GUARD_INCONSISTENT` with `rule: "absolute_delta"` on
+  the checked path and `GUARD_BYPASS` on the unchecked one. A setter with
+  `flag_arg` (the override flag's argument word) yields `OVERRIDE_FLAG_SET`
+  on every call that set it; the family summary carries `override_flags`.
+- `guard.kind: event_rules` with `rules` (Ondo OUSG: `max_move_bps`,
+  `relative_bps`, `relative_skip_bps`, `min_spacing_seconds`): no state is
+  read, every rule replays from the round's own fields (`old`, `ref_old`,
+  `ref_new`, `ref_old_round`, `ref_new_round`, declared under the round
+  event's `fields`) and the previous round's timestamp; a broken rule is
+  `GUARD_INCONSISTENT` naming the rules in `rule`. The bound in force is
+  `max_move_bps` as a percentage at 10^decimals.
+- `latest_round_from_events: true` takes the round count from the events
+  when the feed's own counter does not count every round (Superstate
+  counts effective checkpoints); without a Chainlink-shaped
+  `latestRoundData` the latest answer and time come from the last event.
+- `round_events[]` entries may be objects for events that are not the
+  AnswerUpdated shape: `{signature, round_id: {topic|data: n} |
+  "sequence", answer: {topic|data: n} | {event, field}, timestamp:
+  "block" | {topic|data: n}, fields: {name: {topic|data: n}}}`. A joined
+  answer is taken from the second event of the same transaction in log
+  order; `constructor_rounds` counts rounds written at construction
+  without an event, so round ids start after them and the count check
+  adds them. `bound_events.extra` lists further events after which the
+  guarded values are re-read either side (a bound setter's own event on a
+  non-proxy contract); `upgraded` and `initialized` may be empty. Empty
+  getter signatures in `reads` mean the family has no such getter.
 - `survey_line` per guard kind: the Midas sentence for `max_deviation`;
+  "N feeds replayed, B unchecked posts over the reference bound on M
+  feeds, R reference moves, U of them without the on-chain check" for
+  `reference`; "N feeds replayed, R rounds within the delta cap, O over
+  it, F override flags set, X failed posts" for `absolute_delta`; "N
+  feeds replayed, R rounds, B of them breaking a rule of the feed, X
+  failed posts" for `event_rules`;
   "N feeds replayed, K posts exactly on the clamp band on M feeds, C
   truncated on chain, F failed posts" for `clamp`; "N feeds replayed, R
   rounds posted without an on-chain check, F failed posts, L live" for no
@@ -418,6 +475,7 @@ the family; `--rpc-delay-ms` applies.
 | R16 | `feed_verdict_precedence` (offline, synthetic, every branch) |
 | R17, R19 | `family_replay_reproduces_the_survey_counts_offline` (offline, checked-in bundle under `cli/tests/fixtures/midas-25884405/`, replayed through the bundle-backed source of `03-bundle-verify.md` R6) |
 | families | `hashnote_usyc_replays_through_the_reporter_relay`, `backed_v2_reports_the_at_bound_rounds`, `centrifuge_share_prices_replay_through_the_hub_multicall_and_the_setup_trace` (`cli/tests/fixtures/centrifuge-25885541.tar.gz`: JTRSY and JAAA 146 rounds each, 145 by the manager key through Hub.multicall, one at pool setup resolved from the trace, last prices 1.114706862997801246 and 1.047512653622313284, both live, CONSISTENT, ALLOW) (offline, `cli/tests/fixtures/hashnote-25885541.tar.gz` and `backed-25885541.tar.gz` at block 25,885,541; the research page's facts: 503 USYC rounds by one key through the reporter, no guard, live; bNVDA rounds 37, 213 and 282 exactly on the 10 percent band, 0 truncated, ERNA, ERNX and bC3M stale since 2026-04-23) |
+| families | `hashnote_usyc_replays_through_the_reporter_relay`, `backed_v2_reports_the_at_bound_rounds`, `openeden_tbill_replays_the_reference_guard`, `ondo_ousg_replays_the_event_rules`, `superstate_ustb_replays_the_delta_cap` (offline, `cli/tests/fixtures/<family>-25885541.tar.gz`; the research page's facts: 503 USYC rounds by one key through the reporter, no guard, live; bNVDA rounds 37, 213 and 282 exactly on the 10 percent band, 0 truncated, ERNA, ERNX and bC3M stale since 2026-04-23; 1,158 TBILL rounds within 15 bps of the close NAV, 1,056 reference moves all bounded; 758 OUSG posts through Safes with no rule broken, largest move 6 bps; 433 USTB checkpoints within the 1.000000 cap, 2 failed launch calls, 0 override flags) |
 | R18 | `timeline_rows_are_in_round_order_and_carry_findings` (offline, fixture) |
 
 The fixture bundle is produced once during the event by

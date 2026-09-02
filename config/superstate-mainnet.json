@@ -1,0 +1,88 @@
+{
+  "family": "superstate-ustb",
+  "target": "superstate",
+  "chain_id": 1,
+  "explorer": {
+    "name": "eth.blockscout.com",
+    "api": "https://eth.blockscout.com/api",
+    "address_url": "https://eth.blockscout.com/address/",
+    "transaction_url": "https://eth.blockscout.com/tx/"
+  },
+  "mechanism": {
+    "description": "SuperstateOracle (USTB): an AggregatorV3-shaped oracle with 6 decimals whose latestRoundData extrapolates between the two newest effective checkpoints. addCheckpoint(uint64 timestamp, uint64 effectiveAt, uint128 navs, bool override) (owner only) requires the absolute NAV delta against the latest checkpoint to be at most maximumAcceptablePriceDelta (1.000000 USD, set at construction), strictly increasing timestamps and an effectiveAt at or after now; when the latest checkpoint is not yet effective the call reverts unless the override flag is true. addCheckpoints (batch) forces the flag true and was never called. The round id of latestRoundData counts effective checkpoints, so the round count comes from the NewCheckpoint events.",
+    "source": {
+      "repo": "verified on Etherscan",
+      "path": "SuperstateOracle (0xe4fa682f, solc 0.8.28)",
+      "note": "source read by the research teammate on 2026-09-02 (raw/superstate-ustb-uscc-oracle-rpc-2026-09-02.md); no implementation was verified by this adapter"
+    },
+    "reads": {
+      "description": "",
+      "decimals": "decimals()",
+      "latest_round": "",
+      "latest_round_data": "latestRoundData()",
+      "last_timestamp": ""
+    },
+    "guard": {
+      "kind": "absolute_delta",
+      "max_delta": "maximumAcceptablePriceDelta()"
+    },
+    "round_events": [
+      {
+        "signature": "NewCheckpoint(uint64,uint64,uint128)",
+        "round_id": "sequence",
+        "answer": {
+          "data": 2
+        },
+        "timestamp": "block",
+        "fields": {
+          "checkpoint_timestamp": {
+            "data": 0
+          },
+          "effective_at": {
+            "data": 1
+          }
+        }
+      }
+    ],
+    "constructor_rounds": 0,
+    "latest_round_from_events": true,
+    "setters": [
+      {
+        "signature": "addCheckpoint(uint64,uint64,uint128,bool)",
+        "path": "safe",
+        "value_arg": 2,
+        "flag_arg": 3
+      }
+    ],
+    "relays": [],
+    "other_calls": [
+      {
+        "signature": "addCheckpoints((uint64,uint64,uint128)[])",
+        "note": "batch, forces the override flag; never called"
+      },
+      {
+        "signature": "setMaximumAcceptablePriceDelta(uint256)",
+        "note": "owner, sets the cap"
+      }
+    ],
+    "bound_events": {
+      "upgraded": "",
+      "initialized": "",
+      "initialized_min_version": 2,
+      "extra": [
+        "SetMaximumAcceptablePriceDelta(uint256,uint256)"
+      ]
+    },
+    "spacing_rule": null,
+    "verified_implementations": []
+  },
+  "feeds": [
+    {
+      "product": "USTB",
+      "key": "oracle",
+      "address": "0xe4fa682f94610ccd170680cc3b045d77d9e528a8",
+      "decimals": 6,
+      "kind": "bounded"
+    }
+  ]
+}

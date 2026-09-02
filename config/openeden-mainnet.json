@@ -1,0 +1,93 @@
+{
+  "family": "openeden-tbill",
+  "target": "openeden",
+  "chain_id": 1,
+  "explorer": {
+    "name": "eth.blockscout.com",
+    "api": "https://eth.blockscout.com/api",
+    "address_url": "https://eth.blockscout.com/address/",
+    "transaction_url": "https://eth.blockscout.com/tx/"
+  },
+  "mechanism": {
+    "description": "TBillPriceOracle (OpenEden): an AggregatorV3-shaped oracle with 8 decimals, not a proxy. updatePrice(uint256) (admin or operator) requires the deviation of the new price against closeNavPrice, measured as the absolute difference over the mean of the two, to be at most maxPriceDeviation basis points (15, DEVIATION_FACTOR 10000), then emits UpdatePrice(old, new) and RoundUpdated(roundId). The reference closeNavPrice is moved by updateCloseNavPrice(uint256) under the same bound, or by updateCloseNavPriceManually(uint256) (admin, no check). updateMaxPriceDeviation(uint256) (admin) has no bound. Round 1 was written at construction without an event.",
+    "source": {
+      "repo": "verified on Etherscan",
+      "path": "contracts/TBillPriceOracle.sol (0xCe9a6626, solc 0.8.9)",
+      "note": "source read by the research teammate on 2026-09-02 (raw/openeden-tbill-oracle-usdo-rpc-2026-09-02.md); no implementation was verified by this adapter"
+    },
+    "reads": {
+      "description": "",
+      "decimals": "decimals()",
+      "latest_round": "latestRound()",
+      "latest_round_data": "latestRoundData()",
+      "last_timestamp": ""
+    },
+    "guard": {
+      "kind": "reference",
+      "max_deviation": "maxPriceDeviation()",
+      "reference": "closeNavPrice()",
+      "bound_scale": 10000
+    },
+    "round_events": [
+      {
+        "signature": "RoundUpdated(uint80)",
+        "round_id": {
+          "topic": 1
+        },
+        "answer": {
+          "event": "UpdatePrice(uint256,uint256)",
+          "field": {
+            "data": 1
+          }
+        },
+        "timestamp": "block"
+      }
+    ],
+    "constructor_rounds": 1,
+    "reference_events": {
+      "checked": "UpdateCloseNavPrice(uint256,uint256)",
+      "unchecked": "UpdateCloseNavPriceManually(uint256,uint256)"
+    },
+    "setters": [
+      {
+        "signature": "updatePrice(uint256)",
+        "path": "safe",
+        "value_arg": 0
+      }
+    ],
+    "relays": [],
+    "other_calls": [
+      {
+        "signature": "updateCloseNavPrice(uint256)",
+        "note": "moves the reference under the bound"
+      },
+      {
+        "signature": "updateCloseNavPriceManually(uint256)",
+        "note": "moves the reference without the check (admin)"
+      },
+      {
+        "signature": "updateMaxPriceDeviation(uint256)",
+        "note": "sets the bound (admin)"
+      }
+    ],
+    "bound_events": {
+      "upgraded": "",
+      "initialized": "",
+      "initialized_min_version": 2,
+      "extra": [
+        "UpdateMaxPriceDeviation(uint256,uint256)"
+      ]
+    },
+    "spacing_rule": null,
+    "verified_implementations": []
+  },
+  "feeds": [
+    {
+      "product": "TBILL",
+      "key": "priceOracle",
+      "address": "0xCe9a6626Eb99eaeA829D7fA613d5D0A2eaE45F40",
+      "decimals": 8,
+      "kind": "bounded"
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "family": "ondo-ousg",
+  "target": "ondo",
+  "chain_id": 1,
+  "explorer": {
+    "name": "eth.blockscout.com",
+    "api": "https://eth.blockscout.com/api",
+    "address_url": "https://eth.blockscout.com/address/",
+    "transaction_url": "https://eth.blockscout.com/tx/"
+  },
+  "mechanism": {
+    "description": "RWAOracleExternalComparisonCheck (Ondo, OUSG): setPrice(int256) under SETTER_ROLE reverts unless the Chainlink SHV/USD feed was updated within 25 hours with a new round id, at least 23 hours passed since the previous post, the OUSG change is at most 200 bps, and, when SHV moved at most 274 bps, the OUSG change differs from the SHV change by at most 74 bps (otherwise ChainlinkPriceIgnored is emitted). All bounds are constants of the code; there is no unchecked setter on this contract. The event carries the previous and new SHV answers and round ids and the old and new OUSG price, so every rule except the 25 hour Chainlink freshness replays from logs; the freshness rule needs the SHV round timestamps and is not replayed here.",
+    "source": {
+      "repo": "verified on Etherscan",
+      "path": "RWAOracleExternalComparisonCheck (0x0502c5ae, solc 0.8.16)",
+      "note": "source read by the research teammate on 2026-09-02 (raw/ondo-ousg-oracle-rpc-2026-09-02.md); no implementation was verified by this adapter"
+    },
+    "reads": {
+      "description": "description()",
+      "decimals": "",
+      "latest_round": "",
+      "latest_round_data": "",
+      "last_timestamp": ""
+    },
+    "guard": {
+      "kind": "event_rules",
+      "rules": {
+        "max_move_bps": 200,
+        "relative_bps": 74,
+        "relative_skip_bps": 274,
+        "min_spacing_seconds": 82800
+      }
+    },
+    "round_events": [
+      {
+        "signature": "RWAExternalComparisonCheckPriceSet(int256,uint80,int256,uint80,int256,int256)",
+        "round_id": "sequence",
+        "answer": {
+          "data": 3
+        },
+        "timestamp": "block",
+        "fields": {
+          "ref_old": {
+            "data": 0
+          },
+          "ref_new": {
+            "data": 1
+          },
+          "old": {
+            "data": 2
+          },
+          "ref_old_round": {
+            "topic": 1
+          },
+          "ref_new_round": {
+            "topic": 2
+          }
+        }
+      }
+    ],
+    "constructor_rounds": 0,
+    "latest_round_from_events": true,
+    "setters": [
+      {
+        "signature": "setPrice(int256)",
+        "path": "safe",
+        "value_arg": 0
+      }
+    ],
+    "relays": [],
+    "other_calls": [],
+    "bound_events": {
+      "upgraded": "",
+      "initialized": "",
+      "initialized_min_version": 2,
+      "extra": []
+    },
+    "spacing_rule": null,
+    "verified_implementations": []
+  },
+  "feeds": [
+    {
+      "product": "OUSG",
+      "key": "oracle",
+      "address": "0x0502c5ae08E7CD64fe1AEDA7D6e229413eCC6abe",
+      "decimals": 18,
+      "kind": "bounded"
+    }
+  ]
+}

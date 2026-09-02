@@ -128,7 +128,7 @@ fn hashnote_usyc_replays_through_the_reporter_relay() {
     assert_eq!(usyc["latest_round"], 503);
     assert_eq!(usyc["verdict"], "CONSISTENT");
     assert_eq!(usyc["consumer_action"], "ALLOW");
-    assert_eq!(usyc["posting_path"], "GUARDED");
+    assert_eq!(usyc["posting_path"], "ATTRIBUTED");
     assert_eq!(
         usyc["poster_addresses"],
         serde_json::json!(["0xdbe01f447040f78ccbc8dfd101bec1a2c21f800d"])
@@ -333,7 +333,7 @@ fn centrifuge_share_prices_replay_through_the_hub_multicall_and_the_setup_trace(
         assert_eq!(f["latest_answer"], last_price, "{product}");
         assert_eq!(f["last_post_utc"], "2026-08-31T12:00:00Z", "{product}");
         assert_eq!(f["verdict"], "CONSISTENT", "{product}");
-        assert_eq!(f["posting_path"], "GUARDED", "{product}");
+        assert_eq!(f["posting_path"], "ATTRIBUTED", "{product}");
         assert_eq!(f["liveness"], "LIVE", "{product}");
         assert_eq!(f["consumer_action"], "ALLOW", "{product}");
         assert_eq!(f["rounds_total"], 146, "{product}");
@@ -388,4 +388,231 @@ fn centrifuge_share_prices_replay_through_the_hub_multicall_and_the_setup_trace(
         assert!(rounds.iter().all(|r| r["path"] == "raw"));
     }
     assert!(replay.fixture.join("bundle.sha256").is_file());
+}
+
+/// OpenEden TBILL, class A with a reference guard: 1,158 rounds since
+/// 2023-10 (round 1 from the constructor), every round within 15 basis
+/// points of the close NAV read at block minus one, 1,056 reference moves
+/// all through the bounded setter, three operator keys, no failed post,
+/// live.
+#[test]
+fn openeden_tbill_replays_the_reference_guard() {
+    let replay = replay("openeden-25885541");
+    let result = &replay.result;
+    assert_eq!(result["target"], "openeden");
+    assert_eq!(result["summary"]["family"], "guarded-setter");
+    assert_eq!(result["family"]["mechanism"]["guard"]["kind"], "reference");
+    let s = &result["family_summary"];
+    assert_eq!(s["feeds_replayed"], 1);
+    assert_eq!(s["rounds_total"], 1158);
+    assert_eq!(s["posts_external"]["safe"], 1158);
+    assert_eq!(s["posts_total"]["unattributed"], 0);
+    assert_eq!(s["failed_setters"], 0);
+    assert_eq!(s["bypass_posts_total"], 0);
+    assert_eq!(s["attribution_gaps"], 0);
+    assert_eq!(s["reference_moves"], 1056);
+    assert_eq!(s["unguarded_reference_moves"], 0);
+    assert_eq!(s["findings_by_kind"].get("GUARD_INCONSISTENT"), None);
+    assert_eq!(s["bound_changes"], 0);
+    assert_eq!(s["liveness"]["LIVE"], 1);
+    assert_eq!(s["guard_kind"], "reference");
+    assert_eq!(
+        s["survey_line"],
+        "1 feeds replayed, 0 unchecked posts over the reference bound on 0 feeds, 1056 reference moves, 0 of them without the on-chain check"
+    );
+    let tbill = feed(result, "TBILL");
+    assert_eq!(tbill["kind"], "bounded");
+    assert_eq!(tbill["latest_round"], 1159);
+    assert_eq!(tbill["rounds_total"], 1158);
+    assert_eq!(
+        tbill["bound_at_block"], "15000000",
+        "15 basis points at the 1e8 percent scale"
+    );
+    assert_eq!(tbill["verdict"], "CONSISTENT");
+    assert_eq!(tbill["consumer_action"], "ALLOW");
+    assert_eq!(tbill["posting_path"], "GUARDED");
+    assert_eq!(tbill["liveness"], "LIVE");
+    assert_eq!(tbill["poster_addresses"].as_array().unwrap().len(), 3);
+    assert_eq!(tbill["reference_moves"], 1056);
+    assert!(tbill["findings"].as_array().unwrap().is_empty());
+    let timeline: Value = serde_json::from_str(
+        &std::fs::read_to_string(
+            replay
+                .out_bundle
+                .join(tbill["timeline_file"].as_str().unwrap()),
+        )
+        .unwrap(),
+    )
+    .unwrap();
+    let rounds = timeline["rounds"].as_array().unwrap();
+    assert_eq!(rounds.len(), 1158);
+    assert_eq!(
+        rounds[0]["round_id"], 2,
+        "round 1 was written at construction"
+    );
+    assert_eq!(rounds[1157]["round_id"], 1159);
+    assert_eq!(rounds[1157]["answer"], "115496284");
+    assert_eq!(rounds[1157]["block"], 25_878_750);
+    // Every round after the first carries its deviation against the
+    // reference and the bound in force, all within the bound.
+    let one: i128 = 100_000_000;
+    let _ = one;
+    for row in &rounds[1..] {
+        let dev: i128 = row["deviation_in_force"].as_str().unwrap().parse().unwrap();
+        let bound: i128 = row["bound_in_force"].as_str().unwrap().parse().unwrap();
+        assert!(
+            dev <= bound,
+            "round {} over the reference bound",
+            row["round_id"]
+        );
+        assert_eq!(bound, 15_000_000);
+    }
+}
+
+/// Ondo OUSG, class A with rules that replay from the event fields: 758
+/// posts since 2023-08, every one through a Safe, no rule broken (largest
+/// move 6 bps, largest difference to the SHV move 46 bps, minimum gap 23
+/// hours), no failed post, live.
+#[test]
+fn ondo_ousg_replays_the_event_rules() {
+    let replay = replay("ondo-25885541");
+    let result = &replay.result;
+    assert_eq!(result["target"], "ondo");
+    assert_eq!(result["summary"]["family"], "guarded-setter");
+    assert_eq!(
+        result["family"]["mechanism"]["guard"]["kind"],
+        "event_rules"
+    );
+    let s = &result["family_summary"];
+    assert_eq!(s["feeds_replayed"], 1);
+    // 839 posts since the first PriceSet at block 17,131,761 (the survey
+    // counted 758 from block 18,000,000); 13 of them came through a
+    // MultiSendCallOnly batch of Safe executions, the rest through a Safe.
+    assert_eq!(s["rounds_total"], 839);
+    assert_eq!(s["posts_internal"]["safe"], 839);
+    assert_eq!(s["posts_external"]["safe"], 0);
+    assert_eq!(s["posts_total"]["unattributed"], 0);
+    assert_eq!(s["failed_setters"], 0);
+    assert_eq!(s["bypass_posts_total"], 0);
+    assert_eq!(s["attribution_gaps"], 0);
+    assert_eq!(s["findings_by_kind"].get("GUARD_INCONSISTENT"), None);
+    assert_eq!(s["liveness"]["LIVE"], 1);
+    assert_eq!(s["guard_kind"], "event_rules");
+    let ousg = feed(result, "OUSG");
+    assert_eq!(ousg["decimals"], 18);
+    assert_eq!(ousg["latest_round"], 839);
+    assert_eq!(
+        ousg["bound_at_block"], "2000000000000000000",
+        "200 bps at the 1e18 percent scale"
+    );
+    assert_eq!(ousg["verdict"], "CONSISTENT");
+    assert_eq!(ousg["consumer_action"], "ALLOW");
+    assert_eq!(ousg["posting_path"], "GUARDED");
+    assert!(ousg["findings"].as_array().unwrap().is_empty());
+    let timeline: Value = serde_json::from_str(
+        &std::fs::read_to_string(
+            replay
+                .out_bundle
+                .join(ousg["timeline_file"].as_str().unwrap()),
+        )
+        .unwrap(),
+    )
+    .unwrap();
+    let rounds = timeline["rounds"].as_array().unwrap();
+    assert_eq!(rounds.len(), 839);
+    assert_eq!(rounds[0]["answer"], "100909571830000000000");
+    assert_eq!(rounds[838]["answer"], "116422609000000000000");
+    assert_eq!(rounds[838]["block"], 25_885_288);
+    let batched = ousg["findings"].as_array().unwrap().len();
+    assert_eq!(batched, 0, "no finding on the control feed");
+    let max_move: i128 = rounds[1..]
+        .iter()
+        .map(|r| {
+            r["deviation_in_force"]
+                .as_str()
+                .unwrap()
+                .parse::<i128>()
+                .unwrap()
+        })
+        .max()
+        .unwrap();
+    assert_eq!(
+        max_move,
+        8 * 10i128.pow(18) / 100,
+        "the largest move over the whole history is 8 bps (6 from block 18,000,000)"
+    );
+}
+
+/// Superstate USTB, class A with an absolute delta cap: 433 checkpoints
+/// since 2024-12 by the owner key, two failed calls at launch, no override
+/// flag ever set, every delta within the 1.000000 USD cap, live.
+#[test]
+fn superstate_ustb_replays_the_delta_cap() {
+    let replay = replay("superstate-25885541");
+    let result = &replay.result;
+    assert_eq!(result["target"], "superstate");
+    assert_eq!(result["summary"]["family"], "guarded-setter");
+    assert_eq!(
+        result["family"]["mechanism"]["guard"]["kind"],
+        "absolute_delta"
+    );
+    let s = &result["family_summary"];
+    assert_eq!(s["feeds_replayed"], 1);
+    assert_eq!(s["rounds_total"], 433);
+    assert_eq!(s["posts_external"]["safe"], 433);
+    assert_eq!(s["posts_total"]["unattributed"], 0);
+    assert_eq!(s["failed_setters"], 2);
+    assert_eq!(s["override_flags"], 0);
+    assert_eq!(s["bypass_posts_total"], 0);
+    assert_eq!(s["findings_by_kind"].get("GUARD_INCONSISTENT"), None);
+    assert_eq!(s["bound_changes"], 0);
+    assert_eq!(s["liveness"]["LIVE"], 1);
+    assert_eq!(s["guard_kind"], "absolute_delta");
+    let ustb = feed(result, "USTB");
+    assert_eq!(ustb["decimals"], 6);
+    assert_eq!(ustb["latest_round"], 433);
+    assert_eq!(ustb["bound_at_block"], "1000000");
+    assert_eq!(ustb["verdict"], "CONSISTENT");
+    assert_eq!(ustb["posting_path"], "GUARDED");
+    assert_eq!(
+        ustb["poster_addresses"],
+        serde_json::json!(["0x4b1df64357a5d484563c9b7c16a80ed8b8fb1395"])
+    );
+    let failed: Vec<u64> = ustb["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|f| f["kind"] == "FAILED_SETTER")
+        .map(|f| f["block"].as_u64().unwrap())
+        .collect();
+    assert_eq!(failed, vec![21_344_250, 21_374_225]);
+    let timeline: Value = serde_json::from_str(
+        &std::fs::read_to_string(
+            replay
+                .out_bundle
+                .join(ustb["timeline_file"].as_str().unwrap()),
+        )
+        .unwrap(),
+    )
+    .unwrap();
+    let rounds = timeline["rounds"].as_array().unwrap();
+    assert_eq!(rounds.len(), 433);
+    assert_eq!(rounds[0]["answer"], "10481481");
+    assert_eq!(rounds[432]["answer"], "11197244");
+    let max_delta: i128 = rounds[1..]
+        .iter()
+        .map(|r| {
+            r["deviation_in_force"]
+                .as_str()
+                .unwrap()
+                .parse::<i128>()
+                .unwrap()
+        })
+        .max()
+        .unwrap();
+    assert_eq!(
+        max_delta, 4981,
+        "the largest consecutive delta of the survey"
+    );
+    assert!(rounds[1..].iter().all(|r| r["bound_in_force"] == "1000000"));
 }

@@ -99,6 +99,19 @@ Crossfoot writes nothing to any chain.
   finding vocabulary: `GUARD_BYPASS` and `UNGUARDED_POST` under a
   deviation guard, `GUARD_AT_BOUND` and `GUARD_CLAMPED` under a clamp,
   `UNGUARDED_POST` with `classification: no_guard` without a guard.
+  a 10 percent clamp instead of a revert), `openeden` (the TBILL price
+  oracle, a 15 basis point guard against a close NAV the operator moves
+  minutes earlier), `ondo` (the OUSG oracle, whose rules replay from the
+  event's own fields), `superstate` (the USTB oracle, an absolute delta
+  cap per checkpoint with an override flag). The guard kind decides the finding vocabulary:
+  `GUARD_BYPASS` and `UNGUARDED_POST` under a deviation guard,
+  `GUARD_AT_BOUND` and `GUARD_CLAMPED` under a clamp, `UNGUARDED_POST`
+  with `classification: no_guard` without a guard,
+  `UNGUARDED_REFERENCE_MOVE` under a reference guard, and
+  `OVERRIDE_FLAG_SET` where a setter carries an override flag. The
+  posting path of a feed without a guard is `ATTRIBUTED`, never
+  `GUARDED`; `feeds.json` rows carry `guard_kind` and `family_name` so a
+  reader can tell the families apart.
 
 This README states no results for any target. Results live in bundles.
 
@@ -207,6 +220,9 @@ crossfoot run midas --block 25884405 --feed mRE7 --offline
 crossfoot run family --block 25885541 --config config/hashnote-mainnet.json
 crossfoot run family --block 25885541 --config config/backed-mainnet.json
 crossfoot run family --block 25885541 --config config/centrifuge-mainnet.json --trace-endpoint <archive url with traces>
+crossfoot run family --block 25885541 --config config/openeden-mainnet.json
+crossfoot run family --block 25885541 --config config/ondo-mainnet.json
+crossfoot run family --block 25885541 --config config/superstate-mainnet.json
 ```
 
 Prints the verdict, the summary headline, the result and bundle paths, the
