@@ -9,9 +9,29 @@ query WindowFindings($block: Int!, $since: BigInt!, $resultBlock: BigInt!) {
   }
   overBound: rounds(
     block: { number: $block }
-    where: { path: UNCHECKED, first: false, blockTimestamp_gte: $since }
-    first: 100
+    where: { path: UNCHECKED, first: false, overBound: true, blockTimestamp_gte: $since }
+    first: 1000
     orderBy: block
+  ) {
+    feed { id product }
+    roundId
+    answer
+    previousAnswer
+    deviationFromPrevious
+    boundAtPost
+    overBound
+    selector
+    poster
+    tx
+    block
+    blockTimestamp
+  }
+  unchecked: rounds(
+    block: { number: $block }
+    where: { path: UNCHECKED, first: false, blockTimestamp_gte: $since }
+    first: 1000
+    orderBy: block
+    orderDirection: desc
   ) {
     feed { id product }
     roundId

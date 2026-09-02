@@ -615,7 +615,27 @@ fn parse_window(data: &Value) -> Result<WindowFindings, String> {
         bound_changes: BTreeMap::new(),
         rate_changes: BTreeMap::new(),
     };
-    for round in list("overBound")? {
+    // The over-bound rounds (small, complete) and the newest unchecked
+    // rounds within the bound (capped at 1000, newest first), merged per
+    // feed and deduplicated by transaction and round id.
+    let mut seen: BTreeSet<(String, String)> = BTreeSet::new();
+    let unchecked_rows: Vec<&Value> = list("overBound")?
+        .iter()
+        .chain(
+            data.get("unchecked")
+                .and_then(Value::as_array)
+                .into_iter()
+                .flatten(),
+        )
+        .collect();
+    for round in unchecked_rows {
+        let key = (
+            str_field(round, "tx").unwrap_or_default().to_lowercase(),
+            str_field(round, "roundId").unwrap_or_default(),
+        );
+        if !seen.insert(key) {
+            continue;
+        }
         findings
             .unchecked
             .entry(feed_id_of(round))
@@ -1233,13 +1253,18 @@ mod tests {
     }
 
     fn fixture_dir() -> PathBuf {
-        Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/consume-fixture-v1")
+        Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/consume-QmPm4RhwubryZFgcrXmhEEAxB3eTkpKCevUjbA9vg3kGgh")
     }
 
-    const FIXTURE_NOW: i64 = 1_788_289_368;
-    const FIXTURE_BLOCK: u64 = 25_884_405;
-    const FIXTURE_DEPLOYMENT: &str = "QmRaeyYsGxJcxVXnAvGEBbvFpSEZkJCa9rUM5dAemwWaxD";
-    const FIXTURE_DIGEST: &str = "30297e40e0d0726b2eb69a623a5a088d81227dbf2a7223ba3b732d091709b74e";
+    /// The live recording from Studio v0.0.5 at its head (fixture README).
+    const FIXTURE_NOW: i64 = 1_788_321_647;
+    const FIXTURE_BLOCK: u64 = 25_887_077;
+    const FIXTURE_BLOCK_TIMESTAMP: i64 = 1788321635;
+    const FIXTURE_FEEDS: usize = 73;
+    const FIXTURE_UNINDEXED: usize = 9;
+    const FIXTURE_DEPLOYMENT: &str = "QmPm4RhwubryZFgcrXmhEEAxB3eTkpKCevUjbA9vg3kGgh";
+    const FIXTURE_DIGEST: &str = "151c718a5c41700eb03bfbd838e552d7caad16cd326f364eabb5271fc6b5c492";
     const MRE7: &str = "0x0a2a51f2f206447de3e3a80fcf92240244722395";
     const SVZCHF: &str = "0xe5f130253ff137f9917c0107659a4c5262abf6b0";
 
@@ -1287,7 +1312,7 @@ mod tests {
             assert_eq!(e["gates"]["max_seconds_since_last_post"], 604_800);
             assert_eq!(e["gates"]["max_unchecked_deviation_percent"], "5");
         }
-        assert_eq!(output["header"]["allow"], 11);
+        assert_eq!(output["header"]["allow"], 16);
         // Without a policy the field is null and nothing else changes.
         let mut opts = fixture_opts(&temp("no-policy"));
         opts.policy = Some(PathBuf::from("/nonexistent/policy.json"));
@@ -1548,8 +1573,8 @@ mod tests {
         let mut opts = fixture_opts(&out);
         opts.now = Some(FIXTURE_NOW + 901);
         let outcome = run_with_key(&opts, None).unwrap();
-        assert_eq!(outcome.header.decided, 61);
-        assert_eq!(outcome.header.review, 61);
+        assert_eq!(outcome.header.decided, FIXTURE_FEEDS);
+        assert_eq!(outcome.header.review, FIXTURE_FEEDS);
         assert_eq!(outcome.header.allow, 0);
         assert!(outcome
             .rows
@@ -1734,7 +1759,7 @@ mod tests {
             assert_eq!(p["subgraph"]["deployment"], FIXTURE_DEPLOYMENT);
             assert_eq!(p["subgraph"]["deployment_digest"], FIXTURE_DIGEST);
             assert_eq!(p["subgraph"]["block"]["number"], FIXTURE_BLOCK);
-            assert_eq!(p["subgraph"]["block"]["timestamp"], FIXTURE_NOW);
+            assert_eq!(p["subgraph"]["block"]["timestamp"], FIXTURE_BLOCK_TIMESTAMP);
             assert_eq!(p["now_unix"], FIXTURE_NOW);
             for key in [
                 "window_days",
@@ -1769,7 +1794,7 @@ mod tests {
     #[test]
     fn record_sha256_excludes_itself() {
         let outcome = run_with_key(&fixture_opts(&temp("record-sha")), None).unwrap();
-        assert_eq!(outcome.records.len(), 61);
+        assert_eq!(outcome.records.len(), FIXTURE_FEEDS);
         let output = read_output(&outcome);
         for record in &outcome.records {
             let stored = record.record_sha256.clone().expect("hash set");
@@ -1816,7 +1841,7 @@ mod tests {
         let mut opts = fixture_opts(&temp("no-socket"));
         opts.subgraph = Some("http://127.0.0.1:9/nothing-listens-here".into());
         let outcome = run_with_key(&opts, Some("secret".into())).unwrap();
-        assert_eq!(outcome.header.decided, 61);
+        assert_eq!(outcome.header.decided, FIXTURE_FEEDS);
         let output = read_output(&outcome);
         assert_eq!(
             record_for(&output, MRE7)["provenance"]["subgraph"]["source"],
@@ -1833,10 +1858,14 @@ mod tests {
         let expected_path = fixture_dir().join("expected-decisions.json");
         let mut expected: Value =
             serde_json::from_str(&fs::read_to_string(&expected_path).unwrap()).unwrap();
+        // The expectation was recorded from the network; the replay differs
+        // only in the build identity, the endpoint and the source word.
         for output in [&mut actual, &mut expected] {
             for record in output["decisions"].as_array_mut().unwrap() {
                 record["agent"]["git_commit"] = json!("<build>");
                 record["record_sha256"] = json!("<build>");
+                record["provenance"]["subgraph"]["endpoint"] = json!("<endpoint>");
+                record["provenance"]["subgraph"]["source"] = json!("<source>");
             }
         }
         assert_eq!(
@@ -1927,14 +1956,23 @@ mod tests {
             bypassed >= 14,
             "{bypassed} feeds REVIEW for ADMIN_GUARD_BYPASSED"
         );
-        assert_eq!(output["header"]["decided"], 61);
+        assert_eq!(output["header"]["decided"], FIXTURE_FEEDS);
         assert_eq!(
             output["header"]["allow"].as_u64().unwrap()
                 + output["header"]["review"].as_u64().unwrap(),
-            61
+            FIXTURE_FEEDS as u64
         );
         assert_eq!(output["header"]["wrappers"].as_array().unwrap().len(), 6);
-        assert_eq!(output["header"]["unindexed"], json!([]));
+        // Families the subgraph does not index (Centrifuge, Sky, sUSDe,
+        // Tectonic on Cronos, Chainlink NAV proxies) are listed, not decided.
+        assert_eq!(
+            output["header"]["unindexed"].as_array().unwrap().len(),
+            FIXTURE_UNINDEXED
+        );
+        assert!(output["header"]["unindexed"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("0x14f753940720c1fa4247cd464c7ea28c806d123f")));
         // Feeds are sorted by address.
         let addresses: Vec<&str> = output["decisions"]
             .as_array()
@@ -2001,7 +2039,7 @@ mod tests {
         assert!(outcome
             .rows
             .iter()
-            .any(|(label, d, _)| label == "svZCHF" && *d == Decision::Allow));
+            .any(|(label, d, _)| label == "svZCHF.savings" && *d == Decision::Allow));
     }
 
     /// 05 R14 live: 61 decisions from the Studio endpoint, deployment equal
@@ -2016,7 +2054,7 @@ mod tests {
         opts.now = None;
         opts.block = Some(FIXTURE_BLOCK);
         let outcome = run(&opts).unwrap();
-        assert_eq!(outcome.header.decided, 61);
+        assert_eq!(outcome.header.decided, FIXTURE_FEEDS);
         let deployment_md = fs::read_to_string(repo_root().join("subgraph/DEPLOYMENT.md")).unwrap();
         assert!(
             deployment_md.contains(&outcome.deployment),
