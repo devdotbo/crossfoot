@@ -57,7 +57,7 @@ multicall, no guard), OpenEden TBILL (reference guard of 15 basis points),
 Ondo OUSG (rules replayed from the event's fields), Superstate USTB
 (absolute delta cap per checkpoint with an override flag); exact
 recomputation from contractual terms: Frankencoin svZCHF, Ethena sUSDe, Sky
-sUSDS, sDAI and stUSDS.
+sUSDS, sDAI and stUSDS, Ondo USDY, Frax sfrxUSD.
 
 - `svzchf`, the Frankencoin savings vault. Full recomputation from
   contractual terms. The administered rate path is rebuilt from the savings
@@ -88,6 +88,23 @@ sUSDS, sDAI and stUSDS.
   legitimate and are recorded, not judged. Demo window `--window demo`
   (blocks 23264565 to 25885408). Specification:
   [`docs/specs/09-derived-targets.md`](docs/specs/09-derived-targets.md).
+- `usdy`, the Ondo USDY oracle (RWADynamicOracle). Full recomputation:
+  `getPrice()` at both pinned blocks is derived from the stored monthly
+  ranges with the contract's own formula (MakerDAO rpow over the daily
+  rate, rounded to eight decimals) and compared to the wei, and every
+  stored close is checked against the derived close of the range before it.
+  Every range set in the window is attributed to the transaction and the
+  SETTER_ROLE holder that made it, with setRange's rule replayed; the daily
+  rate is one key's choice and is recorded, not judged. Demo window
+  `--window demo` (blocks 23264565 to 25885411).
+- `frax`, the Frax sfrxUSD vault. Full recomputation: `pricePerShare()`,
+  `totalAssets()` and `convertToAssets(1e18)` are recomputed from the
+  stored anchor with the deployed PRBMath exp (the 64 magic factors of the
+  verified implementation) and compared to the wei. Every setter event in
+  the window (rate changes, level rewrites, timelock transfers, upgrades)
+  is attributed to its transaction; the rate has no on-chain bound and the
+  timelock address, a Safe, can rewrite the price level, which the record
+  states. Demo window `--window demo` (blocks 24320956 to 25885408).
 - `mtbill`, Midas mTBILL. Consistency checks, no recomputation. The
   underlying portfolio is not observable, so the NAV is never recomputed
   and the result carries `nav_recomputation: INPUT_GAP` on every run. The
@@ -232,6 +249,8 @@ crossfoot run svzchf --window demo --from-bundle cli/tests/fixtures/svzchf-demo-
 crossfoot run susde --window demo
 crossfoot run susde --window demo --from-bundle cli/tests/fixtures/susde-demo-25800000-25885407
 crossfoot run sky --window demo
+crossfoot run usdy --window demo
+crossfoot run frax --window demo
 crossfoot run mtbill --baseline-block 25598000 --block 25850000
 crossfoot run midas --block 25884405 --config config/midas-mainnet.json
 crossfoot run midas --block 25884405 --feed mRE7 --offline

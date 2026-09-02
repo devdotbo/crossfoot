@@ -624,6 +624,8 @@ fn check_class_words(result: &Value) -> &'static str {
     }
     match result.get("target").and_then(Value::as_str) {
         Some("svzchf") => "Full recomputation, zero tolerance. Every compared value is recomputed from public inputs and must match the chain to the wei.",
+        Some("usdy") => "Full recomputation, zero tolerance. The oracle's getPrice() at both pinned blocks is derived from the stored ranges with the contract's own formula (MakerDAO rpow over the daily rate, rounded to eight decimals) and must match the chain to the wei; every stored close is checked against the derived close of the range before it. Every range set in the window is attributed to the transaction and role holder that made it; the daily rate of a range is one key's choice and is recorded, not judged.",
+        Some("frax") => "Full recomputation, zero tolerance. pricePerShare(), totalAssets() and convertToAssets(1e18) are recomputed from the stored anchor with the deployed PRBMath exp and must match the chain to the wei. Every setter event in the window is attributed to its transaction; the rate has no on-chain bound and the timelock address can rewrite the price level, which the record states.",
         Some("sky") => "Full recomputation, zero tolerance. convertToAssets(1e18) of sUSDS, sDAI and stUSDS is recomputed from (rate, chi, rho) and the block timestamp with Sky's rpow and must match the chain to the wei. Every rate change of the window is attributed to the bounded setter (SPBEAM or the stUSDS rate setter, with its own bounds, step and cooldown replayed) or to the governance spell path; both are legitimate paths and are recorded, not judged.",
         Some("susde") => "Full recomputation, zero tolerance. The unvested reward, totalAssets and convertToAssets(1e18) are recomputed from five state reads at the pinned block and must match the chain to the wei. The reward posts of the window are attributed to the transaction and path that made them; their size is a role holder's choice and is reported, not judged.",
         Some("mtbill") => "Consistency bundle. The NAV itself is INPUT_GAP: the underlying portfolio is not observable, so it is not recomputed here. Everything below checks the issuer's own contractual and on-chain rules against itself.",
@@ -1059,6 +1061,106 @@ fn sky_body(run: &Run) -> String {
                 escape(&rule),
                 escape(&s("transaction_hash"))
             ));
+        }
+        html.push_str("</table>\n");
+    }
+    html
+}
+
+/// The page body of the USDY and sfrxUSD targets: the residual table and
+/// the attributed setter events of the window from the timeline file.
+fn derived_body(run: &Run, target: &str) -> String {
+    let result = &run.result;
+    let mut html = String::new();
+    html.push_str("<h2>Comparison</h2>\n");
+    html.push_str(match target {
+        "usdy" => "<p class=\"note\">Modeled is derived from the oracle's stored ranges with the contract's formula at the block timestamp. Observed is getPrice() read from the chain at the pinned block. Tolerance is zero.</p>\n",
+        _ => "<p class=\"note\">Modeled is the stored price per share compounded from the last sync to the block timestamp with the deployed exp. Observed is read from the chain at the pinned block. Tolerance is zero.</p>\n",
+    });
+    html.push_str(&comparison_table(result));
+
+    let (section, counts_key) = match target {
+        "usdy" => ("Range sets in the window", "range_sets"),
+        _ => ("Setter events in the window", "setter_events"),
+    };
+    html.push_str(&format!("<h2>{section}</h2>\n"));
+    let counts = result.get(counts_key);
+    let total = counts
+        .and_then(|c| c.get("in_window"))
+        .and_then(Value::as_u64)
+        .unwrap_or(0);
+    let by_path = counts
+        .and_then(|c| c.get("by_path"))
+        .and_then(Value::as_object)
+        .map(|m| {
+            m.iter()
+                .map(|(k, v)| format!("{} {}", v, k))
+                .collect::<Vec<String>>()
+                .join(", ")
+        })
+        .unwrap_or_default();
+    let note = counts
+        .and_then(|c| c.get("note"))
+        .and_then(Value::as_str)
+        .unwrap_or("");
+    html.push_str(&format!(
+        "<p>{total} event(s) between the two pinned blocks ({}). {}</p>\n",
+        escape(&by_path),
+        escape(note)
+    ));
+    if let Some(timeline) = read_json(&run.dir.join("timelines").join(format!("{target}.json"))) {
+        if target == "usdy" {
+            html.push_str("<table>\n<tr><th>range</th><th>posted (UTC)</th><th>starts (UTC)</th><th>daily rate</th><th>annual bps</th><th>path</th><th>rule</th><th>transaction</th></tr>\n");
+        } else {
+            html.push_str("<table>\n<tr><th>kind</th><th>block</th><th>time (UTC)</th><th>value</th><th>annual bps</th><th>path</th><th>transaction</th></tr>\n");
+        }
+        for row in timeline
+            .get("rows")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+        {
+            let s = |k: &str| row.get(k).and_then(Value::as_str).unwrap_or("").to_string();
+            let n = |k: &str| {
+                row.get(k)
+                    .and_then(Value::as_u64)
+                    .map(|v| v.to_string())
+                    .unwrap_or("?".into())
+            };
+            if target == "usdy" {
+                let ok = |k: &str| row.get(k).and_then(Value::as_bool).unwrap_or(true);
+                let rule = if ok("contiguous")
+                    && ok("day_aligned")
+                    && ok("rate_at_least_one")
+                    && ok("prev_close_matches_derived")
+                {
+                    "held"
+                } else {
+                    "NOT HELD"
+                };
+                html.push_str(&format!(
+                    "<tr><td class=\"num\">{}</td><td class=\"mono\">{}</td><td class=\"mono\">{}</td><td class=\"num\">{}</td><td class=\"num\">{}</td><td>{}</td><td>{}</td><td class=\"mono\">{}</td></tr>\n",
+                    n("index"),
+                    escape(&s("timestamp_utc")),
+                    escape(&s("start_utc")),
+                    escape(&wei(&s("daily_ir"), 27)),
+                    n("apy_bps"),
+                    escape(&s("path")),
+                    rule,
+                    escape(&s("transaction_hash"))
+                ));
+            } else {
+                html.push_str(&format!(
+                    "<tr><td>{}</td><td class=\"mono\">{}</td><td class=\"mono\">{}</td><td class=\"num\">{}</td><td class=\"num\">{}</td><td>{}</td><td class=\"mono\">{}</td></tr>\n",
+                    escape(&s("kind")),
+                    n("block"),
+                    escape(&s("timestamp_utc")),
+                    escape(&s("value")),
+                    n("apy_bps"),
+                    escape(&s("path")),
+                    escape(&s("transaction_hash"))
+                ));
+            }
         }
         html.push_str("</table>\n");
     }
@@ -1756,11 +1858,13 @@ fn feed_row(run: &Run, feed: Option<&Value>) -> Value {
             s(Some(feed), "timeline_file")
                 .map(|file| format!("data/timelines/{}", file.trim_start_matches("timelines/"))),
         ),
-        ("svzchf", _) | ("susde", _) | ("sky", _) => (
+        ("svzchf", _) | ("susde", _) | ("sky", _) | ("usdy", _) | ("frax", _) => (
             Some(
                 match target {
                     "susde" => crate::susde::VAULT,
                     "sky" => crate::sky::SUSDS,
+                    "usdy" => crate::usdy::ORACLE,
+                    "frax" => crate::frax::VAULT,
                     _ => crate::svzchf::VAULT,
                 }
                 .to_string(),
@@ -1769,11 +1873,13 @@ fn feed_row(run: &Run, feed: Option<&Value>) -> Value {
                 match target {
                     "susde" => "sUSDe",
                     "sky" => "sUSDS",
+                    "usdy" => "USDY",
+                    "frax" => "sfrxUSD",
                     _ => "svZCHF",
                 }
                 .to_string(),
             ),
-            Some("vault".to_string()),
+            Some(if target == "usdy" { "oracle" } else { "vault" }.to_string()),
             Some("recomputable".to_string()),
             s(summary, "verdict").or_else(|| Some(verdict_of(result))),
             None,
@@ -1817,7 +1923,7 @@ fn feed_row(run: &Run, feed: Option<&Value>) -> Value {
     };
     let family = s(summary, "family").unwrap_or_else(|| {
         match target {
-            "svzchf" | "susde" | "sky" => "recomputable-accrual",
+            "svzchf" | "susde" | "sky" | "usdy" | "frax" => "recomputable-accrual",
             _ => "guarded-setter",
         }
         .to_string()
@@ -2058,6 +2164,12 @@ fn run_page(run: &Run) -> String {
             crate::sky::STUSDS_RATE_SETTER.to_string(),
         ));
         addresses.push(("pause proxy", crate::sky::PAUSE_PROXY.to_string()));
+    } else if target == "usdy" {
+        addresses.push(("oracle", crate::usdy::ORACLE.to_string()));
+        addresses.push(("setter Safe", crate::usdy::SETTER_SAFE.to_string()));
+        addresses.push(("admin Safe", crate::usdy::ADMIN_SAFE.to_string()));
+    } else if target == "frax" {
+        addresses.push(("vault", crate::frax::VAULT.to_string()));
     } else if target == "susde" {
         addresses.push(("vault", crate::susde::VAULT.to_string()));
         addresses.push(("asset (USDe)", crate::susde::USDE.to_string()));
@@ -2093,6 +2205,8 @@ fn run_page(run: &Run) -> String {
         "svzchf" => svzchf_body(run),
         "susde" => susde_body(run),
         "sky" => sky_body(run),
+        "usdy" => derived_body(run, "usdy"),
+        "frax" => derived_body(run, "frax"),
         "mtbill" => mtbill_body(run),
         _ if is_family_run(result) => midas_body(run),
         _ => String::new(),
@@ -2729,6 +2843,61 @@ mod tests {
         assert!(page.contains("<td>spell</td>"));
         assert!(page.contains("<td>bounded_setter</td>"));
         assert!(page.contains("<td>held</td>"));
+    }
+
+    /// Spec 09.3 and 09.4: the USDY and sfrxUSD fixtures render a page each
+    /// with the residual table and the attributed events, and one feeds.json
+    /// row each in the consumer's shape.
+    #[test]
+    fn usdy_and_frax_fixtures_render_feed_rows_and_pages() {
+        fn copy_dir(from: &Path, to: &Path) {
+            fs::create_dir_all(to).unwrap();
+            for entry in fs::read_dir(from).unwrap() {
+                let entry = entry.unwrap();
+                let target = to.join(entry.file_name());
+                if entry.path().is_dir() {
+                    copy_dir(&entry.path(), &target);
+                } else {
+                    fs::copy(entry.path(), target).unwrap();
+                }
+            }
+        }
+        let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures");
+        let input = crate::util::scratch_dir("render-derived-in");
+        for name in ["usdy-demo-23264565-25885411", "frax-demo-24320956-25885408"] {
+            copy_dir(&fixtures.join(name), &input.join(name));
+        }
+        let out = crate::util::scratch_dir("render-derived-out");
+        render(&input, &out).unwrap();
+        let feeds: Value =
+            serde_json::from_str(&fs::read_to_string(out.join("data/feeds.json")).unwrap())
+                .unwrap();
+        let rows = feeds["rows"].as_array().unwrap();
+        assert_eq!(rows.len(), 2);
+        let row = |target: &str| rows.iter().find(|r| r["target"] == target).unwrap();
+        let usdy = row("usdy");
+        assert_eq!(usdy["product"], "USDY");
+        assert_eq!(usdy["key"], "oracle");
+        assert_eq!(usdy["address"], crate::usdy::ORACLE);
+        assert_eq!(usdy["headline"], "2 of 2 fields exact, residual 0");
+        let frax = row("frax");
+        assert_eq!(frax["product"], "sfrxUSD");
+        assert_eq!(frax["address"], crate::frax::VAULT);
+        for r in rows {
+            assert_eq!(r["family"], "recomputable-accrual");
+            assert_eq!(r["verdict"], "MODEL_MATCH");
+            assert_eq!(r["consumer_action"], "ALLOW");
+            assert_eq!(r["nav_recomputation"], "FULL");
+        }
+        let usdy_page = fs::read_to_string(out.join("usdy-demo-23264565-25885411.html")).unwrap();
+        balanced(&usdy_page).unwrap();
+        assert!(usdy_page.contains("12 event(s) between the two pinned blocks"));
+        assert!(usdy_page.contains("setter_role_holder"));
+        assert!(usdy_page.contains("<td>held</td>"));
+        let frax_page = fs::read_to_string(out.join("frax-demo-24320956-25885408.html")).unwrap();
+        balanced(&frax_page).unwrap();
+        assert!(frax_page.contains("6 event(s) between the two pinned blocks"));
+        assert!(frax_page.contains("timelock_safe"));
     }
 
     #[test]

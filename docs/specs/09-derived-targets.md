@@ -141,3 +141,116 @@ Out of scope: replaying chi across the window (every drip rounds, and drips
 happen at every deposit and withdrawal), the Spark cross-chain SSR oracles
 (the same rpow over a relayed triple), and the Conv table itself (bps are
 recovered by compounding, not by the table).
+
+## 09.3 Ondo USDY
+
+Target `usdy`. RWADynamicOracle `0xa0219aa5b31e65bc920b5b6dfb8edf0988121de0`
+(verified source, no proxy); SETTER_ROLE held by the setter Safe
+`0x19c114B7c6Ff86482cEbFc6AE3cef894e6793Db8` (4 of 8) and the admin Safe
+`0x1a694A09494E214a3Be3652e4B343B7B81A73ad7` (4 of 7, also DEFAULT_ADMIN).
+Evidence: `raw/ondo-usdy-oracle-rpc-2026-09-02.md`; addresses and getters
+confirmed by `eth_call` at block 25,885,411 before use.
+
+Model (from the source):
+
+```
+range = the latest range with start <= t; t is frozen at end - 1 once the range is over
+elapsedDays = floor((t - start) / 86400)
+price = roundTo8(rpow(dailyInterestRate, elapsedDays + 1, 1e27) * prevRangeClosePrice / 1e27)
+```
+
+`rpow` is the MakerDAO ray exponentiation shared with the Sky target;
+`roundTo8` rounds half up to a multiple of 1e10.
+
+- R14. Reads: block headers at B0 and B1, `getPrice()` and `paused()` at
+  both, every `RangeSet` event ever (to know the range count), `ranges(i)`
+  for every range at B1, `RangeOverriden` and `Paused` events in the
+  window, the transaction of every `RangeSet` in the window, and
+  `hasRole(SETTER_ROLE, target)` at B1 per distinct transaction target.
+- R15. `comparison.fields`: `oracle.getPrice()` at B1 and at B0, both
+  derived from the ranges as stored at B1, zero tolerance. A
+  `RangeOverriden` in the window is an input gap (the ranges at B1 need
+  not be the ranges in force at B0).
+- R16. Every stored `prevRangeClosePrice` is checked against the derived
+  close of the range before it over the whole history
+  (`range_close_chain_broken` otherwise, which only `overrideRange`
+  produces; it fails the series and the verdict is `OBSERVED_DEVIATION`).
+- R17. Every `RangeSet` in the window is attributed: path
+  `setter_role_holder` when the transaction's target holds SETTER_ROLE at
+  B1 (`range_set_off_setter_role` otherwise), and setRange's rule is
+  replayed (contiguous with the previous range, day aligned, daily rate at
+  least one ray, prevClose equal to the derived previous close;
+  `range_rule_inconsistent` otherwise). The lead time between the post and
+  the range's start is recorded. The daily rate itself is one key's choice
+  and is recorded, not judged.
+- R18. Timeline `timelines/usdy.json`: one row per range set with index,
+  post time, start, end, daily rate, annual bps (365 days compounded),
+  prevClose, path, sender, target, the four rule checks and the lead time.
+- R19. Demo window `--window demo`: B0 = 23,264,565, B1 = 25,885,411.
+  Pinned observations: `getPrice()` 1144746000000000000 at B1 (range 37,
+  daily rate 1.0000969, about 3.60 percent a year) and 1103925820000000000
+  at B0; 38 ranges stored, chain of closes unbroken; 12 range sets in the
+  window, all through the setter Safe (executor EOAs 0x4a15f6bd,
+  0x26621f75, 0x74a4c329), every rule held, posted 0 to 5 days before the
+  range start.
+
+| Requirement | Test |
+|---|---|
+| model, R16 | `formula_reproduces_the_pinned_archive_observations` (offline, the archive's six observations and the close chain over 38 ranges) |
+| R15, R17, R19 | `verify_passes_on_the_usdy_fixture` (offline, `cli/tests/fixtures/usdy-demo-23264565-25885411`) |
+| R18 | `usdy_and_frax_fixtures_render_feed_rows_and_pages` |
+
+## 09.4 Frax sfrxUSD
+
+Target `frax`. sfrxUSD `0xcf62F905562626CfcDD2261162a51fd02Fc9c5b6`
+(TransparentUpgradeableProxy, verified SfrxUSD implementation); the
+timelock address `0x4b45D73b83686e69d08E61105FdB7F7b51f41Bc1` is a Safe (3
+of 6), not a delayed contract. Evidence: `raw/frax-sfrxusd-rpc-2026-09-02.md`;
+addresses and getters confirmed by `eth_call` at block 25,885,408 before
+use. Class C: a derived ERC-4626 rate with an on-chain formula, not a
+posted feed.
+
+Model (from the source):
+
+```
+pricePerShare(t) = mulDiv18(pricePerShareStored, exp(pricePerShareIncPerSecond * (t - lastSync)))
+totalAssets = pricePerShare * totalSupply / 1e18
+convertToAssets(1e18) = 1e18 * totalAssets / totalSupply
+exp: PRBMath UD60x18, exp(x) = exp2(x * LOG2_E / 1e18), exp2 in 192.64 fixed point
+     over the 64 magic factors of the deployed Common.exp2
+```
+
+- R20. Reads at each pinned block: `pricePerShareStored()`,
+  `pricePerShareIncPerSecond()`, `lastSync()`, `totalSupply()`,
+  `timelockAddress()`, the observed `pricePerShare()`, `totalAssets()`,
+  `convertToAssets(1e18)`, and the block header.
+- R21. `comparison.fields`: `vault.pricePerShare()`, `vault.totalAssets()`,
+  `vault.convertToAssets(1e18)` at B1, zero tolerance.
+- R22. Every setter event in the window is attributed:
+  `SetPricePerShareIncPerSecond` (the rate; the annual bps it encodes are
+  recovered by compounding over a year with the same exp),
+  `SetPricePerShareStored` and `SetLastSync` (the level-rewrite path,
+  finding `price_level_rewritten`), `TimelockTransferred`
+  (`timelock_transferred`) and the proxy's `Upgraded`
+  (`implementation_upgraded`). Path `timelock_safe` when the transaction
+  targets the timelock address read at B1, else `other`
+  (`setter_event_off_timelock`, informational). The rate has no on-chain
+  bound; the record says which path each event took.
+- R23. Timeline `timelines/frax.json`: one row per event with kind, block,
+  time, value, previous value, annual bps before and after, path, sender,
+  target.
+- R24. Demo window `--window demo`: B0 = 24,320,956 (the proxy's latest
+  upgrade, under which the replayed formula holds), B1 = 25,885,408.
+  Pinned observations at B1: pricePerShare 1208570496750105242, totalAssets
+  36203237152360676115213293, convertToAssets(1e18) 1208570496750105241,
+  445,116 seconds since the last sync, rate 4.80 percent a year. Six rate
+  changes in the window (4.65 down to 3.85 and up to 4.80 percent), four
+  sent to the timelock Safe and two (February and April 2026) sent to
+  `0x9641d764` by Safe owners, no level rewrite, no timelock transfer, no
+  upgrade.
+
+| Requirement | Test |
+|---|---|
+| model | `exp_reproduces_the_pinned_archive_observations` (offline, the archive's two rows and PRBMath's exp(1)), `the_wide_helpers_shift_and_multiply_exactly` |
+| R21, R22, R24 | `verify_passes_on_the_frax_fixture` (offline, `cli/tests/fixtures/frax-demo-24320956-25885408`) |
+| R23 | `usdy_and_frax_fixtures_render_feed_rows_and_pages` |

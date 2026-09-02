@@ -289,6 +289,26 @@ fn replay(
             replay_root,
         )
         .map(|outcome| outcome.result_path),
+        "usdy" => crate::run_usdy::run(
+            &mut source,
+            &crate::run_usdy::RunArgs {
+                baseline_block,
+                block,
+                window_name: window_name.clone(),
+            },
+            replay_root,
+        )
+        .map(|outcome| outcome.result_path),
+        "frax" => crate::run_frax::run(
+            &mut source,
+            &crate::run_frax::RunArgs {
+                baseline_block,
+                block,
+                window_name: window_name.clone(),
+            },
+            replay_root,
+        )
+        .map(|outcome| outcome.result_path),
         "sky" => crate::run_sky::run(
             &mut source,
             &crate::run_sky::RunArgs {
@@ -1308,6 +1328,91 @@ mod tests {
         assert_eq!(ssr[0]["previous_bps"], 475);
         assert_eq!(ssr[8]["new_bps"], 352);
         assert_eq!(ssr[8]["block"], 25_596_101);
+    }
+
+    /// Spec 09.3: the USDY fixture verifies, carries the archive's pinned
+    /// observations, and every range set of the window took the setter role
+    /// holder with the rule held.
+    #[test]
+    fn verify_passes_on_the_usdy_fixture() {
+        let fixture = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/usdy-demo-23264565-25885411");
+        let report = verify(&fixture, &Options::default());
+        let text = print(&report);
+        assert_eq!(report.exit_code, VERIFIED, "{text}");
+        assert!(
+            text.contains("entries         61 checked, hashes ok"),
+            "{text}"
+        );
+        let result: Value = read_json(&fixture.join("result.json")).unwrap();
+        assert_eq!(result["verdict"], "MODEL_MATCH");
+        assert_eq!(
+            result["summary"]["headline"],
+            "2 of 2 fields exact, residual 0"
+        );
+        let fields = result["comparison"]["fields"].as_array().unwrap();
+        assert_eq!(fields[0]["observed"], "1144746000000000000");
+        assert_eq!(fields[1]["observed"], "1103925820000000000");
+        assert_eq!(result["range_sets"]["in_window"], 12);
+        assert_eq!(result["range_sets"]["by_path"]["setter_role_holder"], 12);
+        assert_eq!(result["range_sets"]["overrides_in_window"], 0);
+        assert_eq!(result["inputs"]["ranges_stored"], 38);
+        let rows: Value = read_json(&fixture.join("timelines/usdy.json")).unwrap();
+        let rows = rows["rows"].as_array().unwrap();
+        assert_eq!(rows.len(), 12);
+        assert!(rows.iter().all(|r| r["contiguous"] == true
+            && r["day_aligned"] == true
+            && r["rate_at_least_one"] == true
+            && r["prev_close_matches_derived"] == true));
+        assert_eq!(rows[11]["index"], 37);
+        assert_eq!(rows[11]["apy_bps"], 360);
+    }
+
+    /// Spec 09.4: the sfrxUSD fixture verifies with the deployed exp, and
+    /// the six rate changes of the window are attributed.
+    #[test]
+    fn verify_passes_on_the_frax_fixture() {
+        let fixture = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/frax-demo-24320956-25885408");
+        let report = verify(&fixture, &Options::default());
+        let text = print(&report);
+        assert_eq!(report.exit_code, VERIFIED, "{text}");
+        assert!(
+            text.contains("entries         30 checked, hashes ok"),
+            "{text}"
+        );
+        let result: Value = read_json(&fixture.join("result.json")).unwrap();
+        assert_eq!(result["verdict"], "MODEL_MATCH");
+        assert_eq!(
+            result["summary"]["headline"],
+            "3 of 3 fields exact, residual 0"
+        );
+        let observed = |field: &str| -> String {
+            result["comparison"]["fields"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|f| f["field"] == field)
+                .unwrap()["observed"]
+                .as_str()
+                .unwrap()
+                .to_string()
+        };
+        assert_eq!(observed("vault.pricePerShare()"), "1208570496750105242");
+        assert_eq!(
+            observed("vault.totalAssets()"),
+            "36203237152360676115213293"
+        );
+        assert_eq!(
+            observed("vault.convertToAssets(1e18)"),
+            "1208570496750105241"
+        );
+        assert_eq!(result["setter_events"]["in_window"], 6);
+        assert_eq!(result["setter_events"]["by_kind"]["inc"], 6);
+        assert_eq!(result["setter_events"]["level_rewrites"], 0);
+        assert_eq!(result["setter_events"]["by_path"]["timelock_safe"], 4);
+        assert_eq!(result["setter_events"]["by_path"]["other"], 2);
+        assert_eq!(result["modeled"]["apy_bps"], 480);
     }
 
     /// The README claims exactly what the verifier proves, in the same

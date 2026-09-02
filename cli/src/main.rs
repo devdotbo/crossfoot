@@ -13,6 +13,7 @@ mod consume;
 mod family_fixture_tests;
 #[cfg(test)]
 mod fixtures;
+mod frax;
 #[cfg(test)]
 mod live_tests;
 mod midas;
@@ -23,16 +24,19 @@ mod mtbill;
 mod pack;
 mod render;
 mod rpc;
+mod run_frax;
 mod run_midas;
 mod run_mtbill;
 mod run_sky;
 mod run_susde;
 mod run_svzchf;
+mod run_usdy;
 mod sky;
 mod source;
 mod summary;
 mod susde;
 mod svzchf;
+mod usdy;
 mod util;
 mod verify;
 
@@ -150,6 +154,12 @@ enum RunTarget {
     /// Sky sUSDS, sDAI and stUSDS: rpow to the wei, every rate change
     /// attributed to the bounded setter or the spell path.
     Sky(RunOpts),
+    /// Ondo USDY: the oracle's price derived from its ranges, every range
+    /// set attributed to its role holder.
+    Usdy(RunOpts),
+    /// Frax sfrxUSD: pricePerShare from the stored anchor with the deployed
+    /// exp, every setter event attributed.
+    Frax(RunOpts),
     /// Midas customFeed family: posting-path replay of every feed in the list.
     Midas(MidasOpts),
     /// Any posted-feed family from its config file: `--config
@@ -385,6 +395,8 @@ fn window_preset(target: &str, name: &str) -> Option<(u64, u64)> {
         ("svzchf", "demo") => Some(run_svzchf::DEMO_WINDOW),
         ("susde", "demo") => Some(run_susde::DEMO_WINDOW),
         ("sky", "demo") => Some(run_sky::DEMO_WINDOW),
+        ("usdy", "demo") => Some(run_usdy::DEMO_WINDOW),
+        ("frax", "demo") => Some(run_frax::DEMO_WINDOW),
         _ => None,
     }
 }
@@ -513,6 +525,24 @@ fn main() -> ExitCode {
         Command::Run {
             target: RunTarget::Midas(opts) | RunTarget::Family(opts),
         } => match replay_midas(opts) {
+            Ok(()) => ExitCode::SUCCESS,
+            Err(message) => {
+                eprintln!("crossfoot: {message}");
+                ExitCode::FAILURE
+            }
+        },
+        Command::Run {
+            target: RunTarget::Usdy(opts),
+        } => match recompute_usdy(opts) {
+            Ok(()) => ExitCode::SUCCESS,
+            Err(message) => {
+                eprintln!("crossfoot: {message}");
+                ExitCode::FAILURE
+            }
+        },
+        Command::Run {
+            target: RunTarget::Frax(opts),
+        } => match recompute_frax(opts) {
             Ok(()) => ExitCode::SUCCESS,
             Err(message) => {
                 eprintln!("crossfoot: {message}");
@@ -728,6 +758,64 @@ fn recompute_sky(opts: RunOpts) -> Result<(), String> {
     Ok(())
 }
 
+fn recompute_usdy(opts: RunOpts) -> Result<(), String> {
+    let verify_root = opts.verify_root.canonicalize().map_err(|err| {
+        format!(
+            "--verify-root {} is not readable: {err}",
+            opts.verify_root.display()
+        )
+    })?;
+    let window = resolve_window("usdy", &opts)?;
+    let mut client = read_source(&opts, &verify_root)?;
+    let outcome = run_usdy::run(
+        client.as_mut(),
+        &run_usdy::RunArgs {
+            baseline_block: window.baseline_block,
+            block: window.block,
+            window_name: window.name.clone(),
+        },
+        &verify_root,
+    )?;
+    println!("verdict         {}", outcome.verdict.as_str());
+    println!("summary         {}", outcome.summary.headline);
+    println!("range sets      {} in the window", outcome.range_sets);
+    println!("result          {}", outcome.result_path.display());
+    println!("bundle          {}", outcome.bundle_dir.display());
+    println!("root hash       {}", outcome.root_hash);
+    println!("cache hits      {}", outcome.cache_hits);
+    println!("network calls   {}", outcome.network_calls);
+    Ok(())
+}
+
+fn recompute_frax(opts: RunOpts) -> Result<(), String> {
+    let verify_root = opts.verify_root.canonicalize().map_err(|err| {
+        format!(
+            "--verify-root {} is not readable: {err}",
+            opts.verify_root.display()
+        )
+    })?;
+    let window = resolve_window("frax", &opts)?;
+    let mut client = read_source(&opts, &verify_root)?;
+    let outcome = run_frax::run(
+        client.as_mut(),
+        &run_frax::RunArgs {
+            baseline_block: window.baseline_block,
+            block: window.block,
+            window_name: window.name.clone(),
+        },
+        &verify_root,
+    )?;
+    println!("verdict         {}", outcome.verdict.as_str());
+    println!("summary         {}", outcome.summary.headline);
+    println!("setter events   {} in the window", outcome.setter_events);
+    println!("result          {}", outcome.result_path.display());
+    println!("bundle          {}", outcome.bundle_dir.display());
+    println!("root hash       {}", outcome.root_hash);
+    println!("cache hits      {}", outcome.cache_hits);
+    println!("network calls   {}", outcome.network_calls);
+    Ok(())
+}
+
 fn check_mtbill(opts: RunOpts) -> Result<(), String> {
     let verify_root = opts.verify_root.canonicalize().map_err(|err| {
         format!(
@@ -901,6 +989,14 @@ mod tests {
             (susde.baseline_block, susde.block),
             (25_800_000, 25_885_407)
         );
+        for (target, expected) in [
+            ("sky", (23_264_565, 25_885_408)),
+            ("usdy", (23_264_565, 25_885_411)),
+            ("frax", (24_320_956, 25_885_408)),
+        ] {
+            let window = resolve_window(target, &opts).unwrap();
+            assert_eq!((window.baseline_block, window.block), expected, "{target}");
+        }
         // No preset of that name for the other target.
         let err = resolve_window("mtbill", &opts).unwrap_err();
         assert!(

@@ -129,6 +129,42 @@ pub fn sky(
     )
 }
 
+/// The Ondo USDY summary: posted and recomputed being the oracle's getPrice().
+pub fn usdy(
+    verdict: Verdict,
+    comparison: &ComparisonSet,
+    window: Window,
+    findings_count: usize,
+) -> Summary {
+    exact(
+        "usdy",
+        "oracle.getPrice()",
+        "range close chain breaks",
+        verdict,
+        comparison,
+        window,
+        findings_count,
+    )
+}
+
+/// The Frax sfrxUSD summary: posted and recomputed being pricePerShare().
+pub fn frax(
+    verdict: Verdict,
+    comparison: &ComparisonSet,
+    window: Window,
+    findings_count: usize,
+) -> Summary {
+    exact(
+        "frax",
+        "vault.pricePerShare()",
+        "setter series deviates",
+        verdict,
+        comparison,
+        window,
+        findings_count,
+    )
+}
+
 /// A full recomputation compared field by field: the shared shape of the
 /// recomputable-accrual targets.
 fn exact(

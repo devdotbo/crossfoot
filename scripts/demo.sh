@@ -15,6 +15,7 @@
 #      way: survey line, verdict, root hash.
 #   2b. Ethena sUSDe, replayed from its fixture: verdict, summary, root hash.
 #   2c. Sky sUSDS, sDAI and stUSDS, replayed from the fixture archive.
+#   2d. Ondo USDY and Frax sfrxUSD, replayed from their fixtures.
 #   3. render: static pages over the bundles just written.
 #   4. consume --replay: the consumer agent over the recorded subgraph
 #      responses, ALLOW or REVIEW per feed.
@@ -136,6 +137,26 @@ else
   echo "NO"
   exit 1
 fi
+
+for spec in "usdy|usdy-demo-23264565-25885411|Ondo USDY: the oracle price derived from its monthly ranges, every range set attributed" \
+            "frax|frax-demo-24320956-25885408|Frax sfrxUSD: pricePerShare from the stored anchor with the deployed exp, every setter event attributed"; do
+  target="${spec%%|*}"; rest="${spec#*|}"; fixture_name="${rest%%|*}"; title="${rest#*|}"
+  say "2d. $title, replayed from the fixture"
+  fixture="cli/tests/fixtures/$fixture_name"
+  "$crossfoot" run "$target" --window demo --from-bundle "$fixture" --verify-root "$work" \
+    | tee "$work/$target.out"
+  bundle_dir="$(sed -n 's/^bundle  *//p' "$work/$target.out")"
+  bundles+=("$bundle_dir")
+  printf 'summary block:  headline %s, consumer_action %s\n' \
+    "$(headline "$bundle_dir/result.json")" "$(consumer_action "$bundle_dir/result.json")"
+  printf 'fixture result.json equals the replay:  '
+  if cmp -s "$fixture/result.json" "$bundle_dir/result.json"; then
+    echo "yes"
+  else
+    echo "NO"
+    exit 1
+  fi
+done
 
 say "3. render: static pages over the bundles, no script, no fetch at view time"
 # Captured to a file first: a pipe into head would close early on a long
