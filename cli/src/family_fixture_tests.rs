@@ -289,8 +289,8 @@ fn centrifuge_share_prices_replay_through_the_hub_multicall_and_the_setup_trace(
     assert_eq!(result["summary"]["consumer_action"], "ALLOW");
     assert_eq!(result["family"]["mechanism"]["guard"], Value::Null);
     assert_eq!(
-        result["family"]["mechanism"]["round_event_layout"],
-        "share_price"
+        result["family"]["mechanism"]["round_events"][0]["round_id"],
+        "sequence"
     );
     let s = &result["family_summary"];
     assert_eq!(s["feeds_replayed"], 2);

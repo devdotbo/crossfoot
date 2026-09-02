@@ -349,27 +349,6 @@ pub struct SpacingSpec {
     pub seconds: u64,
 }
 
-/// How the round events of a family lay out their fields.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
-#[serde(rename_all = "snake_case")]
-pub enum RoundEventLayout {
-    /// `AnswerUpdated(int256 current, uint256 roundId, uint256 updatedAt)`
-    /// with the answer and the round id indexed; `updatedAt` indexed
-    /// (Midas) or in the data (the Chainlink shape).
-    #[default]
-    AnswerUpdated,
-    /// A hub event keyed by indexed identifiers (the feed's `topics`) with
-    /// the price in data word 0 and the timestamp in data word 1; round
-    /// ids are the position in log order, since the event carries none.
-    SharePrice,
-}
-
-impl RoundEventLayout {
-    fn is_default(&self) -> bool {
-        *self == RoundEventLayout::AnswerUpdated
-    }
-}
-
 /// Everything the replay needs to know about how a family posts.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Mechanism {
@@ -399,8 +378,6 @@ pub struct Mechanism {
     #[serde(default)]
     pub relays: Vec<RelaySpec>,
     /// How the round events lay out their fields; absent for AnswerUpdated.
-    #[serde(default, skip_serializing_if = "RoundEventLayout::is_default")]
-    pub round_event_layout: RoundEventLayout,
     #[serde(default)]
     pub other_calls: Vec<Value>,
     #[serde(default)]
@@ -798,22 +775,6 @@ pub fn decode_bytes_array(input: &str, word: usize) -> Option<Vec<String>> {
         out.push(format!("0x{}", args.get(start + 64..start + 64 + length)?));
     }
     Some(out)
-}
-
-/// Decodes one hub round event (`RoundEventLayout::SharePrice`): price in
-/// data word 0, timestamp in data word 1. The round id is assigned by the
-/// caller from the log order.
-pub fn decode_share_price(row: &Value) -> Option<RoundEvent> {
-    let data = row.get("data")?.as_str()?;
-    Some(RoundEvent {
-        round_id: 0,
-        answer: i128_word(data, 0)?,
-        timestamp: u64_word(data, 1)?,
-        block: dec_u64(row, "blockNumber")?,
-        log_index: dec_u64(row, "logIndex").unwrap_or(0),
-        transaction_hash: row.get("transactionHash")?.as_str()?.to_lowercase(),
-        fields: BTreeMap::new(),
-    })
 }
 
 /// The leading argument words of a call equal the feed's topics, so a
@@ -1490,14 +1451,9 @@ pub fn fetch(
                 block,
             )?;
             let decoded: Vec<RoundEvent> = match spec {
-                RoundEventSpec::Signature(_) => match mechanism.round_event_layout {
-                    RoundEventLayout::AnswerUpdated => {
-                        rows.iter().filter_map(decode_answer_updated).collect()
-                    }
-                    RoundEventLayout::SharePrice => {
-                        rows.iter().filter_map(decode_share_price).collect()
-                    }
-                },
+                RoundEventSpec::Signature(_) => {
+                    rows.iter().filter_map(decode_answer_updated).collect()
+                }
                 RoundEventSpec::Custom(custom) => {
                     let join_rows = match &custom.answer {
                         AnswerSpec::Join { event, .. } => sweep_logs(
@@ -1520,12 +1476,6 @@ pub fn fetch(
             events.extend(decoded);
         }
         inputs.round_events = round_events;
-        if mechanism.round_event_layout == RoundEventLayout::SharePrice {
-            events.sort_by_key(|e| (e.block, e.log_index));
-            for (index, event) in events.iter_mut().enumerate() {
-                event.round_id = index as u64 + 1;
-            }
-        }
         events.sort_by_key(|e| (e.round_id, e.block, e.log_index));
         let latest_round = if mechanism.latest_round_from_events {
             Some(events.len() as u64 + mechanism.constructor_rounds)

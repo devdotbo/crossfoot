@@ -318,12 +318,13 @@ Further config fields, added for the families beyond Midas
   feed entry may carry `log_address` (the contract that emits its rounds,
   the Centrifuge Spoke) and `topics` (topic1 and topic2 selecting its
   rounds, the pool id and the share class id); the round sweep filters on
-  them. `mechanism.round_event_layout: "share_price"` decodes
-  `UpdateSharePrice(uint64,bytes16,uint128,uint64)`: price from data
-  word 0, timestamp from data word 1, round ids assigned in log order
-  because the event carries none. A read signature left empty (`""`) is
-  skipped; with `latest_round_data` empty the latest state is the last
-  round event, so liveness reads the series. The feed list's `decimals`
+  them. The round event is the object form `{"signature":
+  "UpdateSharePrice(uint64,bytes16,uint128,uint64)", "round_id":
+  "sequence", "answer": {"data": 0}, "timestamp": {"data": 1}}` with
+  `latest_round_from_events: true`: price from data word 0, computedAt
+  from data word 1, round ids assigned in log order because the event
+  carries none, and the latest state taken from the series. A read
+  signature left empty (`""`) is skipped. The feed list's `decimals`
   is the price scale (D18) whatever `decimals()` of the token says, and
   the result row carries the decimals the replay used.
 - Relay calls keyed to a feed: when a feed has `topics`, `relay_call` only

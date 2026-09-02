@@ -24,9 +24,14 @@
     },
     "guard": null,
     "round_events": [
-      "UpdateSharePrice(uint64,bytes16,uint128,uint64)"
+      {
+        "signature": "UpdateSharePrice(uint64,bytes16,uint128,uint64)",
+        "round_id": "sequence",
+        "answer": { "data": 0 },
+        "timestamp": { "data": 1 }
+      }
     ],
-    "round_event_layout": "share_price",
+    "latest_round_from_events": true,
     "setters": [
       {
         "signature": "updateSharePrice(uint64,bytes16,uint128,uint64)",
