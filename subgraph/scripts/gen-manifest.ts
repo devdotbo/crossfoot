@@ -15,7 +15,13 @@ interface FeedRow {
   address: string;
   startBlock: number;
   abi: string;
-  handler: "midas" | "openeden" | "ondo" | "superstate";
+  handler: "midas" | "openeden" | "ondo" | "superstate" | "hashnote" | "backed" | "centrifuge" | "ethena" | "sky";
+  relay?: string; // Hashnote: the reporter proxy the operator calls
+  sourceAddress?: string; // Centrifuge: the Spoke that emits for several feeds
+  poolId?: string;
+  scId?: string;
+  hub?: string;
+  inputsFrom?: string; // DERIVED families: the contract that moves the rate
 }
 
 interface FeedsFile {
@@ -59,6 +65,11 @@ const ABIS_BY_HANDLER: Record<string, string[]> = {
   openeden: ["OpenEdenTBillOracle"],
   ondo: ["OndoComparisonOracle"],
   superstate: ["SuperstateOracle"],
+  hashnote: ["HashnoteAggregator"],
+  backed: ["BackedOracle"],
+  centrifuge: ["CentrifugeSpoke"],
+  ethena: ["StakedUSDe"],
+  sky: ["SUsds"],
 };
 const seen = new Set<string>();
 for (const f of input.feeds) {
@@ -203,6 +214,62 @@ const ISSUER_TEMPLATES: Record<string, IssuerTemplate> = {
     callHandlers: ["        - function: setPrice(int256)", "          handler: handleSetPriceCall"],
     file: "./src/ondo.ts",
   },
+  hashnote: {
+    entities: ["Feed", "Round", "PostTx", "Upgrade", "BoundChange", "Poster"],
+    eventHandlers: [
+      "        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)",
+      "          handler: handleAnswerUpdated",
+      "        - event: Initialized(uint8)",
+      "          handler: handleInitialized",
+      "        - event: Upgraded(indexed address)",
+      "          handler: handleUpgraded",
+    ],
+    callHandlers: ["        - function: transmit(uint256,uint256)", "          handler: handleTransmitCall"],
+    file: "./src/hashnote.ts",
+  },
+  backed: {
+    entities: ["Feed", "Round", "PostTx", "Upgrade", "BoundChange", "Poster"],
+    eventHandlers: [
+      "        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)",
+      "          handler: handleAnswerUpdated",
+      "        - event: Initialized(uint8)",
+      "          handler: handleInitialized",
+      "        - event: Upgraded(indexed address)",
+      "          handler: handleUpgraded",
+    ],
+    callHandlers: ["        - function: updateAnswer(int192,uint32)", "          handler: handleUpdateAnswerCall"],
+    file: "./src/backed.ts",
+  },
+  centrifuge: {
+    entities: ["Feed", "Round", "PostTx", "Poster"],
+    eventHandlers: [
+      "        - event: UpdateSharePrice(indexed uint64,indexed bytes16,uint128,uint64)",
+      "          handler: handleUpdateSharePrice",
+    ],
+    callHandlers: [
+      "        - function: updatePricePoolPerShare(uint64,bytes16,uint128,uint64)",
+      "          handler: handleUpdatePricePoolPerShareCall",
+    ],
+    file: "./src/centrifuge.ts",
+  },
+  ethena: {
+    entities: ["Feed", "Round", "VaultFlow"],
+    eventHandlers: [
+      "        - event: RewardsReceived(uint256)",
+      "          handler: handleRewardsReceived",
+    ],
+    callHandlers: [],
+    file: "./src/ethena.ts",
+  },
+  sky: {
+    entities: ["Feed", "Round", "RateChange"],
+    eventHandlers: [
+      "        - event: File(indexed bytes32,uint256)",
+      "          handler: handleFile",
+    ],
+    callHandlers: [],
+    file: "./src/sky.ts",
+  },
   superstate: {
     entities: ["Feed", "Round", "PostTx", "BoundChange", "Poster"],
     eventHandlers: [
@@ -219,21 +286,29 @@ const ISSUER_TEMPLATES: Record<string, IssuerTemplate> = {
   },
 };
 
-function issuerSource(f: FeedRow): string[] {
+function issuerSource(f: FeedRow, group: FeedRow[]): string[] {
   const t = ISSUER_TEMPLATES[f.handler];
+  const ctx: [string, string][] = [
+    ["issuer", f.issuer],
+    ["product", f.product],
+    ["registryKey", f.key],
+  ];
+  if (f.relay) ctx.push(["relay", f.relay]);
+  if (f.inputsFrom) ctx.push(["inputsFrom", f.inputsFrom]);
+  if (f.handler === "centrifuge") {
+    // One Spoke source serves every feed of the group: "token:poolId:scId,..."
+    ctx.push(["feeds", group.map((g) => `${g.address}:${g.poolId}:${g.scId}:${g.product}`).join(",")]);
+    ctx.push(["hub", f.hub ?? ""]);
+  }
   const lines = [
     "  - kind: ethereum/contract",
-    `    name: ${sourceName(f)}`,
+    `    name: ${f.handler === "centrifuge" ? `${f.issuer}_spoke_${f.key}` : sourceName(f)}`,
     `    network: ${input.network}`,
     "    source:",
-    `      address: '${f.address}'`,
+    `      address: '${f.sourceAddress ?? f.address}'`,
     `      abi: ${f.abi}`,
-    `      startBlock: ${f.startBlock}`,
-    ...context([
-      ["issuer", f.issuer],
-      ["product", f.product],
-      ["registryKey", f.key],
-    ]),
+    `      startBlock: ${Math.min(...group.map((g) => g.startBlock))}`,
+    ...context(ctx),
     "    mapping:",
     "      kind: ethereum/events",
     `      apiVersion: ${API_VERSION}`,
@@ -323,7 +398,18 @@ const out: string[] = [
   "  prune: never",
   "dataSources:",
 ];
-for (const f of input.feeds) out.push(...(f.handler === "midas" ? midasSource(f) : issuerSource(f)));
+const emittedSources = new Set<string>();
+for (const f of input.feeds) {
+  if (f.handler === "midas") {
+    out.push(...midasSource(f));
+    continue;
+  }
+  const sourceAddress = (f.sourceAddress ?? f.address).toLowerCase();
+  if (emittedSources.has(sourceAddress)) continue; // grouped with an earlier row
+  emittedSources.add(sourceAddress);
+  const group = input.feeds.filter((g) => (g.sourceAddress ?? g.address).toLowerCase() === sourceAddress);
+  out.push(...issuerSource(f, group));
+}
 out.push(...frankencoinSource());
 
 writeFileSync(outPath, out.join("\n") + "\n");

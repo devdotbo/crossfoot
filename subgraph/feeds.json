@@ -3,7 +3,7 @@
   "chain_id": 1,
   "network": "mainnet",
   "callHandlers": true,
-  "source": "raw/midas-customfeed-creators-2026-09-01.md (creation blocks) and raw/midas-customfeed-survey-2026-09-01.md (the 66 addresses minus the six customFeedDv/customFeedRv wrappers, which emit no events); OpenEden, Ondo and Superstate rows from wiki/asset-feed-candidates.md (raw/openeden-tbill-oracle-usdo-rpc-2026-09-02.md, raw/ondo-ousg-oracle-rpc-2026-09-02.md, raw/superstate-ustb-uscc-oracle-rpc-2026-09-02.md)",
+  "source": "raw/midas-customfeed-creators-2026-09-01.md (creation blocks) and raw/midas-customfeed-survey-2026-09-01.md (the 66 addresses minus the six customFeedDv/customFeedRv wrappers, which emit no events); OpenEden, Ondo and Superstate rows from wiki/asset-feed-candidates.md (raw/openeden-tbill-oracle-usdo-rpc-2026-09-02.md, raw/ondo-ousg-oracle-rpc-2026-09-02.md, raw/superstate-ustb-uscc-oracle-rpc-2026-09-02.md); Hashnote, Backed, Centrifuge rows from config/*.json on origin/main with creation blocks from Etherscan getcontractcreation (2026-09-03); Ethena from raw/ethena-susde-feeds-rpc-2026-09-02.md (first RewardsReceived block); Sky from raw/sky-susds-sdai-stusds-spbeam-rpc-2026-09-02.md",
   "feeds": [
     {
       "product": "mTBILL",
@@ -571,6 +571,98 @@
       "startBlock": 21340412,
       "abi": "SuperstateOracle",
       "handler": "superstate"
+    },
+    {
+      "product": "USYC",
+      "key": "aggregator18",
+      "issuer": "Hashnote",
+      "address": "0x74f2199AEb743f68f05943e5715A33EaF2b61f53",
+      "startBlock": 20530942,
+      "abi": "HashnoteAggregator",
+      "handler": "hashnote",
+      "relay": "0x9fde717a21c5b272b8956d3aa0c3551e1ffd23d7"
+    },
+    {
+      "product": "bC3M",
+      "key": "oracle",
+      "issuer": "Backed",
+      "address": "0x83Ec02059F686E747392A22ddfED7833bA0d7cE3",
+      "startBlock": 17676542,
+      "abi": "BackedOracle",
+      "handler": "backed"
+    },
+    {
+      "product": "ERNX",
+      "key": "oracle",
+      "issuer": "Backed",
+      "address": "0x475855DAe09af1e3f2d380d766b9E630926ad3CE",
+      "startBlock": 19368300,
+      "abi": "BackedOracle",
+      "handler": "backed"
+    },
+    {
+      "product": "ERNA",
+      "key": "oracle",
+      "issuer": "Backed",
+      "address": "0x2674Cc47786740432b895a70D92CFDfB1d5BF798",
+      "startBlock": 19368312,
+      "abi": "BackedOracle",
+      "handler": "backed"
+    },
+    {
+      "product": "bNVDA",
+      "key": "oracle",
+      "issuer": "Backed",
+      "address": "0x1D3be4d05Eba2aA6c4eEdE85a74f491C31766E64",
+      "startBlock": 20190090,
+      "abi": "BackedOracle",
+      "handler": "backed"
+    },
+    {
+      "product": "JTRSY",
+      "key": "sharePrice",
+      "issuer": "Centrifuge",
+      "address": "0x8c213ee79581Ff4984583C6a801e5263418C4b86",
+      "startBlock": 24319323,
+      "abi": "CentrifugeSpoke",
+      "handler": "centrifuge",
+      "sourceAddress": "0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB",
+      "poolId": "281474976710662",
+      "scId": "0x00010000000000060000000000000001",
+      "hub": "0xa4a7bb3831958463b3fe3e27a6a160f764341953"
+    },
+    {
+      "product": "JAAA",
+      "key": "sharePrice",
+      "issuer": "Centrifuge",
+      "address": "0x5a0F93D040De44e78F251b03c43be9CF317Dcf64",
+      "startBlock": 24319323,
+      "abi": "CentrifugeSpoke",
+      "handler": "centrifuge",
+      "sourceAddress": "0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB",
+      "poolId": "281474976710663",
+      "scId": "0x00010000000000070000000000000001",
+      "hub": "0xa4a7bb3831958463b3fe3e27a6a160f764341953"
+    },
+    {
+      "product": "sUSDe",
+      "key": "stakedUSDe",
+      "issuer": "Ethena",
+      "address": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+      "startBlock": 19026137,
+      "abi": "StakedUSDe",
+      "handler": "ethena",
+      "inputsFrom": "0xf2fa332bD83149c66b09B45670bCe64746C6b439"
+    },
+    {
+      "product": "sUSDS",
+      "key": "susds",
+      "issuer": "Sky",
+      "address": "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD",
+      "startBlock": 20677434,
+      "abi": "SUsds",
+      "handler": "sky",
+      "inputsFrom": "0x36B072ed8AFE665E3Aa6DaBa79Decbec63752b22"
     }
   ]
 }

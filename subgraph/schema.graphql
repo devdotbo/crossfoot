@@ -20,6 +20,7 @@ enum FlowKind {
   SAVED
   WITHDRAWN
   INTEREST_COLLECTED
+  REWARDS_RECEIVED           # Ethena sUSDe transferInRewards
 }
 
 type Feed @entity(immutable: false) {
@@ -86,6 +87,7 @@ type Round @entity(immutable: true) {
   boundAtPost: BigInt              # the guard value at the post in Feed.bound units; null if unknown
   overBound: Boolean!              # !first && the family's guard measure > boundAtPost (Midas: deviationFromPrevious; OpenEden: deviationFromReference; Ondo: deviationFromPrevious; Superstate: deltaFromPrevious); false for DERIVED
   override: Boolean                # Superstate only: the addCheckpoint override flag from the calldata
+  atBound: Boolean                 # Backed only: the clamp held the stored answer exactly at the 10 percent band (deviation equals the bound)
   extra: BigInt                    # the unindexed int80 of the four-argument AnswerUpdated (mGLOBAL growth), else null
   totalAssets: BigInt              # DERIVED only: vault totalAssets() at the event block
   totalSupply: BigInt              # DERIVED only: vault totalSupply() at the event block
@@ -172,7 +174,8 @@ type Poster @entity(immutable: false) {
 type RateChange @entity(immutable: true) {
   id: Bytes!                       # tx hash ++ logIndex
   feed: Feed!
-  ratePPM: Int!
+  ratePPM: Int!                    # Frankencoin: RateChanged.newRate; Sky: the annualised ssr in parts per million, derived in f64 from the ray
+  rateRaw: BigInt                  # Sky only: the per-second RAY rate of File(ssr)
   applier: Bytes!                  # transaction.from
   proposal: RateProposal           # the latest RateProposal with the same rate and nextChange <= blockTimestamp
   block: BigInt!

@@ -9,13 +9,20 @@
     "raw/graph-feasibility-chain-checks-2026-09-01.md",
     "raw/openeden-tbill-oracle-usdo-rpc-2026-09-02.md",
     "raw/ondo-ousg-oracle-rpc-2026-09-02.md",
-    "raw/superstate-ustb-uscc-oracle-rpc-2026-09-02.md"
+    "raw/superstate-ustb-uscc-oracle-rpc-2026-09-02.md",
+    "config/hashnote-mainnet.json",
+    "config/backed-mainnet.json",
+    "config/centrifuge-mainnet.json",
+    "raw/ethena-susde-feeds-rpc-2026-09-02.md",
+    "raw/sky-susds-sdai-stusds-spbeam-rpc-2026-09-02.md",
+    "raw/hashnote-usyc-oracle-rpc-2026-09-02.md",
+    "raw/centrifuge-v3-share-price-rpc-2026-09-02.md"
   ],
   "counts": {
     "feeds": {
-      "value": 64,
+      "value": 73,
       "status": "exact",
-      "note": "60 Midas POSTED, OpenEden TBILL, Ondo OUSG, Superstate USTB, plus svZCHF"
+      "note": "60 Midas, OpenEden, Ondo, Superstate, Hashnote USYC, 4 Backed, Centrifuge JTRSY and JAAA (POSTED); svZCHF, sUSDe, sUSDS (DERIVED)"
     },
     "rounds_posted": {
       "value": 2535,
@@ -113,6 +120,29 @@
       "value": 1056,
       "status": "expected",
       "note": "OpenEden UpdateCloseNavPrice events, all guarded; 0 manual, 0 Chainlink-ignored"
+    },
+    "rounds_hashnote": {
+      "value": 503,
+      "status": "expected",
+      "note": "503 AnswerUpdated since block 20,626,973, round 503 at 2026-09-01 12:38 UTC; all path UNCHECKED (no guard), attributed by the transmit call handler with the reporter proxy as caller, or from the relay selector on the outer transaction; overBound 0"
+    },
+    "rounds_backed": {
+      "status": "recorded at capture",
+      "note": "four feeds (bC3M from 17,676,542; ERNX, ERNA from 19,368,3xx; bNVDA from 20,190,090); path SAFE via updateAnswer; rounds with atBound true are the clamped posts the engine reports"
+    },
+    "rounds_centrifuge": {
+      "value": 292,
+      "status": "expected",
+      "note": "JTRSY 146 and JAAA 146 UpdateSharePrice transactions at head (145 Hub multicalls plus 1 Safe setup each); one event per transaction assumed, confirmed at capture; path UNCHECKED, attributed by the Spoke call handler with the Hub as caller"
+    },
+    "rounds_ethena": {
+      "status": "recorded at capture",
+      "note": "one PROTOCOL round per RewardsReceived since block 19,026,137 (about every 8 hours), answer convertToAssets(1e18)"
+    },
+    "rate_changes_sky": {
+      "value": 18,
+      "status": "expected",
+      "note": "18 File(ssr) events on sUSDS all time (9 since 23,264,565), each with a PROTOCOL round"
     }
   },
   "over_bound_per_feed": {
@@ -266,6 +296,30 @@
         "tx": "0x3153e6c663166334042cf6a0e59aae6c32f0dc0db506589414d3393adb7550f7",
         "block": 25882646
       }
+    },
+    {
+      "feed": "0x74f2199AEb743f68f05943e5715A33EaF2b61f53",
+      "product": "USYC",
+      "roundId": 503,
+      "expect": {
+        "answer": "1135836026647586904",
+        "updatedAt": "1788266291",
+        "path": "UNCHECKED",
+        "attributedBy": "CALL",
+        "caller": "0x9fde717a21c5b272b8956d3aa0c3551e1ffd23d7",
+        "poster": "0xdbe01f447040f78ccbc8dfd101bec1a2c21f800d",
+        "overBound": false
+      }
+    },
+    {
+      "feed": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+      "product": "sUSDe",
+      "note": "the round at block 25884197 (tx 0xa0f55bffe8bac071723767830193cce1ba60fa7bb82ecfc824698c55f7c19e87) reads answer 1246044511148265715, totalAssets 1360540178210757799734799363, extra 57440000000000000000000, trigger REWARDS_RECEIVED"
+    },
+    {
+      "feed": "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD",
+      "product": "sUSDS",
+      "note": "the RateChange of tx 0x12435f652eeb08f9de4f4b6402a88de38ac092aef2a6656c87ed0be2f6f6619b (block 25596101) reads rateRaw 1000000001096988989836188433, ratePPM 35200"
     }
   ]
 }

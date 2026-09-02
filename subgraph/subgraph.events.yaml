@@ -2585,6 +2585,313 @@ dataSources:
           handler: handleSetMaximumAcceptablePriceDelta
       file: ./src/superstate.ts
   - kind: ethereum/contract
+    name: Hashnote_USYC_aggregator18
+    network: mainnet
+    source:
+      address: '0x74f2199AEb743f68f05943e5715A33EaF2b61f53'
+      abi: HashnoteAggregator
+      startBlock: 20530942
+    context:
+      issuer:
+        type: String
+        data: 'Hashnote'
+      product:
+        type: String
+        data: 'USYC'
+      registryKey:
+        type: String
+        data: 'aggregator18'
+      relay:
+        type: String
+        data: '0x9fde717a21c5b272b8956d3aa0c3551e1ffd23d7'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Upgrade
+        - BoundChange
+        - Poster
+      abis:
+        - name: HashnoteAggregator
+          file: ./abis/HashnoteAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: Initialized(uint8)
+          handler: handleInitialized
+        - event: Upgraded(indexed address)
+          handler: handleUpgraded
+      file: ./src/hashnote.ts
+  - kind: ethereum/contract
+    name: Backed_bC3M_oracle
+    network: mainnet
+    source:
+      address: '0x83Ec02059F686E747392A22ddfED7833bA0d7cE3'
+      abi: BackedOracle
+      startBlock: 17676542
+    context:
+      issuer:
+        type: String
+        data: 'Backed'
+      product:
+        type: String
+        data: 'bC3M'
+      registryKey:
+        type: String
+        data: 'oracle'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Upgrade
+        - BoundChange
+        - Poster
+      abis:
+        - name: BackedOracle
+          file: ./abis/BackedOracle.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: Initialized(uint8)
+          handler: handleInitialized
+        - event: Upgraded(indexed address)
+          handler: handleUpgraded
+      file: ./src/backed.ts
+  - kind: ethereum/contract
+    name: Backed_ERNX_oracle
+    network: mainnet
+    source:
+      address: '0x475855DAe09af1e3f2d380d766b9E630926ad3CE'
+      abi: BackedOracle
+      startBlock: 19368300
+    context:
+      issuer:
+        type: String
+        data: 'Backed'
+      product:
+        type: String
+        data: 'ERNX'
+      registryKey:
+        type: String
+        data: 'oracle'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Upgrade
+        - BoundChange
+        - Poster
+      abis:
+        - name: BackedOracle
+          file: ./abis/BackedOracle.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: Initialized(uint8)
+          handler: handleInitialized
+        - event: Upgraded(indexed address)
+          handler: handleUpgraded
+      file: ./src/backed.ts
+  - kind: ethereum/contract
+    name: Backed_ERNA_oracle
+    network: mainnet
+    source:
+      address: '0x2674Cc47786740432b895a70D92CFDfB1d5BF798'
+      abi: BackedOracle
+      startBlock: 19368312
+    context:
+      issuer:
+        type: String
+        data: 'Backed'
+      product:
+        type: String
+        data: 'ERNA'
+      registryKey:
+        type: String
+        data: 'oracle'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Upgrade
+        - BoundChange
+        - Poster
+      abis:
+        - name: BackedOracle
+          file: ./abis/BackedOracle.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: Initialized(uint8)
+          handler: handleInitialized
+        - event: Upgraded(indexed address)
+          handler: handleUpgraded
+      file: ./src/backed.ts
+  - kind: ethereum/contract
+    name: Backed_bNVDA_oracle
+    network: mainnet
+    source:
+      address: '0x1D3be4d05Eba2aA6c4eEdE85a74f491C31766E64'
+      abi: BackedOracle
+      startBlock: 20190090
+    context:
+      issuer:
+        type: String
+        data: 'Backed'
+      product:
+        type: String
+        data: 'bNVDA'
+      registryKey:
+        type: String
+        data: 'oracle'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Upgrade
+        - BoundChange
+        - Poster
+      abis:
+        - name: BackedOracle
+          file: ./abis/BackedOracle.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: Initialized(uint8)
+          handler: handleInitialized
+        - event: Upgraded(indexed address)
+          handler: handleUpgraded
+      file: ./src/backed.ts
+  - kind: ethereum/contract
+    name: Centrifuge_spoke_sharePrice
+    network: mainnet
+    source:
+      address: '0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB'
+      abi: CentrifugeSpoke
+      startBlock: 24319323
+    context:
+      issuer:
+        type: String
+        data: 'Centrifuge'
+      product:
+        type: String
+        data: 'JTRSY'
+      registryKey:
+        type: String
+        data: 'sharePrice'
+      feeds:
+        type: String
+        data: '0x8c213ee79581Ff4984583C6a801e5263418C4b86:281474976710662:0x00010000000000060000000000000001:JTRSY,0x5a0F93D040De44e78F251b03c43be9CF317Dcf64:281474976710663:0x00010000000000070000000000000001:JAAA'
+      hub:
+        type: String
+        data: '0xa4a7bb3831958463b3fe3e27a6a160f764341953'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Poster
+      abis:
+        - name: CentrifugeSpoke
+          file: ./abis/CentrifugeSpoke.json
+      eventHandlers:
+        - event: UpdateSharePrice(indexed uint64,indexed bytes16,uint128,uint64)
+          handler: handleUpdateSharePrice
+      file: ./src/centrifuge.ts
+  - kind: ethereum/contract
+    name: Ethena_sUSDe_stakedUSDe
+    network: mainnet
+    source:
+      address: '0x9D39A5DE30e57443BfF2A8307A4256c8797A3497'
+      abi: StakedUSDe
+      startBlock: 19026137
+    context:
+      issuer:
+        type: String
+        data: 'Ethena'
+      product:
+        type: String
+        data: 'sUSDe'
+      registryKey:
+        type: String
+        data: 'stakedUSDe'
+      inputsFrom:
+        type: String
+        data: '0xf2fa332bD83149c66b09B45670bCe64746C6b439'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - VaultFlow
+      abis:
+        - name: StakedUSDe
+          file: ./abis/StakedUSDe.json
+      eventHandlers:
+        - event: RewardsReceived(uint256)
+          handler: handleRewardsReceived
+      file: ./src/ethena.ts
+  - kind: ethereum/contract
+    name: Sky_sUSDS_susds
+    network: mainnet
+    source:
+      address: '0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD'
+      abi: SUsds
+      startBlock: 20677434
+    context:
+      issuer:
+        type: String
+        data: 'Sky'
+      product:
+        type: String
+        data: 'sUSDS'
+      registryKey:
+        type: String
+        data: 'susds'
+      inputsFrom:
+        type: String
+        data: '0x36B072ed8AFE665E3Aa6DaBa79Decbec63752b22'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - RateChange
+      abis:
+        - name: SUsds
+          file: ./abis/SUsds.json
+      eventHandlers:
+        - event: File(indexed bytes32,uint256)
+          handler: handleFile
+      file: ./src/sky.ts
+  - kind: ethereum/contract
     name: Frankencoin_svZCHF_savings
     network: mainnet
     source:
