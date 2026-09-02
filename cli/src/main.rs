@@ -759,16 +759,23 @@ fn replay_midas(opts: MidasOpts) -> Result<(), String> {
             opts.rpc_delay_ms,
         )),
     };
-    let mut trace_client = opts.trace_endpoint.as_ref().map(|url| {
-        Client::new(
+    // Traces come from the same bundle on a replay, else from the trace
+    // endpoint when one was given.
+    let mut trace_bundle = match &opts.from_bundle {
+        Some(bundle) => Some(source::BundleSource::open(bundle)?),
+        None => None,
+    };
+    let mut trace_net = match (&opts.from_bundle, &opts.trace_endpoint) {
+        (None, Some(url)) => Some(Client::new(
             vec![url.clone()],
             Vec::new(),
             Cache::new(verify_root.join("cache")),
             list.chain_id,
             opts.offline,
             opts.rpc_delay_ms,
-        )
-    });
+        )),
+        _ => None,
+    };
 
     let outcome = run_midas::run(
         client.as_mut(),
@@ -782,7 +789,10 @@ fn replay_midas(opts: MidasOpts) -> Result<(), String> {
             feed_list_source: opts.feeds.display().to_string(),
             stale_after_days: opts.stale_after_days,
             recent_days: opts.recent_days,
-            trace: trace_client.as_mut().map(|c| c as &mut dyn rpc::ReadSource),
+            trace: trace_bundle
+                .as_mut()
+                .map(|c| c as &mut dyn rpc::ReadSource)
+                .or_else(|| trace_net.as_mut().map(|c| c as &mut dyn rpc::ReadSource)),
         },
         &verify_root,
     )?;

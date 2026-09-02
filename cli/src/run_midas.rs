@@ -75,6 +75,8 @@ fn kind_name(kind: &str) -> &'static str {
         "GUARD_INCONSISTENT" => "GUARD_INCONSISTENT",
         "GUARD_AT_BOUND" => "GUARD_AT_BOUND",
         "GUARD_CLAMPED" => "GUARD_CLAMPED",
+        "UNGUARDED_REFERENCE_MOVE" => "UNGUARDED_REFERENCE_MOVE",
+        "OVERRIDE_FLAG_SET" => "OVERRIDE_FLAG_SET",
         "BOUND_CHANGED" => "BOUND_CHANGED",
         "BOUND_HISTORY_INCONSISTENT" => "BOUND_HISTORY_INCONSISTENT",
         "FAILED_SETTER" => "FAILED_SETTER",
@@ -98,12 +100,16 @@ fn timeline_name(entry: &FeedEntry) -> String {
     format!("{}-{}", entry.product, entry.key)
 }
 
+#[allow(clippy::too_many_arguments)]
 fn feed_report(
     inputs: &FeedInputs,
     block_timestamp: u64,
     stale_after_seconds: u64,
     recent_seconds: u64,
     spacing_seconds: Option<u64>,
+    reference_guard: bool,
+    absolute_guard: bool,
+    event_rules: Option<&BTreeMap<String, i128>>,
 ) -> FeedReport {
     let entry = &inputs.entry;
     let name = entry.name();
@@ -203,6 +209,10 @@ fn feed_report(
                 bound_at_b1: inputs.bounds.map(|b| b.max_answer_deviation),
                 spacing_seconds,
                 clamp_band: inputs.clamp_band,
+                reference_guard,
+                reference_moves: &inputs.reference_moves,
+                absolute_guard,
+                event_rules,
                 rounds: &inputs.rounds,
                 failed: &inputs.failed,
                 states: &inputs.states,
@@ -214,8 +224,13 @@ fn feed_report(
             });
             let live = live.unwrap_or(Liveness::Stale);
             let bypasses = replay.bypass_posts_external + replay.bypass_posts_internal;
-            let (verdict, posting_path, action) =
-                feed_verdict(false, bypasses, replay.unattributed, live);
+            let (verdict, posting_path, action) = feed_verdict(
+                false,
+                bypasses,
+                replay.unattributed,
+                live,
+                inputs.kind == FeedKind::Bounded,
+            );
             let timeline_name = timeline_name(entry);
             let timeline = json!({
                 "feed": name,
@@ -249,6 +264,9 @@ fn feed_report(
             value["unguarded_posts"] = json!(replay.unguarded_posts);
             value["at_bound_posts"] = json!(replay.at_bound_posts);
             value["clamped_posts"] = json!(replay.clamped_posts);
+            value["reference_moves"] = json!(replay.reference_moves);
+            value["unguarded_reference_moves"] = json!(replay.unguarded_reference_moves);
+            value["override_flags"] = json!(replay.override_flags);
             value["bound_changes"] = json!(replay.bound_changes);
             value["other_transactions"] = json!(inputs.other);
             value["findings"] = json!(replay.findings);
@@ -342,6 +360,19 @@ pub fn run(
                     .spacing_rule
                     .as_ref()
                     .map(|rule| rule.seconds),
+                args.mechanism
+                    .guard
+                    .as_ref()
+                    .is_some_and(|g| g.is_reference()),
+                args.mechanism
+                    .guard
+                    .as_ref()
+                    .is_some_and(|g| g.is_absolute()),
+                args.mechanism
+                    .guard
+                    .as_ref()
+                    .filter(|g| g.is_event_rules())
+                    .map(|g| &g.rules),
             )
         })
         .collect();
@@ -382,6 +413,9 @@ pub fn run(
     let mut at_bound = 0usize;
     let mut clamped = 0usize;
     let mut feeds_at_bound = 0usize;
+    let mut reference_moves = 0usize;
+    let mut unguarded_reference_moves = 0usize;
+    let mut override_flags = 0usize;
     let mut unattributed = 0usize;
     let mut findings_count = 0usize;
     let mut kind_counts: BTreeMap<&str, usize> = BTreeMap::new();
@@ -424,6 +458,9 @@ pub fn run(
         unguarded += replay.unguarded_posts;
         at_bound += replay.at_bound_posts;
         clamped += replay.clamped_posts;
+        reference_moves += replay.reference_moves;
+        unguarded_reference_moves += replay.unguarded_reference_moves;
+        override_flags += replay.override_flags;
         if replay.at_bound_posts + replay.clamped_posts > 0 {
             feeds_at_bound += 1;
         }
@@ -449,6 +486,19 @@ pub fn run(
     let survey_line = match guard_kind {
         "clamp" => format!(
             "{feeds_read} feeds replayed, {at_bound} posts exactly on the clamp band on {feeds_at_bound} feeds, {clamped} truncated on chain, {} failed posts",
+            total.failed
+        ),
+        "reference" => format!(
+            "{feeds_read} feeds replayed, {bypass_total} unchecked posts over the reference bound on {feeds_with_bypass} feeds, {reference_moves} reference moves, {unguarded_reference_moves} of them without the on-chain check"
+        ),
+        "absolute_delta" => format!(
+            "{feeds_read} feeds replayed, {rounds_total} rounds within the delta cap, {} over it, {override_flags} override flags set, {} failed posts",
+            kind_counts.get("GUARD_INCONSISTENT").copied().unwrap_or(0) + bypass_total,
+            total.failed
+        ),
+        "event_rules" => format!(
+            "{feeds_read} feeds replayed, {rounds_total} rounds, {} of them breaking a rule of the feed, {} failed posts",
+            kind_counts.get("GUARD_INCONSISTENT").copied().unwrap_or(0) + bypass_total,
             total.failed
         ),
         "none" => format!(
@@ -496,6 +546,9 @@ pub fn run(
         "at_bound_posts": at_bound,
         "clamped_posts": clamped,
         "feeds_at_bound": feeds_at_bound,
+        "reference_moves": reference_moves,
+        "unguarded_reference_moves": unguarded_reference_moves,
+        "override_flags": override_flags,
         "guard_kind": guard_kind,
         "recent": {"days": args.recent_days, "posts": recent_posts, "feeds": recent_feeds},
         "liveness": liveness_counts,

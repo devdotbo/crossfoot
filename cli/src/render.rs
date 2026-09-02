@@ -1682,14 +1682,7 @@ fn feed_row(run: &Run, feed: Option<&Value>) -> Value {
             s(Some(feed), "liveness"),
             s(Some(feed), "consumer_action"),
             s(Some(feed), "nav_recomputation"),
-            Some(format!(
-                "{} unchecked post(s) over the bound in force, posting path {}, liveness {}",
-                feed.get("bypass_posts")
-                    .and_then(Value::as_u64)
-                    .unwrap_or(0),
-                s(Some(feed), "posting_path").unwrap_or("n/a".into()),
-                s(Some(feed), "liveness").unwrap_or("n/a".into())
-            )),
+            Some(feed_headline(result, feed)),
             s(Some(feed), "timeline_file")
                 .map(|file| format!("data/timelines/{}", file.trim_start_matches("timelines/"))),
         ),
@@ -1765,6 +1758,8 @@ fn feed_row(run: &Run, feed: Option<&Value>) -> Value {
         "consumer_action": action,
         "nav_recomputation": nav,
         "headline": headline_text,
+        "guard_kind": guard_kind(result),
+        "family_name": str_at(result, &["family", "name"]),
         "bundle": run.name,
         "bundle_root": run.root_hash,
         "result_path": format!("bundles/{}/result.json", run.name),
@@ -1773,6 +1768,60 @@ fn feed_row(run: &Run, feed: Option<&Value>) -> Value {
         "baseline_block": u64_at(result, &["window", "baseline_block"]),
         "timeline_file": timeline,
     })
+}
+
+/// The guard kind of a family run: the mechanism's guard kind, `none`
+/// when the family has no guard, absent on other targets.
+fn guard_kind(result: &Value) -> Option<String> {
+    let mechanism = result.get("family")?.get("mechanism")?;
+    Some(match mechanism.get("guard") {
+        Some(Value::Object(guard)) => guard
+            .get("kind")
+            .and_then(Value::as_str)
+            .unwrap_or("max_deviation")
+            .to_string(),
+        _ => "none".to_string(),
+    })
+}
+
+/// One sentence per feed that says what was replayed, in the words of the
+/// guard kind: the number of posts and keys without a guard, the clamp
+/// band and at-bound posts under a clamp, the unchecked posts over the
+/// bound otherwise.
+fn feed_headline(result: &Value, feed: &Value) -> String {
+    let n = |key: &str| feed.get(key).and_then(Value::as_u64).unwrap_or(0);
+    let rounds = n("rounds_total");
+    let keys = feed
+        .get("poster_addresses")
+        .and_then(Value::as_array)
+        .map(|a| a.len())
+        .unwrap_or(0);
+    let liveness = feed
+        .get("liveness")
+        .and_then(Value::as_str)
+        .unwrap_or("n/a");
+    match guard_kind(result).as_deref() {
+        Some("none") => format!(
+            "no on-chain deviation check; {rounds} post(s) by {keys} key(s), liveness {liveness}"
+        ),
+        Some("clamp") => format!(
+            "{rounds} post(s) under a clamp, {} exactly on the band, {} truncated on chain, liveness {liveness}",
+            n("at_bound_posts"),
+            n("clamped_posts")
+        ),
+        Some("reference") => format!(
+            "{rounds} post(s) within the bound against the reference, {} reference move(s), {} without the on-chain check, liveness {liveness}",
+            n("reference_moves"),
+            n("unguarded_reference_moves")
+        ),
+        _ => format!(
+            "{} unchecked post(s) over the bound in force, posting path {}, liveness {liveness}",
+            n("bypass_posts"),
+            feed.get("posting_path")
+                .and_then(Value::as_str)
+                .unwrap_or("n/a")
+        ),
+    }
 }
 
 fn write_data_files(runs: &[Run], out_dir: &Path) -> Result<Vec<PathBuf>, String> {

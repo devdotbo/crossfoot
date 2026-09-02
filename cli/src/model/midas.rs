@@ -73,6 +73,8 @@ pub struct SetterTx {
     pub selector: String,
     /// The first int256 word of the calldata, when present.
     pub value: Option<i128>,
+    /// The setter's override flag, when the family has one.
+    pub flag: Option<bool>,
     pub failed: bool,
 }
 
@@ -85,6 +87,33 @@ pub struct RoundEvent {
     pub block: u64,
     pub log_index: u64,
     pub transaction_hash: String,
+    /// Extra named event fields a family's guard reads (config `fields`).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub fields: BTreeMap<String, i128>,
+}
+
+/// A move of the guard's reference value (a family whose guard compares
+/// against a second on-chain value the same operator maintains).
+#[derive(Debug, Clone, Serialize)]
+pub struct ReferenceMove {
+    pub block: u64,
+    pub log_index: u64,
+    pub timestamp: u64,
+    pub transaction_hash: String,
+    pub old: i128,
+    pub new: i128,
+    /// Through the checked setter (bounded) or the unchecked one.
+    pub checked: bool,
+}
+
+/// The reference guard's formula: |reference - value| over the mean of the
+/// two, as a percentage at 10^decimals precision.
+pub fn deviation_over_mean(reference: i128, value: i128, one: i128) -> Option<i128> {
+    let mean = (reference + value) / 2;
+    if mean == 0 {
+        return None;
+    }
+    Some(((reference - value).abs() * one * 100) / mean)
 }
 
 /// How a round's transaction was resolved to a posting call.
@@ -109,6 +138,8 @@ pub struct Attribution {
     pub path: PostPath,
     pub selector: String,
     pub value: Option<i128>,
+    /// The setter's override flag, when the family has one.
+    pub flag: Option<bool>,
     /// The externally owned account that sent the outer transaction.
     pub sender: String,
     /// Executor EOA, each Safe, then the feed; empty on an external post.
@@ -205,6 +236,18 @@ pub fn implied_bounds(segments: &[BoundSegment], block: u64) -> Option<Bounds> {
         .map(|segment| segment.bounds)
 }
 
+/// Under a reference guard every round after the first needs the reference
+/// and the bound at block minus one.
+pub fn all_blocks_after_first(rounds: &[AttributedRound]) -> Vec<u64> {
+    rounds
+        .iter()
+        .skip(1)
+        .map(|r| r.event.block.saturating_sub(1))
+        .collect::<BTreeSet<u64>>()
+        .into_iter()
+        .collect()
+}
+
 /// Which blocks need a state read at block minus one: every unchecked post
 /// after the first successful post, and every checked post whose naive
 /// deviation against the previous round exceeds the bound at B1.
@@ -296,9 +339,13 @@ pub fn classify_bypass(
 /// R16 posting path words.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PostingPath {
+    /// A guard was replayed on every round and held.
     Guarded,
     AdminGuardBypassed,
     Unattributed,
+    /// Every round is attributed to a known poster; the family has no
+    /// on-chain check to replay.
+    Attributed,
 }
 
 impl PostingPath {
@@ -307,6 +354,7 @@ impl PostingPath {
             PostingPath::Guarded => "GUARDED",
             PostingPath::AdminGuardBypassed => "ADMIN_GUARD_BYPASSED",
             PostingPath::Unattributed => "UNATTRIBUTED",
+            PostingPath::Attributed => "ATTRIBUTED",
         }
     }
 }
@@ -317,13 +365,16 @@ pub fn feed_verdict(
     bypasses: usize,
     unattributed: usize,
     liveness: Liveness,
+    guarded: bool,
 ) -> (&'static str, PostingPath, &'static str) {
     let posting_path = if bypasses > 0 {
         PostingPath::AdminGuardBypassed
     } else if unattributed > 0 {
         PostingPath::Unattributed
-    } else {
+    } else if guarded {
         PostingPath::Guarded
+    } else {
+        PostingPath::Attributed
     };
     let verdict = if unreadable {
         "INPUT_GAP"
@@ -382,6 +433,21 @@ pub struct FeedReplayInput<'a> {
     pub bound_at_b1: Option<i128>,
     /// The checked path's minimum spacing, when the family has that rule.
     pub spacing_seconds: Option<u64>,
+    /// For a reference guard: the deviation of every round is measured
+    /// against the reference getter read at block minus one (carried in
+    /// `StateAtBlock.last_answer`) with `deviation_over_mean`, never against
+    /// the previous round.
+    pub reference_guard: bool,
+    /// Moves of the reference value, for a reference guard.
+    pub reference_moves: &'a [ReferenceMove],
+    /// For an absolute delta guard: the cap read at block minus one sits in
+    /// `StateAtBlock.bound` in answer units and the previous round's answer
+    /// in `last_answer`.
+    pub absolute_guard: bool,
+    /// For an event-rules guard: the constants; every rule is replayed from
+    /// the round's own fields (`old`, `ref_old`, `ref_new`, `ref_old_round`,
+    /// `ref_new_round`).
+    pub event_rules: Option<&'a BTreeMap<String, i128>>,
     /// For a clamp guard: the band at 10^decimals scale. The stored answer
     /// can never exceed the previous one by more than this; an answer that
     /// sits exactly on the band, or a posted value the contract truncated,
@@ -411,6 +477,9 @@ pub struct FeedReplay {
     pub unguarded_posts: usize,
     pub at_bound_posts: usize,
     pub clamped_posts: usize,
+    pub reference_moves: usize,
+    pub unguarded_reference_moves: usize,
+    pub override_flags: usize,
     pub bound_changes: usize,
     pub unattributed: usize,
     pub poster_addresses: Vec<String>,
@@ -450,6 +519,8 @@ pub fn replay_feed(input: &FeedReplayInput) -> FeedReplay {
     let mut unguarded = 0usize;
     let mut at_bound = 0usize;
     let mut clamped = 0usize;
+    let mut unguarded_reference = 0usize;
+    let mut override_flags = 0usize;
     let mut classifications: BTreeMap<String, usize> = BTreeMap::new();
     let mut posters: BTreeSet<String> = BTreeSet::new();
     let mut bound_samples: BTreeMap<u64, i128> = BTreeMap::new();
@@ -530,6 +601,14 @@ pub fn replay_feed(input: &FeedReplayInput) -> FeedReplay {
             })
         };
 
+        if round.attribution.flag == Some(true) {
+            let mut finding = base(round);
+            finding["kind"] = json!("OVERRIDE_FLAG_SET");
+            finding["note"] = json!("the setter was called with its override flag set");
+            override_flags += 1;
+            findings.push(finding);
+        }
+
         if index == 0 {
             // R7: the guard is skipped when no round exists.
             if path.is_unchecked() {
@@ -575,6 +654,187 @@ pub fn replay_feed(input: &FeedReplayInput) -> FeedReplay {
             }
         }
 
+        if input.absolute_guard {
+            // An absolute delta guard: |value - previous| against the cap read
+            // at block minus one, both in answer units.
+            let Some(state) = state else {
+                let mut finding = base(round);
+                finding["kind"] = json!("ATTRIBUTION_GAP");
+                finding["rule"] = json!("state_unread");
+                row.finding = Some("ATTRIBUTION_GAP".to_string());
+                findings.push(finding);
+                timeline.push(row);
+                continue;
+            };
+            bound_samples.insert(state.block, state.bound);
+            let delta = (round.event.answer - last_answer).abs();
+            row.deviation_in_force = Some(delta.to_string());
+            row.bound_in_force = Some(state.bound.to_string());
+            if delta > state.bound {
+                let mut finding = base(round);
+                finding["last_answer_at_block_minus_one"] = json!(last_answer.to_string());
+                finding["deviation_in_force"] = json!(delta.to_string());
+                finding["bound_in_force"] = json!(state.bound.to_string());
+                finding["same_block"] = json!(same_block);
+                finding["initialization"] = json!(false);
+                if path.is_unchecked() {
+                    finding["kind"] = json!("GUARD_BYPASS");
+                    finding["classification"] = json!("valuation_move");
+                    *classifications
+                        .entry("valuation_move".to_string())
+                        .or_insert(0) += 1;
+                    if external {
+                        bypass_external += 1;
+                    } else {
+                        bypass_internal += 1;
+                    }
+                    if round.event.timestamp >= recent_from {
+                        bypass_recent += 1;
+                    }
+                    row.finding = Some("GUARD_BYPASS".to_string());
+                } else {
+                    finding["kind"] = json!("GUARD_INCONSISTENT");
+                    finding["rule"] = json!("absolute_delta");
+                    row.finding = Some("GUARD_INCONSISTENT".to_string());
+                }
+                findings.push(finding);
+            }
+            timeline.push(row);
+            continue;
+        }
+        if let Some(rules) = input.event_rules {
+            // Every rule replays from the event's own fields.
+            let get = |name: &str| round.event.fields.get(name).copied();
+            let bps = |from: i128, to: i128| -> Option<i128> {
+                if from == 0 {
+                    return None;
+                }
+                Some((to - from) * 10_000 / from)
+            };
+            let max_move = rules.get("max_move_bps").copied().unwrap_or(i128::MAX);
+            let relative = rules.get("relative_bps").copied();
+            let relative_skip = rules.get("relative_skip_bps").copied().unwrap_or(i128::MAX);
+            let min_spacing = rules.get("min_spacing_seconds").copied().unwrap_or(0) as u64;
+            let old = get("old").unwrap_or(last_answer);
+            let move_bps = bps(old, round.event.answer).unwrap_or(i128::MAX);
+            let ref_move = match (get("ref_old"), get("ref_new")) {
+                (Some(a), Some(b)) => bps(a, b),
+                _ => None,
+            };
+            row.deviation_in_force = Some((move_bps.abs() * one / 100).to_string());
+            row.bound_in_force = Some((max_move * one / 100).to_string());
+            let mut broken: Vec<&str> = Vec::new();
+            if old != last_answer {
+                broken.push("old_price_is_not_the_previous_round");
+            }
+            if move_bps.abs() > max_move {
+                broken.push("max_move");
+            }
+            if let (Some(relative), Some(ref_move)) = (relative, ref_move) {
+                if ref_move.abs() <= relative_skip && (move_bps - ref_move).abs() > relative {
+                    broken.push("relative_to_reference");
+                }
+            }
+            let gap = round
+                .event
+                .timestamp
+                .saturating_sub(previous.event.timestamp);
+            if gap < min_spacing {
+                broken.push("spacing");
+            }
+            if let (Some(a), Some(b)) = (get("ref_old_round"), get("ref_new_round")) {
+                if a == b {
+                    broken.push("reference_round_unchanged");
+                }
+            }
+            if !broken.is_empty() {
+                let mut finding = base(round);
+                finding["kind"] = json!(if path.is_unchecked() {
+                    "GUARD_BYPASS"
+                } else {
+                    "GUARD_INCONSISTENT"
+                });
+                finding["rule"] = json!(broken.join(","));
+                finding["move_bps"] = json!(move_bps);
+                finding["reference_move_bps"] = json!(ref_move);
+                finding["gap_seconds"] = json!(gap);
+                finding["last_answer_at_block_minus_one"] = json!(last_answer.to_string());
+                finding["deviation_in_force"] = json!((move_bps.abs() * one / 100).to_string());
+                finding["bound_in_force"] = json!((max_move * one / 100).to_string());
+                finding["same_block"] = json!(same_block);
+                finding["initialization"] = json!(false);
+                if path.is_unchecked() {
+                    finding["classification"] = json!("valuation_move");
+                    bypass_external += usize::from(external);
+                    bypass_internal += usize::from(!external);
+                    row.finding = Some("GUARD_BYPASS".to_string());
+                } else {
+                    row.finding = Some("GUARD_INCONSISTENT".to_string());
+                }
+                findings.push(finding);
+            }
+            timeline.push(row);
+            continue;
+        }
+        if input.reference_guard {
+            // A reference guard: the bound applies against a second on-chain
+            // value read at block minus one, not against the previous round.
+            let Some(state) = state else {
+                let mut finding = base(round);
+                finding["kind"] = json!("ATTRIBUTION_GAP");
+                finding["rule"] = json!("state_unread");
+                finding["note"] = json!("the reference and bound at block minus one were not read");
+                row.finding = Some("ATTRIBUTION_GAP".to_string());
+                findings.push(finding);
+                timeline.push(row);
+                continue;
+            };
+            bound_samples.insert(state.block, state.bound);
+            let dev = deviation_over_mean(state.last_answer, round.event.answer, one)
+                .unwrap_or(i128::MAX);
+            row.deviation_in_force = Some(dev.to_string());
+            row.bound_in_force = Some(state.bound.to_string());
+            let mut finding = base(round);
+            finding["reference_at_block_minus_one"] = json!(state.last_answer.to_string());
+            finding["last_answer_at_block_minus_one"] = json!(last_answer.to_string());
+            finding["deviation_in_force"] = json!(dev.to_string());
+            finding["deviation_percent"] = json!(percent(dev, one));
+            finding["bound_in_force"] = json!(state.bound.to_string());
+            finding["bound_percent"] = json!(percent(state.bound, one));
+            finding["same_block"] = json!(same_block);
+            finding["initialization"] = json!(false);
+            if path.is_unchecked() {
+                if dev > state.bound {
+                    finding["kind"] = json!("GUARD_BYPASS");
+                    finding["classification"] = json!("valuation_move");
+                    *classifications
+                        .entry("valuation_move".to_string())
+                        .or_insert(0) += 1;
+                    if external {
+                        bypass_external += 1;
+                    } else {
+                        bypass_internal += 1;
+                    }
+                    if round.event.timestamp >= recent_from {
+                        bypass_recent += 1;
+                    }
+                    row.finding = Some("GUARD_BYPASS".to_string());
+                } else {
+                    finding["kind"] = json!("UNGUARDED_POST");
+                    finding["classification"] = json!("within_bound");
+                    unguarded += 1;
+                    row.finding = Some("UNGUARDED_POST".to_string());
+                }
+                findings.push(finding);
+            } else if dev > state.bound {
+                finding["kind"] = json!("GUARD_INCONSISTENT");
+                finding["rule"] = json!("reference_bound");
+                row.finding = Some("GUARD_INCONSISTENT".to_string());
+                findings.push(finding);
+            }
+            timeline.push(row);
+            continue;
+        }
         if let Some(band) = input.clamp_band {
             // A clamp guard: the contract truncates instead of reverting, so
             // the series itself carries the evidence. A zero previous answer
@@ -725,6 +985,42 @@ pub fn replay_feed(input: &FeedReplayInput) -> FeedReplay {
         timeline.push(row);
     }
 
+    // Reference moves: the unchecked setter is a finding on its own; a
+    // checked move is measured against the bound at B1 with the reference
+    // formula (the bound history of the family says whether it changed).
+    for mv in input.reference_moves {
+        if !mv.checked {
+            unguarded_reference += 1;
+            findings.push(json!({
+                "kind": "UNGUARDED_REFERENCE_MOVE",
+                "feed": input.feed_name,
+                "transaction_hash": mv.transaction_hash,
+                "block": mv.block,
+                "timestamp_unix": mv.timestamp,
+                "old": mv.old.to_string(),
+                "new": mv.new.to_string(),
+                "note": "the reference value the guard compares against was set through the setter without the on-chain check",
+            }));
+            continue;
+        }
+        let dev = deviation_over_mean(mv.old, mv.new, one).unwrap_or(0);
+        if input.bound_at_b1.is_some_and(|bound| dev > bound) {
+            findings.push(json!({
+                "kind": "GUARD_INCONSISTENT",
+                "feed": input.feed_name,
+                "rule": "reference_move",
+                "transaction_hash": mv.transaction_hash,
+                "block": mv.block,
+                "timestamp_unix": mv.timestamp,
+                "old": mv.old.to_string(),
+                "new": mv.new.to_string(),
+                "deviation_in_force": dev.to_string(),
+                "deviation_percent": percent(dev, one),
+                "bound_in_force": input.bound_at_b1.map(|b| b.to_string()),
+            }));
+        }
+    }
+
     // R12: bound changes from the event groups.
     let mut bound_changes = 0usize;
     let mut previous: Option<Bounds> = None;
@@ -806,6 +1102,9 @@ pub fn replay_feed(input: &FeedReplayInput) -> FeedReplay {
         unguarded_posts: unguarded,
         at_bound_posts: at_bound,
         clamped_posts: clamped,
+        reference_moves: input.reference_moves.len(),
+        unguarded_reference_moves: unguarded_reference,
+        override_flags,
         bound_changes,
         unattributed,
         poster_addresses: posters.into_iter().collect(),
@@ -823,9 +1122,9 @@ fn bounds_json(bounds: &Bounds, one: i128) -> Value {
 
 /// Round ids must run 1..=N contiguously. Returns a description of the
 /// first defect, or None.
-pub fn round_id_gap(rounds: &[RoundEvent]) -> Option<String> {
+pub fn round_id_gap(rounds: &[RoundEvent], first_id: u64) -> Option<String> {
     for (index, round) in rounds.iter().enumerate() {
-        let expected = index as u64 + 1;
+        let expected = index as u64 + first_id;
         if round.round_id != expected {
             return Some(format!(
                 "expected round id {expected} at position {index}, found {}",
@@ -851,6 +1150,7 @@ mod tests {
                 block,
                 log_index: 0,
                 transaction_hash: format!("0x{id:064x}"),
+                fields: BTreeMap::new(),
             },
             attribution: Attribution {
                 via,
@@ -861,6 +1161,7 @@ mod tests {
                     _ => String::new(),
                 },
                 value: Some(answer),
+                flag: None,
                 sender: "0x00000000000000000000000000000000000000aa".to_string(),
                 safe_chain: vec![],
                 batch_index: None,
@@ -921,6 +1222,10 @@ mod tests {
             bound_at_b1: Some(bound_at_b1),
             spacing_seconds: Some(3600),
             clamp_band: None,
+            reference_guard: false,
+            reference_moves: &[],
+            absolute_guard: false,
+            event_rules: None,
             rounds,
             failed: &[],
             states: &states,
@@ -1228,8 +1533,11 @@ mod tests {
 
     #[test]
     fn feed_verdict_precedence() {
-        assert_eq!(feed_verdict(true, 3, 0, Liveness::Live).0, "INPUT_GAP");
-        let (v, p, a) = feed_verdict(false, 1, 2, Liveness::Stale);
+        assert_eq!(
+            feed_verdict(true, 3, 0, Liveness::Live, true).0,
+            "INPUT_GAP"
+        );
+        let (v, p, a) = feed_verdict(false, 1, 2, Liveness::Stale, true);
         assert_eq!(
             (v, p, a),
             (
@@ -1238,15 +1546,17 @@ mod tests {
                 "REVIEW"
             )
         );
-        let (v, p, a) = feed_verdict(false, 0, 2, Liveness::Stale);
+        let (v, p, a) = feed_verdict(false, 0, 2, Liveness::Stale, true);
         assert_eq!(
             (v, p, a),
             ("INSUFFICIENT_WINDOW", PostingPath::Unattributed, "REVIEW")
         );
-        let (v, p, a) = feed_verdict(false, 0, 0, Liveness::Placeholder);
+        let (v, p, a) = feed_verdict(false, 0, 0, Liveness::Placeholder, true);
         assert_eq!((v, p, a), ("SOURCE_STALE", PostingPath::Guarded, "REVIEW"));
-        let (v, p, a) = feed_verdict(false, 0, 0, Liveness::Live);
+        let (v, p, a) = feed_verdict(false, 0, 0, Liveness::Live, true);
         assert_eq!((v, p, a), ("CONSISTENT", PostingPath::Guarded, "ALLOW"));
+        let (v, p, a) = feed_verdict(false, 0, 0, Liveness::Live, false);
+        assert_eq!((v, p, a), ("CONSISTENT", PostingPath::Attributed, "ALLOW"));
     }
 
     #[test]
@@ -1266,10 +1576,11 @@ mod tests {
         let ok: Vec<RoundEvent> = (1..=3)
             .map(|id| round(id, ONE, 100, PostPath::Safe, Via::External).event)
             .collect();
-        assert!(round_id_gap(&ok).is_none());
+        assert!(round_id_gap(&ok, 1).is_none());
+        assert!(round_id_gap(&ok, 2).is_some());
         let mut gap = ok.clone();
         gap[2].round_id = 5;
-        assert!(round_id_gap(&gap).is_some());
+        assert!(round_id_gap(&gap, 1).is_some());
     }
 
     #[test]
@@ -1299,6 +1610,10 @@ mod tests {
             bound_at_b1: None,
             spacing_seconds: None,
             clamp_band: Some(10 * ONE),
+            reference_guard: false,
+            reference_moves: &[],
+            absolute_guard: false,
+            event_rules: None,
             rounds: &rounds,
             failed: &[],
             states: &states,
@@ -1316,5 +1631,211 @@ mod tests {
         assert_eq!(replay.at_bound_posts, 1);
         assert_eq!(replay.clamped_posts, 1);
         assert_eq!(replay.bypass_posts_external, 0);
+    }
+
+    /// A reference guard: the deviation is taken against the reference read
+    /// at block minus one, a checked post over it is inconsistent, an
+    /// unchecked post over it is a bypass, and an unchecked reference move
+    /// is its own finding.
+    #[test]
+    fn reference_guard_measures_against_the_reference_not_the_previous_round() {
+        // 15 bps bound at 1e8 scale: 15_000_000.
+        let bound = 15_000_000;
+        let rounds = vec![
+            round(1, 115_000_000, 100, PostPath::Safe, Via::External),
+            round(2, 115_010_000, 200, PostPath::Safe, Via::External),
+            round(3, 115_300_000, 300, PostPath::Safe, Via::External),
+            round(4, 115_400_000, 400, PostPath::Raw, Via::External),
+        ];
+        // The reference at 199 and 299 is the close NAV, 115_000_000 and
+        // 115_100_000; at 399 it is 115_100_000 again.
+        let states = [
+            state(199, bound, 0, 115_000_000),
+            state(299, bound, 0, 115_100_000),
+            state(399, bound, 0, 115_100_000),
+        ];
+        let states: BTreeMap<u64, StateAtBlock> = states.iter().map(|s| (s.block, *s)).collect();
+        let moves = vec![
+            ReferenceMove {
+                block: 150,
+                log_index: 0,
+                timestamp: 0,
+                transaction_hash: "0xm1".into(),
+                old: 115_000_000,
+                new: 115_100_000,
+                checked: true,
+            },
+            ReferenceMove {
+                block: 160,
+                log_index: 0,
+                timestamp: 0,
+                transaction_hash: "0xm2".into(),
+                old: 115_100_000,
+                new: 115_300_000,
+                checked: true,
+            },
+            ReferenceMove {
+                block: 170,
+                log_index: 0,
+                timestamp: 0,
+                transaction_hash: "0xm3".into(),
+                old: 115_300_000,
+                new: 115_000_000,
+                checked: false,
+            },
+        ];
+        let replay = replay_feed(&FeedReplayInput {
+            feed_name: "TBILL.oracle".to_string(),
+            decimals: 8,
+            bound_at_b1: Some(bound),
+            spacing_seconds: None,
+            clamp_band: None,
+            reference_guard: true,
+            reference_moves: &moves,
+            absolute_guard: false,
+            event_rules: None,
+            rounds: &rounds,
+            failed: &[],
+            states: &states,
+            bound_groups: &[deployment(50, bound)],
+            eras: &[era(50, false)],
+            b1_timestamp: 1_800_000_000,
+            recent_seconds: 183 * 86_400,
+            round_id_gap: None,
+        });
+        assert_eq!(
+            kinds(&replay),
+            vec![
+                "GUARD_INCONSISTENT",
+                "GUARD_BYPASS",
+                "GUARD_INCONSISTENT",
+                "UNGUARDED_REFERENCE_MOVE"
+            ]
+        );
+        // Round 2: 10 bps against the reference, within 15.
+        assert!(replay.timeline[1].finding.is_none());
+        assert_eq!(
+            replay.timeline[1].deviation_in_force.as_deref(),
+            Some("869527")
+        );
+        // Round 3: 17.4 bps against the reference 115_100_000: inconsistent.
+        assert_eq!(replay.findings[0]["round_id"], 3);
+        assert_eq!(replay.findings[0]["rule"], "reference_bound");
+        // Round 4: unchecked, 26 bps over: a bypass.
+        assert_eq!(replay.findings[1]["round_id"], 4);
+        assert_eq!(replay.bypass_posts_external, 1);
+        // Move 2 exceeds the bound on the checked reference setter.
+        assert_eq!(replay.findings[2]["rule"], "reference_move");
+        assert_eq!(replay.findings[3]["transaction_hash"], "0xm3");
+        assert_eq!(replay.reference_moves, 3);
+        assert_eq!(replay.unguarded_reference_moves, 1);
+        assert_eq!(
+            deviation_over_mean(115_000_000, 115_010_000, ONE),
+            Some(869_527)
+        );
+    }
+
+    /// An absolute delta guard: the cap in answer units against the
+    /// previous round; an override flag on a setter call is its own finding.
+    #[test]
+    fn absolute_delta_guard_and_override_flag() {
+        let mut rounds = vec![
+            round(1, 10_481_481, 100, PostPath::Safe, Via::External),
+            round(2, 10_482_804, 200, PostPath::Safe, Via::External),
+            round(3, 11_600_000, 300, PostPath::Safe, Via::External),
+        ];
+        rounds[2].attribution.flag = Some(true);
+        let states = [
+            state(199, 1_000_000, 0, 10_481_481),
+            state(299, 1_000_000, 0, 10_482_804),
+        ];
+        let states: BTreeMap<u64, StateAtBlock> = states.iter().map(|s| (s.block, *s)).collect();
+        let replay = replay_feed(&FeedReplayInput {
+            feed_name: "USTB.oracle".to_string(),
+            decimals: 6,
+            bound_at_b1: Some(1_000_000),
+            spacing_seconds: None,
+            clamp_band: None,
+            reference_guard: false,
+            reference_moves: &[],
+            absolute_guard: true,
+            event_rules: None,
+            rounds: &rounds,
+            failed: &[],
+            states: &states,
+            bound_groups: &[],
+            eras: &[],
+            b1_timestamp: 1_800_000_000,
+            recent_seconds: 183 * 86_400,
+            round_id_gap: None,
+        });
+        assert_eq!(
+            kinds(&replay),
+            vec!["OVERRIDE_FLAG_SET", "GUARD_INCONSISTENT"]
+        );
+        assert_eq!(replay.findings[1]["rule"], "absolute_delta");
+        assert_eq!(replay.findings[1]["deviation_in_force"], "1117196");
+        assert_eq!(
+            replay.timeline[1].deviation_in_force.as_deref(),
+            Some("1323")
+        );
+        assert_eq!(replay.override_flags, 1);
+    }
+
+    /// An event-rules guard: the move, the relative move against the
+    /// reference feed, the spacing and the reference round all replay from
+    /// the event's fields.
+    #[test]
+    fn event_rules_guard_replays_from_the_event_fields() {
+        let mut rules = BTreeMap::new();
+        rules.insert("max_move_bps".to_string(), 200);
+        rules.insert("relative_bps".to_string(), 74);
+        rules.insert("relative_skip_bps".to_string(), 274);
+        rules.insert("min_spacing_seconds".to_string(), 82_800);
+        let mut a = round(1, 116_000_000, 100, PostPath::Safe, Via::External);
+        let mut b = round(2, 116_100_000, 200, PostPath::Safe, Via::External);
+        let mut c = round(3, 116_200_000, 300, PostPath::Safe, Via::External);
+        a.event.timestamp = 1_000_000;
+        b.event.timestamp = 1_000_000 + 86_400;
+        c.event.timestamp = 1_000_000 + 86_400 + 3_600;
+        for (r, old, ref_old, ref_new, ro, rn) in [
+            (&mut b, 116_000_000, 11_000_000, 11_002_000, 10, 11),
+            (&mut c, 116_100_000, 11_002_000, 11_002_000, 11, 11),
+        ] {
+            r.event.fields.insert("old".into(), old);
+            r.event.fields.insert("ref_old".into(), ref_old);
+            r.event.fields.insert("ref_new".into(), ref_new);
+            r.event.fields.insert("ref_old_round".into(), ro);
+            r.event.fields.insert("ref_new_round".into(), rn);
+        }
+        let rounds = vec![a, b, c];
+        let states = BTreeMap::new();
+        let replay = replay_feed(&FeedReplayInput {
+            feed_name: "OUSG.oracle".to_string(),
+            decimals: 8,
+            bound_at_b1: Some(2 * ONE),
+            spacing_seconds: None,
+            clamp_band: None,
+            reference_guard: false,
+            reference_moves: &[],
+            absolute_guard: false,
+            event_rules: Some(&rules),
+            rounds: &rounds,
+            failed: &[],
+            states: &states,
+            bound_groups: &[],
+            eras: &[],
+            b1_timestamp: 1_800_000_000,
+            recent_seconds: 183 * 86_400,
+            round_id_gap: None,
+        });
+        // Round 2: 8 bps move, reference 1.8 bps, within every rule.
+        assert!(replay.timeline[1].finding.is_none());
+        // Round 3: one hour after round 2 and the reference round unchanged.
+        assert_eq!(kinds(&replay), vec!["GUARD_INCONSISTENT"]);
+        assert_eq!(
+            replay.findings[0]["rule"],
+            "spacing,reference_round_unchanged"
+        );
     }
 }

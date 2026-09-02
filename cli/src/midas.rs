@@ -16,8 +16,8 @@ use crate::abi::{
 };
 use crate::bundle::BundleWriter;
 use crate::model::midas::{
-    checked_blocks, round_id_gap, AttributedRound, Attribution, BoundEventGroup, Bounds, Era,
-    PostPath, RoundEvent, SetterTx, StateAtBlock, Via,
+    all_blocks_after_first, checked_blocks, round_id_gap, AttributedRound, Attribution,
+    BoundEventGroup, Bounds, Era, PostPath, ReferenceMove, RoundEvent, SetterTx, StateAtBlock, Via,
 };
 use crate::rpc::{
     blockscout_logs_descriptor_full, blockscout_txlist_descriptor, call_descriptor,
@@ -84,6 +84,10 @@ pub struct SetterSpec {
     pub path: PostPath,
     #[serde(default)]
     pub value_arg: usize,
+    /// An argument word that, when non-zero, marks the call as having used
+    /// the setter's override (Superstate's checkpoint flag).
+    #[serde(default)]
+    pub flag_arg: Option<usize>,
 }
 
 /// The on-chain guard the checked path enforces. Absent for a family whose
@@ -103,6 +107,23 @@ pub struct GuardSpec {
     pub max_answer: String,
     #[serde(default)]
     pub band_percent: Option<u64>,
+    /// For `kind: reference`: the getter of the value the deviation is
+    /// measured against (read at block minus one), and the scale of the
+    /// `max_deviation` getter (10000 for basis points; 0 or absent means
+    /// the getter is already a percentage at 10^decimals, the Midas scale).
+    #[serde(default)]
+    pub reference: String,
+    #[serde(default)]
+    pub bound_scale: u64,
+    /// For `kind: absolute_delta`: the getter of the largest allowed
+    /// absolute move against the previous round, in answer units.
+    #[serde(default)]
+    pub max_delta: String,
+    /// For `kind: event_rules`: the constants of the rules replayed from the
+    /// round event's own fields (`max_move_bps`, `relative_bps`,
+    /// `relative_skip_bps`, `min_spacing_seconds`).
+    #[serde(default)]
+    pub rules: BTreeMap<String, i128>,
 }
 
 fn default_guard_kind() -> String {
@@ -113,6 +134,125 @@ impl GuardSpec {
     pub fn is_clamp(&self) -> bool {
         self.kind == "clamp"
     }
+
+    pub fn is_reference(&self) -> bool {
+        self.kind == "reference"
+    }
+
+    pub fn is_absolute(&self) -> bool {
+        self.kind == "absolute_delta"
+    }
+
+    pub fn is_event_rules(&self) -> bool {
+        self.kind == "event_rules"
+    }
+
+    /// Guards whose bound comes from a getter read at a block.
+    fn reads_getters(&self) -> bool {
+        !self.is_clamp() && !self.is_event_rules()
+    }
+
+    /// The bound getter's raw value as a percentage at 10^decimals.
+    pub fn scale_bound(&self, raw: i128, decimals: u32) -> i128 {
+        if self.bound_scale == 0 {
+            raw
+        } else {
+            raw * 10i128.pow(decimals) * 100 / self.bound_scale as i128
+        }
+    }
+}
+
+/// Where a value sits in a log: an indexed topic or a data word.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[serde(deny_unknown_fields)]
+pub struct Field {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub topic: Option<usize>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub data: Option<usize>,
+}
+
+impl Field {
+    fn read(&self, row: &Value) -> Option<i128> {
+        if let Some(index) = self.topic {
+            let topic = row.get("topics")?.as_array()?.get(index)?.as_str()?;
+            return i128_word(topic, 0);
+        }
+        let data = row.get("data")?.as_str()?;
+        i128_word(data, self.data?)
+    }
+}
+
+/// Where the round id of a custom round event comes from: a field, or
+/// `"sequence"` (log order, starting after `constructor_rounds`).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(untagged)]
+pub enum IdSpec {
+    Sequence(String),
+    Field(Field),
+}
+
+/// Where the answer comes from: a field of the event, or a field of a
+/// second event emitted in the same transaction.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(untagged)]
+pub enum AnswerSpec {
+    Join { event: String, field: Field },
+    Field(Field),
+}
+
+/// Where the timestamp comes from: `"block"` or a field.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(untagged)]
+pub enum TimeSpec {
+    Block(String),
+    Field(Field),
+}
+
+impl Default for TimeSpec {
+    fn default() -> Self {
+        TimeSpec::Block("block".to_string())
+    }
+}
+
+/// A round event that is not the AnswerUpdated shape.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct CustomRoundEvent {
+    pub signature: String,
+    pub round_id: IdSpec,
+    pub answer: AnswerSpec,
+    #[serde(default)]
+    pub timestamp: TimeSpec,
+    /// Extra named fields carried on the round for the guard.
+    #[serde(default)]
+    pub fields: BTreeMap<String, Field>,
+}
+
+/// A round event: the AnswerUpdated shape by signature, or a custom layout.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(untagged)]
+pub enum RoundEventSpec {
+    Signature(String),
+    Custom(CustomRoundEvent),
+}
+
+impl RoundEventSpec {
+    pub fn signature(&self) -> &str {
+        match self {
+            RoundEventSpec::Signature(s) => s,
+            RoundEventSpec::Custom(c) => &c.signature,
+        }
+    }
+}
+
+/// The events that move a reference guard's reference value.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ReferenceEventsSpec {
+    /// Emitted by the bounded setter; data words 0 and 1 are old and new.
+    pub checked: String,
+    /// Emitted by the setter without the check; same layout.
+    #[serde(default)]
+    pub unchecked: String,
 }
 
 /// A contract that forwards posting calls to the feed: the transaction goes
@@ -174,10 +314,16 @@ impl Default for ReadSpec {
 /// The events that mark a possible change of the guarded values.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct BoundEventsSpec {
+    #[serde(default)]
     pub upgraded: String,
+    #[serde(default)]
     pub initialized: String,
     #[serde(default = "default_min_version")]
     pub initialized_min_version: u64,
+    /// Further events after which the guarded values are re-read either
+    /// side (a bound setter's own event on a non-proxy contract).
+    #[serde(default)]
+    pub extra: Vec<String>,
 }
 
 fn default_min_version() -> u64 {
@@ -190,6 +336,7 @@ impl Default for BoundEventsSpec {
             upgraded: "Upgraded(address)".to_string(),
             initialized: "Initialized(uint8)".to_string(),
             initialized_min_version: 2,
+            extra: Vec::new(),
         }
     }
 }
@@ -234,9 +381,20 @@ pub struct Mechanism {
     pub reads: ReadSpec,
     #[serde(default)]
     pub guard: Option<GuardSpec>,
-    /// Round event signatures; the first is swept always, the rest only
-    /// when the series stays short of `latestRound()`.
-    pub round_events: Vec<String>,
+    /// Round events; the first is swept always, the rest only when the
+    /// series stays short of `latestRound()`.
+    pub round_events: Vec<RoundEventSpec>,
+    /// Rounds written at construction without an event (round ids start
+    /// after them).
+    #[serde(default)]
+    pub constructor_rounds: u64,
+    /// The feed's round counter does not count every round event (Superstate
+    /// counts effective checkpoints): take latestRound from the events.
+    #[serde(default)]
+    pub latest_round_from_events: bool,
+    /// The events that move a reference guard's reference value.
+    #[serde(default)]
+    pub reference_events: Option<ReferenceEventsSpec>,
     pub setters: Vec<SetterSpec>,
     #[serde(default)]
     pub relays: Vec<RelaySpec>,
@@ -284,6 +442,13 @@ impl Mechanism {
     pub fn value_of(&self, input: &str) -> Option<i128> {
         let spec = self.setter(&selector_of(input))?;
         argument_word_at(input, spec.value_arg)
+    }
+
+    /// Whether a setter call set its override flag (None without a flag).
+    pub fn flag_of(&self, input: &str) -> Option<bool> {
+        let spec = self.setter(&selector_of(input))?;
+        let word = argument_word_at(input, spec.flag_arg?)?;
+        Some(word != 0)
     }
 
     /// (signature, selector, path) for every setter.
@@ -347,8 +512,17 @@ pub fn parse_feed_list(text: &str) -> Result<FeedList, String> {
         if guard.is_clamp() && guard.band_percent.is_none() {
             return Err("a clamp guard needs band_percent".to_string());
         }
-        if !guard.is_clamp() && guard.max_deviation.is_empty() {
+        if guard.reads_getters() && !guard.is_absolute() && guard.max_deviation.is_empty() {
             return Err("a max_deviation guard needs the max_deviation getter".to_string());
+        }
+        if guard.is_reference() && guard.reference.is_empty() {
+            return Err("a reference guard needs the reference getter".to_string());
+        }
+        if guard.is_absolute() && guard.max_delta.is_empty() {
+            return Err("an absolute_delta guard needs the max_delta getter".to_string());
+        }
+        if guard.is_event_rules() && !guard.rules.contains_key("max_move_bps") {
+            return Err("an event_rules guard needs max_move_bps".to_string());
         }
     }
     for setter in &list.mechanism.setters {
@@ -466,6 +640,7 @@ pub fn decode_txlist_row(row: &Value, mechanism: &Mechanism) -> Option<SetterTx>
         } else {
             None
         },
+        flag: mechanism.flag_of(input),
         failed: is_error || receipt_failed,
     })
 }
@@ -491,7 +666,75 @@ pub fn decode_answer_updated(row: &Value) -> Option<RoundEvent> {
         block: dec_u64(row, "blockNumber")?,
         log_index: dec_u64(row, "logIndex").unwrap_or(0),
         transaction_hash: row.get("transactionHash")?.as_str()?.to_lowercase(),
+        fields: BTreeMap::new(),
     })
+}
+
+/// Decodes rounds of a custom event layout. `rows` are the primary event's
+/// logs, `join_rows` the second event's logs when the answer is joined.
+pub fn decode_custom_rounds(
+    rows: &[Value],
+    join_rows: &[Value],
+    spec: &CustomRoundEvent,
+    constructor_rounds: u64,
+) -> Vec<RoundEvent> {
+    let mut sorted: Vec<&Value> = rows.iter().collect();
+    sorted.sort_by_key(|row| (dec_u64(row, "blockNumber"), dec_u64(row, "logIndex")));
+    let mut joined: BTreeMap<String, std::collections::VecDeque<&Value>> = BTreeMap::new();
+    let mut join_sorted: Vec<&Value> = join_rows.iter().collect();
+    join_sorted.sort_by_key(|row| (dec_u64(row, "blockNumber"), dec_u64(row, "logIndex")));
+    for row in join_sorted {
+        if let Some(hash) = row.get("transactionHash").and_then(Value::as_str) {
+            joined
+                .entry(hash.to_lowercase())
+                .or_default()
+                .push_back(row);
+        }
+    }
+    let mut out = Vec::new();
+    for (index, row) in sorted.iter().enumerate() {
+        let hash = match row.get("transactionHash").and_then(Value::as_str) {
+            Some(hash) => hash.to_lowercase(),
+            None => continue,
+        };
+        let answer = match &spec.answer {
+            AnswerSpec::Field(field) => field.read(row),
+            AnswerSpec::Join { field, .. } => joined
+                .get_mut(&hash)
+                .and_then(|queue| queue.pop_front())
+                .and_then(|join_row| field.read(join_row)),
+        };
+        let Some(answer) = answer else { continue };
+        let round_id = match &spec.round_id {
+            IdSpec::Field(field) => field.read(row).map(|v| v as u64),
+            IdSpec::Sequence(_) => Some(constructor_rounds + index as u64 + 1),
+        };
+        let Some(round_id) = round_id else { continue };
+        let timestamp = match &spec.timestamp {
+            TimeSpec::Field(field) => field.read(row).map(|v| v as u64),
+            TimeSpec::Block(_) => dec_u64(row, "timeStamp"),
+        };
+        let Some(timestamp) = timestamp else { continue };
+        let Some(block) = dec_u64(row, "blockNumber") else {
+            continue;
+        };
+        let mut fields = BTreeMap::new();
+        for (name, field) in &spec.fields {
+            if let Some(value) = field.read(row) {
+                fields.insert(name.clone(), value);
+            }
+        }
+        out.push(RoundEvent {
+            round_id,
+            answer,
+            timestamp,
+            block,
+            log_index: dec_u64(row, "logIndex").unwrap_or(0),
+            transaction_hash: hash,
+            fields,
+        });
+    }
+    out
 }
 
 /// R6 step (a): the inner call of a Gnosis Safe execTransaction.
@@ -569,6 +812,7 @@ pub fn decode_share_price(row: &Value) -> Option<RoundEvent> {
         block: dec_u64(row, "blockNumber")?,
         log_index: dec_u64(row, "logIndex").unwrap_or(0),
         transaction_hash: row.get("transactionHash")?.as_str()?.to_lowercase(),
+        fields: BTreeMap::new(),
     })
 }
 
@@ -967,6 +1211,8 @@ pub struct FeedInputs {
     pub bounds: Option<Bounds>,
     /// The clamp band at 10^decimals scale for a clamp guard.
     pub clamp_band: Option<i128>,
+    /// Moves of the reference value under a reference guard.
+    pub reference_moves: Vec<ReferenceMove>,
     pub latest_round: Option<u64>,
     pub latest: Option<LatestRound>,
     pub last_timestamp: Option<u64>,
@@ -1008,37 +1254,72 @@ fn read_bounds(
     source: &mut dyn ReadSource,
     bundle: &mut BundleWriter,
     guard: Option<&GuardSpec>,
+    decimals: u32,
     name: &str,
     address: &str,
     block: u64,
 ) -> Result<Option<Bounds>, String> {
-    let Some(guard) = guard.filter(|g| !g.is_clamp()) else {
+    let Some(guard) = guard else {
         return Ok(None);
     };
-    let deviation = call_i128(
-        source,
-        bundle,
-        &format!("{name} {} @ {block}", guard.max_deviation),
-        address,
-        &guard.max_deviation,
-        block,
-    )?;
-    let minimum = call_i128(
-        source,
-        bundle,
-        &format!("{name} {} @ {block}", guard.min_answer),
-        address,
-        &guard.min_answer,
-        block,
-    )?;
-    let maximum = call_i128(
-        source,
-        bundle,
-        &format!("{name} {} @ {block}", guard.max_answer),
-        address,
-        &guard.max_answer,
-        block,
-    )?;
+    if guard.is_clamp() {
+        return Ok(None);
+    }
+    if guard.is_event_rules() {
+        // The rules are constants of the code: the bound is the largest
+        // allowed move, as a percentage at 10^decimals.
+        let bps = guard.rules.get("max_move_bps").copied().unwrap_or(0);
+        return Ok(Some(Bounds {
+            max_answer_deviation: bps * 10i128.pow(decimals) / 100,
+            min_answer: 0,
+            max_answer: 0,
+        }));
+    }
+    let deviation = if guard.is_absolute() {
+        call_i128(
+            source,
+            bundle,
+            &format!("{name} {} @ {block}", guard.max_delta),
+            address,
+            &guard.max_delta,
+            block,
+        )?
+    } else {
+        call_i128(
+            source,
+            bundle,
+            &format!("{name} {} @ {block}", guard.max_deviation),
+            address,
+            &guard.max_deviation,
+            block,
+        )?
+        .map(|raw| guard.scale_bound(raw, decimals))
+    };
+    // A family without min and max getters leaves them empty: zero then.
+    let minimum = if guard.min_answer.is_empty() {
+        Some(0)
+    } else {
+        call_i128(
+            source,
+            bundle,
+            &format!("{name} {} @ {block}", guard.min_answer),
+            address,
+            &guard.min_answer,
+            block,
+        )?
+    };
+    let maximum = if guard.max_answer.is_empty() {
+        Some(0)
+    } else {
+        call_i128(
+            source,
+            bundle,
+            &format!("{name} {} @ {block}", guard.max_answer),
+            address,
+            &guard.max_answer,
+            block,
+        )?
+    };
     Ok(match (deviation, minimum, maximum) {
         (Some(max_answer_deviation), Some(min_answer), Some(max_answer)) => Some(Bounds {
             max_answer_deviation,
@@ -1092,6 +1373,7 @@ pub fn fetch(
             source,
             bundle,
             mechanism.guard.as_ref(),
+            decimals.unwrap_or(entry.decimals),
             &name,
             address,
             block,
@@ -1163,6 +1445,7 @@ pub fn fetch(
             decimals,
             bounds,
             clamp_band,
+            reference_moves: Vec::new(),
             latest_round,
             latest,
             last_timestamp,
@@ -1192,29 +1475,47 @@ pub fn fetch(
                 .collect::<BTreeSet<u64>>()
                 .len() as u64
         };
-        for (index, signature) in mechanism.round_events.iter().enumerate() {
+        for (index, spec) in mechanism.round_events.iter().enumerate() {
             if index > 0 && latest_round.is_none_or(|latest| distinct(&events) >= latest) {
                 break;
             }
+            let signature = spec.signature().to_string();
             let rows = sweep_logs(
                 source,
                 bundle,
                 &format!("{name} {signature}"),
                 entry.log_address(),
-                &topic0_of(signature),
+                &topic0_of(&signature),
                 &entry.topics,
                 block,
             )?;
-            let decoded: Vec<RoundEvent> = match mechanism.round_event_layout {
-                RoundEventLayout::AnswerUpdated => {
-                    rows.iter().filter_map(decode_answer_updated).collect()
-                }
-                RoundEventLayout::SharePrice => {
-                    rows.iter().filter_map(decode_share_price).collect()
+            let decoded: Vec<RoundEvent> = match spec {
+                RoundEventSpec::Signature(_) => match mechanism.round_event_layout {
+                    RoundEventLayout::AnswerUpdated => {
+                        rows.iter().filter_map(decode_answer_updated).collect()
+                    }
+                    RoundEventLayout::SharePrice => {
+                        rows.iter().filter_map(decode_share_price).collect()
+                    }
+                },
+                RoundEventSpec::Custom(custom) => {
+                    let join_rows = match &custom.answer {
+                        AnswerSpec::Join { event, .. } => sweep_logs(
+                            source,
+                            bundle,
+                            &format!("{name} {event}"),
+                            entry.log_address(),
+                            &topic0_of(event),
+                            &entry.topics,
+                            block,
+                        )?,
+                        AnswerSpec::Field(_) => Vec::new(),
+                    };
+                    decode_custom_rounds(&rows, &join_rows, custom, mechanism.constructor_rounds)
                 }
             };
             if index == 0 || !decoded.is_empty() {
-                round_events.push(signature.clone());
+                round_events.push(signature);
             }
             events.extend(decoded);
         }
@@ -1226,10 +1527,30 @@ pub fn fetch(
             }
         }
         events.sort_by_key(|e| (e.round_id, e.block, e.log_index));
-        inputs.round_id_gap = round_id_gap(&events);
+        let latest_round = if mechanism.latest_round_from_events {
+            Some(events.len() as u64 + mechanism.constructor_rounds)
+        } else {
+            latest_round
+        };
+        // Without a Chainlink-shaped latestRoundData the latest round is the
+        // last event.
+        if inputs.latest.is_none() {
+            if let Some(last) = events.last() {
+                inputs.latest = Some(LatestRound {
+                    round_id: last.round_id,
+                    answer: last.answer,
+                    started_at: last.timestamp,
+                    updated_at: last.timestamp,
+                });
+            }
+        }
+        if inputs.latest_round.is_none() || mechanism.latest_round_from_events {
+            inputs.latest_round = latest_round;
+        }
+        inputs.round_id_gap = round_id_gap(&events, mechanism.constructor_rounds + 1);
         if let Some(latest_round) = latest_round {
             let distinct: BTreeSet<u64> = events.iter().map(|e| e.round_id).collect();
-            if distinct.len() as u64 != latest_round {
+            if distinct.len() as u64 + mechanism.constructor_rounds != latest_round {
                 bundle.add_finding(
                     "round_count_mismatch",
                     &name,
@@ -1248,24 +1569,90 @@ pub fn fetch(
         }
 
         // R12 and R9: upgrade and initializer events.
-        let upgrade_rows = sweep_logs(
-            source,
-            bundle,
-            &format!("{name} {}", mechanism.bound_events.upgraded),
-            address,
-            &topic0_of(&mechanism.bound_events.upgraded),
-            &[],
-            block,
-        )?;
-        let init_rows = sweep_logs(
-            source,
-            bundle,
-            &format!("{name} {}", mechanism.bound_events.initialized),
-            address,
-            &topic0_of(&mechanism.bound_events.initialized),
-            &[],
-            block,
-        )?;
+        let upgrade_rows = if mechanism.bound_events.upgraded.is_empty() {
+            Vec::new()
+        } else {
+            sweep_logs(
+                source,
+                bundle,
+                &format!("{name} {}", mechanism.bound_events.upgraded),
+                address,
+                &topic0_of(&mechanism.bound_events.upgraded),
+                &[],
+                block,
+            )?
+        };
+        let init_rows = if mechanism.bound_events.initialized.is_empty() {
+            Vec::new()
+        } else {
+            sweep_logs(
+                source,
+                bundle,
+                &format!("{name} {}", mechanism.bound_events.initialized),
+                address,
+                &topic0_of(&mechanism.bound_events.initialized),
+                &[],
+                block,
+            )?
+        };
+        let mut extra_rows: Vec<Value> = Vec::new();
+        for signature in &mechanism.bound_events.extra {
+            extra_rows.extend(sweep_logs(
+                source,
+                bundle,
+                &format!("{name} {signature}"),
+                address,
+                &topic0_of(signature),
+                &[],
+                block,
+            )?);
+        }
+        // Reference moves under a reference guard.
+        if let Some(reference_events) = &mechanism.reference_events {
+            let mut moves = Vec::new();
+            for (signature, checked) in [
+                (reference_events.checked.as_str(), true),
+                (reference_events.unchecked.as_str(), false),
+            ] {
+                if signature.is_empty() {
+                    continue;
+                }
+                let rows = sweep_logs(
+                    source,
+                    bundle,
+                    &format!("{name} {signature}"),
+                    address,
+                    &topic0_of(signature),
+                    &[],
+                    block,
+                )?;
+                for row in &rows {
+                    let data = row.get("data").and_then(Value::as_str).unwrap_or("0x");
+                    let (Some(old), Some(new), Some(block_number)) = (
+                        i128_word(data, 0),
+                        i128_word(data, 1),
+                        dec_u64(row, "blockNumber"),
+                    ) else {
+                        continue;
+                    };
+                    moves.push(ReferenceMove {
+                        block: block_number,
+                        log_index: dec_u64(row, "logIndex").unwrap_or(0),
+                        timestamp: dec_u64(row, "timeStamp").unwrap_or(0),
+                        transaction_hash: row
+                            .get("transactionHash")
+                            .and_then(Value::as_str)
+                            .unwrap_or("")
+                            .to_lowercase(),
+                        old,
+                        new,
+                        checked,
+                    });
+                }
+            }
+            moves.sort_by_key(|m| (m.block, m.log_index));
+            inputs.reference_moves = moves;
+        }
 
         // R4, R5: the external transaction list.
         let tx_rows = sweep_txlist(source, bundle, &format!("{name} txlist"), address, block)?;
@@ -1300,6 +1687,7 @@ pub fn fetch(
                     sender: tx.from.clone(),
                     safe_chain: Vec::new(),
                     batch_index: None,
+                    flag: tx.flag,
                 }
             } else {
                 let fetched = source
@@ -1331,7 +1719,13 @@ pub fn fetch(
                     |(target, selector, inner, mut chain)| {
                         if target == feed_lower {
                             chain.push(feed_lower.clone());
-                            return Some((selector, mechanism.value_of(&inner), chain, None));
+                            return Some((
+                                selector,
+                                mechanism.value_of(&inner),
+                                chain,
+                                None,
+                                mechanism.flag_of(&inner),
+                            ));
                         }
                         // A relay reached through the Safe: a hub's batch
                         // executed by a multisig, as at pool setup.
@@ -1346,6 +1740,7 @@ pub fn fetch(
                                 mechanism.value_of(&calldata),
                                 chain,
                                 Some(batch_index),
+                                mechanism.flag_of(&calldata),
                             ));
                         }
                         // A multiSend batch executed by the Safe: the k-th
@@ -1363,14 +1758,22 @@ pub fn fetch(
                             mechanism.value_of(data),
                             chain,
                             Some(position),
+                            mechanism.flag_of(data),
                         ))
                     },
                 );
+                // A batch sent straight to a MultiSend contract: several
+                // Safe executions (or feed calls) in one transaction, the
+                // k-th one that reaches the feed posted the k-th round.
+                let unwrapped = unwrapped.or_else(|| {
+                    let position = *seen_in_tx.get(&event.transaction_hash).unwrap_or(&0);
+                    outer_multi_send_call(mechanism, &from, &to, &input, &feed_lower, position)
+                });
                 *seen_in_tx
                     .entry(event.transaction_hash.clone())
                     .or_insert(0) += 1;
                 match unwrapped {
-                    Some((selector, value, chain, batch_index)) => Attribution {
+                    Some((selector, value, chain, batch_index, flag)) => Attribution {
                         via: Via::SafeRouted,
                         path: mechanism.path_of(&selector),
                         selector,
@@ -1378,6 +1781,7 @@ pub fn fetch(
                         sender: from,
                         safe_chain: chain,
                         batch_index,
+                        flag,
                     },
                     None if relay_call(
                         mechanism,
@@ -1401,6 +1805,7 @@ pub fn fetch(
                             path: mechanism.path_of(&selector),
                             selector,
                             value: mechanism.value_of(&calldata),
+                            flag: mechanism.flag_of(&calldata),
                             sender: from,
                             safe_chain: vec![to.clone(), relay, feed_lower.clone()],
                             batch_index: Some(position),
@@ -1428,6 +1833,7 @@ pub fn fetch(
                                 path: mechanism.path_of(&selector),
                                 selector,
                                 value: mechanism.value_of(&calldata),
+                                flag: mechanism.flag_of(&calldata),
                                 sender: from,
                                 safe_chain: chain,
                                 batch_index: None,
@@ -1437,6 +1843,7 @@ pub fn fetch(
                                 path: PostPath::Unattributed,
                                 selector: selector_of(&input),
                                 value: None,
+                                flag: None,
                                 sender: from,
                                 safe_chain: Vec::new(),
                                 batch_index: None,
@@ -1544,6 +1951,28 @@ pub fn fetch(
             group.upgraded = true;
             group.implementation = Some(implementation.clone());
         }
+        for row in &extra_rows {
+            let Some(block_number) = dec_u64(row, "blockNumber") else {
+                continue;
+            };
+            let tx = row
+                .get("transactionHash")
+                .and_then(Value::as_str)
+                .unwrap_or("")
+                .to_lowercase();
+            groups
+                .entry((block_number, tx.clone()))
+                .or_insert_with(|| BoundEventGroup {
+                    block: block_number,
+                    transaction_hash: tx.clone(),
+                    timestamp: dec_u64(row, "timeStamp").unwrap_or(0),
+                    upgraded: false,
+                    implementation: None,
+                    initialized_version: None,
+                    before: None,
+                    after: None,
+                });
+        }
         for row in &init_rows {
             let Some(version) = row
                 .get("data")
@@ -1580,16 +2009,86 @@ pub fn fetch(
         }
         for ((block_number, _), mut group) in groups {
             let guard = mechanism.guard.as_ref();
+            let dec = decimals.unwrap_or(entry.decimals);
             if block_number > 0 {
                 group.before =
-                    read_bounds(source, bundle, guard, &name, address, block_number - 1)?;
+                    read_bounds(source, bundle, guard, dec, &name, address, block_number - 1)?;
             }
-            group.after = read_bounds(source, bundle, guard, &name, address, block_number)?;
+            group.after = read_bounds(source, bundle, guard, dec, &name, address, block_number)?;
             inputs.bound_groups.push(group);
         }
 
+        // Under a reference guard: the bound and the reference at block minus
+        // one for every round after the first.
+        if let Some(guard) = mechanism.guard.as_ref().filter(|g| g.is_reference()) {
+            let dec = decimals.unwrap_or(entry.decimals);
+            for block_minus_one in all_blocks_after_first(&inputs.rounds) {
+                let bound = call_i128(
+                    source,
+                    bundle,
+                    &format!("{name} {} @ {block_minus_one}", guard.max_deviation),
+                    address,
+                    &guard.max_deviation,
+                    block_minus_one,
+                )?
+                .map(|raw| guard.scale_bound(raw, dec));
+                let reference = call_i128(
+                    source,
+                    bundle,
+                    &format!("{name} {} @ {block_minus_one}", guard.reference),
+                    address,
+                    &guard.reference,
+                    block_minus_one,
+                )?;
+                if let (Some(bound), Some(reference)) = (bound, reference) {
+                    inputs.states.insert(
+                        block_minus_one,
+                        StateAtBlock {
+                            block: block_minus_one,
+                            bound,
+                            last_round_id: 0,
+                            last_answer: reference,
+                        },
+                    );
+                }
+            }
+        }
+
+        // Under an absolute delta guard: the cap at block minus one for every
+        // round after the first; the reference is the previous round.
+        if let Some(guard) = mechanism.guard.as_ref().filter(|g| g.is_absolute()) {
+            let previous: BTreeMap<u64, i128> = inputs
+                .rounds
+                .windows(2)
+                .map(|pair| (pair[1].event.block.saturating_sub(1), pair[0].event.answer))
+                .collect();
+            for block_minus_one in all_blocks_after_first(&inputs.rounds) {
+                let cap = call_i128(
+                    source,
+                    bundle,
+                    &format!("{name} {} @ {block_minus_one}", guard.max_delta),
+                    address,
+                    &guard.max_delta,
+                    block_minus_one,
+                )?;
+                if let Some(cap) = cap {
+                    inputs.states.insert(
+                        block_minus_one,
+                        StateAtBlock {
+                            block: block_minus_one,
+                            bound: cap,
+                            last_round_id: 0,
+                            last_answer: previous.get(&block_minus_one).copied().unwrap_or(0),
+                        },
+                    );
+                }
+            }
+        }
+
         // R8, R10: the guard state at block minus one for every checked post.
-        if let Some(guard) = mechanism.guard.as_ref().filter(|g| !g.is_clamp()) {
+        if let Some(guard) = mechanism.guard.as_ref().filter(|g| {
+            !g.is_clamp() && !g.is_reference() && !g.is_absolute() && !g.is_event_rules()
+        }) {
             let bound_at_b1 = bounds.map(|b| b.max_answer_deviation);
             for block_minus_one in checked_blocks(&inputs.rounds, bound_at_b1) {
                 let bound = call_i128(
@@ -1632,6 +2131,76 @@ pub fn fetch(
         feeds,
         implementation_scan,
     })
+}
+
+/// A transaction whose outer call is `multiSend(bytes)` on a MultiSend
+/// contract: every entry that is a Safe execTransaction reaching the feed,
+/// or a direct feed call, is a candidate in batch order. Returns the
+/// attribution tuple of the `position`-th candidate.
+#[allow(clippy::type_complexity)]
+fn outer_multi_send_call(
+    mechanism: &Mechanism,
+    from: &str,
+    to: &str,
+    input: &str,
+    feed: &str,
+    position: usize,
+) -> Option<(
+    String,
+    Option<i128>,
+    Vec<String>,
+    Option<usize>,
+    Option<bool>,
+)> {
+    if selector_of(input) != MULTI_SEND_SELECTOR {
+        return None;
+    }
+    let entries = decode_multi_send(input)?;
+    let mut candidates: Vec<(String, Vec<String>)> = Vec::new();
+    for (entry_to, data) in &entries {
+        if *entry_to == feed && mechanism.setter(&selector_of(data)).is_some() {
+            candidates.push((
+                data.clone(),
+                vec![from.to_lowercase(), to.to_lowercase(), feed.to_string()],
+            ));
+        } else if let Some((target, inner)) = decode_safe_exec_transaction(data) {
+            if target == feed && mechanism.setter(&selector_of(&inner)).is_some() {
+                candidates.push((
+                    inner,
+                    vec![
+                        from.to_lowercase(),
+                        to.to_lowercase(),
+                        entry_to.clone(),
+                        feed.to_string(),
+                    ],
+                ));
+            } else if let Some(nested) = decode_multi_send(&inner) {
+                // The Safe itself delegatecalls a MultiSend batch.
+                for (nested_to, nested_data) in nested {
+                    if nested_to == feed && mechanism.setter(&selector_of(&nested_data)).is_some() {
+                        candidates.push((
+                            nested_data,
+                            vec![
+                                from.to_lowercase(),
+                                to.to_lowercase(),
+                                entry_to.clone(),
+                                target.clone(),
+                                feed.to_string(),
+                            ],
+                        ));
+                    }
+                }
+            }
+        }
+    }
+    let (calldata, chain) = candidates.get(position)?;
+    Some((
+        selector_of(calldata),
+        mechanism.value_of(calldata),
+        chain.clone(),
+        Some(position),
+        mechanism.flag_of(calldata),
+    ))
 }
 
 /// The number of rounds of this transaction attributed before the current
