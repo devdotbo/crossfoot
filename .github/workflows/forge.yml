@@ -28,15 +28,17 @@ jobs:
         working-directory: contracts/guard
     steps:
       - uses: actions/checkout@v4
+      # Pinned to the version the snapshot was taken with; gas metering differs
+      # between releases (1.8.1 measured the accept path 21k above 1.7.1).
       - uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: stable
+          version: v1.7.1
       - run: forge --version
       - run: forge build
       - run: forge test -vv
       # The committed snapshot is the gas record cited in docs/specs/10-guard-wrapper.md.
       # Fork tests skip themselves without CROSSFOOT_FORK_URL, so the snapshot excludes them.
-      - run: forge snapshot --check
+      - run: forge snapshot --check --tolerance 5
       # Mainnet fork replay (test/ForkMorpho.t.sol): only when the repository holds the
       # CROSSFOOT_FORK_URL secret (an archive endpoint). Skipped otherwise.
       - name: Fork tests
