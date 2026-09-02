@@ -1,9 +1,10 @@
 # consume-QmeTCucCXDhT27pMMExg2EtDx1t7SA3Abgcw2p4BuZgmdQ
 
 Replay fixture for `crossfoot consume` (spec 05 R11), recorded live from
-the Studio deployment v0.0.5 of the Crossfoot subgraph (deployment ID in the
-directory name, 73 feeds) on 2026-09-02 at its head, block 25,887,068
-(`--now 1788329482`). Studio keeps about 1,000 blocks of history and does
+the Studio deployment v0.0.7 of the Crossfoot subgraph (deployment ID in the
+directory name, 95 feeds: the Midas family, OpenEden, Ondo, Superstate,
+Hashnote, Backed, Frankencoin, sUSDe, stUSDS, sDAI and 20 Chainlink proxies)
+on 2026-09-02 at its head, block 25,887,730 (`--now 1788329482`). Studio keeps about 1,000 blocks of history and does
 not serve time-travel queries below that, so the survey block 25,884,405 of
 spec 04 R17 was already unreachable when the sync finished; the fixture is
 pinned at the head of the recording instead, and every response carries
@@ -27,6 +28,10 @@ that block.
 - `expected-decisions.json`: the run's `decisions.json` with the default
   policy `config/policy-default.json`, compared by the tests modulo the
   build identity, the endpoint and the source word.
+
+Result at the recording: 95 decided, 19 ALLOW, 76 REVIEW, 5 unindexed, 6
+wrappers; svZCHF ALLOW, mRE7 REVIEW with the round 36 sentence, 16 feeds
+ADMIN_GUARD_BYPASSED.
 
 ## Demo command
 
