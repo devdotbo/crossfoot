@@ -135,9 +135,14 @@ function midasSource(f: FeedRow): string[] {
     "        - BoundChange",
     "        - Upgrade",
     "        - Poster",
+    // Both Midas ABIs on every source: midas.ts binds `CustomFeed` by name for
+    // the getters, and graph-node resolves the name against this list (a
+    // source with only CustomFeedGrowth failed at its deployment block).
     "      abis:",
-    `        - name: ${f.abi}`,
-    `          file: ./abis/${f.abi}.json`,
+    "        - name: CustomFeed",
+    "          file: ./abis/CustomFeed.json",
+    "        - name: CustomFeedGrowth",
+    "          file: ./abis/CustomFeedGrowth.json",
     "      eventHandlers:",
     `        - event: ${answerEvent}`,
     `          handler: ${answerHandler}`,

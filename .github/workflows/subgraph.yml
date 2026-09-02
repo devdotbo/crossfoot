@@ -36,6 +36,8 @@ jobs:
       - run: bun run gen && git diff --exit-code subgraph.yaml subgraph.events.yaml
       # 04 R4: every contract call goes through a try_ variant.
       - run: sh scripts/check-try.sh
+      # every ABI a mapping binds is listed on the data sources that use it
+      - run: bun run check-abis
       - run: bunx graph codegen
       - run: bunx graph build
       # 04 R16: the agent's query files are valid against the schema.

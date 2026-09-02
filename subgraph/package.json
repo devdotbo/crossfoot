@@ -10,7 +10,8 @@
     "build": "graph build",
     "test": "graph test",
     "check-try": "sh scripts/check-try.sh",
-    "check-queries": "bun run scripts/check-queries.ts"
+    "check-queries": "bun run scripts/check-queries.ts",
+    "check-abis": "bun run scripts/check-abis.ts"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.97.1",

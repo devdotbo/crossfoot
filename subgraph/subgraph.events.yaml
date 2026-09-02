@@ -39,6 +39,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -80,6 +82,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -121,6 +125,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -162,6 +168,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -203,6 +211,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -244,6 +254,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -285,6 +297,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -326,6 +340,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -367,6 +383,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -408,6 +426,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -449,6 +469,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -490,6 +512,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -531,6 +555,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -572,6 +598,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -613,6 +641,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -654,6 +684,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -695,6 +727,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -736,6 +770,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -777,6 +813,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -818,6 +856,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -859,6 +899,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -900,6 +942,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -941,6 +985,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -982,6 +1028,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -1023,6 +1071,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -1064,6 +1114,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -1105,6 +1157,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -1146,6 +1200,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -1187,6 +1243,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -1228,6 +1286,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -1269,6 +1329,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -1310,6 +1372,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -1351,6 +1415,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -1392,6 +1458,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -1433,6 +1501,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -1474,6 +1544,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -1515,6 +1587,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -1556,6 +1630,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -1595,6 +1671,8 @@ dataSources:
         - Upgrade
         - Poster
       abis:
+        - name: CustomFeed
+          file: ./abis/CustomFeed.json
         - name: CustomFeedGrowth
           file: ./abis/CustomFeedGrowth.json
       eventHandlers:
@@ -1638,6 +1716,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -1679,6 +1759,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -1720,6 +1802,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -1761,6 +1845,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -1802,6 +1888,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -1843,6 +1931,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -1884,6 +1974,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -1925,6 +2017,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -1966,6 +2060,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -2007,6 +2103,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -2048,6 +2146,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -2089,6 +2189,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -2130,6 +2232,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -2171,6 +2275,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -2212,6 +2318,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -2253,6 +2361,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -2294,6 +2404,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -2335,6 +2447,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -2376,6 +2490,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -2417,6 +2533,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
@@ -2458,6 +2576,8 @@ dataSources:
       abis:
         - name: CustomFeed
           file: ./abis/CustomFeed.json
+        - name: CustomFeedGrowth
+          file: ./abis/CustomFeedGrowth.json
       eventHandlers:
         - event: AnswerUpdated(indexed int256,indexed uint256,indexed uint256)
           handler: handleAnswerUpdated
