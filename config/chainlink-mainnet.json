@@ -1,0 +1,346 @@
+{
+  "family": "chainlink-aggregator",
+  "target": "chainlink",
+  "chain_id": 1,
+  "explorer": {
+    "name": "eth.blockscout.com",
+    "api": "https://eth.blockscout.com/api",
+    "address_url": "https://eth.blockscout.com/address/",
+    "transaction_url": "https://eth.blockscout.com/tx/"
+  },
+  "mechanism": {
+    "description": "Chainlink Data Feeds (NAVLink, Proof of Reserve): an EACAggregatorProxy in front of one OCR aggregator per phase. A round is written by an OCR transmit of the network's transmitter set (a quorum of node operators signing the issuer's or auditor's figure), never by an issuer key; the aggregator clamps nothing but rejects a median outside minAnswer..maxAnswer, so an answer exactly on either bound is the range limit, not the market (class D, aggregated). Rounds are read from AnswerUpdated on every phase aggregator with the transmitter taken from NewTransmission of the same transaction (the OCR2 and the OCR1 layout both carry it in the second data word); the feed directory's heartbeat (plus one hour of grace) bounds the silence between rounds and its deviation threshold classifies the moves. Left out on purpose: M NAV (0xC28198Df, M^0), a high-frequency feed with over 76,000 rounds whose aggregator emits NewRound without a transmitter. The proxies' AggregatorConfirmed events are swept as notices; none was found on these proxies through the explorer, so the phase history is the log_addresses list read from phaseAggregators().",
+    "source": {
+      "repo": "https://github.com/smartcontractkit/chainlink",
+      "path": "contracts/src/v0.8/shared/interfaces/AggregatorV2V3Interface.sol, EACAggregatorProxy, AccessControlledOCR2Aggregator",
+      "note": "heartbeat and threshold per feed from https://reference-data-directory.vercel.app/feeds-mainnet.json (raw/chainlink-feeds-mainnet-json-2026-09-01.md); phase aggregators read through phaseId() and phaseAggregators(i) on 2026-09-02; no aggregator source was verified by this adapter"
+    },
+    "reads": {
+      "description": "description()",
+      "decimals": "decimals()",
+      "latest_round": "",
+      "latest_round_data": "latestRoundData()",
+      "last_timestamp": ""
+    },
+    "guard": {
+      "kind": "min_max",
+      "min_answer": "minAnswer()",
+      "max_answer": "maxAnswer()"
+    },
+    "guard_on_log_address": true,
+    "attribution": "event",
+    "posting_path_word": "AGGREGATED",
+    "round_events": [
+      {
+        "signature": "AnswerUpdated(int256,uint256,uint256)",
+        "round_id": "sequence",
+        "answer": {
+          "topic": 1
+        },
+        "timestamp": {
+          "data": 0
+        },
+        "poster": {
+          "event": "NewTransmission(uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40) | NewTransmission(uint32,int192,address,int192[],bytes,bytes32)",
+          "field": {
+            "data": 1
+          }
+        }
+      }
+    ],
+    "latest_round_from_events": true,
+    "setters": [
+      {
+        "signature": "transmit(bytes32[3],bytes,bytes32[],bytes32[],bytes32)",
+        "path": "safe",
+        "value_arg": 0
+      }
+    ],
+    "relays": [],
+    "other_calls": [],
+    "bound_events": {
+      "upgraded": "",
+      "initialized": "",
+      "initialized_min_version": 2,
+      "extra": []
+    },
+    "notice_events": [
+      {
+        "signature": "AggregatorConfirmed(address,address)",
+        "kind": "AGGREGATOR_CHANGED",
+        "note": "the proxy switched to a new aggregator (a phase change); rounds continue on the new contract"
+      }
+    ],
+    "spacing_rule": null,
+    "verified_implementations": []
+  },
+  "feeds": [
+    {
+      "product": "TBILL",
+      "key": "feed",
+      "address": "0xAbE7a3643615Ed32d3431e11E0Ee5A486Cb27d48",
+      "decimals": 8,
+      "kind": "bounded",
+      "log_addresses": [
+        "0xf17cb308606999df25f5d4b9f74bd9fe47a5b3b3"
+      ],
+      "max_silence_seconds": 100800,
+      "threshold_percent": 1e-07,
+      "note": "TBILL NAV; issuer None; product None; heartbeat 97200 s, deviation threshold 1e-07 percent (Chainlink feed directory, 2026-09-01); phase aggregators in order"
+    },
+    {
+      "product": "USTB",
+      "key": "nav",
+      "address": "0x289B5036cd942e619E1Ee48670F98d214E745AAC",
+      "decimals": 6,
+      "kind": "bounded",
+      "log_addresses": [
+        "0x0bcca5ed4c22b528a29a14fdec6d5b9b9419609e",
+        "0xd5bc4e3c7e77a5776fd9d0dde8471b8b4aec10f5"
+      ],
+      "max_silence_seconds": 99000,
+      "threshold_percent": 0.0001,
+      "note": "USTB NAV per Share; issuer Superstate; product NAVLink; heartbeat 95400 s, deviation threshold 0.0001 percent (Chainlink feed directory, 2026-09-01); phase aggregators in order"
+    },
+    {
+      "product": "USCC",
+      "key": "nav",
+      "address": "0xAfFd8F5578E8590665de561bdE9E7BAdb99300d9",
+      "decimals": 6,
+      "kind": "bounded",
+      "log_addresses": [
+        "0x5c00518d3d423ec59d553af123be8a63b11078cf"
+      ],
+      "max_silence_seconds": 99000,
+      "threshold_percent": 1e-07,
+      "note": "USCC NAV per Share; issuer Superstate; product NAVLink; heartbeat 95400 s, deviation threshold 1e-07 percent (Chainlink feed directory, 2026-09-01); phase aggregators in order"
+    },
+    {
+      "product": "USYCLlamaGuard",
+      "key": "feed",
+      "address": "0xE8E65Fb9116875012F5990Ecaab290B3531DbeB9",
+      "decimals": 8,
+      "kind": "bounded",
+      "log_addresses": [
+        "0xda069434c65889041154117278f0af98f0893955",
+        "0x9c838be86802377a2847edb416755f79c7cae8d8",
+        "0x3c405e1fe8a6be5d9b714b8c88ad913f236b1639"
+      ],
+      "max_silence_seconds": 100800,
+      "threshold_percent": 1e-07,
+      "note": "USYC NAV - Aave LlamaGuard; issuer None; product None; heartbeat 97200 s, deviation threshold 1e-07 percent (Chainlink feed directory, 2026-09-01); phase aggregators in order"
+    },
+    {
+      "product": "JTRSY",
+      "key": "nav",
+      "address": "0x0C2e4Df738e99e8db80012f5bb2a303f3f48Ca74",
+      "decimals": 6,
+      "kind": "bounded",
+      "log_addresses": [
+        "0x009b8b4d648cfcc813ecb70db0f31ce305dd4b32"
+      ],
+      "max_silence_seconds": 100800,
+      "threshold_percent": 1e-07,
+      "note": "JTRSY NAV; issuer Centrifuge / Anemoy; product NAVLink; heartbeat 97200 s, deviation threshold 1e-07 percent (Chainlink feed directory, 2026-09-01); phase aggregators in order"
+    },
+    {
+      "product": "JAAA",
+      "key": "nav",
+      "address": "0x3BbccB2301759D2e4A5692bA72DAb4b75dC43B1a",
+      "decimals": 6,
+      "kind": "bounded",
+      "log_addresses": [
+        "0xa4dd65e17944d735ce35dfe12b92eab8f679a510"
+      ],
+      "max_silence_seconds": 100800,
+      "threshold_percent": 1e-07,
+      "note": "JAAA NAV; issuer Centrifuge / Anemoy; product NAVLink; heartbeat 97200 s, deviation threshold 1e-07 percent (Chainlink feed directory, 2026-09-01); phase aggregators in order"
+    },
+    {
+      "product": "USTBL",
+      "key": "nav",
+      "address": "0x477e363c51Ab0C4D13B22CD6B57D56d4a3Cb7Abe",
+      "decimals": 6,
+      "kind": "bounded",
+      "log_addresses": [
+        "0xc1c24f0f2103f5899b7ab415a1930e519b7d3423"
+      ],
+      "max_silence_seconds": 100800,
+      "threshold_percent": 1e-07,
+      "note": "USTBL NAV; issuer Spiko; product NAVLink; heartbeat 97200 s, deviation threshold 1e-07 percent (Chainlink feed directory, 2026-09-01); phase aggregators in order"
+    },
+    {
+      "product": "EUTBL",
+      "key": "nav",
+      "address": "0xfD628af590c4150A9651C1f4ddD0b4f532B703ae",
+      "decimals": 6,
+      "kind": "bounded",
+      "log_addresses": [
+        "0xdaa1c6511aa051e9e83dd7ac2d65d5e41d1f6b98"
+      ],
+      "max_silence_seconds": 100800,
+      "threshold_percent": 1e-07,
+      "note": "EUTBL NAV; issuer Spiko; product NAVLink; heartbeat 97200 s, deviation threshold 1e-07 percent (Chainlink feed directory, 2026-09-01); phase aggregators in order"
+    },
+    {
+      "product": "SAFO",
+      "key": "nav",
+      "address": "0xC1E5FA6d48ba11cA163b03f2aBf843471eB7B2fB",
+      "decimals": 6,
+      "kind": "bounded",
+      "log_addresses": [
+        "0x3f2647a71cc99ff788a87160fefb535f6eb6896f"
+      ],
+      "max_silence_seconds": 100800,
+      "threshold_percent": 1e-07,
+      "note": "SAFO NAV; issuer Spiko; product NAVLink; heartbeat 97200 s, deviation threshold 1e-07 percent (Chainlink feed directory, 2026-09-01); phase aggregators in order"
+    },
+    {
+      "product": "EURSAFO",
+      "key": "nav",
+      "address": "0x799fdc55150583b5Baa0b47065E1C901862c95d5",
+      "decimals": 6,
+      "kind": "bounded",
+      "log_addresses": [
+        "0xe774bc668d300e3ac157e405149aaff89eed1df6"
+      ],
+      "max_silence_seconds": 100800,
+      "threshold_percent": 1e-07,
+      "note": "EURSAFO NAV; issuer Spiko; product NAVLink; heartbeat 97200 s, deviation threshold 1e-07 percent (Chainlink feed directory, 2026-09-01); phase aggregators in order"
+    },
+    {
+      "product": "USTBLlamaGuard",
+      "key": "feed",
+      "address": "0xde49c7B5C0E54b1624ED21C7D88bA6593d444Aa0",
+      "decimals": 6,
+      "kind": "bounded",
+      "log_addresses": [
+        "0x9d5dcbfe48c516a1de7a2be7981f70545fc118dd",
+        "0x267d0dd05fbc989565c521e0b8882f61027ff32a"
+      ],
+      "max_silence_seconds": 100800,
+      "threshold_percent": 1e-07,
+      "note": "USTB NAV - Aave LlamaGuard; issuer None; product None; heartbeat 97200 s, deviation threshold 1e-07 percent (Chainlink feed directory, 2026-09-01); phase aggregators in order"
+    },
+    {
+      "product": "WTGXX",
+      "key": "nav",
+      "address": "0xD13cB763C43B5C058E7Ec40176962c5030F4EB49",
+      "decimals": 8,
+      "kind": "bounded",
+      "log_addresses": [
+        "0x45d48aa93275c2274e1006bfdcb6406ef96a509b"
+      ],
+      "max_silence_seconds": 90000,
+      "threshold_percent": 1e-07,
+      "note": "WTGXX NAV; issuer WisdomTree; product NAVLink; heartbeat 86400 s, deviation threshold 1e-07 percent (Chainlink feed directory, 2026-09-01); phase aggregators in order"
+    },
+    {
+      "product": "mGLOBAL",
+      "key": "nav",
+      "address": "0xB92A68763b2F83e094595c7B41a7FB9D0f8Da193",
+      "decimals": 8,
+      "kind": "bounded",
+      "log_addresses": [
+        "0x0e078dc7fcd6f8faa6787e0cf783b8208c1db0f6"
+      ],
+      "max_silence_seconds": 90000,
+      "threshold_percent": 0.3,
+      "note": "mGLOBAL NAV; issuer Fasanara; product NAVLINK; heartbeat 86400 s, deviation threshold 0.3 percent (Chainlink feed directory, 2026-09-01); phase aggregators in order"
+    },
+    {
+      "product": "cbBTC",
+      "key": "por",
+      "address": "0xcBe87Dc0Cf9d807848a3E703B01A90B28eCFb2a7",
+      "decimals": 8,
+      "kind": "bounded",
+      "log_addresses": [
+        "0x4014f1f654a454785a6a97b9125fecfa88868192"
+      ],
+      "max_silence_seconds": 90000,
+      "threshold_percent": 0.5,
+      "note": "cbBTC Reserves; issuer Coinbase ; product Proof of Reserve; heartbeat 86400 s, deviation threshold 0.5 percent (Chainlink feed directory, 2026-09-01); phase aggregators in order"
+    },
+    {
+      "product": "WBTC",
+      "key": "por",
+      "address": "0xa81FE04086865e63E12dD3776978E49DEEa2ea4e",
+      "decimals": 8,
+      "kind": "bounded",
+      "log_addresses": [
+        "0xb622b7d6d9131cf6a1230eba91e5da58dbea6f59",
+        "0x64dee1bc46e817ed93dea4815f071b20ed218e39"
+      ],
+      "max_silence_seconds": 90000,
+      "threshold_percent": 1e-07,
+      "note": "WBTC Proof of Reserves; issuer BitGo; product Proof of Reserve; heartbeat 86400 s, deviation threshold 1e-07 percent (Chainlink feed directory, 2026-09-01); phase aggregators in order"
+    },
+    {
+      "product": "stETH",
+      "key": "por",
+      "address": "0xAd410E655C0fE4741F573152592eeb766e686CE7",
+      "decimals": 18,
+      "kind": "bounded",
+      "log_addresses": [
+        "0x8a43cc06554ab042ffbf07e64cfb8fee4e673422"
+      ],
+      "max_silence_seconds": 25200,
+      "threshold_percent": 0.2,
+      "note": "stETH Proof of Reserves; issuer Lido; product Proof of Reserve; heartbeat 21600 s, deviation threshold 0.2 percent (Chainlink feed directory, 2026-09-01); phase aggregators in order"
+    },
+    {
+      "product": "TUSD",
+      "key": "por",
+      "address": "0xBE456fd14720C3aCCc30A2013Bffd782c9Cb75D5",
+      "decimals": 18,
+      "kind": "bounded",
+      "log_addresses": [
+        "0x3d9b6787245773683ed6287b5a2db0fdfad13145",
+        "0xac099d59755982757537f13c7c4ae8c8d9f030b9",
+        "0x1669a35da4e5a4e0e55d30b728e66be508e11de8"
+      ],
+      "max_silence_seconds": 90000,
+      "threshold_percent": 5,
+      "note": "TUSD Reserves; issuer TrueUSD; product Proof of Reserve; heartbeat 86400 s, deviation threshold 5 percent (Chainlink feed directory, 2026-09-01); phase aggregators in order"
+    },
+    {
+      "product": "Lombard",
+      "key": "por",
+      "address": "0x70c158c7731Da2C14BC84aEBa39A4FF703DDc7d2",
+      "decimals": 8,
+      "kind": "bounded",
+      "log_addresses": [
+        "0x54977fdc88a5fc6cfbb1e3791e762c4c3e303b75"
+      ],
+      "max_silence_seconds": 90000,
+      "threshold_percent": 0.1,
+      "note": "Lombard Proof of Reserves; issuer Lombard; product Proof of Reserve; heartbeat 86400 s, deviation threshold 0.1 percent (Chainlink feed directory, 2026-09-01); phase aggregators in order"
+    },
+    {
+      "product": "FBTC",
+      "key": "por",
+      "address": "0x75A0d3264a949C2C920d7F25Df174af1FaF73399",
+      "decimals": 8,
+      "kind": "bounded",
+      "log_addresses": [
+        "0x00f0efb3d9dbe7fe91fee44ae09dae5dfa65c382"
+      ],
+      "max_silence_seconds": 90000,
+      "threshold_percent": 0.5,
+      "note": "FBTC Proof of Reserves; issuer Ignition; product Proof of Reserve; heartbeat 86400 s, deviation threshold 0.5 percent (Chainlink feed directory, 2026-09-01); phase aggregators in order"
+    },
+    {
+      "product": "USPC",
+      "key": "nav",
+      "address": "0x02ae69C812DD749c32afb4F1723F6833EeF3d7a3",
+      "decimals": 18,
+      "kind": "bounded",
+      "log_addresses": [
+        "0x05a75d586b0b06e3843517dbf470270cd92c27a9"
+      ],
+      "max_silence_seconds": 90000,
+      "threshold_percent": 0.5,
+      "note": "USPC NAV; issuer Coinshift; product NAVLink; heartbeat 86400 s, deviation threshold 0.5 percent (Chainlink feed directory, 2026-09-01); phase aggregators in order"
+    }
+  ]
+}

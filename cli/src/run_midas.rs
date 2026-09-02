@@ -78,6 +78,7 @@ fn kind_name(kind: &str) -> &'static str {
         "UNGUARDED_REFERENCE_MOVE" => "UNGUARDED_REFERENCE_MOVE",
         "OVERRIDE_FLAG_SET" => "OVERRIDE_FLAG_SET",
         "SILENCE" => "SILENCE",
+        "AGGREGATOR_CHANGED" => "AGGREGATOR_CHANGED",
         "BOUND_CHANGED" => "BOUND_CHANGED",
         "BOUND_HISTORY_INCONSISTENT" => "BOUND_HISTORY_INCONSISTENT",
         "FAILED_SETTER" => "FAILED_SETTER",
@@ -112,6 +113,8 @@ fn feed_report(
     absolute_guard: bool,
     event_rules: Option<&BTreeMap<String, i128>>,
     inputs_silence: Option<u64>,
+    guard_is_min_max: bool,
+    posting_path_word: Option<&str>,
 ) -> FeedReport {
     let entry = &inputs.entry;
     let name = entry.name();
@@ -215,7 +218,16 @@ fn feed_report(
                 reference_moves: &inputs.reference_moves,
                 absolute_guard,
                 event_rules,
-                max_silence_seconds: inputs_silence,
+                max_silence_seconds: inputs.entry.max_silence_seconds.or(inputs_silence),
+                min_max: inputs
+                    .bounds
+                    .filter(|_| guard_is_min_max)
+                    .map(|b| (b.min_answer, b.max_answer)),
+                threshold: inputs
+                    .entry
+                    .threshold_percent
+                    .map(|t| (t * 10f64.powi(decimals as i32)).round() as i128),
+                notices: &inputs.notices,
                 rounds: &inputs.rounds,
                 failed: &inputs.failed,
                 states: &inputs.states,
@@ -233,6 +245,7 @@ fn feed_report(
                 replay.unattributed,
                 live,
                 inputs.kind == FeedKind::Bounded,
+                posting_path_word == Some("AGGREGATED"),
             );
             let timeline_name = timeline_name(entry);
             let timeline = json!({
@@ -271,6 +284,12 @@ fn feed_report(
             value["unguarded_reference_moves"] = json!(replay.unguarded_reference_moves);
             value["override_flags"] = json!(replay.override_flags);
             value["silences"] = json!(replay.silences);
+            value["moves_above_threshold"] = json!(replay.moves_above_threshold);
+            if !inputs.entry.log_addresses.is_empty() {
+                value["log_addresses"] = json!(inputs.entry.log_addresses);
+            }
+            value["threshold_percent"] = json!(inputs.entry.threshold_percent);
+            value["max_silence_seconds"] = json!(inputs.entry.max_silence_seconds);
             value["external_txlist"] = json!(inputs.txlist_available);
             if !inputs.txlist_available {
                 value["failed_setters_note"] = json!("no explorer API on this chain: the external transaction list was not read, so failed setter calls are unknown");
@@ -383,6 +402,11 @@ pub fn run(
                     .filter(|g| g.is_event_rules())
                     .map(|g| &g.rules),
                 args.mechanism.max_silence_seconds,
+                args.mechanism
+                    .guard
+                    .as_ref()
+                    .is_some_and(|g| g.is_min_max()),
+                args.mechanism.posting_path_word.as_deref(),
             )
         })
         .collect();
@@ -427,6 +451,8 @@ pub fn run(
     let mut unguarded_reference_moves = 0usize;
     let mut override_flags = 0usize;
     let mut silences = 0usize;
+    let mut moves_above_threshold = 0usize;
+    let mut aggregator_changes = 0usize;
     let mut unattributed = 0usize;
     let mut findings_count = 0usize;
     let mut kind_counts: BTreeMap<&str, usize> = BTreeMap::new();
@@ -473,6 +499,12 @@ pub fn run(
         unguarded_reference_moves += replay.unguarded_reference_moves;
         override_flags += replay.override_flags;
         silences += replay.silences;
+        moves_above_threshold += replay.moves_above_threshold;
+        aggregator_changes += replay
+            .findings
+            .iter()
+            .filter(|f| f["kind"] == "AGGREGATOR_CHANGED")
+            .count();
         if replay.at_bound_posts + replay.clamped_posts > 0 {
             feeds_at_bound += 1;
         }
@@ -512,6 +544,10 @@ pub fn run(
             "{feeds_read} feeds replayed, {rounds_total} rounds, {} of them breaking a rule of the feed, {} failed posts",
             kind_counts.get("GUARD_INCONSISTENT").copied().unwrap_or(0) + bypass_total,
             total.failed
+        ),
+        "min_max" => format!(
+            "{feeds_read} feeds replayed, {rounds_total} rounds, {at_bound} at minAnswer or maxAnswer, {silences} gaps above the heartbeat, {aggregator_changes} aggregator changes, {} live",
+            liveness_counts.get("LIVE").copied().unwrap_or(0)
         ),
         "none" => format!(
             "{feeds_read} feeds replayed, {rounds_total} rounds posted without an on-chain check, {} failed posts, {} live",
@@ -562,6 +598,8 @@ pub fn run(
         "unguarded_reference_moves": unguarded_reference_moves,
         "override_flags": override_flags,
         "silences": silences,
+        "moves_above_threshold": moves_above_threshold,
+        "aggregator_changes": aggregator_changes,
         "guard_kind": guard_kind,
         "recent": {"days": args.recent_days, "posts": recent_posts, "feeds": recent_feeds},
         "liveness": liveness_counts,

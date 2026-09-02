@@ -397,13 +397,34 @@ Further config fields, added for the families beyond Midas
 - `max_silence_seconds`: a gap between consecutive rounds above it is a
   `SILENCE` finding (`from_round`, `round_id`, `gap_seconds`); the feed
   and the family summary carry `silences`.
+- Chainlink aggregators (`config/chainlink-mainnet.json`, class D,
+  aggregated): a feed entry is the EACAggregatorProxy with
+  `log_addresses` listing every phase aggregator in order (rounds are read
+  from all of them and numbered in log order), `max_silence_seconds` (the
+  directory's heartbeat plus one hour of grace) and `threshold_percent`
+  (the directory's deviation threshold; moves above it are counted as
+  `moves_above_threshold`, not reported). `mechanism.attribution: event`
+  takes the poster from the round event's `poster` field
+  (`NewTransmission`'s transmitter word joined in the same transaction; a
+  join event may list several signatures separated by `|` when the layout
+  kept the field across contract versions) and reads no transaction;
+  `guard.kind: min_max` reads `minAnswer()` and `maxAnswer()` on the
+  current aggregator (`guard_on_log_address`), and an answer exactly on
+  either is `GUARD_AT_BOUND` (the range clamp of the aggregator, the
+  Venus LUNA class); `posting_path_word: AGGREGATED` replaces `GUARDED`
+  for rounds written by a transmitter set rather than an issuer key;
+  `notice_events` report the proxy's `AggregatorConfirmed(address,address)`
+  as `AGGREGATOR_CHANGED` with `previous` and `latest`. Bound words above
+  the i128 range (a maxAnswer of 2^176 minus 1) read saturated.
 - `survey_line` per guard kind: the Midas sentence for `max_deviation`;
   "N feeds replayed, B unchecked posts over the reference bound on M
   feeds, R reference moves, U of them without the on-chain check" for
   `reference`; "N feeds replayed, R rounds within the delta cap, O over
   it, F override flags set, X failed posts" for `absolute_delta`; "N
   feeds replayed, R rounds, B of them breaking a rule of the feed, X
-  failed posts" for `event_rules`;
+  failed posts" for `event_rules`; "N feeds replayed, R rounds, A at
+  minAnswer or maxAnswer, S gaps above the heartbeat, C aggregator
+  changes, L live" for `min_max`;
   "N feeds replayed, K posts exactly on the clamp band on M feeds, C
   truncated on chain, F failed posts" for `clamp`; "N feeds replayed, R
   rounds posted without an on-chain check, F failed posts, L live" for no

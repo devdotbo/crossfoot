@@ -46,7 +46,7 @@ pub fn topic0_of(signature: &str) -> String {
 // Feed list
 // ---------------------------------------------------------------------------
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct FeedEntry {
     pub product: String,
     pub key: String,
@@ -65,6 +65,20 @@ pub struct FeedEntry {
     /// of a relayed setter call for this feed.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub topics: Vec<String>,
+    /// Every contract the round events are read from, in phase order (a
+    /// Chainlink proxy's phase aggregators); the last one is the current
+    /// one and the guard getters are read there when the mechanism says
+    /// `guard_on_log_address`. Overrides `log_address` for the sweeps.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub log_addresses: Vec<String>,
+    /// A gap between rounds above this many seconds is a SILENCE finding
+    /// for this feed (a Chainlink heartbeat plus a grace period).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_silence_seconds: Option<u64>,
+    /// The feed's declared deviation threshold in percent; moves above it
+    /// are counted per feed.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub threshold_percent: Option<f64>,
 }
 
 impl FeedEntry {
@@ -74,6 +88,15 @@ impl FeedEntry {
 
     pub fn log_address(&self) -> &str {
         self.log_address.as_deref().unwrap_or(&self.address)
+    }
+
+    /// The contracts the round events are read from.
+    pub fn log_addresses(&self) -> Vec<String> {
+        if self.log_addresses.is_empty() {
+            vec![self.log_address().to_string()]
+        } else {
+            self.log_addresses.clone()
+        }
     }
 }
 
@@ -148,6 +171,12 @@ impl GuardSpec {
         self.kind == "event_rules"
     }
 
+    /// `min_max`: no deviation bound, only minAnswer and maxAnswer; an
+    /// answer exactly on either is GUARD_AT_BOUND.
+    pub fn is_min_max(&self) -> bool {
+        self.kind == "min_max"
+    }
+
     /// Guards whose bound comes from a getter read at a block.
     fn reads_getters(&self) -> bool {
         !self.is_clamp() && !self.is_event_rules()
@@ -174,6 +203,22 @@ pub struct Field {
 }
 
 impl Field {
+    /// The field as an address (the low 20 bytes of the word).
+    fn read_address(&self, row: &Value) -> Option<String> {
+        let word = if let Some(index) = self.topic {
+            row.get("topics")?
+                .as_array()?
+                .get(index)?
+                .as_str()?
+                .to_string()
+        } else {
+            let data = row.get("data")?.as_str()?;
+            let body = data.strip_prefix("0x").unwrap_or(data);
+            format!("0x{}", body.get(self.data? * 64..(self.data? + 1) * 64)?)
+        };
+        Some(address_of_topic(&word))
+    }
+
     fn read(&self, row: &Value) -> Option<i128> {
         if let Some(index) = self.topic {
             let topic = row.get("topics")?.as_array()?.get(index)?.as_str()?;
@@ -227,6 +272,21 @@ pub struct CustomRoundEvent {
     /// Extra named fields carried on the round for the guard.
     #[serde(default)]
     pub fields: BTreeMap<String, Field>,
+    /// The poster's address, from a field of the event or of a second event
+    /// of the same transaction (a Chainlink NewRound's startedBy), for
+    /// families attributed from events rather than transactions.
+    #[serde(default)]
+    pub poster: Option<AnswerSpec>,
+}
+
+/// An event that is reported as a finding when it occurs, such as a
+/// Chainlink proxy's AggregatorConfirmed.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct NoticeEventSpec {
+    pub signature: String,
+    pub kind: String,
+    #[serde(default)]
+    pub note: String,
 }
 
 /// A round event: the AnswerUpdated shape by signature, or a custom layout.
@@ -272,6 +332,10 @@ pub struct RelaySpec {
     pub calls_kind: String,
     #[serde(default)]
     pub note: String,
+}
+
+fn default_attribution() -> String {
+    "transaction".to_string()
 }
 
 fn default_calls_kind() -> String {
@@ -406,6 +470,22 @@ pub struct Mechanism {
     /// `SILENCE` finding.
     #[serde(default)]
     pub max_silence_seconds: Option<u64>,
+    /// `transaction` (the default: the txlist, Safe unwrapping, relays and
+    /// traces) or `event` (the poster comes from the round event's `poster`
+    /// field; no transaction is read).
+    #[serde(default = "default_attribution")]
+    pub attribution: String,
+    /// Read the guard getters on the feed's current log address (the
+    /// aggregator behind a proxy) rather than on the feed address.
+    #[serde(default)]
+    pub guard_on_log_address: bool,
+    /// The posting path word of a feed whose rounds carry no single key
+    /// (`AGGREGATED` for an OCR feed); replaces GUARDED when set.
+    #[serde(default)]
+    pub posting_path_word: Option<String>,
+    /// Events on the feed address reported as findings of the given kind.
+    #[serde(default)]
+    pub notice_events: Vec<NoticeEventSpec>,
     /// The events that move a reference guard's reference value.
     #[serde(default)]
     pub reference_events: Option<ReferenceEventsSpec>,
@@ -524,7 +604,14 @@ pub fn parse_feed_list(text: &str) -> Result<FeedList, String> {
         if guard.is_clamp() && guard.band_percent.is_none() {
             return Err("a clamp guard needs band_percent".to_string());
         }
-        if guard.reads_getters() && !guard.is_absolute() && guard.max_deviation.is_empty() {
+        if guard.is_min_max() && (guard.min_answer.is_empty() || guard.max_answer.is_empty()) {
+            return Err("a min_max guard needs the min_answer and max_answer getters".to_string());
+        }
+        if guard.reads_getters()
+            && !guard.is_absolute()
+            && !guard.is_min_max()
+            && guard.max_deviation.is_empty()
+        {
             return Err("a max_deviation guard needs the max_deviation getter".to_string());
         }
         if guard.is_reference() && guard.reference.is_empty() {
@@ -595,6 +682,21 @@ fn u64_word(data: &str, index: usize) -> Option<u64> {
 
 fn i128_word(data: &str, index: usize) -> Option<i128> {
     word_to_signed_decimal(&word_at(data, index)?).parse().ok()
+}
+
+/// As `i128_word`, saturating at the i128 range: a Chainlink maxAnswer of
+/// 2^176 - 1 reads as i128::MAX, which compares the same way.
+fn i128_word_saturating(data: &str, index: usize) -> Option<i128> {
+    let decimal = word_to_signed_decimal(&word_at(data, index)?);
+    Some(
+        decimal
+            .parse::<i128>()
+            .unwrap_or(if decimal.starts_with('-') {
+                i128::MIN
+            } else {
+                i128::MAX
+            }),
+    )
 }
 
 fn selector_of(input: &str) -> String {
@@ -679,6 +781,7 @@ pub fn decode_answer_updated(row: &Value) -> Option<RoundEvent> {
         log_index: dec_u64(row, "logIndex").unwrap_or(0),
         transaction_hash: row.get("transactionHash")?.as_str()?.to_lowercase(),
         fields: BTreeMap::new(),
+        poster: None,
     })
 }
 
@@ -736,6 +839,14 @@ pub fn decode_custom_rounds(
                 fields.insert(name.clone(), value);
             }
         }
+        let poster = match &spec.poster {
+            Some(AnswerSpec::Field(field)) => field.read_address(row),
+            Some(AnswerSpec::Join { field, .. }) => joined
+                .get_mut(&hash)
+                .and_then(|queue| queue.pop_front())
+                .and_then(|join_row| field.read_address(join_row)),
+            None => None,
+        };
         out.push(RoundEvent {
             round_id,
             answer,
@@ -744,6 +855,7 @@ pub fn decode_custom_rounds(
             log_index: dec_u64(row, "logIndex").unwrap_or(0),
             transaction_hash: hash,
             fields,
+            poster,
         });
     }
     out
@@ -1074,7 +1186,7 @@ fn call_i128(
 ) -> Result<Option<i128>, String> {
     Ok(
         call(source, bundle, label, to, &encode_no_args(signature), block)?
-            .and_then(|data| i128_word(&data, 0)),
+            .and_then(|data| i128_word_saturating(&data, 0)),
     )
 }
 
@@ -1308,6 +1420,8 @@ pub struct FeedInputs {
     /// False when the family has no explorer API: failed setters are then
     /// unknown and every round was resolved through its transaction.
     pub txlist_available: bool,
+    /// Findings from the mechanism's notice events.
+    pub notices: Vec<Value>,
     pub latest_round: Option<u64>,
     pub latest: Option<LatestRound>,
     pub last_timestamp: Option<u64>,
@@ -1373,7 +1487,9 @@ fn read_bounds(
             max_answer: 0,
         }));
     }
-    let deviation = if guard.is_absolute() {
+    let deviation = if guard.is_min_max() {
+        Some(0)
+    } else if guard.is_absolute() {
         call_i128(
             source,
             bundle,
@@ -1468,13 +1584,22 @@ pub fn fetch(
         let decimals = read_getter(source, bundle, &name, address, &reads.decimals, block)?
             .and_then(|data| u64_word(&data, 0))
             .map(|d| d as u32);
+        let guard_address = if mechanism.guard_on_log_address {
+            entry
+                .log_addresses()
+                .last()
+                .cloned()
+                .unwrap_or_else(|| address.to_string())
+        } else {
+            address.to_string()
+        };
         let bounds = read_bounds(
             source,
             bundle,
             mechanism.guard.as_ref(),
             decimals.unwrap_or(entry.decimals),
             &name,
-            address,
+            &guard_address,
             block,
         )?;
         let latest_round = read_getter(source, bundle, &name, address, &reads.latest_round, block)?
@@ -1546,6 +1671,7 @@ pub fn fetch(
             clamp_band,
             reference_moves: Vec::new(),
             txlist_available: true,
+            notices: Vec::new(),
             latest_round,
             latest,
             last_timestamp,
@@ -1576,47 +1702,75 @@ pub fn fetch(
                 .len() as u64
         };
         for (index, spec) in mechanism.round_events.iter().enumerate() {
-            if index > 0 && latest_round.is_none_or(|latest| distinct(&events) >= latest) {
-                break;
-            }
-            let signature = spec.signature().to_string();
-            let rows = sweep_logs(
-                source,
-                bundle,
-                &format!("{name} {signature}"),
-                entry.log_address(),
-                &topic0_of(&signature),
-                &entry.topics,
-                block,
-                logs,
-            )?;
-            let decoded: Vec<RoundEvent> = match spec {
-                RoundEventSpec::Signature(_) => {
-                    rows.iter().filter_map(decode_answer_updated).collect()
+            for log_address in entry.log_addresses() {
+                let log_address = log_address.as_str();
+                if index > 0 && latest_round.is_none_or(|latest| distinct(&events) >= latest) {
+                    break;
                 }
-                RoundEventSpec::Custom(custom) => {
-                    let join_rows = match &custom.answer {
-                        AnswerSpec::Join { event, .. } => sweep_logs(
-                            source,
-                            bundle,
-                            &format!("{name} {event}"),
-                            entry.log_address(),
-                            &topic0_of(event),
-                            &entry.topics,
-                            block,
-                            logs,
-                        )?,
-                        AnswerSpec::Field(_) => Vec::new(),
-                    };
-                    decode_custom_rounds(&rows, &join_rows, custom, mechanism.constructor_rounds)
+                let signature = spec.signature().to_string();
+                let rows = sweep_logs(
+                    source,
+                    bundle,
+                    &format!("{name} {signature}"),
+                    log_address,
+                    &topic0_of(&signature),
+                    &entry.topics,
+                    block,
+                    logs,
+                )?;
+                let decoded: Vec<RoundEvent> = match spec {
+                    RoundEventSpec::Signature(_) => {
+                        rows.iter().filter_map(decode_answer_updated).collect()
+                    }
+                    RoundEventSpec::Custom(custom) => {
+                        let join_event = match (&custom.answer, &custom.poster) {
+                            (AnswerSpec::Join { event, .. }, _) => Some(event.clone()),
+                            (_, Some(AnswerSpec::Join { event, .. })) => Some(event.clone()),
+                            _ => None,
+                        };
+                        // Several signatures separated by `|` (an event whose
+                        // layout kept the field but changed elsewhere between
+                        // contract versions) are swept one by one.
+                        let mut join_rows = Vec::new();
+                        if let Some(events) = join_event.as_deref() {
+                            for event in events.split('|').map(str::trim) {
+                                join_rows.extend(sweep_logs(
+                                    source,
+                                    bundle,
+                                    &format!("{name} {event}"),
+                                    log_address,
+                                    &topic0_of(event),
+                                    &entry.topics,
+                                    block,
+                                    logs,
+                                )?);
+                            }
+                        }
+                        decode_custom_rounds(
+                            &rows,
+                            &join_rows,
+                            custom,
+                            mechanism.constructor_rounds,
+                        )
+                    }
+                };
+                if (index == 0 || !decoded.is_empty()) && !round_events.contains(&signature) {
+                    round_events.push(signature);
                 }
-            };
-            if index == 0 || !decoded.is_empty() {
-                round_events.push(signature);
+                events.extend(decoded);
             }
-            events.extend(decoded);
         }
         inputs.round_events = round_events;
+        if mechanism
+            .round_events
+            .iter()
+            .any(|spec| matches!(spec, RoundEventSpec::Custom(c) if matches!(c.round_id, IdSpec::Sequence(_))))
+        {
+            events.sort_by_key(|e| (e.block, e.log_index));
+            for (index, event) in events.iter_mut().enumerate() {
+                event.round_id = mechanism.constructor_rounds + index as u64 + 1;
+            }
+        }
         events.sort_by_key(|e| (e.round_id, e.block, e.log_index));
         let latest_round = if mechanism.latest_round_from_events {
             Some(events.len() as u64 + mechanism.constructor_rounds)
@@ -1748,6 +1902,38 @@ pub fn fetch(
             moves.sort_by_key(|m| (m.block, m.log_index));
             inputs.reference_moves = moves;
         }
+        // Notice events on the feed address, reported as findings.
+        for notice in &mechanism.notice_events {
+            let rows = sweep_logs(
+                source,
+                bundle,
+                &format!("{name} {}", notice.signature),
+                address,
+                &topic0_of(&notice.signature),
+                &[],
+                block,
+                logs,
+            )?;
+            for row in &rows {
+                let topics = row.get("topics").and_then(Value::as_array);
+                let topic_address = |index: usize| {
+                    topics
+                        .and_then(|t| t.get(index))
+                        .and_then(Value::as_str)
+                        .map(address_of_topic)
+                };
+                inputs.notices.push(serde_json::json!({
+                    "kind": notice.kind,
+                    "feed": name,
+                    "transaction_hash": row.get("transactionHash").and_then(Value::as_str).unwrap_or("").to_lowercase(),
+                    "block": dec_u64(row, "blockNumber"),
+                    "timestamp_unix": dec_u64(row, "timeStamp"),
+                    "previous": topic_address(1),
+                    "latest": topic_address(2),
+                    "note": notice.note,
+                }));
+            }
+        }
 
         // R4, R5: the external transaction list.
         let tx_rows = if args.has_explorer {
@@ -1777,8 +1963,25 @@ pub fn fetch(
         // R6: attribution.
         let feed_lower = address.to_lowercase();
         let mut seen_in_tx: BTreeMap<String, usize> = BTreeMap::new();
+        let event_attribution = mechanism.attribution == "event";
+        let first_setter = mechanism.setters.first().cloned();
         for event in events {
-            let attribution = if let Some(tx) = by_hash.get(&event.transaction_hash) {
+            let attribution = if let (true, Some(poster), Some(setter)) = (
+                event_attribution,
+                event.poster.clone(),
+                first_setter.as_ref(),
+            ) {
+                Attribution {
+                    via: Via::Event,
+                    path: setter.path,
+                    selector: encode_no_args(&setter.signature),
+                    value: Some(event.answer),
+                    flag: None,
+                    sender: poster,
+                    safe_chain: Vec::new(),
+                    batch_index: None,
+                }
+            } else if let Some(tx) = by_hash.get(&event.transaction_hash) {
                 Attribution {
                     via: Via::External,
                     path: tx.path,
@@ -2194,7 +2397,11 @@ pub fn fetch(
 
         // R8, R10: the guard state at block minus one for every checked post.
         if let Some(guard) = mechanism.guard.as_ref().filter(|g| {
-            !g.is_clamp() && !g.is_reference() && !g.is_absolute() && !g.is_event_rules()
+            !g.is_clamp()
+                && !g.is_reference()
+                && !g.is_absolute()
+                && !g.is_event_rules()
+                && !g.is_min_max()
         }) {
             let bound_at_b1 = bounds.map(|b| b.max_answer_deviation);
             for block_minus_one in checked_blocks(&inputs.rounds, bound_at_b1) {

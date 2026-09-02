@@ -136,13 +136,18 @@ sUSDS, sDAI and stUSDS, Ondo USDY, Frax sfrxUSD.
   age), `openeden` (the TBILL price oracle, a 15 basis point guard against
   a close NAV the operator moves minutes earlier), `ondo` (the OUSG oracle,
   whose rules replay from the event's own fields), `superstate` (the USTB
-  oracle, an absolute delta cap per checkpoint with an override flag). The
+  oracle, an absolute delta cap per checkpoint with an override flag),
+  `chainlink` (NAVLink and Proof of Reserve feeds: rounds from every
+  phase aggregator with the OCR transmitter as the poster, the range
+  bounds and the directory's heartbeat and deviation threshold). The
   guard kind decides the finding vocabulary: `GUARD_BYPASS` and
   `UNGUARDED_POST` under a deviation guard, `GUARD_AT_BOUND` and
   `GUARD_CLAMPED` under a clamp, `UNGUARDED_POST` with `classification:
   no_guard` without a guard, `UNGUARDED_REFERENCE_MOVE` under a reference
-  guard, `OVERRIDE_FLAG_SET` where a setter carries an override flag, and
-  `SILENCE` where a family sets a maximum gap between rounds.
+  guard, `OVERRIDE_FLAG_SET` where a setter carries an override flag,
+  `SILENCE` where a family sets a maximum gap between rounds, and
+  `AGGREGATOR_CHANGED` where a Chainlink proxy switched aggregator. The
+  posting path of an aggregated feed is `AGGREGATED`.
   The posting path of a feed without a guard is `ATTRIBUTED`, never
   `GUARDED`; `feeds.json` rows carry `guard_kind` and `family_name` so a
   reader can tell the families apart.
@@ -260,6 +265,7 @@ crossfoot run family --block 25885541 --config config/centrifuge-mainnet.json --
 crossfoot run family --block 25885541 --config config/openeden-mainnet.json
 crossfoot run family --block 25885541 --config config/ondo-mainnet.json
 crossfoot run family --block 25885541 --config config/superstate-mainnet.json
+crossfoot run family --block 25885541 --config config/chainlink-mainnet.json
 ```
 
 Prints the verdict, the summary headline, the result and bundle paths, the

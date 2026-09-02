@@ -616,3 +616,71 @@ fn superstate_ustb_replays_the_delta_cap() {
     );
     assert!(rounds[1..].iter().all(|r| r["bound_in_force"] == "1000000"));
 }
+
+/// Chainlink NAVLink feeds, class D, aggregated: six proxies with every
+/// phase aggregator swept (USTB two phases, USYC three), rounds numbered
+/// in log order and matching the aggregators' own counters, every round
+/// attributed to an OCR transmitter from NewTransmission, no answer on
+/// minAnswer or maxAnswer, no gap above the heartbeat plus one hour, all
+/// live, posting path AGGREGATED.
+#[test]
+fn chainlink_navlink_feeds_replay_across_phase_aggregators() {
+    let replay = replay("chainlink-25885541");
+    let result = &replay.result;
+    assert_eq!(result["target"], "chainlink");
+    assert_eq!(result["summary"]["family"], "guarded-setter");
+    assert_eq!(result["family"]["mechanism"]["guard"]["kind"], "min_max");
+    assert_eq!(result["family"]["mechanism"]["attribution"], "event");
+    let s = &result["family_summary"];
+    assert_eq!(s["feeds_replayed"], 6);
+    assert_eq!(s["rounds_total"], 499 + 833 + 860 + 207 + 73 + 73);
+    assert_eq!(s["posts_total"]["unattributed"], 0);
+    assert_eq!(s["at_bound_posts"], 0);
+    assert_eq!(s["silences"], 0);
+    assert_eq!(s["aggregator_changes"], 0);
+    assert_eq!(s["bypass_posts_total"], 0);
+    assert_eq!(s["attribution_gaps"], 0);
+    assert_eq!(s["liveness"]["LIVE"], 6);
+    assert_eq!(s["guard_kind"], "min_max");
+    for (product, rounds, phases) in [
+        ("TBILL", 499, 1),
+        ("USTB", 833, 2),
+        ("USYCLlamaGuard", 860, 3),
+        ("JTRSY", 207, 1),
+        ("SAFO", 73, 1),
+        ("EURSAFO", 73, 1),
+    ] {
+        let f = feed(result, product);
+        assert_eq!(f["rounds_total"], rounds, "{product}");
+        assert_eq!(f["latest_round"], rounds, "{product}");
+        assert_eq!(f["posts"]["safe"], rounds, "{product}");
+        assert_eq!(
+            f["log_addresses"].as_array().unwrap().len(),
+            phases,
+            "{product}"
+        );
+        assert_eq!(f["posting_path"], "AGGREGATED", "{product}");
+        assert_eq!(f["verdict"], "CONSISTENT", "{product}");
+        assert_eq!(f["consumer_action"], "ALLOW", "{product}");
+        assert_eq!(f["liveness"], "LIVE", "{product}");
+        assert!(
+            f["poster_addresses"].as_array().unwrap().len() >= 4,
+            "{product}: a transmitter set, not one key"
+        );
+        assert!(
+            f["max_silence_seconds"].as_u64().unwrap() > 86_400,
+            "{product}"
+        );
+        assert!(f["findings"].as_array().unwrap().is_empty(), "{product}");
+        let timeline = timeline(&replay, f);
+        let rows = timeline["rounds"].as_array().unwrap();
+        assert_eq!(rows.len(), rounds as usize, "{product}");
+        assert!(rows[1]["deviation_in_force"].is_string(), "{product}");
+        assert!(rows.iter().all(|r| r["path"] == "safe"), "{product}");
+    }
+    let ustb = feed(result, "USTB");
+    assert_eq!(ustb["decimals"], 6);
+    assert_eq!(ustb["min_answer"], "1");
+    assert_eq!(ustb["latest_answer"], "11197244");
+    assert_eq!(ustb["threshold_percent"], 0.0001);
+}

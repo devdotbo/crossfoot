@@ -90,6 +90,9 @@ pub struct RoundEvent {
     /// Extra named event fields a family's guard reads (config `fields`).
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub fields: BTreeMap<String, i128>,
+    /// The poster, when the family attributes from the event itself.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub poster: Option<String>,
 }
 
 /// A move of the guard's reference value (a family whose guard compares
@@ -128,6 +131,8 @@ pub enum Via {
     Trace,
     /// Resolved through a configured relay contract's bytes[] of calls.
     Relay,
+    /// Taken from the round event's poster field (an OCR transmitter).
+    Event,
     /// Could not be resolved.
     Unattributed,
 }
@@ -346,6 +351,9 @@ pub enum PostingPath {
     /// Every round is attributed to a known poster; the family has no
     /// on-chain check to replay.
     Attributed,
+    /// The rounds come from an oracle network's aggregation (OCR
+    /// transmitters), not from an issuer key.
+    Aggregated,
 }
 
 impl PostingPath {
@@ -355,6 +363,7 @@ impl PostingPath {
             PostingPath::AdminGuardBypassed => "ADMIN_GUARD_BYPASSED",
             PostingPath::Unattributed => "UNATTRIBUTED",
             PostingPath::Attributed => "ATTRIBUTED",
+            PostingPath::Aggregated => "AGGREGATED",
         }
     }
 }
@@ -366,11 +375,14 @@ pub fn feed_verdict(
     unattributed: usize,
     liveness: Liveness,
     guarded: bool,
+    aggregated: bool,
 ) -> (&'static str, PostingPath, &'static str) {
     let posting_path = if bypasses > 0 {
         PostingPath::AdminGuardBypassed
     } else if unattributed > 0 {
         PostingPath::Unattributed
+    } else if aggregated {
+        PostingPath::Aggregated
     } else if guarded {
         PostingPath::Guarded
     } else {
@@ -446,6 +458,14 @@ pub struct FeedReplayInput<'a> {
     pub absolute_guard: bool,
     /// A gap between consecutive rounds above this is a `SILENCE` finding.
     pub max_silence_seconds: Option<u64>,
+    /// For a min_max guard: the minAnswer and maxAnswer in force at B1; an
+    /// answer exactly on either is GUARD_AT_BOUND.
+    pub min_max: Option<(i128, i128)>,
+    /// The feed's declared deviation threshold as a percentage at
+    /// 10^decimals; moves above it are counted.
+    pub threshold: Option<i128>,
+    /// Findings from notice events, appended as they are.
+    pub notices: &'a [Value],
     /// For an event-rules guard: the constants; every rule is replayed from
     /// the round's own fields (`old`, `ref_old`, `ref_new`, `ref_old_round`,
     /// `ref_new_round`).
@@ -483,6 +503,7 @@ pub struct FeedReplay {
     pub unguarded_reference_moves: usize,
     pub override_flags: usize,
     pub silences: usize,
+    pub moves_above_threshold: usize,
     pub bound_changes: usize,
     pub unattributed: usize,
     pub poster_addresses: Vec<String>,
@@ -524,6 +545,7 @@ pub fn replay_feed(input: &FeedReplayInput) -> FeedReplay {
     let mut clamped = 0usize;
     let mut unguarded_reference = 0usize;
     let mut override_flags = 0usize;
+    let mut moves_above_threshold = 0usize;
     let mut classifications: BTreeMap<String, usize> = BTreeMap::new();
     let mut posters: BTreeSet<String> = BTreeSet::new();
     let mut bound_samples: BTreeMap<u64, i128> = BTreeMap::new();
@@ -657,6 +679,34 @@ pub fn replay_feed(input: &FeedReplayInput) -> FeedReplay {
             }
         }
 
+        if let Some((min, max)) = input.min_max {
+            // A min_max guard: no deviation bound, the series is measured
+            // against the declared threshold, and an answer that sits
+            // exactly on minAnswer or maxAnswer is reported.
+            let dev = deviation(last_answer, round.event.answer).unwrap_or(i128::MAX);
+            row.deviation_in_force = Some(dev.to_string());
+            row.bound_in_force = input.threshold.map(|t| t.to_string());
+            if input.threshold.is_some_and(|t| dev > t) {
+                moves_above_threshold += 1;
+            }
+            if round.event.answer == min || round.event.answer == max {
+                let mut finding = base(round);
+                finding["kind"] = json!("GUARD_AT_BOUND");
+                finding["min_answer"] = json!(min.to_string());
+                finding["max_answer"] = json!(max.to_string());
+                finding["last_answer_at_block_minus_one"] = json!(last_answer.to_string());
+                finding["deviation_in_force"] = json!(dev.to_string());
+                finding["deviation_percent"] = json!(percent(dev, one));
+                finding["same_block"] = json!(same_block);
+                finding["initialization"] = json!(false);
+                finding["note"] = json!("the stored answer equals minAnswer or maxAnswer: the aggregator's range clamp, not the market");
+                at_bound += 1;
+                row.finding = Some("GUARD_AT_BOUND".to_string());
+                findings.push(finding);
+            }
+            timeline.push(row);
+            continue;
+        }
         if input.absolute_guard {
             // An absolute delta guard: |value - previous| against the cap read
             // at block minus one, both in answer units.
@@ -1024,6 +1074,10 @@ pub fn replay_feed(input: &FeedReplayInput) -> FeedReplay {
         }
     }
 
+    for notice in input.notices {
+        findings.push(notice.clone());
+    }
+
     // Silence: gaps between consecutive rounds above the family's limit.
     let mut silences = 0usize;
     if let Some(limit) = input.max_silence_seconds {
@@ -1134,6 +1188,7 @@ pub fn replay_feed(input: &FeedReplayInput) -> FeedReplay {
         unguarded_reference_moves: unguarded_reference,
         override_flags,
         silences,
+        moves_above_threshold,
         bound_changes,
         unattributed,
         poster_addresses: posters.into_iter().collect(),
@@ -1180,6 +1235,7 @@ mod tests {
                 log_index: 0,
                 transaction_hash: format!("0x{id:064x}"),
                 fields: BTreeMap::new(),
+                poster: None,
             },
             attribution: Attribution {
                 via,
@@ -1256,6 +1312,9 @@ mod tests {
             absolute_guard: false,
             event_rules: None,
             max_silence_seconds: None,
+            min_max: None,
+            threshold: None,
+            notices: &[],
             rounds,
             failed: &[],
             states: &states,
@@ -1564,10 +1623,10 @@ mod tests {
     #[test]
     fn feed_verdict_precedence() {
         assert_eq!(
-            feed_verdict(true, 3, 0, Liveness::Live, true).0,
+            feed_verdict(true, 3, 0, Liveness::Live, true, false).0,
             "INPUT_GAP"
         );
-        let (v, p, a) = feed_verdict(false, 1, 2, Liveness::Stale, true);
+        let (v, p, a) = feed_verdict(false, 1, 2, Liveness::Stale, true, false);
         assert_eq!(
             (v, p, a),
             (
@@ -1576,17 +1635,19 @@ mod tests {
                 "REVIEW"
             )
         );
-        let (v, p, a) = feed_verdict(false, 0, 2, Liveness::Stale, true);
+        let (v, p, a) = feed_verdict(false, 0, 2, Liveness::Stale, true, false);
         assert_eq!(
             (v, p, a),
             ("INSUFFICIENT_WINDOW", PostingPath::Unattributed, "REVIEW")
         );
-        let (v, p, a) = feed_verdict(false, 0, 0, Liveness::Placeholder, true);
+        let (v, p, a) = feed_verdict(false, 0, 0, Liveness::Placeholder, true, false);
         assert_eq!((v, p, a), ("SOURCE_STALE", PostingPath::Guarded, "REVIEW"));
-        let (v, p, a) = feed_verdict(false, 0, 0, Liveness::Live, true);
+        let (v, p, a) = feed_verdict(false, 0, 0, Liveness::Live, true, false);
         assert_eq!((v, p, a), ("CONSISTENT", PostingPath::Guarded, "ALLOW"));
-        let (v, p, a) = feed_verdict(false, 0, 0, Liveness::Live, false);
+        let (v, p, a) = feed_verdict(false, 0, 0, Liveness::Live, false, false);
         assert_eq!((v, p, a), ("CONSISTENT", PostingPath::Attributed, "ALLOW"));
+        let (v, p, a) = feed_verdict(false, 0, 0, Liveness::Live, true, true);
+        assert_eq!((v, p, a), ("CONSISTENT", PostingPath::Aggregated, "ALLOW"));
     }
 
     #[test]
@@ -1645,6 +1706,9 @@ mod tests {
             absolute_guard: false,
             event_rules: None,
             max_silence_seconds: None,
+            min_max: None,
+            threshold: None,
+            notices: &[],
             rounds: &rounds,
             failed: &[],
             states: &states,
@@ -1726,6 +1790,9 @@ mod tests {
             absolute_guard: false,
             event_rules: None,
             max_silence_seconds: None,
+            min_max: None,
+            threshold: None,
+            notices: &[],
             rounds: &rounds,
             failed: &[],
             states: &states,
@@ -1793,6 +1860,9 @@ mod tests {
             absolute_guard: true,
             event_rules: None,
             max_silence_seconds: None,
+            min_max: None,
+            threshold: None,
+            notices: &[],
             rounds: &rounds,
             failed: &[],
             states: &states,
@@ -1854,6 +1924,9 @@ mod tests {
             absolute_guard: false,
             event_rules: Some(&rules),
             max_silence_seconds: None,
+            min_max: None,
+            threshold: None,
+            notices: &[],
             rounds: &rounds,
             failed: &[],
             states: &states,
@@ -1896,6 +1969,9 @@ mod tests {
             absolute_guard: false,
             event_rules: None,
             max_silence_seconds: Some(86_400),
+            min_max: None,
+            threshold: None,
+            notices: &[],
             rounds: &rounds,
             failed: &[],
             states: &states,
@@ -1910,5 +1986,48 @@ mod tests {
         assert_eq!(replay.findings[0]["round_id"], 3);
         assert_eq!(replay.findings[0]["gap_seconds"], 100_000);
         assert_eq!(replay.silences, 1);
+    }
+
+    /// A min_max guard: an answer on minAnswer is at bound, moves above the
+    /// declared threshold are counted, notices pass through as findings.
+    #[test]
+    fn min_max_guard_reports_the_answer_at_a_bound() {
+        let rounds = vec![
+            round(1, 1_000_000, 100, PostPath::Safe, Via::Event),
+            round(2, 1_005_000, 200, PostPath::Safe, Via::Event),
+            round(3, 1, 300, PostPath::Safe, Via::Event),
+        ];
+        let states = BTreeMap::new();
+        let notice = json!({"kind": "AGGREGATOR_CHANGED", "feed": "x", "block": 250});
+        let replay = replay_feed(&FeedReplayInput {
+            feed_name: "USTB.navlink".to_string(),
+            decimals: 6,
+            bound_at_b1: None,
+            spacing_seconds: None,
+            clamp_band: None,
+            reference_guard: false,
+            reference_moves: &[],
+            absolute_guard: false,
+            event_rules: None,
+            max_silence_seconds: None,
+            min_max: Some((1, i128::MAX)),
+            threshold: Some(100_000),
+            notices: std::slice::from_ref(&notice),
+            rounds: &rounds,
+            failed: &[],
+            states: &states,
+            bound_groups: &[],
+            eras: &[],
+            b1_timestamp: 1_800_000_000,
+            recent_seconds: 183 * 86_400,
+            round_id_gap: None,
+        });
+        assert_eq!(kinds(&replay), vec!["GUARD_AT_BOUND", "AGGREGATOR_CHANGED"]);
+        assert_eq!(replay.findings[0]["round_id"], 3);
+        assert_eq!(replay.at_bound_posts, 1);
+        // Round 2 moved 0.5 percent, above the 0.1 percent threshold; round 3
+        // as well.
+        assert_eq!(replay.moves_above_threshold, 2);
+        assert_eq!(replay.timeline[1].bound_in_force.as_deref(), Some("100000"));
     }
 }

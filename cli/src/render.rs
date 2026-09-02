@@ -1997,6 +1997,11 @@ fn feed_headline(result: &Value, feed: &Value) -> String {
             n("reference_moves"),
             n("unguarded_reference_moves")
         ),
+        Some("min_max") => format!(
+            "{rounds} round(s) by {keys} transmitter(s), {} at minAnswer or maxAnswer, {} gap(s) above the heartbeat, liveness {liveness}",
+            n("at_bound_posts"),
+            n("silences")
+        ),
         Some("absolute_delta") => format!(
             "{rounds} checkpoint(s) within the delta cap, {} over it, {} override flag(s) set, liveness {liveness}",
             n("bypass_posts"),
