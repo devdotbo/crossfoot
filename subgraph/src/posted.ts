@@ -74,7 +74,7 @@ export function startRound(
   uncheckedSelectors: string[],
 ): Round {
   const tx = event.transaction;
-  const round = new Round(roundKey(event.address, roundId));
+  const round = new Round(roundKey(feed.id, roundId));
   round.feed = feed.id;
   round.roundId = roundId;
   round.answer = answer;
@@ -114,7 +114,7 @@ export function startRound(
 export function finishRound(feed: Feed, round: Round, event: ethereum.Event): void {
   round.save();
   const tx = event.transaction;
-  const postKey = txKey(event.address, tx.hash);
+  const postKey = txKey(feed.id, tx.hash);
   let post = PostTx.load(postKey);
   if (post === null) {
     post = new PostTx(postKey);

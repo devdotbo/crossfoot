@@ -8,7 +8,8 @@ Target: Subgraph Studio (04-subgraph.md D4, R14). Publishing to the network
 | Item | State |
 |---|---|
 | `bun install`, `bun run gen`, `graph codegen`, `graph build` | pass (2026-09-02, graph-cli 0.97.1, darwin-arm64) |
-| `graph test` (matchstick 0.6.0, `binary-macos-12-m1`) | 41 tests pass (one file per family) |
+| `graph test` (matchstick 0.6.0, `binary-macos-12-m1`) | 46 tests pass (one file per family) |
+| Tectonic TONIC (Cronos, chain id 25) | unindexed by design: Cronos does not appear on The Graph's supported networks page (fetched 2026-09-02, 1.2 MB of page data, zero mentions), so no Studio subgraph can index it; the consumer keeps listing it under `unindexed` |
 | Studio deploy | v0.0.1 deployed 2026-09-01 22:57 UTC (deployment ID Qmdzkdfsezd9m11omAppiDikkLgCJX2wX2dWpELf4ejDbJ, see the versions table); the first key supplied was rejected with "Deploy key not found" and turned out to be an API key |
 | Local graph-node (docker, dRPC with traces) | bounded manifest deployed; graph-node accepts the call handlers and finds one event plus one call trigger per Safe-routed round; entity checks below |
 | Network publish | not done |

@@ -3323,6 +3323,9 @@ dataSources:
       inputsFrom:
         type: String
         data: '0x36B072ed8AFE665E3Aa6DaBa79Decbec63752b22'
+      what:
+        type: String
+        data: 'ssr'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -3337,6 +3340,1275 @@ dataSources:
       eventHandlers:
         - event: File(indexed bytes32,uint256)
           handler: handleFile
+      file: ./src/sky.ts
+  - kind: ethereum/contract
+    name: Chainlink_TBILL_feed_p1
+    network: mainnet
+    source:
+      address: '0xf17cb308606999df25f5d4b9f74bd9fe47a5b3b3'
+      abi: ChainlinkAggregator
+      startBlock: 22784127
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'TBILL'
+      registryKey:
+        type: String
+        data: 'feed'
+      feed:
+        type: String
+        data: '0xAbE7a3643615Ed32d3431e11E0Ee5A486Cb27d48'
+      phase:
+        type: String
+        data: '1'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_USTB_nav_p1
+    network: mainnet
+    source:
+      address: '0x0bcca5ed4c22b528a29a14fdec6d5b9b9419609e'
+      abi: ChainlinkAggregator
+      startBlock: 20181923
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'USTB'
+      registryKey:
+        type: String
+        data: 'nav'
+      feed:
+        type: String
+        data: '0x289B5036cd942e619E1Ee48670F98d214E745AAC'
+      phase:
+        type: String
+        data: '1'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_USTB_nav_p2
+    network: mainnet
+    source:
+      address: '0xd5bc4e3c7e77a5776fd9d0dde8471b8b4aec10f5'
+      abi: ChainlinkAggregator
+      startBlock: 20265109
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'USTB'
+      registryKey:
+        type: String
+        data: 'nav'
+      feed:
+        type: String
+        data: '0x289B5036cd942e619E1Ee48670F98d214E745AAC'
+      phase:
+        type: String
+        data: '2'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_USCC_nav_p1
+    network: mainnet
+    source:
+      address: '0x5c00518d3d423ec59d553af123be8a63b11078cf'
+      abi: ChainlinkAggregator
+      startBlock: 20930805
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'USCC'
+      registryKey:
+        type: String
+        data: 'nav'
+      feed:
+        type: String
+        data: '0xAfFd8F5578E8590665de561bdE9E7BAdb99300d9'
+      phase:
+        type: String
+        data: '1'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_USYCLlamaGuard_feed_p1
+    network: mainnet
+    source:
+      address: '0xda069434c65889041154117278f0af98f0893955'
+      abi: ChainlinkAggregator
+      startBlock: 22790909
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'USYCLlamaGuard'
+      registryKey:
+        type: String
+        data: 'feed'
+      feed:
+        type: String
+        data: '0xE8E65Fb9116875012F5990Ecaab290B3531DbeB9'
+      phase:
+        type: String
+        data: '1'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_USYCLlamaGuard_feed_p2
+    network: mainnet
+    source:
+      address: '0x9c838be86802377a2847edb416755f79c7cae8d8'
+      abi: ChainlinkAggregator
+      startBlock: 23092081
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'USYCLlamaGuard'
+      registryKey:
+        type: String
+        data: 'feed'
+      feed:
+        type: String
+        data: '0xE8E65Fb9116875012F5990Ecaab290B3531DbeB9'
+      phase:
+        type: String
+        data: '2'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_USYCLlamaGuard_feed_p3
+    network: mainnet
+    source:
+      address: '0x3c405e1fe8a6be5d9b714b8c88ad913f236b1639'
+      abi: ChainlinkAggregator
+      startBlock: 23433311
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'USYCLlamaGuard'
+      registryKey:
+        type: String
+        data: 'feed'
+      feed:
+        type: String
+        data: '0xE8E65Fb9116875012F5990Ecaab290B3531DbeB9'
+      phase:
+        type: String
+        data: '3'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_JTRSY_nav_p1
+    network: mainnet
+    source:
+      address: '0x009b8b4d648cfcc813ecb70db0f31ce305dd4b32'
+      abi: ChainlinkAggregator
+      startBlock: 24452009
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'JTRSY'
+      registryKey:
+        type: String
+        data: 'nav'
+      feed:
+        type: String
+        data: '0x0C2e4Df738e99e8db80012f5bb2a303f3f48Ca74'
+      phase:
+        type: String
+        data: '1'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_JAAA_nav_p1
+    network: mainnet
+    source:
+      address: '0xa4dd65e17944d735ce35dfe12b92eab8f679a510'
+      abi: ChainlinkAggregator
+      startBlock: 24451939
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'JAAA'
+      registryKey:
+        type: String
+        data: 'nav'
+      feed:
+        type: String
+        data: '0x3BbccB2301759D2e4A5692bA72DAb4b75dC43B1a'
+      phase:
+        type: String
+        data: '1'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_USTBL_nav_p1
+    network: mainnet
+    source:
+      address: '0xc1c24f0f2103f5899b7ab415a1930e519b7d3423'
+      abi: ChainlinkAggregator
+      startBlock: 21323645
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'USTBL'
+      registryKey:
+        type: String
+        data: 'nav'
+      feed:
+        type: String
+        data: '0x477e363c51Ab0C4D13B22CD6B57D56d4a3Cb7Abe'
+      phase:
+        type: String
+        data: '1'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_EUTBL_nav_p1
+    network: mainnet
+    source:
+      address: '0xdaa1c6511aa051e9e83dd7ac2d65d5e41d1f6b98'
+      abi: ChainlinkAggregator
+      startBlock: 21323727
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'EUTBL'
+      registryKey:
+        type: String
+        data: 'nav'
+      feed:
+        type: String
+        data: '0xfD628af590c4150A9651C1f4ddD0b4f532B703ae'
+      phase:
+        type: String
+        data: '1'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_SAFO_nav_p1
+    network: mainnet
+    source:
+      address: '0x3f2647a71cc99ff788a87160fefb535f6eb6896f'
+      abi: ChainlinkAggregator
+      startBlock: 25431394
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'SAFO'
+      registryKey:
+        type: String
+        data: 'nav'
+      feed:
+        type: String
+        data: '0xC1E5FA6d48ba11cA163b03f2aBf843471eB7B2fB'
+      phase:
+        type: String
+        data: '1'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_EURSAFO_nav_p1
+    network: mainnet
+    source:
+      address: '0xe774bc668d300e3ac157e405149aaff89eed1df6'
+      abi: ChainlinkAggregator
+      startBlock: 25431709
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'EURSAFO'
+      registryKey:
+        type: String
+        data: 'nav'
+      feed:
+        type: String
+        data: '0x799fdc55150583b5Baa0b47065E1C901862c95d5'
+      phase:
+        type: String
+        data: '1'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_USTBLlamaGuard_feed_p1
+    network: mainnet
+    source:
+      address: '0x9d5dcbfe48c516a1de7a2be7981f70545fc118dd'
+      abi: ChainlinkAggregator
+      startBlock: 23091750
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'USTBLlamaGuard'
+      registryKey:
+        type: String
+        data: 'feed'
+      feed:
+        type: String
+        data: '0xde49c7B5C0E54b1624ED21C7D88bA6593d444Aa0'
+      phase:
+        type: String
+        data: '1'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_USTBLlamaGuard_feed_p2
+    network: mainnet
+    source:
+      address: '0x267d0dd05fbc989565c521e0b8882f61027ff32a'
+      abi: ChainlinkAggregator
+      startBlock: 23433600
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'USTBLlamaGuard'
+      registryKey:
+        type: String
+        data: 'feed'
+      feed:
+        type: String
+        data: '0xde49c7B5C0E54b1624ED21C7D88bA6593d444Aa0'
+      phase:
+        type: String
+        data: '2'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_WTGXX_nav_p1
+    network: mainnet
+    source:
+      address: '0x45d48aa93275c2274e1006bfdcb6406ef96a509b'
+      abi: ChainlinkAggregator
+      startBlock: 24523179
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'WTGXX'
+      registryKey:
+        type: String
+        data: 'nav'
+      feed:
+        type: String
+        data: '0xD13cB763C43B5C058E7Ec40176962c5030F4EB49'
+      phase:
+        type: String
+        data: '1'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_mGLOBAL_nav_p1
+    network: mainnet
+    source:
+      address: '0x0e078dc7fcd6f8faa6787e0cf783b8208c1db0f6'
+      abi: ChainlinkAggregator
+      startBlock: 25251975
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'mGLOBAL'
+      registryKey:
+        type: String
+        data: 'nav'
+      feed:
+        type: String
+        data: '0xB92A68763b2F83e094595c7B41a7FB9D0f8Da193'
+      phase:
+        type: String
+        data: '1'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_cbBTC_por_p1
+    network: mainnet
+    source:
+      address: '0x4014f1f654a454785a6a97b9125fecfa88868192'
+      abi: ChainlinkAggregator
+      startBlock: 21926409
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'cbBTC'
+      registryKey:
+        type: String
+        data: 'por'
+      feed:
+        type: String
+        data: '0xcBe87Dc0Cf9d807848a3E703B01A90B28eCFb2a7'
+      phase:
+        type: String
+        data: '1'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_WBTC_por_p1
+    network: mainnet
+    source:
+      address: '0xb622b7d6d9131cf6a1230eba91e5da58dbea6f59'
+      abi: ChainlinkAggregator
+      startBlock: 13199213
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'WBTC'
+      registryKey:
+        type: String
+        data: 'por'
+      feed:
+        type: String
+        data: '0xa81FE04086865e63E12dD3776978E49DEEa2ea4e'
+      phase:
+        type: String
+        data: '1'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_WBTC_por_p2
+    network: mainnet
+    source:
+      address: '0x64dee1bc46e817ed93dea4815f071b20ed218e39'
+      abi: ChainlinkAggregator
+      startBlock: 19621372
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'WBTC'
+      registryKey:
+        type: String
+        data: 'por'
+      feed:
+        type: String
+        data: '0xa81FE04086865e63E12dD3776978E49DEEa2ea4e'
+      phase:
+        type: String
+        data: '2'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_stETH_por_p1
+    network: mainnet
+    source:
+      address: '0x8a43cc06554ab042ffbf07e64cfb8fee4e673422'
+      abi: ChainlinkAggregator
+      startBlock: 21029655
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'stETH'
+      registryKey:
+        type: String
+        data: 'por'
+      feed:
+        type: String
+        data: '0xAd410E655C0fE4741F573152592eeb766e686CE7'
+      phase:
+        type: String
+        data: '1'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_TUSD_por_p1
+    network: mainnet
+    source:
+      address: '0x3d9b6787245773683ed6287b5a2db0fdfad13145'
+      abi: ChainlinkAggregator
+      startBlock: 16471192
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'TUSD'
+      registryKey:
+        type: String
+        data: 'por'
+      feed:
+        type: String
+        data: '0xBE456fd14720C3aCCc30A2013Bffd782c9Cb75D5'
+      phase:
+        type: String
+        data: '1'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_TUSD_por_p2
+    network: mainnet
+    source:
+      address: '0xac099d59755982757537f13c7c4ae8c8d9f030b9'
+      abi: ChainlinkAggregator
+      startBlock: 16471262
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'TUSD'
+      registryKey:
+        type: String
+        data: 'por'
+      feed:
+        type: String
+        data: '0xBE456fd14720C3aCCc30A2013Bffd782c9Cb75D5'
+      phase:
+        type: String
+        data: '2'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_TUSD_por_p3
+    network: mainnet
+    source:
+      address: '0x1669a35da4e5a4e0e55d30b728e66be508e11de8'
+      abi: ChainlinkAggregator
+      startBlock: 20265829
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'TUSD'
+      registryKey:
+        type: String
+        data: 'por'
+      feed:
+        type: String
+        data: '0xBE456fd14720C3aCCc30A2013Bffd782c9Cb75D5'
+      phase:
+        type: String
+        data: '3'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_Lombard_por_p1
+    network: mainnet
+    source:
+      address: '0x54977fdc88a5fc6cfbb1e3791e762c4c3e303b75'
+      abi: ChainlinkAggregator
+      startBlock: 24176406
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'Lombard'
+      registryKey:
+        type: String
+        data: 'por'
+      feed:
+        type: String
+        data: '0x70c158c7731Da2C14BC84aEBa39A4FF703DDc7d2'
+      phase:
+        type: String
+        data: '1'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_FBTC_por_p1
+    network: mainnet
+    source:
+      address: '0x00f0efb3d9dbe7fe91fee44ae09dae5dfa65c382'
+      abi: ChainlinkAggregator
+      startBlock: 21036178
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'FBTC'
+      registryKey:
+        type: String
+        data: 'por'
+      feed:
+        type: String
+        data: '0x75A0d3264a949C2C920d7F25Df174af1FaF73399'
+      phase:
+        type: String
+        data: '1'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Chainlink_USPC_nav_p1
+    network: mainnet
+    source:
+      address: '0x05a75d586b0b06e3843517dbf470270cd92c27a9'
+      abi: ChainlinkAggregator
+      startBlock: 24657699
+    context:
+      issuer:
+        type: String
+        data: 'Chainlink'
+      product:
+        type: String
+        data: 'USPC'
+      registryKey:
+        type: String
+        data: 'nav'
+      feed:
+        type: String
+        data: '0x02ae69C812DD749c32afb4F1723F6833EeF3d7a3'
+      phase:
+        type: String
+        data: '1'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - PostTx
+        - Transmission
+        - Poster
+      abis:
+        - name: ChainlinkAggregator
+          file: ./abis/ChainlinkAggregator.json
+      eventHandlers:
+        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)
+          handler: handleAnswerUpdated
+        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)
+          handler: handleNewTransmission
+        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)
+          handler: handleNewTransmissionV1
+      file: ./src/chainlink.ts
+  - kind: ethereum/contract
+    name: Sky_stUSDS_vault
+    network: mainnet
+    source:
+      address: '0x99CD4Ec3f88A45940936F469E4bB72A2A701EEB9'
+      abi: SUsds
+      startBlock: 23219535
+    context:
+      issuer:
+        type: String
+        data: 'Sky'
+      product:
+        type: String
+        data: 'stUSDS'
+      registryKey:
+        type: String
+        data: 'vault'
+      inputsFrom:
+        type: String
+        data: '0x30784615252B13E1DbE2bDf598627eaC297Bf4C5'
+      what:
+        type: String
+        data: 'str'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - RateChange
+      abis:
+        - name: SUsds
+          file: ./abis/SUsds.json
+      eventHandlers:
+        - event: File(indexed bytes32,uint256)
+          handler: handleFile
+      file: ./src/sky.ts
+  - kind: ethereum/contract
+    name: Sky_sDAI_vault
+    network: mainnet
+    source:
+      address: '0x36B072ed8AFE665E3Aa6DaBa79Decbec63752b22'
+      abi: SPBEAM
+      startBlock: 22317839
+    context:
+      issuer:
+        type: String
+        data: 'Sky'
+      product:
+        type: String
+        data: 'sDAI'
+      registryKey:
+        type: String
+        data: 'vault'
+      inputsFrom:
+        type: String
+        data: '0x36B072ed8AFE665E3Aa6DaBa79Decbec63752b22'
+      what:
+        type: String
+        data: 'DSR'
+      feed:
+        type: String
+        data: '0x83F20F44975D03b1b09e64809B757c47f942BEeA'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Feed
+        - Round
+        - RateChange
+      abis:
+        - name: SPBEAM
+          file: ./abis/SPBEAM.json
+        - name: SUsds
+          file: ./abis/SUsds.json
+      eventHandlers:
+        - event: Set(indexed bytes32,uint256)
+          handler: handleSet
       file: ./src/sky.ts
   - kind: ethereum/contract
     name: Frankencoin_svZCHF_savings

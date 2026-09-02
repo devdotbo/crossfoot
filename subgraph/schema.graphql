@@ -75,7 +75,7 @@ type Round @entity(immutable: true) {
   caller: Bytes                    # immediate caller of the setter from the call trace (a Safe for routed posts, the poster for direct posts); null when unattributed
   path: Path!
   selector: Bytes                  # four-byte selector of the setter, kept raw; null when unattributed
-  attributedBy: String!            # TRANSACTION (outer calldata), CALL (call handler at any depth), NONE, PROTOCOL
+  attributedBy: String!            # TRANSACTION (outer calldata), CALL (call handler at any depth), EVENT (Chainlink NewTransmission), NONE, PROTOCOL
   first: Boolean!                  # no previous round on this feed; the guard does not apply
   previousAnswer: BigInt
   secondsSincePrevious: BigInt
@@ -92,6 +92,18 @@ type Round @entity(immutable: true) {
   totalAssets: BigInt              # DERIVED only: vault totalAssets() at the event block
   totalSupply: BigInt              # DERIVED only: vault totalSupply() at the event block
   trigger: String                  # DERIVED only: RATE_CHANGED, SAVED, WITHDRAWN, INTEREST_COLLECTED
+}
+
+# Chainlink OCR: the NewTransmission of the transaction that wrote a round.
+type Transmission @entity(immutable: true) {
+  id: Bytes!                       # feed (proxy) address ++ tx hash
+  feed: Feed!
+  transmitter: Bytes!
+  aggregatorRoundId: BigInt!
+  observationCount: Int!
+  block: BigInt!
+  tx: Bytes!
+  logIndex: BigInt!
 }
 
 # Bookkeeping for the event-to-call join: the rounds one feed emitted in one

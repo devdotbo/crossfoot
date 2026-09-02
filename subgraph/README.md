@@ -20,9 +20,17 @@ families with one schema:
   no guard), Backed v2 (four feeds, 10 percent clamp: `atBound` marks the
   clamped posts), Centrifuge JTRSY and JAAA (share prices from the shared
   Spoke, keyed by pool and share class, no guard).
-- DERIVED, production feeds (extension E2): Ethena sUSDe (one round per
-  RewardsReceived with convertToAssets(1e18)) and Sky sUSDS (one RateChange
-  and round per File(ssr), rate in ppm derived from the ray).
+- POSTED, Chainlink (extension E3): the 20 NAVLink and Proof of Reserve
+  proxies of `config/chainlink-mainnet.json`, one source per phase
+  aggregator, the Feed keyed by the proxy; rounds from AnswerUpdated with
+  the transmitter from NewTransmission (`attributedBy: EVENT`), `atBound`
+  when the median sits on minAnswer or maxAnswer.
+- DERIVED, production feeds (extensions E2 and E3): Ethena sUSDe (one round
+  per RewardsReceived with convertToAssets(1e18)), Sky sUSDS and stUSDS (one
+  RateChange and round per File(ssr) or File(str), rate in ppm derived from
+  the ray) and sDAI (SPBEAM Set(DSR), bps as ppm, SPBEAM era only).
+- Not indexed by design: Tectonic TONIC on Cronos; Cronos is absent from
+  The Graph's supported networks page (checked 2026-09-02).
 - DERIVED: svZCHF. Every state transition of the Frankencoin savings module
   that concerns the vault (rate changes, deposits, withdrawals, interest)
   becomes a `Round` with `path: PROTOCOL` carrying the vault's `price()`.
@@ -48,7 +56,7 @@ Specification: `docs/specs/04-subgraph.md`. Design study:
 | `src/midas.ts` | Event handlers (AnswerUpdated, Initialized, Upgraded) and the four setter call handlers |
 | `src/posted.ts` | Shared Feed, Round, PostTx, Poster and call attribution logic of the other POSTED families |
 | `src/openeden.ts`, `src/ondo.ts`, `src/superstate.ts` | The issuer handlers of extension E1 |
-| `src/hashnote.ts`, `src/backed.ts`, `src/centrifuge.ts`, `src/ethena.ts`, `src/sky.ts` | The production feed handlers of extension E2 |
+| `src/hashnote.ts`, `src/backed.ts`, `src/centrifuge.ts`, `src/ethena.ts`, `src/sky.ts`, `src/chainlink.ts` | The production feed handlers of extensions E2 and E3 |
 | `src/frankencoin.ts` | RateChanged, RateProposed, Saved, Withdrawn, InterestCollected |
 | `tests/` | matchstick tests, one file per family, and `expected-counts.json` |
 | `subgraph.events.yaml` | The same manifest without call handlers (`bun run gen` writes both); deployed as the fast-syncing fallback |

@@ -15,7 +15,9 @@ interface FeedRow {
   address: string;
   startBlock: number;
   abi: string;
-  handler: "midas" | "openeden" | "ondo" | "superstate" | "hashnote" | "backed" | "centrifuge" | "ethena" | "sky";
+  handler: "midas" | "openeden" | "ondo" | "superstate" | "hashnote" | "backed" | "centrifuge" | "ethena" | "sky" | "sky-spbeam" | "chainlink";
+  phase?: number; // Chainlink: phase index of the aggregator behind the proxy
+  what?: string; // Sky: the File key (ssr, str) or the SPBEAM id (DSR)
   relay?: string; // Hashnote: the reporter proxy the operator calls
   sourceAddress?: string; // Centrifuge: the Spoke that emits for several feeds
   poolId?: string;
@@ -70,11 +72,14 @@ const ABIS_BY_HANDLER: Record<string, string[]> = {
   centrifuge: ["CentrifugeSpoke"],
   ethena: ["StakedUSDe"],
   sky: ["SUsds"],
+  "sky-spbeam": ["SPBEAM"],
+  chainlink: ["ChainlinkAggregator"],
 };
 const seen = new Set<string>();
 for (const f of input.feeds) {
-  const lower = f.address.toLowerCase();
   if (!/^0x[0-9a-fA-F]{40}$/.test(f.address)) throw new Error(`bad address ${f.address}`);
+  // A Chainlink proxy has one row per phase aggregator: uniqueness is per (feed, source).
+  const lower = `${f.address}:${f.sourceAddress ?? f.address}`.toLowerCase();
   if (seen.has(lower)) throw new Error(`duplicate address ${f.address}`);
   seen.add(lower);
   const abis = ABIS_BY_HANDLER[f.handler];
@@ -275,6 +280,25 @@ const ISSUER_TEMPLATES: Record<string, IssuerTemplate> = {
     callHandlers: [],
     file: "./src/sky.ts",
   },
+  "sky-spbeam": {
+    entities: ["Feed", "Round", "RateChange"],
+    eventHandlers: ["        - event: Set(indexed bytes32,uint256)", "          handler: handleSet"],
+    callHandlers: [],
+    file: "./src/sky.ts",
+  },
+  chainlink: {
+    entities: ["Feed", "Round", "PostTx", "Transmission", "Poster"],
+    eventHandlers: [
+      "        - event: AnswerUpdated(indexed int256,indexed uint256,uint256)",
+      "          handler: handleAnswerUpdated",
+      "        - event: NewTransmission(indexed uint32,int192,address,uint32,int192[],bytes,int192,bytes32,uint40)",
+      "          handler: handleNewTransmission",
+      "        - event: NewTransmission(indexed uint32,int192,address,int192[],bytes,bytes32)",
+      "          handler: handleNewTransmissionV1",
+    ],
+    callHandlers: [],
+    file: "./src/chainlink.ts",
+  },
   superstate: {
     entities: ["Feed", "Round", "PostTx", "BoundChange", "Poster"],
     eventHandlers: [
@@ -300,6 +324,9 @@ function issuerSource(f: FeedRow, group: FeedRow[]): string[] {
   ];
   if (f.relay) ctx.push(["relay", f.relay]);
   if (f.inputsFrom) ctx.push(["inputsFrom", f.inputsFrom]);
+  if (f.what) ctx.push(["what", f.what]);
+  if (f.handler === "chainlink" || f.handler === "sky-spbeam") ctx.push(["feed", f.address]);
+  if (f.phase !== undefined) ctx.push(["phase", String(f.phase)]);
   if (f.handler === "centrifuge") {
     // One Spoke source serves every feed of the group: "token:poolId:scId,..."
     ctx.push(["feeds", group.map((g) => `${g.address}:${g.poolId}:${g.scId}:${g.product}`).join(",")]);
@@ -307,7 +334,7 @@ function issuerSource(f: FeedRow, group: FeedRow[]): string[] {
   }
   const lines = [
     "  - kind: ethereum/contract",
-    `    name: ${f.handler === "centrifuge" ? `${f.issuer}_spoke_${f.key}` : sourceName(f)}`,
+    `    name: ${f.handler === "centrifuge" ? `${f.issuer}_spoke_${f.key}` : f.handler === "chainlink" ? `${sourceName(f)}_p${f.phase}` : sourceName(f)}`,
     `    network: ${input.network}`,
     "    source:",
     `      address: '${f.sourceAddress ?? f.address}'`,
@@ -323,6 +350,8 @@ function issuerSource(f: FeedRow, group: FeedRow[]): string[] {
     "      abis:",
     `        - name: ${f.abi}`,
     `          file: ./abis/${f.abi}.json`,
+    // sky.ts binds the vault through the SUsds ABI whatever the event source is.
+    ...(f.handler === "sky-spbeam" ? ["        - name: SUsds", "          file: ./abis/SUsds.json"] : []),
     "      eventHandlers:",
     ...t.eventHandlers,
   ];

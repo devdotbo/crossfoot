@@ -582,3 +582,27 @@ additive schema, existing counts unchanged, the R16 queries validate.
   offline, the evidence files' last rounds); `tests/expected-counts.json`
   rows `rounds_hashnote` 503, `rounds_centrifuge` 292, `rate_changes_sky`
   18, feeds 73; Backed and Ethena counts recorded at capture.
+
+## Extension E3 (2026-09-02): Chainlink proxies, the other Sky vaults, Tectonic
+
+- E3.1 Chainlink (`config/chainlink-mainnet.json`, 20 proxies, 27 phase
+  aggregators): one data source per aggregator with the proxy in the
+  context; the Feed id is the proxy (what the consumer's feeds.json
+  carries), `boundKind: ABSOLUTE` with `minAnswer` and `maxAnswer` from
+  the aggregator, `implementation` = the aggregator currently writing
+  (`upgradeCount` counts phase changes). One Round per AnswerUpdated,
+  roundId a per-feed counter, `extra` the aggregator's round id, path SAFE
+  from the transmit selector, `caller` = the transmitter of the
+  NewTransmission of the same transaction (`attributedBy: EVENT`, both
+  event orders handled through the `Transmission` entity), `atBound` when
+  the answer equals a limit. Rounds and the PostTx join are keyed by the
+  Feed id in `posted.ts` (identical to the event address for every earlier
+  family).
+- E3.2 Sky: stUSDS 0x99CD4Ec3 (File(str) on the vault) and sDAI 0x83F20F44
+  (the Pot emits no ABI event, so the SPBEAM `Set(id, bps)` with id DSR is
+  the source, ppm = bps times 100, SPBEAM era only from block 22,317,839)
+  join sUSDS; the File key and the Feed address come from the context.
+- E3.3 Tectonic TONIC (Cronos): not indexable on Studio, Cronos is absent
+  from the supported networks page; documented as unindexed by design.
+- E3.4 Verification: `tests/chainlink.test.ts`, the stUSDS and sDAI cases in
+  `tests/sky.test.ts`; feeds 95 in `expected-counts.json`.

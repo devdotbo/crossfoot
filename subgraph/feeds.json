@@ -3,7 +3,7 @@
   "chain_id": 1,
   "network": "mainnet",
   "callHandlers": true,
-  "source": "raw/midas-customfeed-creators-2026-09-01.md (creation blocks) and raw/midas-customfeed-survey-2026-09-01.md (the 66 addresses minus the six customFeedDv/customFeedRv wrappers, which emit no events); OpenEden, Ondo and Superstate rows from wiki/asset-feed-candidates.md (raw/openeden-tbill-oracle-usdo-rpc-2026-09-02.md, raw/ondo-ousg-oracle-rpc-2026-09-02.md, raw/superstate-ustb-uscc-oracle-rpc-2026-09-02.md); Hashnote, Backed, Centrifuge rows from config/*.json on origin/main with creation blocks from Etherscan getcontractcreation (2026-09-02); Ethena from raw/ethena-susde-feeds-rpc-2026-09-02.md (first RewardsReceived block); Sky from raw/sky-susds-sdai-stusds-spbeam-rpc-2026-09-02.md",
+  "source": "raw/midas-customfeed-creators-2026-09-01.md (creation blocks) and raw/midas-customfeed-survey-2026-09-01.md (the 66 addresses minus the six customFeedDv/customFeedRv wrappers, which emit no events); OpenEden, Ondo and Superstate rows from wiki/asset-feed-candidates.md (raw/openeden-tbill-oracle-usdo-rpc-2026-09-02.md, raw/ondo-ousg-oracle-rpc-2026-09-02.md, raw/superstate-ustb-uscc-oracle-rpc-2026-09-02.md); Hashnote, Backed, Centrifuge rows from config/*.json on origin/main with creation blocks from Etherscan getcontractcreation (2026-09-02); Ethena from raw/ethena-susde-feeds-rpc-2026-09-02.md (first RewardsReceived block); Sky from raw/sky-susds-sdai-stusds-spbeam-rpc-2026-09-02.md; Chainlink rows from config/chainlink-mainnet.json (one source per phase aggregator, creation blocks from Etherscan getcontractcreation 2026-09-02); stUSDS and sDAI (through SPBEAM Set) from raw/sky-susds-sdai-stusds-spbeam-rpc-2026-09-02.md",
   "feeds": [
     {
       "product": "mTBILL",
@@ -662,7 +662,328 @@
       "startBlock": 20677434,
       "abi": "SUsds",
       "handler": "sky",
-      "inputsFrom": "0x36B072ed8AFE665E3Aa6DaBa79Decbec63752b22"
+      "inputsFrom": "0x36B072ed8AFE665E3Aa6DaBa79Decbec63752b22",
+      "what": "ssr"
+    },
+    {
+      "product": "TBILL",
+      "key": "feed",
+      "issuer": "Chainlink",
+      "address": "0xAbE7a3643615Ed32d3431e11E0Ee5A486Cb27d48",
+      "startBlock": 22784127,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0xf17cb308606999df25f5d4b9f74bd9fe47a5b3b3",
+      "phase": 1
+    },
+    {
+      "product": "USTB",
+      "key": "nav",
+      "issuer": "Chainlink",
+      "address": "0x289B5036cd942e619E1Ee48670F98d214E745AAC",
+      "startBlock": 20181923,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0x0bcca5ed4c22b528a29a14fdec6d5b9b9419609e",
+      "phase": 1
+    },
+    {
+      "product": "USTB",
+      "key": "nav",
+      "issuer": "Chainlink",
+      "address": "0x289B5036cd942e619E1Ee48670F98d214E745AAC",
+      "startBlock": 20265109,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0xd5bc4e3c7e77a5776fd9d0dde8471b8b4aec10f5",
+      "phase": 2
+    },
+    {
+      "product": "USCC",
+      "key": "nav",
+      "issuer": "Chainlink",
+      "address": "0xAfFd8F5578E8590665de561bdE9E7BAdb99300d9",
+      "startBlock": 20930805,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0x5c00518d3d423ec59d553af123be8a63b11078cf",
+      "phase": 1
+    },
+    {
+      "product": "USYCLlamaGuard",
+      "key": "feed",
+      "issuer": "Chainlink",
+      "address": "0xE8E65Fb9116875012F5990Ecaab290B3531DbeB9",
+      "startBlock": 22790909,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0xda069434c65889041154117278f0af98f0893955",
+      "phase": 1
+    },
+    {
+      "product": "USYCLlamaGuard",
+      "key": "feed",
+      "issuer": "Chainlink",
+      "address": "0xE8E65Fb9116875012F5990Ecaab290B3531DbeB9",
+      "startBlock": 23092081,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0x9c838be86802377a2847edb416755f79c7cae8d8",
+      "phase": 2
+    },
+    {
+      "product": "USYCLlamaGuard",
+      "key": "feed",
+      "issuer": "Chainlink",
+      "address": "0xE8E65Fb9116875012F5990Ecaab290B3531DbeB9",
+      "startBlock": 23433311,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0x3c405e1fe8a6be5d9b714b8c88ad913f236b1639",
+      "phase": 3
+    },
+    {
+      "product": "JTRSY",
+      "key": "nav",
+      "issuer": "Chainlink",
+      "address": "0x0C2e4Df738e99e8db80012f5bb2a303f3f48Ca74",
+      "startBlock": 24452009,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0x009b8b4d648cfcc813ecb70db0f31ce305dd4b32",
+      "phase": 1
+    },
+    {
+      "product": "JAAA",
+      "key": "nav",
+      "issuer": "Chainlink",
+      "address": "0x3BbccB2301759D2e4A5692bA72DAb4b75dC43B1a",
+      "startBlock": 24451939,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0xa4dd65e17944d735ce35dfe12b92eab8f679a510",
+      "phase": 1
+    },
+    {
+      "product": "USTBL",
+      "key": "nav",
+      "issuer": "Chainlink",
+      "address": "0x477e363c51Ab0C4D13B22CD6B57D56d4a3Cb7Abe",
+      "startBlock": 21323645,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0xc1c24f0f2103f5899b7ab415a1930e519b7d3423",
+      "phase": 1
+    },
+    {
+      "product": "EUTBL",
+      "key": "nav",
+      "issuer": "Chainlink",
+      "address": "0xfD628af590c4150A9651C1f4ddD0b4f532B703ae",
+      "startBlock": 21323727,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0xdaa1c6511aa051e9e83dd7ac2d65d5e41d1f6b98",
+      "phase": 1
+    },
+    {
+      "product": "SAFO",
+      "key": "nav",
+      "issuer": "Chainlink",
+      "address": "0xC1E5FA6d48ba11cA163b03f2aBf843471eB7B2fB",
+      "startBlock": 25431394,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0x3f2647a71cc99ff788a87160fefb535f6eb6896f",
+      "phase": 1
+    },
+    {
+      "product": "EURSAFO",
+      "key": "nav",
+      "issuer": "Chainlink",
+      "address": "0x799fdc55150583b5Baa0b47065E1C901862c95d5",
+      "startBlock": 25431709,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0xe774bc668d300e3ac157e405149aaff89eed1df6",
+      "phase": 1
+    },
+    {
+      "product": "USTBLlamaGuard",
+      "key": "feed",
+      "issuer": "Chainlink",
+      "address": "0xde49c7B5C0E54b1624ED21C7D88bA6593d444Aa0",
+      "startBlock": 23091750,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0x9d5dcbfe48c516a1de7a2be7981f70545fc118dd",
+      "phase": 1
+    },
+    {
+      "product": "USTBLlamaGuard",
+      "key": "feed",
+      "issuer": "Chainlink",
+      "address": "0xde49c7B5C0E54b1624ED21C7D88bA6593d444Aa0",
+      "startBlock": 23433600,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0x267d0dd05fbc989565c521e0b8882f61027ff32a",
+      "phase": 2
+    },
+    {
+      "product": "WTGXX",
+      "key": "nav",
+      "issuer": "Chainlink",
+      "address": "0xD13cB763C43B5C058E7Ec40176962c5030F4EB49",
+      "startBlock": 24523179,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0x45d48aa93275c2274e1006bfdcb6406ef96a509b",
+      "phase": 1
+    },
+    {
+      "product": "mGLOBAL",
+      "key": "nav",
+      "issuer": "Chainlink",
+      "address": "0xB92A68763b2F83e094595c7B41a7FB9D0f8Da193",
+      "startBlock": 25251975,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0x0e078dc7fcd6f8faa6787e0cf783b8208c1db0f6",
+      "phase": 1
+    },
+    {
+      "product": "cbBTC",
+      "key": "por",
+      "issuer": "Chainlink",
+      "address": "0xcBe87Dc0Cf9d807848a3E703B01A90B28eCFb2a7",
+      "startBlock": 21926409,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0x4014f1f654a454785a6a97b9125fecfa88868192",
+      "phase": 1
+    },
+    {
+      "product": "WBTC",
+      "key": "por",
+      "issuer": "Chainlink",
+      "address": "0xa81FE04086865e63E12dD3776978E49DEEa2ea4e",
+      "startBlock": 13199213,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0xb622b7d6d9131cf6a1230eba91e5da58dbea6f59",
+      "phase": 1
+    },
+    {
+      "product": "WBTC",
+      "key": "por",
+      "issuer": "Chainlink",
+      "address": "0xa81FE04086865e63E12dD3776978E49DEEa2ea4e",
+      "startBlock": 19621372,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0x64dee1bc46e817ed93dea4815f071b20ed218e39",
+      "phase": 2
+    },
+    {
+      "product": "stETH",
+      "key": "por",
+      "issuer": "Chainlink",
+      "address": "0xAd410E655C0fE4741F573152592eeb766e686CE7",
+      "startBlock": 21029655,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0x8a43cc06554ab042ffbf07e64cfb8fee4e673422",
+      "phase": 1
+    },
+    {
+      "product": "TUSD",
+      "key": "por",
+      "issuer": "Chainlink",
+      "address": "0xBE456fd14720C3aCCc30A2013Bffd782c9Cb75D5",
+      "startBlock": 16471192,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0x3d9b6787245773683ed6287b5a2db0fdfad13145",
+      "phase": 1
+    },
+    {
+      "product": "TUSD",
+      "key": "por",
+      "issuer": "Chainlink",
+      "address": "0xBE456fd14720C3aCCc30A2013Bffd782c9Cb75D5",
+      "startBlock": 16471262,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0xac099d59755982757537f13c7c4ae8c8d9f030b9",
+      "phase": 2
+    },
+    {
+      "product": "TUSD",
+      "key": "por",
+      "issuer": "Chainlink",
+      "address": "0xBE456fd14720C3aCCc30A2013Bffd782c9Cb75D5",
+      "startBlock": 20265829,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0x1669a35da4e5a4e0e55d30b728e66be508e11de8",
+      "phase": 3
+    },
+    {
+      "product": "Lombard",
+      "key": "por",
+      "issuer": "Chainlink",
+      "address": "0x70c158c7731Da2C14BC84aEBa39A4FF703DDc7d2",
+      "startBlock": 24176406,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0x54977fdc88a5fc6cfbb1e3791e762c4c3e303b75",
+      "phase": 1
+    },
+    {
+      "product": "FBTC",
+      "key": "por",
+      "issuer": "Chainlink",
+      "address": "0x75A0d3264a949C2C920d7F25Df174af1FaF73399",
+      "startBlock": 21036178,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0x00f0efb3d9dbe7fe91fee44ae09dae5dfa65c382",
+      "phase": 1
+    },
+    {
+      "product": "USPC",
+      "key": "nav",
+      "issuer": "Chainlink",
+      "address": "0x02ae69C812DD749c32afb4F1723F6833EeF3d7a3",
+      "startBlock": 24657699,
+      "abi": "ChainlinkAggregator",
+      "handler": "chainlink",
+      "sourceAddress": "0x05a75d586b0b06e3843517dbf470270cd92c27a9",
+      "phase": 1
+    },
+    {
+      "product": "stUSDS",
+      "key": "vault",
+      "issuer": "Sky",
+      "address": "0x99CD4Ec3f88A45940936F469E4bB72A2A701EEB9",
+      "startBlock": 23219535,
+      "abi": "SUsds",
+      "handler": "sky",
+      "inputsFrom": "0x30784615252B13E1DbE2bDf598627eaC297Bf4C5",
+      "what": "str"
+    },
+    {
+      "product": "sDAI",
+      "key": "vault",
+      "issuer": "Sky",
+      "address": "0x83F20F44975D03b1b09e64809B757c47f942BEeA",
+      "startBlock": 22317839,
+      "abi": "SPBEAM",
+      "handler": "sky-spbeam",
+      "sourceAddress": "0x36B072ed8AFE665E3Aa6DaBa79Decbec63752b22",
+      "inputsFrom": "0x36B072ed8AFE665E3Aa6DaBa79Decbec63752b22",
+      "what": "DSR"
     }
   ]
 }

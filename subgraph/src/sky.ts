@@ -6,13 +6,12 @@
 
 import { Address, BigInt, Bytes, dataSource, ethereum } from "@graphprotocol/graph-ts";
 import { File, SUsds } from "../generated/Sky_sUSDS_susds/SUsds";
+import { Set as SetEvent } from "../generated/Sky_sDAI_vault/SPBEAM";
 import { Feed, RateChange, Round } from "../generated/schema";
 import { ATTRIBUTED_BY_PROTOCOL, FAMILY_DERIVED, PATH_PROTOCOL, deviation, eventKey, roundKey } from "./shared";
 
 const ONE_SHARE = BigInt.fromI32(10).pow(18);
 const TRIGGER = "RATE_CHANGED";
-// bytes32("ssr")
-const WHAT_SSR = "0x7373720000000000000000000000000000000000000000000000000000000000";
 const SECONDS_PER_YEAR = 31536000.0;
 const RAY = 1e27;
 
@@ -25,6 +24,21 @@ export function ratePPMFromRay(ray: BigInt): i32 {
   return <i32>Math.round(annual * 1000000.0);
 }
 
+// bytes32 of a short ASCII key, right-padded with zeros, as a hex string.
+export function bytes32Key(key: string): string {
+  let hex = "";
+  for (let i = 0; i < key.length; i++) hex += key.charCodeAt(i).toString(16).padStart(2, "0");
+  return "0x" + hex.padEnd(64, "0");
+}
+
+// The vault the Feed represents: the event source itself (sUSDS, stUSDS) or
+// the context's `feed` (sDAI, whose rate is set on the Pot through SPBEAM).
+function vaultAddress(source: Address): Address {
+  const ctx = dataSource.context();
+  const feed = ctx.get("feed");
+  return feed === null ? source : Address.fromString(feed.toString());
+}
+
 function ensureFeed(address: Address, block: ethereum.Block, tx: ethereum.Transaction): Feed {
   const existing = Feed.load(address);
   if (existing !== null) return existing;
@@ -34,7 +48,7 @@ function ensureFeed(address: Address, block: ethereum.Block, tx: ethereum.Transa
   feed.issuer = ctx.getString("issuer");
   feed.product = ctx.getString("product");
   feed.registryKey = ctx.getString("registryKey");
-  feed.description = "sUSDS convertToAssets(1e18) in USDS at each ssr change";
+  feed.description = ctx.getString("product") + " convertToAssets(1e18) at each " + ctx.getString("what") + " change";
   feed.decimals = 18;
   feed.inputsFrom = Address.fromString(ctx.getString("inputsFrom"));
   feed.createdAtBlock = block.number;
@@ -50,20 +64,32 @@ function ensureFeed(address: Address, block: ethereum.Block, tx: ethereum.Transa
   return feed;
 }
 
+// sUSDS and stUSDS: File(what = the context key) carries the new per-second ray.
 export function handleFile(event: File): void {
-  if (event.params.what.toHexString() != WHAT_SSR) return;
-  const feed = ensureFeed(event.address, event.block, event.transaction);
+  if (event.params.what.toHexString() != bytes32Key(dataSource.context().getString("what"))) return;
+  recordRateChange(event, ratePPMFromRay(event.params.data), event.params.data);
+}
+
+// sDAI: SPBEAM Set(id, bps) with id = "DSR"; the Pot itself emits no ABI event.
+export function handleSet(event: SetEvent): void {
+  if (event.params.id.toHexString() != bytes32Key(dataSource.context().getString("what"))) return;
+  recordRateChange(event, event.params.bps.times(BigInt.fromI32(100)).toI32(), null);
+}
+
+function recordRateChange(event: ethereum.Event, ratePPM: i32, rateRaw: BigInt | null): void {
+  const vaultAddr = vaultAddress(event.address);
+  const feed = ensureFeed(vaultAddr, event.block, event.transaction);
   const change = new RateChange(eventKey(event.transaction.hash, event.logIndex));
   change.feed = feed.id;
-  change.ratePPM = ratePPMFromRay(event.params.data);
-  change.rateRaw = event.params.data;
+  change.ratePPM = ratePPM;
+  change.rateRaw = rateRaw;
   change.applier = event.transaction.from;
   change.block = event.block.number;
   change.blockTimestamp = event.block.timestamp;
   change.tx = event.transaction.hash;
   change.save();
 
-  const vault = SUsds.bind(event.address);
+  const vault = SUsds.bind(vaultAddr);
   const price = vault.try_convertToAssets(ONE_SHARE);
   if (price.reverted) return;
   const totalAssets = vault.try_totalAssets();
@@ -94,7 +120,7 @@ export function handleFile(event: File): void {
   round.totalAssets = totalAssets.reverted ? null : totalAssets.value;
   round.totalSupply = totalSupply.reverted ? null : totalSupply.value;
   round.trigger = TRIGGER;
-  round.extra = event.params.data;
+  round.extra = rateRaw;
   round.save();
   feed.latestRound = round.id;
   feed.latestAnswer = price.value;

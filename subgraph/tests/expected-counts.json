@@ -16,13 +16,14 @@
     "raw/ethena-susde-feeds-rpc-2026-09-02.md",
     "raw/sky-susds-sdai-stusds-spbeam-rpc-2026-09-02.md",
     "raw/hashnote-usyc-oracle-rpc-2026-09-02.md",
-    "raw/centrifuge-v3-share-price-rpc-2026-09-02.md"
+    "raw/centrifuge-v3-share-price-rpc-2026-09-02.md",
+    "config/chainlink-mainnet.json"
   ],
   "counts": {
     "feeds": {
-      "value": 73,
+      "value": 95,
       "status": "exact",
-      "note": "60 Midas, OpenEden, Ondo, Superstate, Hashnote USYC, 4 Backed, Centrifuge JTRSY and JAAA (POSTED); svZCHF, sUSDe, sUSDS (DERIVED)"
+      "note": "60 Midas, OpenEden, Ondo, Superstate, Hashnote, 4 Backed, 2 Centrifuge, 20 Chainlink proxies (POSTED); svZCHF, sUSDe, sUSDS, stUSDS, sDAI (DERIVED). Tectonic TONIC (Cronos) is unindexed by design."
     },
     "rounds_posted": {
       "value": 2535,
@@ -142,7 +143,11 @@
     "rate_changes_sky": {
       "value": 18,
       "status": "expected",
-      "note": "18 File(ssr) events on sUSDS all time (9 since 23,264,565), each with a PROTOCOL round"
+      "note": "sUSDS File(ssr) 18 all time; stUSDS File(str) and sDAI SPBEAM Set(DSR) counts recorded at capture (sDAI covers only SPBEAM-era changes from block 22,317,839)"
+    },
+    "rounds_chainlink": {
+      "status": "recorded at capture",
+      "note": "one Round per AnswerUpdated on the 27 phase aggregators of the 20 proxies, roundId a per-feed counter, extra the aggregator round; caller from NewTransmission (attributedBy EVENT); atBound when the answer equals minAnswer or maxAnswer"
     }
   },
   "over_bound_per_feed": {
