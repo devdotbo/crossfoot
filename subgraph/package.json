@@ -5,7 +5,7 @@
   "description": "The Graph subgraph for the Midas customFeed family (POSTED) and svZCHF (DERIVED) on Ethereum mainnet",
   "license": "MIT",
   "scripts": {
-    "gen": "bun run scripts/gen-manifest.ts",
+    "gen": "bun run scripts/gen-manifest.ts && bun run scripts/gen-manifest.ts --event-only",
     "codegen": "graph codegen",
     "build": "graph build",
     "test": "graph test",
